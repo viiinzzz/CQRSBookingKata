@@ -1,0 +1,13 @@
+
+*.cache
+/CQRSBookingKata/obj
+/CQRSBookingKata.API/bin
+/.vs/CQRSBookingKata/FileContentIndex
+/CQRSBookingKata.API/obj
+/CQRSBookingKata.Tests/obj
+*.ncrunchsolution
+CQRSBookingKata.v3.ncrunchsolution.user
+/CQRSBookingKata/bin
+/.vs/ProjectEvaluation
+/.vs
+*.DotSettings

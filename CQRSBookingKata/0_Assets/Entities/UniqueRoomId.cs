@@ -1,0 +1,56 @@
+﻿using CQRSBookingKata.Assets;
+using System;
+using System.ComponentModel.DataAnnotations;
+
+namespace CQRSBookingKata.Sales;
+
+// HHHHRRRR
+
+public class UniqueRoomId(int Urid)
+{
+    public int Value => Urid;
+
+    public UniqueRoomId(int hotelId, int floorNum, int roomNum) 
+        : this(
+            hotelId * 10000 * 10000 +
+            roomNum * 10000
+            )
+    {
+        // if (hotelId is <= 0 or >= 1_0000)
+        // {
+        //     throw new ArgumentException("value must be at least 1 and at most 9999", nameof(hotelId));
+        // }
+        //
+        // if (roomNum is <= 0 or >= 1_0000)
+        // {
+        //     throw new ArgumentException("value must be at least 1 and at most 9999", nameof(roomNum));
+        // }
+
+        var floorNum2 = RoomNum / 1_00;
+
+        if (floorNum2 != floorNum)
+        {
+            throw new ArgumentException("value must be consistent with roomNum", nameof(floorNum));
+        }
+    }
+
+    private readonly bool Valid = Validate(Urid);
+
+    private static bool Validate(int urid)
+    {
+
+        if (urid is <= 0 or 1_0000 or >= 1_0000_0000)
+        {
+            throw new ArgumentException("value must be at least 1 and at most 9999 9999, and not 1 0000", nameof(Urid));
+        }
+
+        return true;
+    }
+
+
+    public int FloorNum { get; } = (Urid % 1_0000) % 1_00;
+
+    public int RoomNum { get; } = Urid % 1_0000;
+
+    public int HotelId { get; } = Urid / 1_0000;
+}

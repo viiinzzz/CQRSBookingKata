@@ -1,0 +1,9 @@
+﻿namespace CQRSBookingKata.Billing;
+
+public record Payroll(
+    double MonthlyBaseIncome,
+    string Currency,
+
+    int EmployeeId,
+    int PayrollId = 0
+);
