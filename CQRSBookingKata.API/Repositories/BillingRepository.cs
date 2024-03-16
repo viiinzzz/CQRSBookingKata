@@ -1,11 +1,7 @@
 ﻿
-using CQRSBookingKata.API.Databases;
-using CQRSBookingKata.Billing;
-using CQRSBookingKata.Sales;
-
 namespace CQRSBookingKata.API.Repositories;
 
-public class BillingRepository(BookingBackContext back, BookingSensitiveContext sensitive) : IBillingRepository
+public partial class BillingRepository
 {
     public IQueryable<Booking> AllBookings => back.Bookings.AsQueryable();
 

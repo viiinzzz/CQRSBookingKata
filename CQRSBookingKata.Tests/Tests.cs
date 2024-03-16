@@ -10,7 +10,7 @@ public class Tests
     // {
     //     var q = new SalesQueryService();
     //
-    //     var date1 = DateTime.Now.AddDays(7);
+    //     var date1 = DateTime.UtcNow.AddDays(7);
     //     var date2 = date1.AddDays(3);
     //
     //     q.Vacancies(date1, date2);

@@ -11,3 +11,6 @@ CQRSBookingKata.v3.ncrunchsolution.user
 /.vs/ProjectEvaluation
 /.vs
 *.DotSettings
+/CQRSBookingKata.Tests/bin
+/CQRSBookingKata.Tests/bin
+/CQRSBookingKata.Tests/bin/Debug

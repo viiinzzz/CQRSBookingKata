@@ -1,32 +1,14 @@
 ﻿
-using CQRSBookingKata.Billing;
 using CQRSBookingKata.Sales;
 
 namespace CQRSBookingKata.Assets;
 
 //housekeeping, guest services, food and beverage service, security, IT, maintenance, HR
-public class AssetService(IAssetsRepository assets)
+public class RoomCommandService(IAssetsRepository assets)
 {
-    public int CreateHotel(string hotelName, double latitude, double longitude) => assets.CreateHotel(hotelName, latitude, longitude);
-    public Hotel? GetHotel(int hotelId) => assets.GetHotel(hotelId);
-    public void UpdateHotel(Hotel hotel) => assets.UpdateHotel(hotel);
-    public void DeleteHotel(int hotelId)
-    {
-        //transaction
-
-        // var busy = bookings.stillhadBookings();
-        //
-        // if (busy)
-        // {
-        //     throw new HotelStillBusyException();
-        // }
-
-        assets.DisableHotel(hotelId, true);
-    }
-
     private int GetFloorNextRoomNumber(int hotelId, int floorNum)
     {
-        var hotel = GetHotel(hotelId);
+        var hotel = assets.GetHotel(hotelId);
 
         if (hotel == default)
         {
@@ -35,7 +17,7 @@ public class AssetService(IAssetsRepository assets)
 
         var floorRooms = assets
 
-            .GetHotelRooms(hotelId)
+            .Rooms(hotelId)
 
             .Where(room => room.FloorNum == floorNum);
 
@@ -62,7 +44,7 @@ public class AssetService(IAssetsRepository assets)
     {
         //transaction
 
-        var hotel = GetHotel(hotelId);
+        var hotel = assets.GetHotel(hotelId);
 
         if (hotel == default)
         {
@@ -77,7 +59,7 @@ public class AssetService(IAssetsRepository assets)
 
             var room = new Room(urid.Value, personMaxCount);
             
-            assets.CreateRoom(room);
+            assets.Create(room);
         }
     }
 }

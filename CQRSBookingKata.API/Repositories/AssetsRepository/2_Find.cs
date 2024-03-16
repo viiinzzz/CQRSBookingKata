@@ -1,0 +1,73 @@
+﻿
+namespace CQRSBookingKata.API.Repositories;
+
+public partial class AssetsRepository
+{
+    public int? FindHotel(string hotelName, bool approx)
+    {
+        var exactMatch = back.Hotels
+            .FirstOrDefault(hotel => hotel.HotelName.EqualsIgnoreCaseAndAccents(hotelName))
+            ?.HotelId;
+
+        if (exactMatch != default)
+        {
+            return exactMatch;
+        }
+
+        if (!approx)
+        {
+            return default;
+        }
+
+        var approxMatch = back.Hotels
+            .FirstOrDefault(hotel => hotel.HotelName.EqualsApprox(hotelName))
+            ?.HotelId;
+
+        return approxMatch;
+    }
+
+
+    public int? FindEmployee(string? lastName, string? firstName, bool? isManager, bool approx)
+    {
+        var query = back.Employees.AsQueryable();
+
+        if (isManager.HasValue)
+        {
+            query = query
+                .Select(employee => new
+                {
+                    employee,
+                    isManager = back.Hotels.Where(hotel => hotel.ManagerId == employee.EmployeeId).Any()
+                })
+                .Where(q => q.isManager == isManager)
+                .Select(q => q.employee);
+        }
+
+        var exactMatch = query
+            .FirstOrDefault(employee =>
+                (lastName == default || employee.LastName.EqualsIgnoreCaseAndAccents(lastName)) &&
+                (firstName == default || employee.FirstName.EqualsIgnoreCaseAndAccents(firstName))
+                )
+            ?.EmployeeId;
+
+        if (exactMatch != default)
+        {
+            return exactMatch;
+        }
+
+        if (!approx)
+        {
+            return default;
+        }
+
+        var approxMatch = query
+            .FirstOrDefault(employee =>
+                (lastName == default || employee.LastName.EqualsApprox(lastName)) &&
+                (firstName == default || employee.FirstName.EqualsApprox(firstName))
+            )
+            ?.EmployeeId;
+
+        return approxMatch;
+    }
+
+}

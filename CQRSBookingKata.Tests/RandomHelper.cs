@@ -142,7 +142,7 @@ public static class RandomHelper
                 var debitCardNumber = random.NextInt64(1_0000_0000_0000_0000);
                 var debitCardOwnerName = $"MX {lastName} {firstName}".ToUpper();
                 var expireMonth = random.Next(12) + 1;
-                var expireYear = (DateTime.Now.Year + random.Next(5)) % 1_00;
+                var expireYear = (DateTime.UtcNow.Year + random.Next(5)) % 1_00;
                 var expire = expireMonth * 1_00 + expireYear;
                 var ccv = random.Next(1_000);
 

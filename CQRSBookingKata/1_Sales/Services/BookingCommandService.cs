@@ -1,5 +1,6 @@
 ﻿
 using CQRSBookingKata.Assets;
+using CQRSBookingKata.Planning;
 using CQRSBookingKata.Sales;
 
 namespace CQRSBookingKata.Billing;
@@ -10,10 +11,12 @@ public class BookingCommandService(
     IBillingRepository billing, 
     ISalesRepository sales,
     IAssetsRepository assets,
-    PaymentService payment)
+    IPlanningRepository planning,
+    PaymentCommandService payment)
 {
 
-    public int Book(StayProposition prop, int customerId, long debitCardNumber, DebitCardSecrets secrets)
+    public int Book(StayProposition prop, int customerId, 
+        string lastName, string firstName, long debitCardNumber, DebitCardSecrets secrets)
     {
         var customer = sales.GetCustomer(customerId);
 
@@ -39,7 +42,7 @@ public class BookingCommandService(
             throw new PaymentFailureException();
         }
 
-        var booking = new Booking(prop.ArrivalDate, prop.DepartureDate, prop.PersonCount, prop.Urid, customerId);
+        var booking = new Booking(prop.ArrivalDate, prop.DepartureDate, lastName, firstName, prop.PersonCount, prop.Urid, customerId);
 
         billing.AddBookingAndInvoice(booking, invoice);
         
@@ -51,6 +54,24 @@ public class BookingCommandService(
             .Select(dayNum => new Vacancy(dayNum, 0, 0, 0, booking.UniqueRoomId).VacancyId);
 
         sales.RemoveVacancies(booked);
+
+        var room = new UniqueRoomId(booking.UniqueRoomId);
+
+        planning.Add(new ReceptionCheck(
+            booking.ArrivalDate, ReceptionEventType.CheckIn, 
+            booking.LastName, booking.FirstName,
+            room.RoomNum, false, room.HotelId,
+            booking.BookingId, default, false, default, 0));
+
+        planning.Add(new ReceptionCheck(
+            booking.DepartureDate, ReceptionEventType.CheckOut, 
+            booking.LastName, booking.FirstName,
+            room.RoomNum, false, room.HotelId,
+            booking.BookingId, default, false, default, 0));
+
+        planning.Add(new RoomServiceDuty(booking.DepartureDate, default/****/,
+            room.RoomNum, room.FloorNum, false, room.HotelId, 
+            booking.BookingId, default, 0));
 
         return booking.BookingId;
     }

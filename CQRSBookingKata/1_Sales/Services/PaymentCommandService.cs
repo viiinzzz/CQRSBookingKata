@@ -1,6 +1,6 @@
 ﻿namespace CQRSBookingKata.Billing;
 
-public class PaymentService
+public class PaymentCommandService
 {
     public bool Pay(double amount, string currency, long debitCardNumber, string debitCardOwnerName, int expire,
         int CCV)

@@ -2,17 +2,15 @@
 using CQRSBookingKata.Assets;
 using CQRSBookingKata.Billing;
 using CQRSBookingKata.Common;
+using CQRSBookingKata.ThirdParty;
 
 namespace CQRSBookingKata.Sales;
 
 //sales and marketing, event planning
 
 public class SalesQueryService(
-   ISalesRepository sales,
-   IAssetsRepository assets,
-
-   PricingQueryService pricing,
-   BookingCommandService booking
+   ISalesRepository sales, IAssetsRepository assets,
+   TimeService DateTime, PricingQueryService pricing, BookingCommandService booking
    )
 {
     private const int FindMinKm = 5;

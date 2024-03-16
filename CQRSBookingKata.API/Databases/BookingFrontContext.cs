@@ -1,4 +1,5 @@
-﻿using CQRSBookingKata.Sales;
+﻿using CQRSBookingKata.Planning;
+using CQRSBookingKata.Sales;
 using Microsoft.EntityFrameworkCore;
 
 namespace CQRSBookingKata.API.Databases;
@@ -8,11 +9,14 @@ public class BookingFrontContext : DbContext
     public DbSet<Vacancy> Stock { get; set; }
     public DbSet<StayProposition> Propositions { get; set; }
     public DbSet<Customer> Customers { get; set; }
+    public DbSet<ReceptionCheck> Checks { get; set; }
+    public DbSet<RoomServiceDuty> Duties { get; set; }
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
-    {
-        builder.UseSqlite("Data Source=./BookinkFront.db;");
-    }
+
+        => builder.ConfigureMyWay<BookingFrontContext>();
+
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -27,7 +31,10 @@ public class BookingFrontContext : DbContext
             .IsUnique();
 
         builder
-            .Entity<Vacancy>()
-            .Ignore(vacancy => vacancy.Urid);
+            .Entity<ReceptionCheck>()
+            .HasKey(check => check.CheckId);
+        builder
+            .Entity<RoomServiceDuty>()
+            .HasKey(duty => duty.DutyId);
     }
 }

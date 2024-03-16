@@ -1,10 +1,7 @@
-﻿using CQRSBookingKata.API.Databases;
-using CQRSBookingKata.Assets;
-using CQRSBookingKata.Sales;
-
+﻿
 namespace CQRSBookingKata.API.Repositories;
 
-public class SalesRepository(BookingFrontContext front) : ISalesRepository
+public partial class SalesRepository
 {
 
     public void AddStayProposition(StayProposition proposition)

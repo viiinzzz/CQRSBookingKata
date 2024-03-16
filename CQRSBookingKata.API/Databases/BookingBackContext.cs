@@ -11,10 +11,11 @@ public class BookingBackContext : DbContext
     public DbSet<Room> Rooms { get; set; }
     public DbSet<Booking> Bookings { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder builder)
-    {
-        builder.UseSqlite("Data Source=./BookinkBack.db;");
-    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder builder) 
+        
+        => builder.ConfigureMyWay<BookingBackContext>();
+
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -32,6 +33,10 @@ public class BookingBackContext : DbContext
             .Entity<Hotel>()
             .HasIndex(hotel => hotel.HotelName)
             .IsUnique();
+
+        builder
+            .Entity<Room>()
+            .HasKey(room => room.Urid);
 
         builder
             .Entity<Booking>()

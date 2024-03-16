@@ -4,6 +4,8 @@ public record Booking
 (
     DateTime ArrivalDate,
     DateTime DepartureDate,
+    string LastName,
+    string FirstName,
     int PersonCount,
 
     int UniqueRoomId,
