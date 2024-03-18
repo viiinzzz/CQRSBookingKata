@@ -11,12 +11,13 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.3" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Zejji.DbContextScope.EFCore" Version="8.0.100.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CQRSBookingKata\CQRSBookingKata.csproj" />
+    <ProjectReference Include="..\FakeTime\FakeTime.csproj" />
+    <ProjectReference Include="..\MessageQueue\MessageQueue.csproj" />
   </ItemGroup>
 
 </Project>

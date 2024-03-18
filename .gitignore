@@ -14,3 +14,12 @@ CQRSBookingKata.v3.ncrunchsolution.user
 /CQRSBookingKata.Tests/bin
 /CQRSBookingKata.Tests/bin
 /CQRSBookingKata.Tests/bin/Debug
+/CQRSBookingKata.ThirdParty/obj
+/FakeTime.Contracts/bin
+/FakeTime.Contracts/obj
+/MessageQueue.Contracts/obj
+/MessageQueue/bin
+/MessageQueue/obj
+/MessageQueue.Contracts/bin
+/FakeTime/obj
+/FakeTime/bin

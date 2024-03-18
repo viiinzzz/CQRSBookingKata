@@ -1,7 +1,4 @@
-﻿using CQRSBookingKata.Common;
-using CQRSBookingKata.Sales;
-
-namespace CQRSBookingKata.Assets;
+﻿namespace CQRSBookingKata.Assets;
 
 public record Room(
     int Urid,

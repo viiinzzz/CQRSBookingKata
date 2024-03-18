@@ -1,6 +1,4 @@
-﻿using CQRSBookingKata.Common;
-
-namespace CQRSBookingKata.Assets;
+﻿namespace CQRSBookingKata.Assets;
 
 public record Hotel(
     string HotelName,

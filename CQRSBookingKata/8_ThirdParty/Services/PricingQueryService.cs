@@ -1,7 +1,4 @@
-﻿using CQRSBookingKata.Assets;
-using CQRSBookingKata.Sales;
-
-namespace CQRSBookingKata.ThirdParty;
+﻿namespace CQRSBookingKata.ThirdParty;
 
 //sales and marketing, event planning
 

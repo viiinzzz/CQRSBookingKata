@@ -1,9 +1,35 @@
-﻿using CQRSBookingKata.ThirdParty;
-
+﻿
 namespace CQRSBookingKata.Planning;
 
-public class PlanningQueryService(IPlanningRepository planning, TimeService DateTime)
+public class PlanningQueryService : MessageBusClientBase
 {
+    private readonly IPlanningRepository planning;
+    private readonly ITimeService DateTime;
+    private readonly IMessageBus bus;
+
+    public PlanningQueryService(IPlanningRepository planning, ITimeService DateTime, IMessageBus bus) : base(bus)
+    {
+        this.planning = planning;
+        this.DateTime = DateTime;
+        this.bus = bus;
+
+        bus.Subscribe(this, default, "NEW BOOKING");
+
+        Notified += (sender, message) =>
+        {
+            switch (message.Verb)
+            {
+                case "NEW BOOKING":
+                    var m = message.Message;
+                    break;
+
+                default:
+                    break;
+            }
+        };
+    }
+
+
     private bool SameDay(DateTime t1, DateTime t2) =>
 
         t1.Year == t2.Year &&
@@ -17,7 +43,7 @@ public class PlanningQueryService(IPlanningRepository planning, TimeService Date
 
     public IQueryable<ReceptionCheck> GetReceptionPlanning(int hotelId)
     {
-        var now = DateTime.UtcNow;
+        var now = System.DateTime.UtcNow;
 
         return 
 
@@ -32,7 +58,7 @@ public class PlanningQueryService(IPlanningRepository planning, TimeService Date
 
     public IQueryable<RoomServiceDuty> GetServiceRoomPlanning(int hotelId)
     {
-        var now = DateTime.UtcNow;
+        var now = System.DateTime.UtcNow;
 
         var priority = (RoomServiceDuty duty) =>
         {

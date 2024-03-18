@@ -1,8 +1,4 @@
-﻿using CQRSBookingKata.Assets;
-using System;
-using System.ComponentModel.DataAnnotations;
-
-namespace CQRSBookingKata.Sales;
+﻿namespace CQRSBookingKata.Sales;
 
 // HHHHRRRR
 

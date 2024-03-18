@@ -1,6 +1,4 @@
-﻿using CQRSBookingKata.Common;
-
-namespace CQRSBookingKata.Sales;
+﻿namespace CQRSBookingKata.Sales;
 
 //room vacancy
 

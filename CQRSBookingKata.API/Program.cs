@@ -3,22 +3,42 @@
  Booking API
 */
 
+
+
 var builder = WebApplication.CreateSlimBuilder(args);
 
 RegisterDbContexts(builder);
 
-builder.Services.AddScoped<IAssetsRepository, AssetsRepository>();
-builder.Services.AddScoped<ISalesRepository, SalesRepository>();
-builder.Services.AddScoped<IBillingRepository, BillingRepository>();
+var services = builder.Services;
 
-builder.Services.AddScoped<PaymentCommandService>();
-builder.Services.AddScoped<PricingQueryService>();
-builder.Services.AddSingleton<TimeService>();
+//backend
+services.AddSingleton<MessageQueueServer>();
+services.AddSingleton<IMessageQueueServer>(sp => sp.GetRequiredService<MessageQueueServer>());
+services.AddSingleton<IMessageBus>(sp => sp.GetRequiredService<MessageQueueServer>());
+services.AddHostedService(sp => sp.GetRequiredService<MessageQueueServer>());
 
-builder.Services.AddScoped<SalesQueryService>();
-builder.Services.AddScoped<RoomCommandService>();
-builder.Services.AddScoped<BookingCommandService>();
-builder.Services.AddScoped<PlanningQueryService>();
+services.AddScoped<IAssetsRepository, AssetsRepository>();
+services.AddScoped<ISalesRepository, SalesRepository>();
+services.AddScoped<IBillingRepository, BillingRepository>();
+services.AddScoped<IPlanningRepository, PlanningRepository>();
+
+//third-party
+services.AddScoped<PaymentCommandService>();
+services.AddScoped<PricingQueryService>();
+services.AddSingleton<ITimeService, TimeService>();
+
+//business
+services.AddScoped<SalesQueryService>();
+services.AddScoped<BookingCommandService>();
+services.AddScoped<PlanningQueryService>();
+
+
+services.Configure<HostOptions>(options =>
+{
+    options.ServicesStartConcurrently = true;
+    options.ServicesStopConcurrently = true;
+});
+services.AddHostedService<DemoService>();
 
 var app = builder.Build();
 
@@ -29,14 +49,14 @@ EnsureDatabasesCreated(app);
 var root = app.MapGet("/", () => new {
     links = new []
     {
-        new { group = "Hotel Administration", url = "/manager" },
+        new { group = "Hotel Administration", url = "/admin" },
         new { group = "Reception Planning", url = "/reception" },
         new { group = "RoomService Planning", url = "/service/room" },
         new { group = "Booking", url = "/booking" }
     }
 }.AsResult());
 
-var manager = app.MapGroup("/manager");
+var manager = app.MapGroup("/admin");
 
 var employees = manager.MapGroup("/employees");
 var hotels = manager.MapGroup("/hotels");
@@ -87,6 +107,8 @@ return;
 void RegisterDbContexts(WebApplicationBuilder webApplicationBuilder)
 {
     var dbContextFactory = new RegisteredDbContextFactory();
+
+    dbContextFactory.RegisterDbContextType(() => new MessageQueueContext());
 
     dbContextFactory.RegisterDbContextType(() => new BookingFrontContext());
     dbContextFactory.RegisterDbContextType(() => new BookingBackContext());

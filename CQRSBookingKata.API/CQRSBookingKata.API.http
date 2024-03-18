@@ -1,11 +1,11 @@
 @CQRSBookingKata.API_HostAddress = http://localhost:5291
 
-GET {{CQRSBookingKata.API_HostAddress}}/todos/
+GET {{CQRSBookingKata.API_HostAddress}}/admin/employees
 Accept: application/json
 
 ###
 
-GET {{CQRSBookingKata.API_HostAddress}}/todos/1
+GET {{CQRSBookingKata.API_HostAddress}}/admin/hotels
 Accept: application/json
 
 ###

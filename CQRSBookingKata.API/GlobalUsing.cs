@@ -10,10 +10,13 @@ global using CQRSBookingKata.Assets;
 global using CQRSBookingKata.Billing;
 global using CQRSBookingKata.Planning;
 global using CQRSBookingKata.Sales;
-global using CQRSBookingKata.ThirdParty;
 
-global using CQRSBookingKata.API.Databases;
-global using CQRSBookingKata.API.Repositories;
+global using CQRSBookingKata.API;
 global using CQRSBookingKata.API.Helpers;
+global using CQRSBookingKata.Common;
 
+global using Vinz.FakeTime;
+global using Vinz.MessageQueue;
 
+global using CQRSBookingKata.ThirdParty;
+global using CQRSBookingKata.API.Demo;

@@ -1,13 +1,13 @@
 ﻿
-using CQRSBookingKata.Assets;
-using CQRSBookingKata.Planning;
-using CQRSBookingKata.Sales;
+using Vinz.MessageQueue;
 
 namespace CQRSBookingKata.Billing;
 
 //accounts, purchasing
 
 public class BookingCommandService(
+    IMessageBus bus,
+
     IBillingRepository billing, 
     ISalesRepository sales,
     IAssetsRepository assets,
@@ -54,6 +54,23 @@ public class BookingCommandService(
             .Select(dayNum => new Vacancy(dayNum, 0, 0, 0, booking.UniqueRoomId).VacancyId);
 
         sales.RemoveVacancies(booked);
+
+
+
+
+        bus.Notify(new NotifyMessage {
+            Recipient = default,
+            Verb = "NEW BOOKING",
+            Message = new
+            {
+                booking.BookingId,
+                booking.ArrivalDate,
+                booking.DepartureDate,
+                booking.LastName,
+                booking.FirstName,
+                booking.UniqueRoomId
+            },
+        });
 
         var room = new UniqueRoomId(booking.UniqueRoomId);
 
