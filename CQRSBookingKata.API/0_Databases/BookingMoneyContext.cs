@@ -1,7 +1,7 @@
 ﻿
 namespace CQRSBookingKata.API;
 
-public class BookingSensitiveContext : DbContext
+public class BookingMoneyContext : DbContext
 {
     public DbSet<Invoice> Invoices { get; set; }
     public DbSet<Payroll> Payrolls { get; set; }
@@ -9,7 +9,7 @@ public class BookingSensitiveContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
 
-        => builder.ConfigureMyWay<BookingSensitiveContext>();
+        => builder.ConfigureMyWay<BookingMoneyContext>();
 
 
     protected override void OnModelCreating(ModelBuilder builder)

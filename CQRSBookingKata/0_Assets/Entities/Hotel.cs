@@ -41,10 +41,10 @@ public record Hotel(
         }
     }
 
-    private int CheckInH => EarliestCheckInTime / 60;
-    private int CheckInM => EarliestCheckInTime % 60;
-    private int CheckOutH => LatestCheckOutTime / 60;
-    private int CheckOutM => LatestCheckOutTime % 60;
+    private int CheckInH => EarliestCheckInTime / 100;
+    private int CheckInM => EarliestCheckInTime % 100;
+    private int CheckOutH => LatestCheckOutTime / 100;
+    private int CheckOutM => LatestCheckOutTime % 100;
 
     public double EarliestCheckInHours => CheckInH + CheckInM / 60d;
     public double LatestCheckOutHours => CheckOutH + CheckOutM / 60d;

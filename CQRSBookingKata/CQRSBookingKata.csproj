@@ -11,8 +11,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="1_Sales\assets\cities.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="1_Sales\assets\cities.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="0_Assets\Services\" />
     <Folder Include="2_Billing\Services\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>

@@ -32,31 +32,32 @@ public record UpdateRoom(
 );
 
 
-public interface IAssetsRepository
+public interface IAdminRepository
 {
     IQueryable<Employee> Employees { get; }
-    IQueryable<Hotel> Hotels { get; }
-    IQueryable<Room> Rooms(int hotelId);
-
-
     int Create(NewEmployee employee);
     Employee? GetEmployee(int employeeId);
-    void Update(int employeeId, UpdateEmployee update);
-    void DisableEmployee(int employeeId, bool disable);
+    void Update(int employeeId, UpdateEmployee update, bool scoped);
+    void DisableEmployee(int employeeId, bool disable, bool scoped);
 
 
+    IQueryable<Hotel> Hotels { get; }
     int Create(NewHotel hotel);
     Hotel? GetHotel(int hotelId);
-    void Update(int hotelId, UpdateHotel update);
-    void DisableHotel(int hotelId, bool disable);
+    void Update(int hotelId, UpdateHotel update, bool scoped);
+    void DisableHotel(int hotelId, bool disable, bool scoped);
 
-    void Create(Room room);
+
+    IQueryable<Room> Rooms(int hotelId);
+    int Create(Room room);
     Room? GetRoom(int uniqueRoomId);
-    void Update(int roomId, UpdateRoom update);
-    void DeleteRoom(int roomId);
+    void Update(int roomId, UpdateRoom update, bool scoped);
+    void DeleteRoom(int roomId, bool scoped);
+    int[] Create(NewRooms rooms, bool scoped);
+    int[] GetFloorNextRoomNumbers(int hotelId, int floorNum, int roomCount, bool scoped);
 
 
-    void Create(NewRooms rooms);
-    int GetFloorNextRoomNumber(int hotelId, int floorNum);
 
+    IQueryable<Booking> Bookings { get; }
+    void AddBooking(Booking booking, bool scoped);
 }

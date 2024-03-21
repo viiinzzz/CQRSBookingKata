@@ -1,52 +1,148 @@
-﻿namespace CQRSBookingKata.Sales;
+﻿
+using CQRSBookingKata.Common;
 
-//sales and marketing, event planning
+namespace CQRSBookingKata.Sales;
 
-public class SalesQueryService(
-   ISalesRepository sales, IAssetsRepository assets,
-   ITimeService DateTime, PricingQueryService pricing, BookingCommandService booking
-   )
+public class SalesQueryService
+(
+    ISalesRepository sales, 
+    IAdminRepository admin,
+   
+    PricingQueryService pricing, 
+    BookingCommandService booking,
+   
+    ITimeService DateTime
+)
 {
     private const int FindMinKm = 5;
     private const int FindMaxKm = 200;
-    private IEnumerable<StayMatch> FullFind(StayRequest request)
-    {
-        var maxKm =
-            request.maxKm < FindMinKm ? FindMinKm 
-            : request.maxKm > FindMaxKm ? FindMaxKm
-            : request.maxKm;
 
+    public static readonly City[] Cities = "cities".GetJsonObjectArray<City>("1_Sales")
+        .Where(city => city != null)
+        .Select(city => city!)
+        .ToArray();
+
+    public IQueryable<StayMatch> Find(StayRequest request)
+    {
         var firstNight = OvernightStay.From(request.ArrivalDate);
         var lastNight = OvernightStay.FromCheckOutDate(request.DepartureDate);
 
+
+        var maxKm =
+            !request.MaxKm.HasValue ? FindMaxKm
+            : request.MaxKm < FindMinKm ? FindMinKm
+            : request.MaxKm > FindMaxKm ? FindMaxKm
+            : request.MaxKm.Value;
+
+
         var nightsCount = firstNight.To(lastNight);
 
-        var urids = sales.Stock
 
-            .Where(room => 
+        var requestPositions = new List<Position>();
+
+        if (request is { Latitude: not null, Longitude: not null })
+        {
+            requestPositions.Add(new Position(request.Latitude.Value, request.Longitude.Value));
+        };
+
+        if (request.CityName != default)
+        {
+            var cities = Cities
+                .Where(city => city.name.EqualsIgnoreCaseAndAccents(request.CityName));
+
+            if (!cities.Any() && (request.ApproximateNameMatch ?? false))
+            {
+                cities = Cities
+                    .Where(city => city.name.EqualsApprox(request.CityName));
+            }
+
+            if (request.CountryCode != default && request.CountryCode.Trim().Length > 0)
+            {
+                cities = cities
+                    .Where(city => city.country.EqualsIgnoreCaseAndAccents(request.CountryCode));
+            }
+
+            requestPositions.AddRange(cities
+                .Select(city =>
+                {
+                    if (!double.TryParse(city.lat, out var latitude) ||
+                        !double.TryParse(city.lng, out var longitude))
+                    {
+                        return (valid: false, 0, 0);
+                    }
+
+                    return (valid: true, latitude, longitude);
+
+                })
+                .Where(latLon => latLon.valid)
+                .Select(latLon => new Position(latLon.latitude,latLon.longitude)));
+        }
+
+        if (requestPositions.Count == 0)
+        {
+            throw new ArgumentException($"must specify either known {request.CityName} or {request.Latitude} and {request.Longitude}", nameof(request.CityName));
+        }
+
+
+
+        var vacancies = 
+            
+            from vacancy in sales.Stock
+            
+            where vacancy.PersonMaxCount >= request.PersonCount &&
+                  
+                  vacancy.DayNum >= firstNight.DayNum &&
+                  vacancy.DayNum <= lastNight.DayNum
+            
+            select vacancy;
+
+
+        if (request.HotelName != default)
+        {
+            vacancies = 
                 
-                room.PersonMaxCount >= request.PersonCount &&
+                from vacancy in vacancies
+                
+                where !(request.ApproximateNameMatch ?? false)
+                    ? vacancy.HotelName.EqualsIgnoreCaseAndAccents(request.HotelName)
+                    : vacancy.HotelName.EqualsApprox(request.HotelName)
+                
+                select vacancy;
+        }
 
-                room.DayNum >= firstNight.DayNum &&
-                room.DayNum <= lastNight.DayNum &&
 
-                new Position(room.Latitude, room.Longitude).EarthDistKm(
-                    new Position(request.Latitude, request.Longitude)) < maxKm
+        {
+            vacancies = 
+                
+                from vacancy in vacancies
+            
+                where requestPositions.Any(requestPosition =>
+                    requestPosition.IsEarthMatch(vacancy.Latitude, vacancy.Longitude, maxKm))
+                
+            select vacancy;
+        }
+
+
+        var urids =
+            
+            from stay in (
+                from vacancy in vacancies
+                group vacancy by vacancy.Urid
+                into stay
+                select new { urid = stay.Key, nightsCount = stay.Count(), personMaxCount = stay.First().PersonMaxCount }
                 )
+            where stay.nightsCount == nightsCount
+            orderby stay.personMaxCount
 
-            .GroupBy(freeRoom => freeRoom.Urid)
+            select stay.urid;
 
-            .Where(nights => nights.Count() == nightsCount)
 
-            .Select(nights => nights.Key);
-
-        return urids
-
-            .ToArray()
+        var stays = urids
+            .ToArray() //fetch into db good size, localization and timing
 
             .Select(urid =>
             {
-                var price = pricing.GetPrice(urid, request.PersonCount, request.ArrivalDate, request.DepartureDate);
+                var price = pricing.GetPrice(urid, request.PersonCount, request.ArrivalDate, request.DepartureDate, request.Currency);
 
                 var match = new StayMatch(
                     request.PersonCount,
@@ -56,24 +152,27 @@ public class SalesQueryService(
 
                 return match;
             })
-            .Where(match => 
-                            match.Price >= request.PriceMin &&
-                            match.Price <= request.PriceMax &&
 
-                            string.Equals(match.Currency, request.Currency, StringComparison.InvariantCultureIgnoreCase))
-            
-            .ToArray();
-    }
+            .Where(stay => //now filter with dynamic pricing
 
+                (!request.PriceMax.HasValue || stay.Price <= request.PriceMax) &&
+                (!request.PriceMin.HasValue || (request.PriceMax.HasValue && request.PriceMax <= request.PriceMin) || stay.Price >= request.PriceMin) &&
 
-    public StayMatch[] Find(StayRequest request, int start, int count)
-    {
-        var matches = FullFind(request);
+                string.Equals(stay.Currency, request.Currency, StringComparison.InvariantCultureIgnoreCase))
 
-        return matches
-            .Skip(start)
-            .Take(count)
-            .ToArray();
+            .AsQueryable();
+
+        if (request.PriceMax is > 0)
+        {
+            return stays.OrderBy(stay => stay.Price);
+        }
+
+        if (request.PriceMin is > 0)
+        {
+            return stays.OrderByDescending(stay => stay.Price);
+        }
+
+        return stays;
     }
 
 
@@ -104,7 +203,7 @@ public class SalesQueryService(
 
 
         var uniqueRoomId = new UniqueRoomId(request.Urid);
-        var hotel = assets.GetHotel(uniqueRoomId.HotelId);
+        var hotel = admin.GetHotel(uniqueRoomId.HotelId);
 
         //adjust arrival/departure to hotel time
         var requestCheckInHours = request.ArrivalDate.Hour + request.ArrivalDate.Minute / 60d;
@@ -147,47 +246,80 @@ public class SalesQueryService(
     
 
 
-    public void OpenBooking(UniqueRoomId urid, DateTime openingDate, DateTime closingDate, int personCount)
+    public long[] Booking(UniqueRoomId urid, DateTime openingDate, DateTime closingDate, int personCount, bool scoped)
     {
-        var room = assets.GetRoom(urid.Value);
-
-        if (room == default)
+        try
         {
-            throw new RoomDoesNotExistException();
+            using var scope = !scoped ? null : new TransactionScope();
+
+            var room = admin.GetRoom(urid.Value);
+
+            if (room == default)
+            {
+                throw new RoomDoesNotExistException();
+            }
+
+            var hotel = admin.GetHotel(urid.HotelId);
+
+            if (hotel == default)
+            {
+                throw new HotelDoesNotExistException();
+            }
+
+            var firstNight = OvernightStay.From(openingDate);
+            var lastNight = OvernightStay.FromCheckOutDate(closingDate);
+
+            var vacancies = firstNight
+                .Until(lastNight, personCount, hotel.Latitude, hotel.Longitude, urid.Value)
+                .ToArray();
+
+            //
+            //
+            sales.AddVacancies(vacancies, false);
+            //
+            //
+
+            scope?.Complete();
+
+            return vacancies
+                .Select(vacancy => vacancy.VacancyId)
+                .ToArray();
         }
-
-        var hotel = assets.GetHotel(urid.HotelId);
-
-        if (hotel == default)
+        catch (Exception e)
         {
-            throw new HotelDoesNotExistException();
+            throw new ServerErrorException(e);
         }
-
-        var firstNight = OvernightStay.From(openingDate);
-        var lastNight = OvernightStay.FromCheckOutDate(closingDate);
-
-        var vacancies = firstNight.Until(lastNight, personCount, hotel.Latitude, hotel.Longitude, urid.Value);
-
-        //
-        //
-        sales.AddVacancy(vacancies);
-        //
-        //
     }
 
-    public void CloseBooking(UniqueRoomId urid, DateTime openingDate, DateTime closingDate)
+    public long[] CloseBooking(UniqueRoomId urid, DateTime openingDate, DateTime closingDate, bool scoped)
     {
-        var firstNight = OvernightStay.From(openingDate);
-        var lastNight = OvernightStay.FromCheckOutDate(closingDate);
 
-        var vacancyIds = firstNight.Until(lastNight, 0,0,0, urid.Value)
-            
-            .Select(vacancy => vacancy.VacancyId);
+        try
+        {
+            using var scope = !scoped ? null : new TransactionScope();
 
-        //
-        //
-        sales.RemoveVacancies(vacancyIds);
-        //
-        //
+            var firstNight = OvernightStay.From(openingDate);
+            var lastNight = OvernightStay.FromCheckOutDate(closingDate);
+
+            var vacancyIds = firstNight
+                .Until(lastNight, 0,0,0, urid.Value)
+                .Select(vacancy => vacancy.VacancyId)
+                .ToArray();
+
+            //
+            //
+            sales.RemoveVacancies(vacancyIds, false);
+            //
+            //
+
+            scope?.Complete();
+
+            return vacancyIds;
+        }
+        catch (Exception e)
+        {
+            throw new ServerErrorException(e);
+        }
     }
+
 }

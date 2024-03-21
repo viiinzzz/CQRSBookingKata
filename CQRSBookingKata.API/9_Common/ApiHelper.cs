@@ -1,3 +1,4 @@
+using System.Security;
 
 namespace CQRSBookingKata.API.Helpers;
 
@@ -24,20 +25,6 @@ public record PageResult<TEntity>(
 public static class ApiHelper
 {
     private static readonly Regex SpaceRx = new Regex(@"\s+", RegexOptions.Multiline);
-
-    public static bool EqualsIgnoreCaseAndAccents(this string source, string test)
-    {
-        return 0 == string.Compare(
-            source, test,
-            CultureInfo.CurrentCulture,
-            CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols);
-    }
-    public static bool EqualsApprox(this string source, string test)
-    {
-        return -1 != CultureInfo.InvariantCulture.CompareInfo.IndexOf(
-            SpaceRx.Replace(source, ""), SpaceRx.Replace(test, ""),
-            CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols);
-    }
 
     private static readonly int DefaultPageSize = 40;
 
@@ -80,16 +67,17 @@ public static class ApiHelper
             throw new ArgumentNullException(nameof(current));
         }
 
-        var ret = JObject.FromObject(current);
+        var retObj = JObject.FromObject(current);
+        var patchObj = JObject.FromObject(patch);
 
-        ret?.Merge(patch, new JsonMergeSettings
+        retObj?.Merge(patchObj, new JsonMergeSettings
         {
             MergeArrayHandling = MergeArrayHandling.Union
         });
 
-        return ret?.ToObject<TEntity>()
+        return retObj?.ToObject<TEntity>()
 
-               ?? throw new ArgumentNullException(nameof(ret));
+               ?? throw new ArgumentNullException(nameof(retObj));
     }
 
 
@@ -126,3 +114,25 @@ public static class ApiHelper
     }
 
 }
+
+
+/*
+
+[Aspect(Scope.Global)]
+[Injection(typeof(TransactionCall))]
+public class TransactionCall : Attribute
+{
+    private IDbContextTransaction _transaction;
+
+    [Advice(Kind.Before)]
+    public void LogEnter([Argument(Source.Name)] string methodName)
+    {
+
+        _transaction = _back.Database.BeginTransaction();
+        _transaction.BeginTransaction();
+        _transaction.Commit();
+        _transaction.Rollback();
+    }
+}
+
+*/

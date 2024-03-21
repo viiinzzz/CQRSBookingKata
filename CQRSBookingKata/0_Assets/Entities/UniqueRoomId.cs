@@ -8,8 +8,8 @@ public class UniqueRoomId(int Urid)
 
     public UniqueRoomId(int hotelId, int floorNum, int roomNum) 
         : this(
-            hotelId * 10000 * 10000 +
-            roomNum * 10000
+            hotelId * 1_0000 +
+            roomNum
             )
     {
         // if (hotelId is <= 0 or >= 1_0000)
@@ -26,7 +26,7 @@ public class UniqueRoomId(int Urid)
 
         if (floorNum2 != floorNum)
         {
-            throw new ArgumentException("value must be consistent with roomNum", nameof(floorNum));
+            throw new ArgumentException("floorNum={floorNum} value must be consistent with roomNum floorNum={floorNum2}", nameof(floorNum));
         }
     }
 
@@ -37,7 +37,7 @@ public class UniqueRoomId(int Urid)
 
         if (urid is <= 0 or 1_0000 or >= 1_0000_0000)
         {
-            throw new ArgumentException("value must be at least 1 and at most 9999 9999, and not 1 0000", nameof(Urid));
+            throw new ArgumentException("urid={urid} value must be at least 1 and at most 9999 9999, and not 1 0000", nameof(Urid));
         }
 
         return true;

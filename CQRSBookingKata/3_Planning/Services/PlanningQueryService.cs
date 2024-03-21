@@ -66,9 +66,9 @@ public class PlanningQueryService : MessageBusClientBase
             var nextDays = Days(now, duty.BusyTime);
 
             return duty.FloorNum * (
-                nextDays == 0 ? 100000 //today high priority
-                : nextDays == 1 ? 10000 //tomorrow medium priority
-                : (prevDays >= 9 ? 9 : prevDays) * 1000 //then the more stink the more urgent 
+                nextDays == 0 ? 100_000 //today high priority
+                : nextDays == 1 ? 10_000 //tomorrow medium priority
+                : (prevDays >= 9 ? 9 : prevDays) * 1_000 //then the more stink the more urgent 
             );
         };
 

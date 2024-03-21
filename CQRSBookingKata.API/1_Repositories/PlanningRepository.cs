@@ -2,62 +2,117 @@
 namespace CQRSBookingKata.API;
 
 
-public class PlanningRepository(IDbContextFactory factory, ITimeService DateTime) : IPlanningRepository
+public class PlanningRepository(IDbContextFactory factory, ITimeService DateTime) : IPlanningRepository, ITransactionable
 {
-    private readonly BookingFrontContext _front = factory.CreateDbContext<BookingFrontContext>();
+    private readonly BookingPlanningContext _planning = factory.CreateDbContext<BookingPlanningContext>();
 
-    public IQueryable<ReceptionCheck> Checks => _front.Checks.AsQueryable();
-    public IQueryable<RoomServiceDuty> Duties => _front.Duties.AsQueryable();
+    public TransactionContext AsTransaction() => new TransactionContext() * _planning;
+
+
+    public IQueryable<ReceptionCheck> Checks
+
+        => _planning.Checks
+            .AsNoTracking();
+
+    public IQueryable<RoomServiceDuty> Duties
+
+        => _planning.Duties
+            .AsNoTracking();
 
 
     public void Add(ReceptionCheck check)
     {
-        _front.Checks.Add(check);
-        _front.SaveChanges();
+        var entity = _planning.Checks.Add(check);
+        _planning.SaveChanges();
+        entity.State = EntityState.Detached;
     }
 
     public void Add(RoomServiceDuty duty)
     {
-        _front.Duties.Add(duty);
-        _front.SaveChanges();
+        var entity = _planning.Duties.Add(duty);
+        _planning.SaveChanges();
+        entity.State = EntityState.Detached;
     }
 
-    public void DoneCheck(int checkId, int employeeId)
+    public void DoneCheck(int checkId, int employeeId, bool scoped)
     {
-        var check = _front.Checks.Find(checkId);
-
-        if (check == default)
+        try
         {
-            throw new InvalidOperationException("checkId not found");
-        }
+            using var scope = !scoped ? null : new TransactionScope();
 
-        _front.Checks.Update(check with { TaskDone = true, EmployeeId = employeeId });
-        _front.SaveChanges();
+            var check = _planning.Checks
+                .Find(checkId);
+
+            if (check == default)
+            {
+                throw new InvalidOperationException("checkId not found");
+            }
+
+            _planning.Entry(check).State = EntityState.Detached;
+
+            var entity = _planning.Checks.Update(check with { TaskDone = true, EmployeeId = employeeId });
+            _planning.SaveChanges();
+            entity.State = EntityState.Detached;
+
+            scope?.Complete();
+        }
+        catch (Exception e)
+        {
+            throw new ServerErrorException(e);
+        }
     }
 
-    public void CancelCheck(int checkId, DateTime cancelDate)
+    public void CancelCheck(int checkId, DateTime cancelDate, bool scoped)
     {
-        var check = _front.Checks.Find(checkId);
-
-        if (check == default)
+        try
         {
-            throw new InvalidOperationException("checkId not found");
-        }
+            using var scope = !scoped ? null : new TransactionScope();
 
-        _front.Checks.Update(check with { Cancelled = true, CancelledDate = cancelDate });
-        _front.SaveChanges();
+            var check = _planning.Checks.Find(checkId);
+
+            if (check == default)
+            {
+                throw new InvalidOperationException("checkId not found");
+            }
+
+            _planning.Entry(check).State = EntityState.Detached;
+
+            var entity = _planning.Checks.Update(check with { Cancelled = true, CancelledDate = cancelDate });
+            _planning.SaveChanges();
+            entity.State = EntityState.Detached;
+
+            scope?.Complete();
+        }
+        catch (Exception e)
+        {
+            throw new ServerErrorException(e);
+        }
     }
 
-    public void DoneDuty(int dutyId, int employeeId)
+    public void DoneDuty(int dutyId, int employeeId, bool scoped)
     {
-        var duty = _front.Duties.Find(dutyId);
-
-        if (duty == default)
+        try
         {
-            throw new InvalidOperationException("dutyId not found");
-        }
+            using var scope = !scoped ? null : new TransactionScope();
 
-        _front.Duties.Update(duty with { TaskDone = true, EmployeeId = employeeId });
-        _front.SaveChanges();
+            var duty = _planning.Duties.Find(dutyId);
+
+            if (duty == default)
+            {
+                throw new InvalidOperationException("dutyId not found");
+            }
+
+            _planning.Entry(duty).State = EntityState.Detached;
+
+            var entity = _planning.Duties.Update(duty with { TaskDone = true, EmployeeId = employeeId });
+            _planning.SaveChanges();
+            entity.State = EntityState.Detached;
+
+            scope?.Complete();
+        }
+        catch (Exception e)
+        {
+            throw new ServerErrorException(e);
+        }
     }
 }

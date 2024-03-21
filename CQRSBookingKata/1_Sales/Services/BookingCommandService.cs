@@ -1,22 +1,68 @@
-﻿
-using Vinz.MessageQueue;
+﻿using CQRSBookingKata.Sales;
 
 namespace CQRSBookingKata.Billing;
 
-//accounts, purchasing
-
-public class BookingCommandService(
-    IMessageBus bus,
-
-    IBillingRepository billing, 
+public class BookingCommandService
+(
     ISalesRepository sales,
-    IAssetsRepository assets,
+
+    IAdminRepository admin,
+    IMoneyRepository money,
     IPlanningRepository planning,
-    PaymentCommandService payment)
+
+    PaymentCommandService payment,
+
+    IMessageBus bus
+)
 {
+    public void OpenHotelSeason(int hotelId, int[]? exceptRoomNumbers, DateTime openingDate, DateTime closingDate, bool scoped)
+    {
+        var hotel = admin.GetHotel(hotelId);
+
+        if (hotel == default)
+        {
+            throw new HotelNotFoundException();
+        }
+
+        if (hotel.Disabled)
+        {
+            throw new AccountLockedException();
+        }
+
+        var roomNumbers = admin.Rooms(hotelId);
+
+        if (exceptRoomNumbers != default)
+        {
+            roomNumbers = roomNumbers
+                .Where(room => !exceptRoomNumbers
+                    .Contains(room.RoomNum));
+        }
+
+        var firstNight = OvernightStay.From(openingDate);
+        var lastNight = OvernightStay.FromCheckOutDate(closingDate);
+
+        var dayNumbers = Enumerable.Range(firstNight.DayNum, lastNight.DayNum);
+
+        try
+        {
+            using var scope = !scoped ? null : new TransactionScope();
+
+            var vacancies = roomNumbers
+                .SelectMany(room => dayNumbers
+                    .Select(dayNum =>
+                        new Vacancy(dayNum, room.PersonMaxCount, hotel.Latitude, hotel.Longitude, room.Urid)));
+
+            sales.AddVacancies(vacancies, scoped);
+        }
+        catch (Exception e)
+        {
+            throw new ServerErrorException(e);
+        }
+    }
 
     public int Book(StayProposition prop, int customerId, 
-        string lastName, string firstName, long debitCardNumber, DebitCardSecrets secrets)
+        string lastName, string firstName, long debitCardNumber, DebitCardSecrets secrets,
+        bool scoped)
     {
         var customer = sales.GetCustomer(customerId);
 
@@ -42,55 +88,66 @@ public class BookingCommandService(
             throw new PaymentFailureException();
         }
 
-        var booking = new Booking(prop.ArrivalDate, prop.DepartureDate, lastName, firstName, prop.PersonCount, prop.Urid, customerId);
 
-        billing.AddBookingAndInvoice(booking, invoice);
-        
-        var beginDayNum = OvernightStay.From(booking.ArrivalDate).DayNum;
-        var endDayNum = OvernightStay.FromCheckOutDate(booking.DepartureDate).DayNum;
+        try
+        {
+            using var scope = !scoped ? null : new TransactionScope();
 
-        var booked = Enumerable.Range(beginDayNum, endDayNum)
+            var booking = new Booking(prop.ArrivalDate, prop.DepartureDate, lastName, firstName, prop.PersonCount, prop.Urid, customerId);
 
-            .Select(dayNum => new Vacancy(dayNum, 0, 0, 0, booking.UniqueRoomId).VacancyId);
+            money.AddInvoice(invoice, scoped: false);
+            admin.AddBooking(booking, scoped: false);
+            
+            var beginDayNum = OvernightStay.From(booking.ArrivalDate).DayNum;
+            var endDayNum = OvernightStay.FromCheckOutDate(booking.DepartureDate).DayNum;
 
-        sales.RemoveVacancies(booked);
+            var booked = Enumerable.Range(beginDayNum, endDayNum)
+
+                .Select(dayNum => new Vacancy(dayNum, 0, 0, 0, booking.UniqueRoomId).VacancyId);
+
+            sales.RemoveVacancies(booked, scoped: false);
 
 
+            bus.Notify(new NotifyMessage {
+                Recipient = default,
+                Verb = "NEW BOOKING",
+                Message = new
+                {
+                    booking.BookingId,
+                    booking.ArrivalDate,
+                    booking.DepartureDate,
+                    booking.LastName,
+                    booking.FirstName,
+                    booking.UniqueRoomId
+                },
+            });
 
+            var room = new UniqueRoomId(booking.UniqueRoomId);
 
-        bus.Notify(new NotifyMessage {
-            Recipient = default,
-            Verb = "NEW BOOKING",
-            Message = new
-            {
-                booking.BookingId,
-                booking.ArrivalDate,
-                booking.DepartureDate,
-                booking.LastName,
-                booking.FirstName,
-                booking.UniqueRoomId
-            },
-        });
+            planning.Add(new ReceptionCheck(
+                booking.ArrivalDate, ReceptionEventType.CheckIn, 
+                booking.LastName, booking.FirstName,
+                room.RoomNum, false, room.HotelId,
+                booking.BookingId, default, false, default, 0));
 
-        var room = new UniqueRoomId(booking.UniqueRoomId);
+            planning.Add(new ReceptionCheck(
+                booking.DepartureDate, ReceptionEventType.CheckOut, 
+                booking.LastName, booking.FirstName,
+                room.RoomNum, false, room.HotelId,
+                booking.BookingId, default, false, default, 0));
 
-        planning.Add(new ReceptionCheck(
-            booking.ArrivalDate, ReceptionEventType.CheckIn, 
-            booking.LastName, booking.FirstName,
-            room.RoomNum, false, room.HotelId,
-            booking.BookingId, default, false, default, 0));
+            planning.Add(new RoomServiceDuty(booking.DepartureDate, default/****/,
+                room.RoomNum, room.FloorNum, false, room.HotelId, 
+                booking.BookingId, default, 0));
 
-        planning.Add(new ReceptionCheck(
-            booking.DepartureDate, ReceptionEventType.CheckOut, 
-            booking.LastName, booking.FirstName,
-            room.RoomNum, false, room.HotelId,
-            booking.BookingId, default, false, default, 0));
+            scope?.Complete();
 
-        planning.Add(new RoomServiceDuty(booking.DepartureDate, default/****/,
-            room.RoomNum, room.FloorNum, false, room.HotelId, 
-            booking.BookingId, default, 0));
-
-        return booking.BookingId;
+            return booking.BookingId;
+        }
+        catch (Exception e)
+        {
+            throw new ServerErrorException(e);
+        }
     }
 
   

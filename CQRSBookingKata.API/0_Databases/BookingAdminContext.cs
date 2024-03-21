@@ -1,7 +1,7 @@
 ﻿
 namespace CQRSBookingKata.API;
 
-public class BookingBackContext : DbContext
+public class BookingAdminContext : DbContext
 {
     public DbSet<Employee> Employees { get; set; }
     public DbSet<Hotel> Hotels { get; set; }
@@ -9,9 +9,12 @@ public class BookingBackContext : DbContext
     public DbSet<Booking> Bookings { get; set; }
 
 
-    protected override void OnConfiguring(DbContextOptionsBuilder builder) 
-        
-        => builder.ConfigureMyWay<BookingBackContext>();
+    protected override void OnConfiguring(DbContextOptionsBuilder builder)
+    {
+        builder.ConfigureMyWay<BookingAdminContext>();
+
+        builder.EnableSensitiveDataLogging();
+    }
 
 
     protected override void OnModelCreating(ModelBuilder builder)

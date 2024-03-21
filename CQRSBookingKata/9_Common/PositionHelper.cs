@@ -2,9 +2,8 @@
 
 public static class PositionHelper
 {
-    public static double EarthDistKm(this Position p1, Position p2)
+    public static double ArcDist(this Position p1, Position p2, double radius)
     {
-        var R = 6371d;
 
         var lat = DegToRad(p1.Latitude);
         var lon = DegToRad(p2.Latitude);
@@ -17,7 +16,7 @@ public static class PositionHelper
 
         var c = 2 * Math.Asin(Math.Min(1, Math.Sqrt(a)));
 
-        var d = R * c;
+        var d = radius * c;
 
         return d;
     }

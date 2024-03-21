@@ -1,75 +1,18 @@
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-
 namespace CQRSBookingKata.Common;
 
 public static class RandomHelper
 {
-    private static readonly string AssetsDir = Path.Combine(
-        AppDomain.CurrentDomain.BaseDirectory,
-        "assets");
 
-    public static JToken GetJsonAsset(string nameWithoutExt)
-    {
-        var assetPath = Path.Combine(
-            AssetsDir,
-            $"{nameWithoutExt}.json");
 
-        using var file = File.OpenText(assetPath);
+    private static readonly string[] FirstNames ="firstnames1000".GetJsonStringArray();
 
-        using var reader = new JsonTextReader(file);
-        
-        return JToken.ReadFrom(reader);
-    }
-
-    private static string[] GetJsonStringArray(string nameWithoutExt)
-
-        => GetJsonAsset(nameWithoutExt)
-            .Values<string>()
-            .Where(str => str != null)
-            .Select(str => $"{str}")
-            .ToArray();
-
-    private static readonly string[] FirstNames = GetJsonStringArray("firstnames1000");
-
-    private static readonly string[] LastNames = GetJsonStringArray("lastnames1000");
-
-    record City(string name, string lat, string lng, string country, string admin1, string admin2)
-    {
-        double? Latitude { get {
-
-            if (!double.TryParse(lat, out var value))
-            {
-                return default;
-            }
-
-            return value;
-        }}
-
-        double? Longitude { get {
-
-            if (!double.TryParse(lng, out var value))
-            {
-                return default;
-            }
-
-            return value;
-        }}
-    }
-
-    private static readonly City[] Cities =
-
-        GetJsonAsset("cities")
-            .Values<City>()
-            .Where(city => city != null)
-            .Select(city => city ?? throw new Exception("shall not happen"))
-            .ToArray();
-
+    private static readonly string[] LastNames = "lastnames1000".GetJsonStringArray();
 
     public record FakeHotel(
         bool Valid,
         string HotelName,
+        int? ranking,
         double Latitude,
         double Longitude,
         string EmailAddress,
@@ -78,9 +21,11 @@ public static class RandomHelper
         string Url
     );
 
+    private static Regex RankinkRx = new Regex(@"^\D*(\d+)\D*$");
+
     private static readonly FakeHotel[] HotelsIDF =
 
-        ((JArray)GetJsonAsset("hotels_idf")).Select(hotel =>
+        ((JArray)"hotels_idf".GetJsonAsset()).Select(hotel =>
         {
             var hotelName = hotel.SelectToken("fields.nom_commercial")?.Value<string>();
             var latitude = hotel.SelectToken("fields.geo[0]")?.Value<double>();
@@ -88,10 +33,18 @@ public static class RandomHelper
             var roomCount = hotel.SelectToken("fields.nombre_de_chambres")?.Value<int>();
             var emailAddress = hotel.SelectToken("fields.courriel")?.Value<string>();
             var receptionTelephoneNumber = hotel.SelectToken("fields.telephone")?.Value<string>();
-            var url = hotel.SelectToken("fields.nom_commercial")?.Value<string>();
+            var url = hotel.SelectToken("fields.site_internet")?.Value<string>();
             var address = hotel.SelectToken("fields.adresse")?.Value<string>();
             var zipCode = hotel.SelectToken("fields.code_postal")?.Value<int>();
-            var city = hotel.SelectToken("fields.site_internet")?.Value<string>();
+            var city = hotel.SelectToken("fields.commune")?.Value<string>();
+            var ranking = hotel.SelectToken("fields.classement")?.Value<string>();
+            
+            int? rankingNum = default;
+            var rankingMatch = RankinkRx.Match(ranking);
+            if (rankingMatch.Success && int.TryParse(rankingMatch.Result("$1"), out var rankingNumValue))
+            {
+                rankingNum = rankingNumValue;
+            }
 
             var valid =
                 hotelName != default &&
@@ -110,7 +63,7 @@ public static class RandomHelper
 {zipCode.Value} {city}";
 
             return new FakeHotel(
-                valid, hotelName ?? string.Empty, 
+                valid, hotelName ?? string.Empty, rankingNum,
                 latitude ?? 0, longitude ?? 0,
                 emailAddress ?? string.Empty, receptionTelephoneNumber ?? string.Empty,
                 locationAddress, url ?? string.Empty);

@@ -2,23 +2,16 @@
 
 public interface ISalesRepository
 {
-    int CreateCustomer(string emailAddress);
-
+    int CreateCustomer(string emailAddress, bool scoped);
     Customer? GetCustomer(int customerId);
-
     int? FindCustomer(string emailAddress);
+    void UpdateCustomer(Customer customer, bool scoped);
+    void DisableCustomer(int customerId, bool disable, bool scoped);
 
-    void UpdateCustomer(Customer customer);
-
-    void DisableCustomer(int customerId, bool disable);
 
     IQueryable<Vacancy> Stock { get; }
-
-    void AddVacancy(IEnumerable<Vacancy> vacancies);
-
-    void RemoveVacancies(IEnumerable<long> vacancyIds);
-
+    void AddVacancies(IEnumerable<Vacancy> vacancies, bool scoped);
+    void RemoveVacancies(IEnumerable<long> vacancyIds, bool scoped);
     void AddStayProposition(StayProposition proposition);
-
     bool HasActiveProposition(int urid, DateTime arrival, DateTime departure);
 }
