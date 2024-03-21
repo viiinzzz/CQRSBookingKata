@@ -24,6 +24,7 @@ public class BookingAdminContext : DbContext
             .Property(employee => employee.EmployeeId)
             .ValueGeneratedOnAdd();
 
+
         builder
             .Entity<Hotel>()
             .Property(hotel => hotel.HotelId)
@@ -35,8 +36,14 @@ public class BookingAdminContext : DbContext
             .IsUnique();
 
         builder
+            .Entity<Hotel>()
+            .Ignore(hotel => hotel.Position);
+
+
+        builder
             .Entity<Room>()
             .HasKey(room => room.Urid);
+
 
         builder
             .Entity<Booking>()

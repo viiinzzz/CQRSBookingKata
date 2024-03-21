@@ -7,6 +7,7 @@ public enum ReceptionEventType
 }
 
 public record ReceptionCheck(
+    int EventDayNum,
     DateTime EventTime,
     ReceptionEventType EventType,
     string CustomerLastName,

@@ -2,15 +2,13 @@ namespace CQRSBookingKata.Common;
 
 public static class JsonHelper
 {
-    private static readonly string AssetsDir = Path.Combine(
-        AppDomain.CurrentDomain.BaseDirectory,
-        "assets");
+    private static readonly string BaseDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory);
 
     public static JToken GetJsonAsset(this string nameWithoutExt, string? subFolder = default)
     {
-        var assetPath = Path.Combine(
-            subFolder == default ? AssetsDir : Path.Combine(AssetsDir, subFolder),
-            $"{nameWithoutExt}.json");
+        var assetPath = Path.GetFullPath(Path.Combine(
+            subFolder == default ? BaseDir : Path.Combine(BaseDir, subFolder),
+            $"{nameWithoutExt}.json"));
 
         using var file = File.OpenText(assetPath);
 

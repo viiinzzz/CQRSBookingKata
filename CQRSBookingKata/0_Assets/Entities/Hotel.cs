@@ -39,7 +39,15 @@ public record Hotel(
         {
             throw new ArgumentException("must be HHMM (24 hours)", nameof(LatestCheckOutTime));
         }
+
+        Position =
+            this is { Latitude: 0, Longitude: 0 }
+                ? default
+                : new Position(Latitude, Longitude);
+
     }
+
+    public Position? Position;
 
     private int CheckInH => EarliestCheckInTime / 100;
     private int CheckInM => EarliestCheckInTime % 100;

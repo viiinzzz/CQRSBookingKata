@@ -17,10 +17,11 @@ public class SalesQueryService
     private const int FindMinKm = 5;
     private const int FindMaxKm = 200;
 
-    public static readonly City[] Cities = "cities".GetJsonObjectArray<City>("1_Sales")
+    public static readonly City[] Cities = "cities".GetJsonObjectArray<City>("1_Sales/assets")
         .Where(city => city != null)
         .Select(city => city!)
         .ToArray();
+
 
     public IQueryable<StayMatch> Find(StayRequest request)
     {
@@ -63,19 +64,8 @@ public class SalesQueryService
             }
 
             requestPositions.AddRange(cities
-                .Select(city =>
-                {
-                    if (!double.TryParse(city.lat, out var latitude) ||
-                        !double.TryParse(city.lng, out var longitude))
-                    {
-                        return (valid: false, 0, 0);
-                    }
-
-                    return (valid: true, latitude, longitude);
-
-                })
-                .Where(latLon => latLon.valid)
-                .Select(latLon => new Position(latLon.latitude,latLon.longitude)));
+                .Where(city => city.Position != default)
+                .Select(city => city.Position ?? new Position(0,0)));
         }
 
         if (requestPositions.Count == 0)
@@ -230,7 +220,7 @@ public class SalesQueryService
             return default;
         }
 
-        var price = pricing.GetPrice(request.Urid, request.PersonCount, arrivalDate, departureDate);
+        var price = pricing.GetPrice(request.Urid, request.PersonCount, arrivalDate, departureDate, request.Currency);
 
         var prop = new StayProposition(
             request.PersonCount,
@@ -266,11 +256,25 @@ public class SalesQueryService
                 throw new HotelDoesNotExistException();
             }
 
+           
+            var nearestKnownCityName =
+                hotel.Position == default
+                    ? default
+                    : Cities
+                        .Select(city => new
+                        {
+                            cityName = city.name,
+                            km = city.Position == default ? double.MaxValue : city.Position - hotel.Position
+                        })
+                        .MinBy(c => c.km)
+                        ?.cityName;
+
+
             var firstNight = OvernightStay.From(openingDate);
             var lastNight = OvernightStay.FromCheckOutDate(closingDate);
 
             var vacancies = firstNight
-                .Until(lastNight, personCount, hotel.Latitude, hotel.Longitude, urid.Value)
+                .StayUntil(lastNight, personCount, hotel.Latitude, hotel.Longitude, hotel.HotelName, nearestKnownCityName, urid.Value)
                 .ToArray();
 
             //
@@ -301,10 +305,7 @@ public class SalesQueryService
             var firstNight = OvernightStay.From(openingDate);
             var lastNight = OvernightStay.FromCheckOutDate(closingDate);
 
-            var vacancyIds = firstNight
-                .Until(lastNight, 0,0,0, urid.Value)
-                .Select(vacancy => vacancy.VacancyId)
-                .ToArray();
+            var vacancyIds = firstNight.StayUntil(lastNight, urid.Value);
 
             //
             //

@@ -43,10 +43,9 @@ public class DemoService : IHostedLifecycleService
 
             var context = new TransactionContext() * _admin * _money;
             
-            context.Execute(() =>
-            {
-                Fake_Employees_Hotels_Vacancies(false);
-            });
+            context.Execute(() => Fake_Employees(false));
+            context.Execute(() => Fake_Hotels(false));
+            context.Execute(() => Fake_Vacancies(false));
             
             DateTime.Unfreeze();
 
@@ -89,13 +88,18 @@ ERROR: {ex}";
 
     private const int SeasonDayNumbers = 250;
 
-    private void Fake_Employees_Hotels_Vacancies(bool scoped)
+
+    public int[] fakeStaffIds { get; private set; }
+    public int[] fakeManagerIds { get; private set; }
+    public int[] fakeHotelsIds { get; private set; }
+
+    private void Fake_Employees(bool scoped)
     {
         try
         {
             using var scope = !scoped ? null : new TransactionScope();
 
-            var fakeStaffIds = RandomHelper
+            fakeStaffIds = RandomHelper
                 .GenerateFakeEmployees(HotelCount * StaffPerHotel)
                 .Select(fake =>
                 {
@@ -106,7 +110,7 @@ ERROR: {ex}";
                 })
                 .ToArray();
             
-            var fakeManagerIds = RandomHelper
+            fakeManagerIds = RandomHelper
                 .GenerateFakeEmployees(HotelCount * ManagerPerHotel)
                 .Select(fake =>
                 {
@@ -117,7 +121,21 @@ ERROR: {ex}";
                 })
                 .ToArray();
 
-            var fakeHotelsIds = RandomHelper
+            scope?.Complete();
+        }
+        catch (Exception e)
+        {
+            throw new TransactionException($"transaction '{nameof(Fake_Employees)}' failed", e);
+        }
+    }
+
+    private void Fake_Hotels(bool scoped)
+    {
+        try
+        {
+            using var scope = !scoped ? null : new TransactionScope();
+
+            fakeHotelsIds = RandomHelper
                 .GenerateFakeHotels(3)
                 .Select((fake, hotelNum) =>
                 {
@@ -140,21 +158,37 @@ ERROR: {ex}";
                         _admin.Create(new NewRooms(hotelId, floorNum, RoomPerFloor, PersonPerRoom), scoped: false);
                     }
 
-
-                    _booking.OpenHotelSeason(
-                        hotelId, default, 
-                        DateTime.UtcNow, DateTime.UtcNow.AddDays(SeasonDayNumbers), scoped: false);
-
                     return hotelId;
                 })
                 .ToArray();
-
 
             scope?.Complete();
         }
         catch (Exception e)
         {
-            throw new TransactionException($"transaction '{nameof(FakeEmployeesAndHotels)}' failed", e);
+            throw new TransactionException($"transaction '{nameof(Fake_Hotels)}' failed", e);
+        }
+    }
+
+    private void Fake_Vacancies(bool scoped)
+    {
+        try
+        {
+            using var scope = !scoped ? null : new TransactionScope();
+
+            foreach(var hotelId in fakeHotelsIds)
+            {
+
+                _booking.OpenHotelSeason(
+                    hotelId, default, 
+                    DateTime.UtcNow, DateTime.UtcNow.AddDays(SeasonDayNumbers), scoped: false);
+            }
+
+            scope?.Complete();
+        }
+        catch (Exception e)
+        {
+            throw new TransactionException($"transaction '{nameof(Fake_Vacancies)}' failed", e);
         }
     }
 

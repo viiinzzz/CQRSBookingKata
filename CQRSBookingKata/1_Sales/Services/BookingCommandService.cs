@@ -29,30 +29,46 @@ public class BookingCommandService
             throw new AccountLockedException();
         }
 
-        var roomNumbers = admin.Rooms(hotelId);
-
-        if (exceptRoomNumbers != default)
-        {
-            roomNumbers = roomNumbers
-                .Where(room => !exceptRoomNumbers
-                    .Contains(room.RoomNum));
-        }
-
-        var firstNight = OvernightStay.From(openingDate);
-        var lastNight = OvernightStay.FromCheckOutDate(closingDate);
-
-        var dayNumbers = Enumerable.Range(firstNight.DayNum, lastNight.DayNum);
-
         try
         {
             using var scope = !scoped ? null : new TransactionScope();
 
+            var nearestKnownCityName =
+            hotel.Position == default
+                ? default
+                : SalesQueryService.Cities
+                    .Select(city => new
+                    {
+                        cityName = city.name,
+                        km = city.Position == default ? double.MaxValue : city.Position - hotel.Position
+                    })
+                    .MinBy(c => c.km)
+                    ?.cityName;
+
+
+            var roomNumbers = admin.Rooms(hotelId);
+
+            if (exceptRoomNumbers != default)
+            {
+                roomNumbers = roomNumbers
+                    .Where(room => !exceptRoomNumbers
+                        .Contains(room.RoomNum));
+            }
+
+            var firstNight = OvernightStay.From(openingDate);
+            var lastNight = OvernightStay.FromCheckOutDate(closingDate);
+
+            var dayNumbers = Enumerable.Range(firstNight.DayNum, lastNight.DayNum);
+
+
             var vacancies = roomNumbers
                 .SelectMany(room => dayNumbers
                     .Select(dayNum =>
-                        new Vacancy(dayNum, room.PersonMaxCount, hotel.Latitude, hotel.Longitude, room.Urid)));
+                        new Vacancy(dayNum, room.PersonMaxCount, hotel.Latitude, hotel.Longitude, hotel.HotelName, nearestKnownCityName, room.Urid)));
 
             sales.AddVacancies(vacancies, scoped);
+
+            scope?.Complete();
         }
         catch (Exception e)
         {
@@ -98,12 +114,10 @@ public class BookingCommandService
             money.AddInvoice(invoice, scoped: false);
             admin.AddBooking(booking, scoped: false);
             
-            var beginDayNum = OvernightStay.From(booking.ArrivalDate).DayNum;
-            var endDayNum = OvernightStay.FromCheckOutDate(booking.DepartureDate).DayNum;
+            var beginDay = OvernightStay.From(booking.ArrivalDate);
+            var endDay = OvernightStay.FromCheckOutDate(booking.DepartureDate);
 
-            var booked = Enumerable.Range(beginDayNum, endDayNum)
-
-                .Select(dayNum => new Vacancy(dayNum, 0, 0, 0, booking.UniqueRoomId).VacancyId);
+            var booked = beginDay.StayUntil(endDay, booking.UniqueRoomId);
 
             sales.RemoveVacancies(booked, scoped: false);
 
@@ -124,13 +138,13 @@ public class BookingCommandService
 
             var room = new UniqueRoomId(booking.UniqueRoomId);
 
-            planning.Add(new ReceptionCheck(
+            planning.Add(new ReceptionCheck(beginDay.DayNum,
                 booking.ArrivalDate, ReceptionEventType.CheckIn, 
                 booking.LastName, booking.FirstName,
                 room.RoomNum, false, room.HotelId,
                 booking.BookingId, default, false, default, 0));
 
-            planning.Add(new ReceptionCheck(
+            planning.Add(new ReceptionCheck(endDay.DayNum + 1,
                 booking.DepartureDate, ReceptionEventType.CheckOut, 
                 booking.LastName, booking.FirstName,
                 room.RoomNum, false, room.HotelId,

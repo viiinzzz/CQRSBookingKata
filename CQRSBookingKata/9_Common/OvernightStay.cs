@@ -1,4 +1,6 @@
-﻿namespace CQRSBookingKata.Sales;
+﻿using System;
+
+namespace CQRSBookingKata.Sales;
 
 public class OvernightStay
 {
@@ -56,12 +58,18 @@ public class OvernightStay
 
     public int To(DateTime checkOutDate) => To(OvernightStay.FromCheckOutDate(checkOutDate));
 
-    public IEnumerable<Vacancy> Until(OvernightStay lastNight, int personMaxCount, double latitude, double longitude, int urid)
+    public IEnumerable<Vacancy> StayUntil(OvernightStay lastNight, int personMaxCount, double latitude, double longitude, string hotelName, string cityName, int urid)
     {
         var firstNight = this;
 
         return Enumerable.Range(firstNight.DayNum, lastNight.DayNum)
             
-            .Select(dayNum => new Vacancy(DayNum, personMaxCount, latitude, longitude, urid));
+            .Select(dayNum => new Vacancy(DayNum, personMaxCount, latitude, longitude, hotelName, cityName, urid));
     }
+
+    public long[] StayUntil(OvernightStay lastStay, int urid) 
+        
+        => StayUntil(lastStay, 0, 0, 0, string.Empty, string.Empty, urid)
+            .Select(vacancy => vacancy.VacancyId)
+            .ToArray();
 }

@@ -5,9 +5,9 @@ public static class RandomHelper
 {
 
 
-    private static readonly string[] FirstNames ="firstnames1000".GetJsonStringArray();
+    private static readonly string[] FirstNames ="firstnames1000".GetJsonStringArray("assets");
 
-    private static readonly string[] LastNames = "lastnames1000".GetJsonStringArray();
+    private static readonly string[] LastNames = "lastnames1000".GetJsonStringArray("assets");
 
     public record FakeHotel(
         bool Valid,
@@ -25,7 +25,7 @@ public static class RandomHelper
 
     private static readonly FakeHotel[] HotelsIDF =
 
-        ((JArray)"hotels_idf".GetJsonAsset()).Select(hotel =>
+        ((JArray)"hotels_idf".GetJsonAsset("assets")).Select(hotel =>
         {
             var hotelName = hotel.SelectToken("fields.nom_commercial")?.Value<string>();
             var latitude = hotel.SelectToken("fields.geo[0]")?.Value<double>();

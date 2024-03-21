@@ -30,12 +30,6 @@ public class PlanningQueryService : MessageBusClientBase
     }
 
 
-    private bool SameDay(DateTime t1, DateTime t2) =>
-
-        t1.Year == t2.Year &&
-        t1.Month == t2.Month &&
-        t1.Day == t2.Day;
-
     private int Days(DateTime t0, DateTime? t)
     {
         return (int)((t ?? System.DateTime.MaxValue) - t0).TotalDays;
@@ -45,12 +39,14 @@ public class PlanningQueryService : MessageBusClientBase
     {
         var now = System.DateTime.UtcNow;
 
+        var nowDayNum = OvernightStay.From(now).DayNum;
+
         return 
 
             from check in planning.Checks
 
             where check.HotelId == hotelId &&
-                  SameDay(now, check.EventTime)
+                  nowDayNum == check.EventDayNum
 
             select check;
     }
