@@ -6,7 +6,7 @@ public class DemoService : IHostedLifecycleService
 {
     private readonly IAdminRepository _admin;
     private readonly IMoneyRepository _money;
-    // private readonly ISalesRepository _sales;
+    private readonly ISalesRepository _sales;
     private readonly BookingCommandService _booking;
 
     private readonly ITimeService DateTime;
@@ -41,7 +41,7 @@ public class DemoService : IHostedLifecycleService
         {
             DateTime.Freeze();
 
-            var context = new TransactionContext() * _admin * _money;
+            var context = new TransactionContext() * _admin * _money * _sales;
             
             context.Execute(() => Fake_Employees(false));
             context.Execute(() => Fake_Hotels(false));

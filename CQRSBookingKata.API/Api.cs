@@ -11,6 +11,7 @@
 */
 
 using System.Collections.Immutable;
+using System.Reflection.Metadata;
 
 void RegisterDbContexts(WebApplicationBuilder webApplicationBuilder)
 {
@@ -26,18 +27,18 @@ void RegisterDbContexts(WebApplicationBuilder webApplicationBuilder)
     webApplicationBuilder.Services.AddSingleton<IDbContextFactory>(dbContextFactory);
 }
 
-void EnsureDatabasesCreated2<TContext>(WebApplication app) where TContext : DbContext
+void EnsureDatabaseCreated<TContext>(WebApplication app) where TContext : DbContext
 {
     app.Services.GetRequiredService<IDbContextFactory>().CreateDbContext<TContext>().Database
         .EnsureCreated();
 }
 
-void EnsureDatabasesCreated(WebApplication app)
+void EnsureAllDatabasesCreated(WebApplication app)
 {
-    EnsureDatabasesCreated2<BookingSalesContext>(app);
-    EnsureDatabasesCreated2<BookingAdminContext>(app);
-    EnsureDatabasesCreated2<BookingMoneyContext>(app);
-    EnsureDatabasesCreated2<BookingPlanningContext>(app);
+    EnsureDatabaseCreated<BookingSalesContext>(app);
+    EnsureDatabaseCreated<BookingAdminContext>(app);
+    EnsureDatabaseCreated<BookingMoneyContext>(app);
+    EnsureDatabaseCreated<BookingPlanningContext>(app);
 }
 /*
                                                                              ╎
@@ -97,7 +98,7 @@ ConfigureDependencyInjection(builder);
 
 var app = builder.Build();
 
-EnsureDatabasesCreated(app);
+EnsureAllDatabasesCreated(app);
 
 SetupRoutes(app);
 
@@ -113,18 +114,101 @@ return;
 
 void SetupRoutes(WebApplication app1)
 {
-    var root = app1.MapGet("/", () => new
+    var root = app1.MapGet("/", () =>
     {
-        links = new[]
+        var links = new[]
         {
-            new { group = "Hotel Administration", url = "/admin" },
+            // new { group = "Hotel Administration", url = "/admin" },
+            new { group = "List of Employees", url = "/admin/employees" },
+            new { group = "List of Hotels", url = "/admin/hotels" },
+            new { group = "List of Vacancies", url = "/admin/vacancies" },
             new { group = "Reception Planning", url = "/reception" },
-            new { group = "RoomService Planning", url = "/service/room" },
-            new { group = "Booking", url = "/booking" }
-        }
-    }.AsResult());
+            new { group = "Room Service Planning", url = "/service/room" },
+            // new { group = "Find a Stay", url = "/booking" }
+        };
+
+        var html = $@"
+<h1>B O O K I N G  API</h1>
+<ul>
+{string.Join(Environment.NewLine, links.Select(link => @$"
+<li><a href={link.url}>{link.group}</a>"))}
+
+<li>Find a Stay
+<form action=""/booking"">
+
+<table  width=""100%""><tbody>
+
+<tr><td>
+<label for=""farrival"">Arrival Date</label><br>
+<input type=""date"" id=""farrival"" name=""arrival"" value=""{DateTime.Now:yyyy-MM-dd}"" required>
+</td><td>
+<label for=""fdeparture"">Departure Date</label><br>
+<input type=""date"" id=""fdeparture"" name=""departure"" value=""{DateTime.Now.AddDays(1):yyyy-MM-dd}"" required>
+</td><td>
+<label for=""fpersons"">Persons</label><br>
+<input type=""number"" id=""fpersons"" name=""persons"" min=""1"" max=""9"" value=""1""  minlength=""1"" maxlength=""1"" size=""4"" required>
+</td></tr>
+
+<tr><td>
+<label for=""fcountry"">Country Code</label>/<label for=""fcity"">City Name</label><br>
+<input type=""text"" id=""fcountry"" name=""country"" minlength=""2"" maxlength=""2"" size=""2"" required value=""FR"" >&nbsp;
+<input type=""text"" id=""fcity"" name=""city"" value=""Paris"">
+</td><td>
+<input type=""checkbox"" id=""fapprox"" name=""approx"">
+<label for=""fapprox"">Approximate Names</label>
+</td><td>
+<label for=""fhotel"">Hotel Name</label><br>
+<input type=""text"" id=""fhotel"" name=""hotel"">
+</td></tr>
+
+<tr><td colspan=""2"">
+<label for=""flat"">Latitude</label>/<label for=""flon"">Longitude</label>&nbsp;
+<input type=""text"" id=""flat"" name=""lat"" size=""10"">/
+<input type=""text"" id=""flon"" name=""lon"" size=""10"">
+</td><td>
+</td></tr>
+
+<tr><td colspan=""2"">
+Price/Currency<br>
+<label for=""fpricemax"">Maximum</label>&nbsp;
+<input type=""text"" id=""fpricemaxvalue"" name=""pricemax"" value=""1000"">&nbsp;
+<input type=""text"" id=""fcurrency"" name=""currency""  minlength=""3"" maxlength=""3"" size=""3"" value=""EUR""><br>
+<input type=""range"" style=""width:100%;"" id=""fpricemax""  min=""0"" max=""1000"" step=""50"" oninput=""document.getElementById('fpricemaxvalue').value = this.value"" value=""1000"">
+</td><td>
+</td></tr>
+
+<tr><td colspan=""2"">
+<label for=""fpricemin"">Minimum</label>&nbsp;<input type=""text"" id=""fpriceminvalue"" name=""pricemin"" value=""0""><br>
+<input type=""range"" style=""width:100%;"" id=""fpricemin""  min=""0"" max=""1000"" step=""50"" oninput=""document.getElementById('fpriceminvalue').value = this.value"" value=""0""><br>
+</td><td>
+<label for=""fkm"">Kilometers allowance</label><input type=""text"" id=""fkmvalue"" name=""km"" size=""4"" value=""20""><br>
+<input type=""range"" style=""width:100%;"" id=""fkm""  min=""0"" max=""50"" step=""5"" oninput=""document.getElementById('fkmvalue').value = this.value"" value=""20"">
+</td></tr>
+
+<tr><td colspan=""2"">
+</td><td>
+<input type=""reset"" value=""Reset"">
+</td><td>
+<input type=""submit"" value=""Submit"">
+</td></tr>
+
+</form>
+
+</ul>
+";
+
+        return Results.Content(html, "text/html");
+    });
 
     var admin = app1.MapGroup("/admin");
+
+    admin.MapGet("/vacancies", ([FromServices] ISalesRepository sales) =>
+    {
+        var ret =  sales.Vacancies
+            .ToArray();
+
+        return ret;
+    });
 
     var employees = admin.MapGroup("/employees");
     var hotels = admin.MapGroup("/hotels");
@@ -169,16 +253,16 @@ void SetupRoutes(WebApplication app1)
     booking.MapGet("/", (
             [FromQuery(Name = "arrival")] DateTime arrivalDate,
             [FromQuery(Name = "departure")] DateTime departureDate,
-            [FromQuery(Name = "person")] int personCount,
+            [FromQuery(Name = "persons")] int personCount,
             [FromQuery(Name = "approx")] bool? approximateNameMatch,
             [FromQuery(Name = "hotel")] string? hotelName,
             [FromQuery(Name = "country")] string? countryCode,
             [FromQuery(Name = "city")] string? cityName,
-            [FromQuery(Name = "lat")] double? latitude,
-            [FromQuery(Name = "lon")] double? longitude,
-            [FromQuery(Name = "km")] int? maxKm,
-            [FromQuery(Name = "pricemin")] double? priceMin,
-            [FromQuery(Name = "pricemax")] double? priceMax,
+            [FromQuery(Name = "lat")] NullableDouble latitude,
+            [FromQuery(Name = "lon")] NullableDouble longitude,
+            [FromQuery(Name = "km")] NullableInt maxKm,
+            [FromQuery(Name = "pricemin")] NullableInt priceMin,
+            [FromQuery(Name = "pricemax")] NullableInt priceMax,
             [FromQuery(Name = "currency")] string? currency,
             int? page, int? pageSize,
             [FromServices] SalesQueryService sales)
@@ -186,12 +270,50 @@ void SetupRoutes(WebApplication app1)
             .Find(new StayRequest(
                 arrivalDate, departureDate, personCount,
                 approximateNameMatch, hotelName, countryCode, cityName,
-                latitude, longitude, maxKm,
-                priceMin, priceMax, currency
+                latitude.Value, longitude.Value, maxKm.Value,
+                priceMin.Value, priceMax.Value, currency
             ))
             .Page($"/booking", page, pageSize));
+
 }
 
 /*
                                                                              ╎
 -----------------------------------------------------------------------------╯*/
+
+
+//
+//
+// public class DateRange : IParsable<DateRange>
+// {
+//     public DateOnly? From { get; init; }
+//     public DateOnly? To { get; init; }
+//
+//     public static DateRange Parse(string value, IFormatProvider? provider)
+//     {
+//         if (!TryParse(value, provider, out var result))
+//         {
+//             throw new ArgumentException("Could not parse supplied value.", nameof(value));
+//         }
+//
+//         return result;
+//     }
+//
+//     public static bool TryParse(string? value,
+//         IFormatProvider? provider, out DateRange dateRange)
+//     {
+//         var segments = value?.Split(',', StringSplitOptions.RemoveEmptyEntries
+//                                          | StringSplitOptions.TrimEntries);
+//
+//         if (segments?.Length == 2
+//             && DateOnly.TryParse(segments[0], provider, out var fromDate)
+//             && DateOnly.TryParse(segments[1], provider, out var toDate))
+//         {
+//             dateRange = new DateRange { From = fromDate, To = toDate };
+//             return true;
+//         }
+//
+//         dateRange = new DateRange { From = default, To = default };
+//         return false;
+//     }
+// }

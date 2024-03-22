@@ -77,7 +77,7 @@ public class SalesQueryService
 
         var vacancies = 
             
-            from vacancy in sales.Stock
+            from vacancy in sales.Vacancies
             
             where vacancy.PersonMaxCount >= request.PersonCount &&
                   
@@ -175,7 +175,7 @@ public class SalesQueryService
 
         var nightsCount = firstNight.To(lastNight);
 
-        var stillAvailable = sales.Stock
+        var stillAvailable = sales.Vacancies
 
             .Where(room =>
 

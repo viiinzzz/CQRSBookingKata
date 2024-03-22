@@ -150,7 +150,7 @@ public class SalesRepository(IDbContextFactory factory, ITimeService DateTime) :
 
 
 
-    public IQueryable<Vacancy> Stock 
+    public IQueryable<Vacancy> Vacancies 
 
         => _sales.Stock
             .AsNoTracking();
@@ -162,7 +162,17 @@ public class SalesRepository(IDbContextFactory factory, ITimeService DateTime) :
             using var scope = !scoped ? null : new TransactionScope();
 
             var toBeAdded = _sales.Stock
-                .AsNoTracking()
+
+
+
+                //TODO
+                //investigate: Cannot use multiple context instances within a single query execution. Ensure the query uses a single context instance
+                //temp fix!!! means load all data into memory.... not really wished
+                .ToList()
+
+
+
+                // .AsNoTracking()
                 .Where(match => vacancies
                     .All(vacancy => vacancy.VacancyId != match.VacancyId))
                 .ToArray();
@@ -196,7 +206,7 @@ public class SalesRepository(IDbContextFactory factory, ITimeService DateTime) :
             using var scope = !scoped ? null : new TransactionScope();
 
             var toBeRemoved = _sales.Stock
-                .AsNoTracking()
+                // .AsNoTracking()
                 .Where(match => vacancyIds
                     .Contains(match.VacancyId))
                 .ToArray();

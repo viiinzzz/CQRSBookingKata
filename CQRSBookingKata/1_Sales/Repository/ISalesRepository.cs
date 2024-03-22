@@ -9,7 +9,7 @@ public interface ISalesRepository
     void DisableCustomer(int customerId, bool disable, bool scoped);
 
 
-    IQueryable<Vacancy> Stock { get; }
+    IQueryable<Vacancy> Vacancies { get; }
     void AddVacancies(IEnumerable<Vacancy> vacancies, bool scoped);
     void RemoveVacancies(IEnumerable<long> vacancyIds, bool scoped);
     void AddStayProposition(StayProposition proposition);
