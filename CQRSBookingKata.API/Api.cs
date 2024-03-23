@@ -78,14 +78,15 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
     services.AddScoped<PlanningQueryService>();
     services.AddScoped<PkiQueryService>();
 
-
+    //demo
+    services.AddSingleton<DemoContext>();
+    services.AddScoped<DemoService>();
+    services.AddHostedService<DemoHostService>();
     services.Configure<HostOptions>(options =>
     {
         options.ServicesStartConcurrently = true;
         options.ServicesStopConcurrently = true;
     });
-    services.AddSingleton<DemoService>();
-    services.AddHostedService<DemoHostService>();
 }
 /*
                                                                              ╎
@@ -131,12 +132,15 @@ void MapRoutes(WebApplication app)
 
     var demo = app.MapGroup("/demo");
 
-    demo.MapGet("/forward", async (int days, [FromServices] DemoHostService demo, [FromServices] ITimeService DateTime) =>
-    {
-        await demo.Forward(days, CancellationToken.None);
+    demo.MapGet("/forward", async (
+        int days,
+        NullableDouble speedFactor,
+        [FromServices] DemoService demos)
+        
+        => Results.Content(
+        $"{await demos.Forward(days, speedFactor.Value, CancellationToken.None):s} (Day+{demos.SimulationDay})", 
+        "text/plain"));
 
-        return Results.Content($"{DateTime.UtcNow:s}", "text/plain");
-    });
 
     var sales = app.MapGroup("/sales");
 

@@ -1,10 +1,4 @@
 ﻿@page
-@using Microsoft.AspNetCore.Antiforgery
-@* @inject IAntiforgery antiforgery *@
-@* @inject HttpContext context *@
-@* @{ *@
-@*     var token = antiforgery.GetAndStoreTokens(context).RequestToken; *@
-@* } *@
 
 @inject PkiQueryService pki
 @inject IAdminRepository admin
@@ -14,6 +8,38 @@
 }
 
 <h1>B O O K I N G  API</h1>
+
+<h2>Demonstration Mode</h2>
+
+<b>Fake Time</b>
+<table width="100%">
+    <tbody>
+    <tr>
+        <td width="30%">
+            <form action="/demo/forward" method="GET">
+                <input type="submit" value="Day+1">
+                <input type="hidden" name="days" value="1">
+                <input type="hidden" name="speedFactor" value="1440">
+            </form>
+        </td>
+        <td width="30%">
+            <form action="/demo/forward" method="GET">
+                <input type="submit" value="Day+7">
+                <input type="hidden" name="days" value="7">
+                <input type="hidden" name="speedFactor" value="10080">
+            </form>
+        </td>
+        <td width="30%">
+            <form action="/demo/forward" method="GET">
+                <input type="submit" value="Day+30">
+                <input type="hidden" name="days" value="30">
+                <input type="hidden" name="speedFactor" value="43200">
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
 
 <h2>Administration</h2>
 <ul>
@@ -68,28 +94,3 @@
     <li><a href="/sales/search">Find a Stay</a></li>
 </ul>
 
-<h2>Demonstration Mode</h2>
-
-<b>Fake Time</b>
-<table width="100%">
-    <tbody>
-        <tr>
-            <td width="30%">
-                <form action="/demo/forward" method="GET">
-                    <input type="submit" value="Day+1"><input type="hidden" name="days" value="1">
-                    @* @token *@
-                </form>
-            </td>
-            <td width="30%">
-                <form action="/demo/forward" method="GET">
-                    <input type="submit" value="Day+7"><input type="hidden" name="days" value="7">
-                </form>
-            </td>
-            <td width="30%">
-                <form action="/demo/forward" method="GET">
-                    <input type="submit" value="Day+30"><input type="hidden" name="days" value="30">
-                </form>
-            </td>
-        </tr>
-    </tbody>
-</table>

@@ -8,9 +8,9 @@ public partial class DemoService
         {
             using var scope = !scoped ? null : new TransactionScope();
 
-            foreach (var hotelId in fakeHotelsIds)
+            foreach (var hotelId in demo.FakeHotelsIds)
             {
-                _booking.OpenHotelSeason(
+                booking.OpenHotelSeason(
                     hotelId, default,
                     DateTime.UtcNow, DateTime.UtcNow.AddDays(SeasonDayNumbers), scoped: false);
             }

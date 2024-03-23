@@ -2,12 +2,13 @@ namespace CQRSBookingKata.API.Demo;
 
 public partial class DemoService
 (
-    IAdminRepository _admin,
-    IMoneyRepository _money,
-    ISalesRepository _sales,
+    DemoContext demo,
+    IAdminRepository admin,
+    IMoneyRepository money,
+    ISalesRepository sales,
 
-    SalesQueryService _sales2,
-    BookingCommandService _booking,
+    SalesQueryService sales2,
+    BookingCommandService booking,
 
     ITimeService DateTime
 )
@@ -29,7 +30,7 @@ public partial class DemoService
         {
             DateTime.Freeze();
 
-            var context = new TransactionContext() * _admin * _money * _sales;
+            var context = new TransactionContext() * admin * money * sales;
 
             context.Execute(() => Fake_Employees(false));
             context.Execute(() => Fake_Hotels(false));
@@ -53,23 +54,35 @@ ERROR: {ex}";
         }
     }
 
-    public async Task Forward(int days, CancellationToken cancel)
+    public int SimulationDay => demo.SimulationDay;
+
+    private const int DayMilliseconds = 24 * 60 * 1000;
+    public const double SpeedFactorOneDayOneMinute = 24 * 60;
+    public async Task<DateTime> Forward(int days, double? speedFactor, CancellationToken cancellationToken)
     {
         try
         {
-            DateTime.Freeze();
+            var context = new TransactionContext() * admin * money * sales;
 
-            var context = new TransactionContext() * _admin * _money * _sales;
-
-            for (var d = 0; d < /*SeasonDayNumbers*/days; d++)
+            for (var d = 0; d < days; d++)
             {
+                var milliseconds = (int)(DayMilliseconds / (speedFactor ?? SpeedFactorOneDayOneMinute));
+                if (milliseconds < 1000) milliseconds = 1000;
+
+                await Task.Delay(milliseconds, cancellationToken);
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                DateTime.Forward(TimeSpan.FromDays(1));
+                demo.SimulationDay++;
+
                 context.Execute(() => Fake_BookingDay(false));
+
+                if (days == SeasonDayNumbers)
+                {
+                    break;
+                }
             }
-
-            DateTime.Unfreeze();
-
-
-            cancel.ThrowIfCancellationRequested();
         }
         catch (Exception ex)
         {
@@ -80,5 +93,7 @@ ERROR: {ex}";
 
             Console.Error.WriteLine(message);
         }
+
+        return DateTime.UtcNow;
     }
 }

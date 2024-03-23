@@ -2,8 +2,6 @@ namespace CQRSBookingKata.API.Demo;
 
 public partial class DemoService
 {
-    public int[] fakeCustomerIds { get; private set; }
-    public Dictionary<int, RandomHelper.FakeCustomer> fakeCustomers = new();
 
     private void Fake_Customers(bool scoped)
     {
@@ -11,13 +9,13 @@ public partial class DemoService
         {
             using var scope = !scoped ? null : new TransactionScope();
 
-            fakeCustomerIds = RandomHelper
+            demo.FakeCustomerIds = RandomHelper
                 .GenerateFakeCustomers(CustomerCount)
                 .Select(fake =>
                 {
-                    var customerId = _sales.CreateCustomer(fake.EmailAddress, scoped: false);
+                    var customerId = sales.CreateCustomer(fake.EmailAddress, scoped: false);
 
-                    fakeCustomers[customerId] = fake;
+                    demo.FakeCustomers[customerId] = fake;
 
                     return customerId;
                 })

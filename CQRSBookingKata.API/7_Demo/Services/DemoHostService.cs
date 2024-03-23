@@ -14,7 +14,7 @@ public partial class DemoHostService : IHostedLifecycleService
 
     protected async Task Execute(CancellationToken cancel) => await _demo.Execute(cancel);
     
-    public async Task Forward(int days, CancellationToken cancel) => _demo.Forward(days, cancel);
+    // public async Task<DateTime> Forward(int days, double? speedFactor, CancellationToken cancel) => await _demo.Forward(days, speedFactor, cancel);
 
 
     private Task _executeTask = Task.CompletedTask;

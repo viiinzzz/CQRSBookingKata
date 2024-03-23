@@ -14,7 +14,7 @@ public class TimeService : ITimeService
 
         _dt = time - utcNow;
 
-        if (_freeze.HasValue) _freeze = utcNow;
+        if (_freeze.HasValue) _freeze = utcNow + _dt;
 
         Log("set");
         return this;

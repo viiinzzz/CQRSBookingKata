@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Mvc;
+/*
+ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace CQRSBookingKata.API.Pages.Sales
@@ -10,3 +11,4 @@ namespace CQRSBookingKata.API.Pages.Sales
         }
     }
 }
+*/

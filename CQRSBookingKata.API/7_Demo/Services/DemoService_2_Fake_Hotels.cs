@@ -2,21 +2,19 @@ namespace CQRSBookingKata.API.Demo;
 
 public partial class DemoService
 {
-    public int[] fakeHotelsIds { get; private set; }
-
     private void Fake_Hotels(bool scoped)
     {
         try
         {
             using var scope = !scoped ? null : new TransactionScope();
 
-            fakeHotelsIds = RandomHelper
+            demo.FakeHotelsIds = RandomHelper
                 .GenerateFakeHotels(3)
                 .Select((fake, hotelNum) =>
                 {
-                    var managerId = fakeManagerIds[hotelNum];
-                    var hotelId = _admin.Create(new NewHotel(fake.HotelName, fake.Latitude, fake.Longitude));
-                    _admin.Update(hotelId, new UpdateHotel
+                    var managerId = demo.FakeManagerIds[hotelNum];
+                    var hotelId = admin.Create(new NewHotel(fake.HotelName, fake.Latitude, fake.Longitude));
+                    admin.Update(hotelId, new UpdateHotel
                     {
                         EarliestCheckInTime = 16_00,
                         LatestCheckOutTime = 10_00,
@@ -30,7 +28,7 @@ public partial class DemoService
 
                     for (var floorNum = 0; floorNum < FloorPerHotel; floorNum++)
                     {
-                        _admin.Create(new NewRooms(hotelId, floorNum, RoomPerFloor, PersonPerRoom), scoped: false);
+                        admin.Create(new NewRooms(hotelId, floorNum, RoomPerFloor, PersonPerRoom), scoped: false);
                     }
 
                     return hotelId;
