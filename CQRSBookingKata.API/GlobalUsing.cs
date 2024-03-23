@@ -12,7 +12,7 @@ global using Zejji.Entity;
 // global using AspectInjector.Broker;
 
 
-global using CQRSBookingKata.Assets;
+global using CQRSBookingKata.Admin;
 global using CQRSBookingKata.Billing;
 global using CQRSBookingKata.Planning;
 global using CQRSBookingKata.Sales;
@@ -25,3 +25,5 @@ global using CQRSBookingKata.API.Demo;
 
 global using Vinz.FakeTime;
 global using Vinz.MessageQueue;
+
+global using System.Web;

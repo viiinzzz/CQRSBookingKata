@@ -1,4 +1,6 @@
 
+using System.Text;
+
 namespace CQRSBookingKata.Common;
 
 public static class RandomHelper
@@ -74,24 +76,30 @@ public static class RandomHelper
 
 
     private static readonly Random random = new();
+    public static int Rand(int max) => random.Next(max);
+    public static long Rand(long max) => random.NextInt64(max);
+    public static double Rand(double max) => random.NextDouble() * max;
 
     public record FakeCustomer(
+        string EmailAddress,
         string LastName,
         string FirstName,
         long DebitCardNumber,
-        string DebitCardOwnerName,
-        int Expire,
-        int CCV
+        DebitCardSecrets DebitCardSecrets
         );
 
+    private static Regex NonAlphanumDash = new ("[^a-zA-Z0-9-]");
     public static FakeCustomer[] GenerateFakeCustomers(int count)
     {
+        var norm = (string name) => NonAlphanumDash.Replace(name.Normalize(NormalizationForm.FormD), "_");
+
         return Enumerable.Range(1, count)
 
             .Select(i =>
             {
                 var lastName = LastNames[random.Next(LastNames.Length)];
                 var firstName = LastNames[random.Next(LastNames.Length)];
+                var emailAddress = $"{norm(firstName)}.{norm(lastName)}@mail.box";
                 var debitCardNumber = random.NextInt64(1_0000_0000_0000_0000);
                 var debitCardOwnerName = $"MX {lastName} {firstName}".ToUpper();
                 var expireMonth = random.Next(12) + 1;
@@ -99,10 +107,9 @@ public static class RandomHelper
                 var expire = expireMonth * 1_00 + expireYear;
                 var ccv = random.Next(1_000);
 
-                return new FakeCustomer(
-                    lastName, firstName,
-                    debitCardNumber, debitCardOwnerName,
-                    expire, ccv);
+                var secrets = new DebitCardSecrets(debitCardOwnerName, expire, ccv);
+
+                return new FakeCustomer(emailAddress, lastName, firstName, debitCardNumber, secrets);
             })
 
             .ToArray();

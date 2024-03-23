@@ -24,7 +24,7 @@ public record PageResult<TEntity>(
 
 public static class ApiHelper
 {
-    private static readonly Regex SpaceRx = new Regex(@"\s+", RegexOptions.Multiline);
+    private static readonly Regex SpaceRx = new(@"\s+", RegexOptions.Multiline);
 
     private static readonly int DefaultPageSize = 40;
 

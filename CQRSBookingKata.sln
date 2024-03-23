@@ -3,19 +3,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34616.47
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CQRSBookingKata", "CQRSBookingKata\CQRSBookingKata.csproj", "{5E9C5C2B-8976-4BA9-BF8D-7C8BFD52006D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "1_Booking.Business", "CQRSBookingKata.Business\1_Booking.Business.csproj", "{5E9C5C2B-8976-4BA9-BF8D-7C8BFD52006D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CQRSBookingKata.API", "CQRSBookingKata.API\CQRSBookingKata.API.csproj", "{2DC1A390-34BE-4A2B-9AAB-1CF3C4D383B4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "2_Booking.API", "CQRSBookingKata.API\2_Booking.API.csproj", "{2DC1A390-34BE-4A2B-9AAB-1CF3C4D383B4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CQRSBookingKata.Tests", "CQRSBookingKata.Tests\CQRSBookingKata.Tests.csproj", "{D4D95339-4425-4715-B978-42684F6C1B48}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "9_Booking.Tests", "CQRSBookingKata.Tests\9_Booking.Tests.csproj", "{D4D95339-4425-4715-B978-42684F6C1B48}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageQueue", "MessageQueue\MessageQueue.csproj", "{4E9989DB-0AB8-4036-ABE4-852C8B91530F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessageQueue", "MessageQueue\MessageQueue.csproj", "{4E9989DB-0AB8-4036-ABE4-852C8B91530F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageQueue.Contracts", "MessageQueue.Contracts\MessageQueue.Contracts.csproj", "{290995D1-BBBB-42C5-9310-9BA79C29A333}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessageQueue.Contracts", "MessageQueue.Contracts\MessageQueue.Contracts.csproj", "{290995D1-BBBB-42C5-9310-9BA79C29A333}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FakeTime", "FakeTime\FakeTime.csproj", "{A9FFC471-B525-402E-8965-65835FFC1EC1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FakeTime", "FakeTime\FakeTime.csproj", "{A9FFC471-B525-402E-8965-65835FFC1EC1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FakeTime.Contracts", "FakeTime.Contracts\FakeTime.Contracts.csproj", "{25A73BEF-D025-4A10-8DF5-896057D16789}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FakeTime.Contracts", "FakeTime.Contracts\FakeTime.Contracts.csproj", "{25A73BEF-D025-4A10-8DF5-896057D16789}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Z_VinZ.Common", "Z_VinZ.Common", "{A621E367-C479-4911-A23D-FD879A3277A2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "A_Booking", "A_Booking", "{1B6C735A-8887-4B74-86E8-88999D61D72A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -54,6 +58,15 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5E9C5C2B-8976-4BA9-BF8D-7C8BFD52006D} = {1B6C735A-8887-4B74-86E8-88999D61D72A}
+		{2DC1A390-34BE-4A2B-9AAB-1CF3C4D383B4} = {1B6C735A-8887-4B74-86E8-88999D61D72A}
+		{D4D95339-4425-4715-B978-42684F6C1B48} = {1B6C735A-8887-4B74-86E8-88999D61D72A}
+		{4E9989DB-0AB8-4036-ABE4-852C8B91530F} = {A621E367-C479-4911-A23D-FD879A3277A2}
+		{290995D1-BBBB-42C5-9310-9BA79C29A333} = {A621E367-C479-4911-A23D-FD879A3277A2}
+		{A9FFC471-B525-402E-8965-65835FFC1EC1} = {A621E367-C479-4911-A23D-FD879A3277A2}
+		{25A73BEF-D025-4A10-8DF5-896057D16789} = {A621E367-C479-4911-A23D-FD879A3277A2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {590111C3-57D0-485D-BF05-544FE98D0519}

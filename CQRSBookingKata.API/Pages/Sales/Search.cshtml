@@ -1,0 +1,92 @@
+﻿@page
+@using Vinz.FakeTime
+@inject ITimeService DateTime
+@{
+}
+
+
+<h1>B O O K I N G  API</h1>
+
+<h2>Sales</h2>
+
+<form action="/booking">
+    <b>Find a Stay</b>
+    <table width="100%">
+        <tbody>
+
+            <tr>
+                <td>
+                    <label for="farrival">Arrival Date</label><br>
+                    <input type="date" id="farrival" name="arrival" value="@($"{DateTime.UtcNow:yyyy-MM-dd}")" required>
+                </td>
+                <td>
+                    <label for="fdeparture">Departure Date</label><br>
+                    <input type="date" id="fdeparture" name="departure" value="@($"{DateTime.UtcNow.AddDays(1):yyyy-MM-dd}")" required>
+                </td>
+                <td>
+                    <label for="fpersons">Persons</label><br>
+                    <input type="number" id="fpersons" name="persons" min="1" max="9" value="1" minlength="1" maxlength="1" size="4" required>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <label for="fcountry">Country Code</label>/<label for="fcity">City Name</label><br>
+                    <input type="text" id="fcountry" name="country" minlength="2" maxlength="2" size="2" required value="FR">&nbsp;
+                    <input type="text" id="fcity" name="city" value="Paris">
+                </td>
+                <td>
+                    <input type="checkbox" id="fapprox" name="approx">
+                    <label for="fapprox">Approximate Names</label>
+                </td>
+                <td>
+                    <label for="fhotel">Hotel Name</label><br>
+                    <input type="text" id="fhotel" name="hotel">
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="2">
+                    <label for="flat">Latitude</label>/<label for="flon">Longitude</label>&nbsp;
+                    <input type="text" id="flat" name="lat" size="10">/
+                    <input type="text" id="flon" name="lon" size="10">
+                </td>
+                <td>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="2">
+                    Price/Currency<br>
+                    <label for="fpricemax">Maximum</label>&nbsp;
+                    <input type="text" id="fpricemaxvalue" name="pricemax" value="1000">&nbsp;
+                    <input type="text" id="fcurrency" name="currency" minlength="3" maxlength="3" size="3" value="EUR"><br>
+                    <input type="range" style="width:100%;" id="fpricemax" min="0" max="1000" step="50" oninput="document.getElementById('fpricemaxvalue').value=this.value" value="1000">
+                </td>
+                <td>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="2">
+                    <label for="fpricemin">Minimum</label>&nbsp;<input type="text" id="fpriceminvalue" name="pricemin" value="0"><br>
+                    <input type="range" style="width:100%;" id="fpricemin" min="0" max="1000" step="50" oninput="document.getElementById('fpriceminvalue').value=this.value" value="0"><br>
+                </td>
+                <td>
+                    <label for="fkm">Kilometers allowance</label><input type="text" id="fkmvalue" name="km" size="4" value="20"><br>
+                    <input type="range" style="width:100%;" id="fkm" min="0" max="50" step="5" oninput="document.getElementById('fkmvalue').value=this.value" value="20">
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="2">
+                </td>
+                <td>
+                    <input type="reset" value="Reset">
+                </td>
+                <td>
+                    <input type="submit" value="Submit">
+                </td>
+            </tr>
+    </table>
+</form>

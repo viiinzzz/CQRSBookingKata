@@ -3,7 +3,7 @@ namespace CQRSBookingKata.API;
 
 public class BookingSalesContext : DbContext
 {
-    public DbSet<Vacancy> Stock { get; set; }
+    public DbSet<Vacancy> Vacancies { get; set; }
     public DbSet<StayProposition> Propositions { get; set; }
     public DbSet<Customer> Customers { get; set; }
 

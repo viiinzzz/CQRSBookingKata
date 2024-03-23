@@ -1,0 +1,95 @@
+﻿@page
+@using Microsoft.AspNetCore.Antiforgery
+@* @inject IAntiforgery antiforgery *@
+@* @inject HttpContext context *@
+@* @{ *@
+@*     var token = antiforgery.GetAndStoreTokens(context).RequestToken; *@
+@* } *@
+
+@inject PkiQueryService pki
+@inject IAdminRepository admin
+
+@{
+    Layout = "_Layout";
+}
+
+<h1>B O O K I N G  API</h1>
+
+<h2>Administration</h2>
+<ul>
+    <li><a href="/admin/employees">List of Employees</a></li>
+    <li><a href="/admin/hotels">List of Hotels</a></li>
+    <li><a href="/admin/vacancies">List of Vacancies</a></li>
+    <li><a href="/admin/bookings">List of Bookings</a></li>
+    <br>
+    <br>
+    <li>
+        Key Performance Indicators
+        <ul>
+            @foreach (var hotel in admin.Hotels)
+            {
+                <li>
+                    <a href="/admin/hotels/@hotel.HotelId/kpi">@hotel.HotelName</a>
+                </li>
+            }
+        </ul>
+    </li>
+</ul>
+<h2>Planning</h2>
+<ul>
+    <li>
+        Reception Planning
+        <ul>
+            @foreach (var hotel in admin.Hotels)
+            {
+                <li>
+                    <a href="/reception/hotels/@hotel.HotelId">@hotel.HotelName</a>
+                </li>
+            }
+        </ul>
+    </li>
+    <br>
+    <li>
+        Room Service Planning
+        <ul>
+            @foreach (var hotel in admin.Hotels)
+            {
+                <li>
+                    <a href="/service/room/hotels/@hotel.HotelId">@hotel.HotelName</a>
+                </li>
+            }
+        </ul>
+    </li>
+
+</ul>
+
+<h2>Sales</h2>
+<ul>
+    <li><a href="/sales/search">Find a Stay</a></li>
+</ul>
+
+<h2>Demonstration Mode</h2>
+
+<b>Fake Time</b>
+<table width="100%">
+    <tbody>
+        <tr>
+            <td width="30%">
+                <form action="/demo/forward" method="GET">
+                    <input type="submit" value="Day+1"><input type="hidden" name="days" value="1">
+                    @* @token *@
+                </form>
+            </td>
+            <td width="30%">
+                <form action="/demo/forward" method="GET">
+                    <input type="submit" value="Day+7"><input type="hidden" name="days" value="7">
+                </form>
+            </td>
+            <td width="30%">
+                <form action="/demo/forward" method="GET">
+                    <input type="submit" value="Day+30"><input type="hidden" name="days" value="30">
+                </form>
+            </td>
+        </tr>
+    </tbody>
+</table>

@@ -152,37 +152,32 @@ public class SalesRepository(IDbContextFactory factory, ITimeService DateTime) :
 
     public IQueryable<Vacancy> Vacancies 
 
-        => _sales.Stock
+        => _sales.Vacancies
+            .Where(vacancy => !vacancy.Cancelled)
             .AsNoTracking();
 
-    public void AddVacancies(IEnumerable<Vacancy> vacancies, bool scoped)
+    public void AddVacancies(IEnumerable<Vacancy> newVacancies, bool scoped)
     {
         try
         {
             using var scope = !scoped ? null : new TransactionScope();
 
-            var toBeAdded = _sales.Stock
-
-
-
-                //TODO
-                //investigate: Cannot use multiple context instances within a single query execution. Ensure the query uses a single context instance
-                //temp fix!!! means load all data into memory.... not really wished
-                .ToList()
-
-
-
-                // .AsNoTracking()
-                .Where(match => vacancies
-                    .All(vacancy => vacancy.VacancyId != match.VacancyId))
-                .ToArray();
+            var toBeAdded = 
+                
+                from newVacancy in newVacancies
+                //left outer join
+                join curVacancy in _sales.Vacancies  
+                    on newVacancy.VacancyId equals curVacancy.VacancyId into alreadyExist
+                from already in alreadyExist.DefaultIfEmpty()
+                where already is null
+                select newVacancy;
 
             if (!toBeAdded.Any())
             {
                 return;
             }
 
-            _sales.Stock.AddRange(toBeAdded);
+            _sales.Vacancies.AddRange(toBeAdded);
 
             foreach (var vacancy in toBeAdded)
             {
@@ -205,7 +200,7 @@ public class SalesRepository(IDbContextFactory factory, ITimeService DateTime) :
         {
             using var scope = !scoped ? null : new TransactionScope();
 
-            var toBeRemoved = _sales.Stock
+            var toBeRemoved = _sales.Vacancies
                 // .AsNoTracking()
                 .Where(match => vacancyIds
                     .Contains(match.VacancyId))
@@ -216,7 +211,7 @@ public class SalesRepository(IDbContextFactory factory, ITimeService DateTime) :
                 return;
             }
 
-            _sales.Stock.RemoveRange(toBeRemoved);
+            _sales.Vacancies.RemoveRange(toBeRemoved);
 
             foreach (var vacancy in toBeRemoved)
             {

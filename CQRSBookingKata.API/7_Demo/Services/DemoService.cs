@@ -1,84 +1,17 @@
-
-
 namespace CQRSBookingKata.API.Demo;
 
-public class DemoService : IHostedLifecycleService
+public partial class DemoService
+(
+    IAdminRepository _admin,
+    IMoneyRepository _money,
+    ISalesRepository _sales,
+
+    SalesQueryService _sales2,
+    BookingCommandService _booking,
+
+    ITimeService DateTime
+)
 {
-    private readonly IAdminRepository _admin;
-    private readonly IMoneyRepository _money;
-    private readonly ISalesRepository _sales;
-    private readonly BookingCommandService _booking;
-
-    private readonly ITimeService DateTime;
-
-    public DemoService(IServiceProvider sp)
-    {
-        using var scope = sp.CreateScope();
-
-        _admin = scope.ServiceProvider.GetRequiredService<IAdminRepository>();
-        _money = scope.ServiceProvider.GetRequiredService<IMoneyRepository>();
-        
-        _booking = scope.ServiceProvider.GetRequiredService<BookingCommandService>();
-
-        DateTime = scope.ServiceProvider.GetRequiredService<ITimeService>();
-    }
-
-    private Task _executeTask = Task.CompletedTask;
-    private CancellationTokenSource _executeCancel = new();
-
-    public async Task StartAsync(CancellationToken cancellationToken)
-    {
-        _executeTask = Execute(_executeCancel.Token);
-    }
-
-    public async Task StartingAsync(CancellationToken cancellationToken) {}
-
-    public async Task StartedAsync(CancellationToken cancellationToken) { }
-
-    protected async Task Execute(CancellationToken cancel)
-    {
-        try
-        {
-            DateTime.Freeze();
-
-            var context = new TransactionContext() * _admin * _money * _sales;
-            
-            context.Execute(() => Fake_Employees(false));
-            context.Execute(() => Fake_Hotels(false));
-            context.Execute(() => Fake_Vacancies(false));
-            
-            DateTime.Unfreeze();
-
-
-            cancel.ThrowIfCancellationRequested();
-        }
-        catch (Exception ex)
-        {
-            var message = @$"
-Demo aborted!
-
-ERROR: {ex}";
-
-            Console.Error.WriteLine(message);
-        }
-    }
-
-    public async Task StopAsync(CancellationToken cancellationToken)
-    {
-        _executeCancel.Cancel();
-
-        await Task.WhenAny(_executeTask, Task.Delay(Timeout.Infinite, cancellationToken));
-    }
-
-    public async Task StoppingAsync(CancellationToken cancellationToken) { }
-
-    public async Task StoppedAsync(CancellationToken cancellationToken) { }
-
-
-
-
-
-
     private const int StaffPerHotel = 3;
     private const int ManagerPerHotel = 1;
     private const int HotelCount = 3;
@@ -87,109 +20,65 @@ ERROR: {ex}";
     private const int PersonPerRoom = 2;
 
     private const int SeasonDayNumbers = 250;
+    private const int CustomerCount = 1000;
 
 
-    public int[] fakeStaffIds { get; private set; }
-    public int[] fakeManagerIds { get; private set; }
-    public int[] fakeHotelsIds { get; private set; }
-
-    private void Fake_Employees(bool scoped)
+    public async Task Execute(CancellationToken cancel)
     {
         try
         {
-            using var scope = !scoped ? null : new TransactionScope();
+            DateTime.Freeze();
 
-            fakeStaffIds = RandomHelper
-                .GenerateFakeEmployees(HotelCount * StaffPerHotel)
-                .Select(fake =>
-                {
-                    var employeeId = _admin.Create(new NewEmployee(fake.LastName, fake.FirstName, fake.SocialSecurityNumber));
-                    var payrollId = _money.Enroll(employeeId, fake.MonthlyIncome, fake.Currency);
+            var context = new TransactionContext() * _admin * _money * _sales;
 
-                    return employeeId;
-                })
-                .ToArray();
-            
-            fakeManagerIds = RandomHelper
-                .GenerateFakeEmployees(HotelCount * ManagerPerHotel)
-                .Select(fake =>
-                {
-                    var employeeId = _admin.Create(new NewEmployee(fake.LastName, fake.FirstName, fake.SocialSecurityNumber));
-                    var payrollId = _money.Enroll(employeeId, fake.MonthlyIncome, fake.Currency);
+            context.Execute(() => Fake_Employees(false));
+            context.Execute(() => Fake_Hotels(false));
+            context.Execute(() => Fake_Vacancies(false));
+            context.Execute(() => Fake_Customers(false));
 
-                    return employeeId;
-                })
-                .ToArray();
 
-            scope?.Complete();
+            // DateTime.Unfreeze();
+
+
+            cancel.ThrowIfCancellationRequested();
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            throw new TransactionException($"transaction '{nameof(Fake_Employees)}' failed", e);
+            var message = @$"
+Demo Seed aborted!
+
+ERROR: {ex}";
+
+            Console.Error.WriteLine(message);
         }
     }
 
-    private void Fake_Hotels(bool scoped)
+    public async Task Forward(int days, CancellationToken cancel)
     {
         try
         {
-            using var scope = !scoped ? null : new TransactionScope();
+            DateTime.Freeze();
 
-            fakeHotelsIds = RandomHelper
-                .GenerateFakeHotels(3)
-                .Select((fake, hotelNum) =>
-                {
-                    var managerId = fakeManagerIds[hotelNum];
-                    var hotelId = _admin.Create(new NewHotel(fake.HotelName, fake.Latitude, fake.Longitude));
-                    _admin.Update(hotelId, new UpdateHotel
-                    {
-                        EarliestCheckInTime = 16_00,
-                        LatestCheckOutTime = 10_00,
-                        LocationAddress = fake.LocationAddress,
-                        ReceptionPhoneNumber = fake.ReceptionTelephoneNumber,
-                        Url = fake.Url,
-                        Ranking = fake.ranking,
-                        ManagerId = managerId,
-                    }, scoped: false);
+            var context = new TransactionContext() * _admin * _money * _sales;
 
-
-                    for (var floorNum = 0; floorNum < FloorPerHotel; floorNum++)
-                    {
-                        _admin.Create(new NewRooms(hotelId, floorNum, RoomPerFloor, PersonPerRoom), scoped: false);
-                    }
-
-                    return hotelId;
-                })
-                .ToArray();
-
-            scope?.Complete();
-        }
-        catch (Exception e)
-        {
-            throw new TransactionException($"transaction '{nameof(Fake_Hotels)}' failed", e);
-        }
-    }
-
-    private void Fake_Vacancies(bool scoped)
-    {
-        try
-        {
-            using var scope = !scoped ? null : new TransactionScope();
-
-            foreach(var hotelId in fakeHotelsIds)
+            for (var d = 0; d < /*SeasonDayNumbers*/days; d++)
             {
-
-                _booking.OpenHotelSeason(
-                    hotelId, default, 
-                    DateTime.UtcNow, DateTime.UtcNow.AddDays(SeasonDayNumbers), scoped: false);
+                context.Execute(() => Fake_BookingDay(false));
             }
 
-            scope?.Complete();
+            DateTime.Unfreeze();
+
+
+            cancel.ThrowIfCancellationRequested();
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            throw new TransactionException($"transaction '{nameof(Fake_Vacancies)}' failed", e);
+            var message = @$"
+Demo Forward aborted!
+
+ERROR: {ex}";
+
+            Console.Error.WriteLine(message);
         }
     }
-
 }

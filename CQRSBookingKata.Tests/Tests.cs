@@ -1,4 +1,3 @@
-using CQRSBookingKata.Sales;
 
 namespace CQRSBookingKata.Tests;
 

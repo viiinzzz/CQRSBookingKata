@@ -10,9 +10,6 @@
   ╎ Storage methods
 */
 
-using System.Collections.Immutable;
-using System.Reflection.Metadata;
-
 void RegisterDbContexts(WebApplicationBuilder webApplicationBuilder)
 {
     var dbContextFactory = new RegisteredDbContextFactory();
@@ -54,6 +51,8 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
 {
     var services = builder.Services;
 
+    services.AddRazorPages();
+
     //backend
     services.AddSingleton<MessageQueueServer>();
     services.AddSingleton<IMessageQueueServer>(sp => sp.GetRequiredService<MessageQueueServer>());
@@ -70,10 +69,14 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
     services.AddScoped<PricingQueryService>();
     services.AddSingleton<ITimeService, TimeService>();
 
+    services.AddHttpContextAccessor();
+    services.AddAntiforgery();
+    
     //business
     services.AddScoped<SalesQueryService>();
     services.AddScoped<BookingCommandService>();
     services.AddScoped<PlanningQueryService>();
+    services.AddScoped<PkiQueryService>();
 
 
     services.Configure<HostOptions>(options =>
@@ -81,7 +84,8 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
         options.ServicesStartConcurrently = true;
         options.ServicesStopConcurrently = true;
     });
-    services.AddHostedService<DemoService>();
+    services.AddSingleton<DemoService>();
+    services.AddHostedService<DemoHostService>();
 }
 /*
                                                                              ╎
@@ -92,18 +96,27 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
 var builder = WebApplication.CreateSlimBuilder(args);
 
 RegisterDbContexts(builder);
-
 ConfigureDependencyInjection(builder);
 
 
-var app = builder.Build();
+var api = builder.Build();
 
-EnsureAllDatabasesCreated(app);
+// if (api.Environment.IsDevelopment())
+// {
+    // api.UseSwagger();
+    // api.UseSwaggerUI();
+    // api.UseExceptionHandler();
+// }
 
-SetupRoutes(app);
+api.UseStaticFiles();
 
-app.Run();
+EnsureAllDatabasesCreated(api);
+MapRoutes(api);
 
+api.MapRazorPages();
+api.UseAntiforgery();
+
+api.Run();
 return;
 
 
@@ -112,103 +125,37 @@ return;
   ╎ Routes
 */
 
-void SetupRoutes(WebApplication app1)
+void MapRoutes(WebApplication app)
 {
-    var root = app1.MapGet("/", () =>
+
+
+    var demo = app.MapGroup("/demo");
+
+    demo.MapGet("/forward", async (int days, [FromServices] DemoHostService demo, [FromServices] ITimeService DateTime) =>
     {
-        var links = new[]
-        {
-            // new { group = "Hotel Administration", url = "/admin" },
-            new { group = "List of Employees", url = "/admin/employees" },
-            new { group = "List of Hotels", url = "/admin/hotels" },
-            new { group = "List of Vacancies", url = "/admin/vacancies" },
-            new { group = "Reception Planning", url = "/reception" },
-            new { group = "Room Service Planning", url = "/service/room" },
-            // new { group = "Find a Stay", url = "/booking" }
-        };
+        await demo.Forward(days, CancellationToken.None);
 
-        var html = $@"
+        return Results.Content($"{DateTime.UtcNow:s}", "text/plain");
+    });
+
+    var sales = app.MapGroup("/sales");
+
+    var admin = app.MapGroup("/admin");
+
+    admin.MapGet("/hotels/{id}/kpi", (int id, [FromServices] PkiQueryService pki) =>
+    {
+        var html= @$"
 <h1>B O O K I N G  API</h1>
+<h2>Key Performance Metrics</h2>
 <ul>
-{string.Join(Environment.NewLine, links.Select(link => @$"
-<li><a href={link.url}>{link.group}</a>"))}
-
-<li>Find a Stay
-<form action=""/booking"">
-
-<table  width=""100%""><tbody>
-
-<tr><td>
-<label for=""farrival"">Arrival Date</label><br>
-<input type=""date"" id=""farrival"" name=""arrival"" value=""{DateTime.Now:yyyy-MM-dd}"" required>
-</td><td>
-<label for=""fdeparture"">Departure Date</label><br>
-<input type=""date"" id=""fdeparture"" name=""departure"" value=""{DateTime.Now.AddDays(1):yyyy-MM-dd}"" required>
-</td><td>
-<label for=""fpersons"">Persons</label><br>
-<input type=""number"" id=""fpersons"" name=""persons"" min=""1"" max=""9"" value=""1""  minlength=""1"" maxlength=""1"" size=""4"" required>
-</td></tr>
-
-<tr><td>
-<label for=""fcountry"">Country Code</label>/<label for=""fcity"">City Name</label><br>
-<input type=""text"" id=""fcountry"" name=""country"" minlength=""2"" maxlength=""2"" size=""2"" required value=""FR"" >&nbsp;
-<input type=""text"" id=""fcity"" name=""city"" value=""Paris"">
-</td><td>
-<input type=""checkbox"" id=""fapprox"" name=""approx"">
-<label for=""fapprox"">Approximate Names</label>
-</td><td>
-<label for=""fhotel"">Hotel Name</label><br>
-<input type=""text"" id=""fhotel"" name=""hotel"">
-</td></tr>
-
-<tr><td colspan=""2"">
-<label for=""flat"">Latitude</label>/<label for=""flon"">Longitude</label>&nbsp;
-<input type=""text"" id=""flat"" name=""lat"" size=""10"">/
-<input type=""text"" id=""flon"" name=""lon"" size=""10"">
-</td><td>
-</td></tr>
-
-<tr><td colspan=""2"">
-Price/Currency<br>
-<label for=""fpricemax"">Maximum</label>&nbsp;
-<input type=""text"" id=""fpricemaxvalue"" name=""pricemax"" value=""1000"">&nbsp;
-<input type=""text"" id=""fcurrency"" name=""currency""  minlength=""3"" maxlength=""3"" size=""3"" value=""EUR""><br>
-<input type=""range"" style=""width:100%;"" id=""fpricemax""  min=""0"" max=""1000"" step=""50"" oninput=""document.getElementById('fpricemaxvalue').value = this.value"" value=""1000"">
-</td><td>
-</td></tr>
-
-<tr><td colspan=""2"">
-<label for=""fpricemin"">Minimum</label>&nbsp;<input type=""text"" id=""fpriceminvalue"" name=""pricemin"" value=""0""><br>
-<input type=""range"" style=""width:100%;"" id=""fpricemin""  min=""0"" max=""1000"" step=""50"" oninput=""document.getElementById('fpriceminvalue').value = this.value"" value=""0""><br>
-</td><td>
-<label for=""fkm"">Kilometers allowance</label><input type=""text"" id=""fkmvalue"" name=""km"" size=""4"" value=""20""><br>
-<input type=""range"" style=""width:100%;"" id=""fkm""  min=""0"" max=""50"" step=""5"" oninput=""document.getElementById('fkmvalue').value = this.value"" value=""20"">
-</td></tr>
-
-<tr><td colspan=""2"">
-</td><td>
-<input type=""reset"" value=""Reset"">
-</td><td>
-<input type=""submit"" value=""Submit"">
-</td></tr>
-
-</form>
-
+<li>Occupancy Rate: {pki.GetOccupancyRate(id):P}
 </ul>
 ";
-
         return Results.Content(html, "text/html");
     });
 
-    var admin = app1.MapGroup("/admin");
-
-    admin.MapGet("/vacancies", ([FromServices] ISalesRepository sales) =>
-    {
-        var ret =  sales.Vacancies
-            .ToArray();
-
-        return ret;
-    });
+    admin.MapGet("/vacancies", ([FromServices] ISalesRepository sales) => sales.Vacancies);
+    admin.MapGet("/bookings", ([FromServices] IAdminRepository admin) => admin.Bookings);
 
     var employees = admin.MapGroup("/employees");
     var hotels = admin.MapGroup("/hotels");
@@ -236,19 +183,19 @@ Price/Currency<br>
         => assets.DisableHotel(id, disable ?? true, scoped: true));
 
 
-    var reception = app1.MapGroup("/reception");
+    var reception = app.MapGroup("/reception");
 
-    reception.MapGet("/{hotelId}", (int hotelId, int? page, int? pageSize, [FromServices] PlanningQueryService planning)
+    reception.MapGet("/hotels/{hotelId}", (int hotelId, int? page, int? pageSize, [FromServices] PlanningQueryService planning)
         => planning.GetReceptionPlanning(hotelId).Page($"/reception/{hotelId}", page, pageSize));
 
-    var service = app1.MapGroup("/service");
+    var service = app.MapGroup("/service");
     var room = service.MapGroup("/room");
 
-    room.MapGet("/{hotelId}", (int hotelId, int? page, int? pageSize, [FromServices] PlanningQueryService planning)
+    room.MapGet("/hotels/{hotelId}", (int hotelId, int? page, int? pageSize, [FromServices] PlanningQueryService planning)
         => planning.GetServiceRoomPlanning(hotelId).Page($"/service/room/{hotelId}", page, pageSize));
 
 
-    var booking = app1.MapGroup("/booking");
+    var booking = app.MapGroup("/booking");
 
     booking.MapGet("/", (
             [FromQuery(Name = "arrival")] DateTime arrivalDate,
@@ -280,40 +227,3 @@ Price/Currency<br>
 /*
                                                                              ╎
 -----------------------------------------------------------------------------╯*/
-
-
-//
-//
-// public class DateRange : IParsable<DateRange>
-// {
-//     public DateOnly? From { get; init; }
-//     public DateOnly? To { get; init; }
-//
-//     public static DateRange Parse(string value, IFormatProvider? provider)
-//     {
-//         if (!TryParse(value, provider, out var result))
-//         {
-//             throw new ArgumentException("Could not parse supplied value.", nameof(value));
-//         }
-//
-//         return result;
-//     }
-//
-//     public static bool TryParse(string? value,
-//         IFormatProvider? provider, out DateRange dateRange)
-//     {
-//         var segments = value?.Split(',', StringSplitOptions.RemoveEmptyEntries
-//                                          | StringSplitOptions.TrimEntries);
-//
-//         if (segments?.Length == 2
-//             && DateOnly.TryParse(segments[0], provider, out var fromDate)
-//             && DateOnly.TryParse(segments[1], provider, out var toDate))
-//         {
-//             dateRange = new DateRange { From = fromDate, To = toDate };
-//             return true;
-//         }
-//
-//         dateRange = new DateRange { From = default, To = default };
-//         return false;
-//     }
-// }
