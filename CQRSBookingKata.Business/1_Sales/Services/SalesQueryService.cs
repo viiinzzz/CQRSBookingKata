@@ -167,6 +167,8 @@ public class SalesQueryService
 
     public StayProposition? LockProposition(StayMatch request)
     {
+        var now = DateTime.UtcNow;
+        ;
         var firstNight = OvernightStay.From(request.ArrivalDate);
         var lastNight = OvernightStay.FromCheckOutDate(request.DepartureDate);
 
@@ -210,7 +212,7 @@ public class SalesQueryService
                 ? setHours(request.DepartureDate, hotel.LatestCheckOutTime)
                 : request.DepartureDate;
 
-        var cannotPropose = !sales.HasActiveProposition(request.Urid, arrivalDate, departureDate);
+        var cannotPropose = !sales.HasActiveProposition(now, request.Urid, arrivalDate, departureDate);
 
         if (cannotPropose)
         {
@@ -223,8 +225,8 @@ public class SalesQueryService
             request.PersonCount,
             arrivalDate, departureDate,
             price.Amount, price.Currency,
-            DateTime.UtcNow,
-            DateTime.UtcNow.AddMinutes(FreeLockMinutes),
+            now,
+            now.AddMinutes(FreeLockMinutes),
             request.Urid);
 
         return prop;

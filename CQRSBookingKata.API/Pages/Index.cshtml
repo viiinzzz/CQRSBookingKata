@@ -1,95 +1,133 @@
 ﻿@page
 
-@inject PkiQueryService pki
+@* @inject PkiQueryService pki *@
 @inject IAdminRepository admin
+@using Vinz.FakeTime
+@inject ITimeService DateTime
+@inject DemoContext demo
 
 @{
     Layout = "_Layout";
 }
+<table>
+    <tbody>
+    <tr>
+        <td width="100">
+            <img src="~/viiinzzz-round.png" width="64">
+        </td>
+        <td>
+            <h1>BOOKING API</h1>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            Vinz the dev, March '24<br/>
+            <br/>
+            This is an exploratory C# solution<br/>
+            <br/>
+            #CQRS #Onion #Core #Layer #Functional #DDD
+            #Ubiquitous #Entities #Services #Bus #Notification
+            #Async #State #orchestrator #remote #cooperation #resilency
+            #Data #semantic #domain #micro-services
+            #data-ownership #Database #SQL #ORM #Repository
+            #architecture #Quality #Tests #landscape #simulation #performance
+        </td>
+    </tr>
+    </tbody>
+</table>
 
-<h1>B O O K I N G  API</h1>
+<hr/>
 
 <h2>Demonstration Mode</h2>
 
 <b>Fake Time</b>
-<table width="100%">
+<table>
     <tbody>
-    <tr>
-        <td width="30%">
-            <form action="/demo/forward" method="GET">
-                <input type="submit" value="Day+1">
-                <input type="hidden" name="days" value="1">
-                <input type="hidden" name="speedFactor" value="1440">
-            </form>
-        </td>
-        <td width="30%">
-            <form action="/demo/forward" method="GET">
-                <input type="submit" value="Day+7">
-                <input type="hidden" name="days" value="7">
-                <input type="hidden" name="speedFactor" value="10080">
-            </form>
-        </td>
-        <td width="30%">
-            <form action="/demo/forward" method="GET">
-                <input type="submit" value="Day+30">
-                <input type="hidden" name="days" value="30">
-                <input type="hidden" name="speedFactor" value="43200">
-            </form>
-        </td>
-    </tr>
+        <tr>
+            <td>
+                @($"{DateTime.UtcNow:s} (Day+{demo.SimulationDay})".Replace("T", " "))
+            </td>
+            <td>
+                <form action="/demo/forward" method="GET">
+                    <button type="submit" value="" class="glow-on-hover">Day+1</button>
+                    <input type="hidden" name="days" value="1">
+                    <input type="hidden" name="speedFactor" value="1440">
+                </form>
+            </td>
+            <td>
+                <form action="/demo/forward" method="GET">
+                    <button type="submit" class="glow-on-hover">Day+7</button>
+                    <input type="hidden" name="days" value="7">
+                    <input type="hidden" name="speedFactor" value="10080">
+                </form>
+            </td>
+            <td>
+                <form action="/demo/forward" method="GET">
+                    <button type="submit" class="glow-on-hover">Day+30</button>
+                    <input type="hidden" name="days" value="30">
+                    <input type="hidden" name="speedFactor" value="43200">
+                </form>
+            </td>
+        </tr>
     </tbody>
 </table>
 
 
 <h2>Administration</h2>
 <ul>
-    <li><a href="/admin/employees">List of Employees</a></li>
-    <li><a href="/admin/hotels">List of Hotels</a></li>
-    <li><a href="/admin/vacancies">List of Vacancies</a></li>
-    <li><a href="/admin/bookings">List of Bookings</a></li>
-    <br>
-    <br>
-    <li>
-        Key Performance Indicators
+    <li>Listing
+        <ul>
+            <li>
+                <a href="/admin/employees">List of Employees</a>
+                <ul>
+                    <li><a href="/money/payrolls">List of Payrolls</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="/sales/customers">List of Customers</a>
+                <ul>
+                    <li><a href="/money/invoices">List of Invoices</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="/admin/hotels">List of Hotels</a>
+                <ul>
+                    <li><a href="/admin/vacancies">List of Vacancies</a></li>
+                    <li><a href="/admin/bookings">List of Bookings</a></li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+
+    <li>Hotels
         <ul>
             @foreach (var hotel in admin.Hotels)
             {
                 <li>
-                    <a href="/admin/hotels/@hotel.HotelId/kpi">@hotel.HotelName</a>
+                    @hotel.HotelName<br>
+                    <a href="/admin/hotels/@hotel.HotelId/kpi">Key Performance Indicators</a>
                 </li>
             }
         </ul>
     </li>
 </ul>
 <h2>Planning</h2>
+
 <ul>
-    <li>
-        Reception Planning
-        <ul>
-            @foreach (var hotel in admin.Hotels)
-            {
-                <li>
-                    <a href="/reception/hotels/@hotel.HotelId">@hotel.HotelName</a>
-                </li>
-            }
-        </ul>
-    </li>
-    <br>
-    <li>
-        Room Service Planning
-        <ul>
-            @foreach (var hotel in admin.Hotels)
-            {
-                <li>
-                    <a href="/service/room/hotels/@hotel.HotelId">@hotel.HotelName</a>
-                </li>
-            }
-        </ul>
-    </li>
-
+    @foreach (var hotel in admin.Hotels)
+    {
+        <li>
+            @hotel.HotelName<br>
+            &nbsp;<a href="/reception/hotels/@hotel.HotelId">Reception</a>
+            &nbsp;<a href="/service/room/hotels/@hotel.HotelId">Room Service</a>
+        </li>
+    }
 </ul>
+ 
 
-<h2>Sales</h2>
+<h2>Booking</h2>
 <ul>
     <li><a href="/sales/search">Find a Stay</a></li>
 </ul>

@@ -14,4 +14,9 @@ public record StayProposition
 
     int Urid,
     int StayPropositionId = 0
-);
+)
+{
+    public bool IsValid(DateTime now)
+        
+        => now >= OptionStartsUtc && now < OptionEndsUtc;
+}

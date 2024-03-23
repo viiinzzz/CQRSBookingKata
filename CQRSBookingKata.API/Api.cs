@@ -137,12 +137,13 @@ void MapRoutes(WebApplication app)
         NullableDouble speedFactor,
         [FromServices] DemoService demos)
         
-        => Results.Content(
-        $"{await demos.Forward(days, speedFactor.Value, CancellationToken.None):s} (Day+{demos.SimulationDay})", 
-        "text/plain"));
+        =>
+    {
+        var newTime = await demos.Forward(days, speedFactor.Value, CancellationToken.None);
 
+        return Results.Redirect("/");
+    });
 
-    var sales = app.MapGroup("/sales");
 
     var admin = app.MapGroup("/admin");
 
@@ -186,6 +187,22 @@ void MapRoutes(WebApplication app)
     hotels.MapDelete("/{id}", (int id, bool? disable, [FromServices] IAdminRepository assets)
         => assets.DisableHotel(id, disable ?? true, scoped: true));
 
+    var money = app.MapGroup("/money");
+
+    var payrolls = money.MapGroup("/payrolls");
+    payrolls.MapGet("/", (int? page, int? pageSize, [FromServices] IMoneyRepository money2)
+        => money2.Payrolls.Page("/money/payrolls", page, pageSize));
+
+    var invoices = money.MapGroup("/invoices");
+    invoices.MapGet("/", (int? page, int? pageSize, [FromServices] IMoneyRepository money2)
+        => money2.Invoices.Page("/money/invoices", page, pageSize));
+
+    var sales = app.MapGroup("/sales");
+    var customers = sales.MapGroup("/customers");
+    customers.MapGet("/", (int? page, int? pageSize, [FromServices] ISalesRepository sales2)
+        => sales2.Customers.Page("/sales/customers", page, pageSize));
+
+
 
     var reception = app.MapGroup("/reception");
 
@@ -199,9 +216,7 @@ void MapRoutes(WebApplication app)
         => planning.GetServiceRoomPlanning(hotelId).Page($"/service/room/{hotelId}", page, pageSize));
 
 
-    var booking = app.MapGroup("/booking");
-
-    booking.MapGet("/", (
+    app.MapGet("/booking", (
             [FromQuery(Name = "arrival")] DateTime arrivalDate,
             [FromQuery(Name = "departure")] DateTime departureDate,
             [FromQuery(Name = "persons")] int personCount,
