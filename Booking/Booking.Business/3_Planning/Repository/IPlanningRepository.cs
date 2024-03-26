@@ -1,4 +1,4 @@
-﻿namespace CQRSBookingKata.Planning;
+﻿namespace BookingKata.Planning;
 
 public interface IPlanningRepository
 {

@@ -1,6 +1,4 @@
-using System.Security;
-
-namespace CQRSBookingKata.API.Helpers;
+namespace BookingKata.API.Helpers;
 
 public class PageLinks
 {

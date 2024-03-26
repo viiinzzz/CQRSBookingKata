@@ -1,18 +1,19 @@
 ﻿
-namespace CQRSBookingKata.API;
+namespace BookingKata.API;
 
 public partial class AdminRepository
 {
     public Hotel? GetHotel(int hotelId)
     {
-        var ret = _admin.Hotels
-            .Include(hotel => hotel.Cells
-                .OrderByDescending(cell => cell.S2Level))
-            .FirstOrDefault(hotel => hotel.HotelId == hotelId);
+        var hotel = _admin.Hotels.Find(hotelId);
 
-        _admin.Entry<Hotel>(ret).State = EntityState.Detached;
-       
-        return ret;
+        _admin.Entry<Hotel>(hotel).State = EntityState.Detached;
+
+        var hotelCells = geo.GeoIndex(hotel, SalesQueryService.PrecisionMaxKm);
+
+        hotel.Cells = hotelCells;
+
+        return hotel;
     }
 
     public Room? GetRoom(int uniqueRoomId)

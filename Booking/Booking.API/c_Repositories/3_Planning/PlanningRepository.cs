@@ -1,6 +1,5 @@
 ﻿
-namespace CQRSBookingKata.API;
-
+namespace BookingKata.API;
 
 public class PlanningRepository(IDbContextFactory factory, ITimeService DateTime) : IPlanningRepository, ITransactionable
 {

@@ -1,4 +1,4 @@
-namespace CQRSBookingKata.API.Helpers;
+namespace BookingKata.API.Helpers;
 
 public class TransactionContext
 {
@@ -86,9 +86,4 @@ public class TransactionContext
         _transactions = default;
         _failed = false;
     }
-}
-
-public interface ITransactionable
-{
-    TransactionContext AsTransaction();
 }

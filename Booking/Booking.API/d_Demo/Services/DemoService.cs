@@ -1,4 +1,4 @@
-namespace CQRSBookingKata.API.Demo;
+namespace BookingKata.API.Demo;
 
 public partial class DemoService
 (

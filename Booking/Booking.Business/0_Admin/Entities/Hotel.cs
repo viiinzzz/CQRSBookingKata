@@ -1,4 +1,4 @@
-﻿namespace CQRSBookingKata.Admin;
+﻿namespace BookingKata.Admin;
 
 public record Hotel(
     string HotelName,
@@ -16,10 +16,10 @@ public record Hotel(
 
     int? ManagerId = default,
 
-    int HotelId = 0,
+    int HotelId = default,
     bool Disabled = false
 ) 
-    : RecordWithValidation
+    : RecordWithValidation, IHavePosition, IHavePrimaryKey
 {
     protected override void Validate()
     {
@@ -47,7 +47,8 @@ public record Hotel(
 
     }
 
-    public Position? Position;
+    public Position? Position { get; private set; }
+    public long PrimaryKey => HotelId;
 
     private int CheckInH => EarliestCheckInTime / 100;
     private int CheckInM => EarliestCheckInTime % 100;
@@ -57,27 +58,13 @@ public record Hotel(
     public double EarliestCheckInHours => CheckInH + CheckInM / 60d;
     public double LatestCheckOutHours => CheckOutH + CheckOutM / 60d;
 
+
     [System.Text.Json.Serialization.JsonIgnore]
     [Newtonsoft.Json.JsonIgnore]
-    public IList<HotelCell> Cells { get; }
+    public IList<IGeoIndexCell> Cells { get; set; }
 
     public string CellsArray 
-        => string.Join(", ", Cells.Select(c => $"{c.S2CellId:x16}".Substring(0, 8)));
+        => string.Join(", ", Cells.Select(c => $"{c.S2CellIdSigned:x16}".Substring(0, 8)));
+     
 
-    [System.Text.Json.Serialization.JsonIgnore]
-    [Newtonsoft.Json.JsonIgnore]
-    public Cells12? Cells12 => new (
-        Cells.FirstOrDefault(c => c.S2Level == 12)?.S2CellId,
-        Cells.FirstOrDefault(c => c.S2Level == 11)?.S2CellId,
-        Cells.FirstOrDefault(c => c.S2Level == 10)?.S2CellId,
-        Cells.FirstOrDefault(c => c.S2Level == 9)?.S2CellId,
-        Cells.FirstOrDefault(c => c.S2Level == 8)?.S2CellId,
-        Cells.FirstOrDefault(c => c.S2Level == 7)?.S2CellId,
-        Cells.FirstOrDefault(c => c.S2Level == 6)?.S2CellId,
-        Cells.FirstOrDefault(c => c.S2Level == 5)?.S2CellId,
-        Cells.FirstOrDefault(c => c.S2Level == 4)?.S2CellId,
-        Cells.FirstOrDefault(c => c.S2Level == 3)?.S2CellId,
-        Cells.FirstOrDefault(c => c.S2Level == 2)?.S2CellId,
-        Cells.FirstOrDefault(c => c.S2Level == 1)?.S2CellId,
-        Cells.FirstOrDefault(c => c.S2Level == 0)?.S2CellId);
 }

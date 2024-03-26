@@ -1,4 +1,4 @@
-﻿namespace CQRSBookingKata.Billing;
+﻿namespace BookingKata.Billing;
 
 public record Invoice(
     long DebitCardNumber,

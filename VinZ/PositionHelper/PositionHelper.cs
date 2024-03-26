@@ -1,7 +1,7 @@
 ﻿namespace VinZ.ToolBox;
 
 
-public static partial class PositionHelper
+public static class PositionHelper
 {
     public static double ArcDist(this Position p1, Position p2, double radius)
     {

@@ -1,4 +1,4 @@
-﻿namespace CQRSBookingKata.ThirdParty;
+﻿namespace BookingKata.ThirdParty;
 
 //sales and marketing, event planning
 

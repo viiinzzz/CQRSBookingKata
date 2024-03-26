@@ -1,4 +1,4 @@
-﻿namespace CQRSBookingKata.Sales;
+﻿namespace BookingKata.Sales;
 
 public class RoomDoesNotExistException : Exception
 {

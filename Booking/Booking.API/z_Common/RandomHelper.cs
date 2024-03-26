@@ -1,7 +1,6 @@
-
 using System.Text;
 
-namespace CQRSBookingKata.Common;
+namespace BookingKata.Common;
 
 public static class RandomHelper
 {
@@ -98,7 +97,7 @@ public static class RandomHelper
             .Select(i =>
             {
                 var lastName = LastNames[random.Next(LastNames.Length)];
-                var firstName = LastNames[random.Next(LastNames.Length)];
+                var firstName = FirstNames[random.Next(FirstNames.Length)];
                 var emailAddress = $"{norm(firstName)}.{norm(lastName)}@mail.box";
                 var debitCardNumber = random.NextInt64(1_0000_0000_0000_0000);
                 var debitCardOwnerName = $"MX {lastName} {firstName}".ToUpper();
@@ -130,7 +129,7 @@ public static class RandomHelper
             .Select(i =>
             {
                 var lastName = LastNames[random.Next(LastNames.Length)];
-                var firstName = LastNames[random.Next(LastNames.Length)];
+                var firstName = FirstNames[random.Next(FirstNames.Length)];
                 var socialSecurityNumber = random.NextInt64(1_0_00_00_00_000_000_00);
 
                 return new FakeEmployee(lastName, firstName, socialSecurityNumber, 1800, "EUR");

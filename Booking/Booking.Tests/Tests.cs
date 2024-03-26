@@ -1,5 +1,5 @@
 
-namespace CQRSBookingKata.Tests;
+namespace BookingKata.Tests;
 
 public class Tests
 {

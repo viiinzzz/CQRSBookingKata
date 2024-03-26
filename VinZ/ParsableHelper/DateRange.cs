@@ -1,4 +1,4 @@
-namespace CQRSBookingKata.API.Helpers;
+namespace VinZ.ParsableHelper;
 
 public class DateRange : IParsable<DateRange>
 {

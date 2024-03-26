@@ -1,9 +1,9 @@
-﻿namespace CQRSBookingKata.Billing;
+﻿namespace BookingKata.Billing;
 
 public record Payroll(
     double MonthlyBaseIncome,
     string Currency,
 
     int EmployeeId,
-    int PayrollId = 0
+    int PayrollId = default
 );

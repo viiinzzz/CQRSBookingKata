@@ -1,5 +1,5 @@
 ﻿
-namespace CQRSBookingKata.API;
+namespace BookingKata.API;
 
 public class BookingSalesContext : DbContext
 {

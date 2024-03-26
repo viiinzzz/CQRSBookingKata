@@ -1,4 +1,4 @@
-﻿namespace CQRSBookingKata.Sales;
+﻿namespace BookingKata.Sales;
 
 public record StayProposition
 (
@@ -13,7 +13,7 @@ public record StayProposition
     DateTime? OptionEndsUtc,
 
     int Urid,
-    int StayPropositionId = 0
+    int StayPropositionId = default
 )
 {
     public bool IsValid(DateTime now)

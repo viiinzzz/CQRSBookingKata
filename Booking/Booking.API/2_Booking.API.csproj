@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <InvariantGlobalization>true</InvariantGlobalization>
     <PublishAot>False</PublishAot>
+    <RootNamespace>Booking.API</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\VinZ\GeoIndexing\VinZ.GeoIndexing.csproj" />
     <ProjectReference Include="..\..\VinZ\ParsableHelper\VinZ.ParsableHelper.csproj" />
     <ProjectReference Include="..\Booking.Business\1_Booking.Business.csproj" />
     <ProjectReference Include="..\..\VinZ\FakeTime\VinZ.FakeTime.csproj" />

@@ -1,4 +1,4 @@
-﻿namespace CQRSBookingKata.Sales;
+﻿namespace BookingKata.Sales;
 
 //room vacancy
 
@@ -9,29 +9,16 @@ public record Vacancy
 
     double Latitude,
     double Longitude,
-    long? Level12,
-    long? Level11,
-    long? Level10,
-    long? Level9,
-    long? Level8,
-    long? Level7,
-    long? Level6,
-    long? Level5,
-    long? Level4,
-    long? Level3,
-    long? Level2,
-    long? Level1,
-    long? Level0,
 
     string HotelName,
     string CityName,
 
     bool Cancelled = false,
-    int UniqueRoomId = 0
+    int UniqueRoomId = default
 )
-    : RecordWithValidation
+    : RecordWithValidation, IHavePosition, IHavePrimaryKey
 {
-    public long VacancyId { get; set; } = 0;
+    public long VacancyId { get; set; } = default;
     
     
     protected override void Validate()
@@ -55,5 +42,14 @@ public record Vacancy
                 UniqueRoomId * 1_0000 +
                 DayNum;
         }
+
+        Position =
+            this is { Latitude: 0, Longitude: 0 }
+                ? default
+                : new Position(Latitude, Longitude);
+
     }
+
+    public Position? Position { get; private set; }
+    public long PrimaryKey => VacancyId;
 }

@@ -1,4 +1,4 @@
-﻿namespace CQRSBookingKata.Admin;
+﻿namespace BookingKata.Admin;
 
 //housekeeping, guest services, food and beverage service, security, IT, maintenance, HR
 

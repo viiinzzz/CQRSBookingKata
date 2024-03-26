@@ -1,4 +1,4 @@
-﻿namespace CQRSBookingKata.Billing;
+﻿namespace BookingKata.Billing;
 
 public record DebitCardSecrets(
     string ownerName,

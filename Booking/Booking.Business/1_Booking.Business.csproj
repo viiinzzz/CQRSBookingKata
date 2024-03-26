@@ -17,24 +17,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="1_Sales\assets\cities.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="1_Sales\assets\cities.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="2_Billing\Services\" />
+    <Folder Include="8_ThirdParty\Entities\" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\VinZ\FakeTime.Contracts\VinZ.FakeTime.Contracts.csproj" />
+    <ProjectReference Include="..\..\VinZ\GeoIndexing.Contract\VinZ.GeoIndexing.Contract.csproj" />
     <ProjectReference Include="..\..\VinZ\MessageQueue.Contracts\VinZ.MessageQueue.Contracts.csproj" />
+    <ProjectReference Include="..\..\VinZ\PositionHelper\VinZ.PositionHelper.csproj" />
+    <ProjectReference Include="..\..\VinZ\StringHelper\VinZ.StringHelper.csproj" />
     <ProjectReference Include="..\..\VinZ\ToolBox\VinZ.ToolBox.csproj" />
   </ItemGroup>
 

@@ -1,5 +1,5 @@
 ﻿
-namespace CQRSBookingKata.Planning;
+namespace BookingKata.Planning;
 
 public class PlanningQueryService : MessageBusClientBase
 {

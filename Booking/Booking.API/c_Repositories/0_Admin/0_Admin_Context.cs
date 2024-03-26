@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore.Storage;
+﻿namespace BookingKata.API;
 
-namespace CQRSBookingKata.API;
-
-public partial class AdminRepository(IDbContextFactory factory, ITimeService DateTime) : IAdminRepository, ITransactionable
+public partial class AdminRepository(
+    IDbContextFactory factory,
+    IGazeteerService geo
+    // ITimeService DateTime
+    ) : IAdminRepository, ITransactionable
 {
     private readonly BookingAdminContext _admin = factory.CreateDbContext<BookingAdminContext>();
 

@@ -2,7 +2,7 @@
 
 public abstract record RecordWithValidation
 {
-    protected RecordWithValidation() => Validate();
+    public RecordWithValidation() => Validate();
 
     protected virtual void Validate() { }
 }

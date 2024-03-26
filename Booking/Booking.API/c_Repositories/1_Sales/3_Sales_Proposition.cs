@@ -1,4 +1,4 @@
-﻿namespace CQRSBookingKata.API;
+﻿namespace BookingKata.API;
 
 public partial class SalesRepository
 {

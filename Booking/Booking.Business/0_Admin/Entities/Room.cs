@@ -1,4 +1,4 @@
-﻿namespace CQRSBookingKata.Admin;
+﻿namespace BookingKata.Admin;
 
 public record Room(
     int Urid,

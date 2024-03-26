@@ -1,4 +1,4 @@
-﻿namespace CQRSBookingKata.Sales;
+﻿namespace BookingKata.Sales;
 
 public record StayRequest
 (
@@ -18,7 +18,7 @@ public record StayRequest
     double? PriceMin = default,
     double? PriceMax = default,
     string? Currency = default
-) : RecordWithValidation
+) : RecordWithValidation, IHavePosition
 {
     protected override void Validate()
     {
@@ -26,14 +26,20 @@ public record StayRequest
         if (Latitude.HasValue) coordinatesCount++;
         if (Longitude.HasValue) coordinatesCount++;
 
-        if (coordinatesCount == 1)
+        switch (coordinatesCount)
         {
-            var argName = string.Empty;
-            if (!Latitude.HasValue) argName = nameof(Latitude);
-            if (!Longitude.HasValue) argName = nameof(Longitude);
+            case 1:
+            {
+                var argName = string.Empty;
+                if (!Latitude.HasValue) argName = nameof(Latitude);
+                if (!Longitude.HasValue) argName = nameof(Longitude);
 
-            throw new ArgumentException($"must specify both or none of {nameof(Latitude)}, {nameof(Longitude)}",
-                argName);
+                throw new ArgumentException($"must specify both or none of {nameof(Latitude)}, {nameof(Longitude)}",
+                    argName);
+            }
+            case 2:
+                Position = new Position(Latitude!.Value, Longitude!.Value);
+                break;
         }
 
         if (DepartureDate < ArrivalDate)
@@ -51,4 +57,6 @@ public record StayRequest
             throw new ArgumentException("must be 1 or greater and at most 9", nameof(PersonCount));
         }
     }
+
+    public Position? Position { get; private set; }
 }

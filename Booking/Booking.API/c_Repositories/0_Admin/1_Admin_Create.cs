@@ -1,6 +1,4 @@
-﻿using VinZ.ToolBox;
-
-namespace CQRSBookingKata.API;
+﻿namespace BookingKata.API;
 
 public partial class AdminRepository
 {
@@ -23,13 +21,7 @@ public partial class AdminRepository
         _admin.SaveChanges();
         entity.State = EntityState.Detached;
 
-        var hotelCells = new Position(spec.Latitude, spec.Longitude)
-            .CellIds()
-            .Select(c => new HotelCell(c.Id, c.Level, hotel.HotelId))
-            .ToArray();
-
-        _admin.HotelCells.AddRange(hotelCells);
-        _admin.SaveChanges();
+        geo.AddReferer(hotel,  0.100, default, scoped: false);
 
         return hotel.HotelId;
     }

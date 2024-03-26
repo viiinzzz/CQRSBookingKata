@@ -1,5 +1,5 @@
 ﻿
-namespace CQRSBookingKata.API;
+namespace BookingKata.API;
 
 public partial class SalesRepository(IDbContextFactory factory, ITimeService DateTime) : ISalesRepository, ITransactionable
 {

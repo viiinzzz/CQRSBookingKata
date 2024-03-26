@@ -1,4 +1,5 @@
-﻿namespace CQRSBookingKata.Sales;
+﻿namespace BookingKata.Sales;
+
 
 public class SalesQueryService
 (
@@ -7,18 +8,15 @@ public class SalesQueryService
    
     PricingQueryService pricing, 
     BookingCommandService booking,
-   
+    IGazeteerService geo,
+
     ITimeService DateTime
 )
 {
-    private const int FindMinKm = 5;
+    public const double PrecisionMaxKm = 0.5;
+    private const int FindMinKm = 1;
     private const int FindMaxKm = 200;
 
-    public static readonly City[] Cities = "cities"
-        .GetJsonObjectArray<City>("1_Sales/assets")
-        .Where(city => city != null)
-        .Select(city => city!)
-        .ToArray();
 
 
     public IQueryable<StayMatch> Find(StayRequest request)
@@ -37,40 +35,32 @@ public class SalesQueryService
         var nightsCount = firstNight.To(lastNight);
 
 
-        var requestPositions = new List<Cells12>();
+        var requestCells = new List<IGeoIndexCell>();
 
         if (request is { Latitude: not null, Longitude: not null })
         {
-            requestPositions.Add(new Position(request.Latitude.Value, request.Longitude.Value).CellIdsLevel12(maxKm));
+            var positionCells = geo.SearchGeoIndex(request, PrecisionMaxKm, maxKm);
+
+            requestCells.AddRange(positionCells);
         };
 
         if (request.CityName != default)
         {
-            var cities = Cities
-                .Where(city => city.name.EqualsIgnoreCaseAndAccents(request.CityName));
-
-            if (!cities.Any() && (request.ApproximateNameMatch ?? false))
-            {
-                cities = Cities
-                    .Where(city => city.name.EqualsApprox(request.CityName));
-            }
-
-            if (request.CountryCode != default && request.CountryCode.Trim().Length > 0)
-            {
-                cities = cities
-                    .Where(city => city.country.EqualsIgnoreCaseAndAccents(request.CountryCode));
-            }
-
-            requestPositions.AddRange(cities
+            var citiesCells = geo
+                .QueryCities(request.CityName, request.ApproximateNameMatch, request.CountryCode)
                 .Where(city => city.Position != default)
-                .Select(city => city.Position.Value.CellIdsLevel12(maxKm)));
+                .SelectMany(city => geo.GeoIndex(city, PrecisionMaxKm))
+                .AsEnumerable();
+
+            requestCells.AddRange(citiesCells);
         }
 
-        if (requestPositions.Count == 0)
+        if (requestCells.Count == 0)
         {
             throw new ArgumentException($"must specify either known {request.CityName} or {request.Latitude} and {request.Longitude}", nameof(request.CityName));
         }
 
+        var matchingVacancyIds = geo.GetMatchingRefererLongIds<Vacancy>(requestCells).ToHashSet();
 
 
         var vacancies = 
@@ -100,26 +90,8 @@ public class SalesQueryService
 
 
         {
-            vacancies = 
-                
-                from vacancy in vacancies
-
-                where requestPositions.Any(requestCells =>
-                    (vacancy.Level12 != null && vacancy.Level12.Value == requestCells.Level12.Value) ||
-                    (vacancy.Level11 != null && vacancy.Level11.Value == requestCells.Level11.Value) ||
-                    (vacancy.Level10 != null && vacancy.Level10.Value == requestCells.Level10.Value) ||
-                    (vacancy.Level9 != null && vacancy.Level9.Value == requestCells.Level9.Value) ||
-                    (vacancy.Level8 != null && vacancy.Level8.Value == requestCells.Level8.Value) ||
-                    (vacancy.Level7 != null && vacancy.Level7.Value == requestCells.Level7.Value) ||
-                    (vacancy.Level6 != null && vacancy.Level6.Value == requestCells.Level6.Value) ||
-                    (vacancy.Level5 != null && vacancy.Level5.Value == requestCells.Level5.Value) ||
-                    (vacancy.Level4 != null && vacancy.Level4.Value == requestCells.Level4.Value) ||
-                    (vacancy.Level3 != null && vacancy.Level3.Value == requestCells.Level3.Value) ||
-                    (vacancy.Level2 != null && vacancy.Level2.Value == requestCells.Level2.Value) ||
-                    (vacancy.Level1 != null && vacancy.Level1.Value == requestCells.Level1.Value) ||
-                    (vacancy.Level0 != null && vacancy.Level0.Value == requestCells.Level0.Value) )
-
-                select vacancy;
+            vacancies = vacancies
+                .Where(vacancy => matchingVacancyIds.Contains(vacancy.VacancyId));
         }
 
 
@@ -174,6 +146,8 @@ public class SalesQueryService
 
         return stays;
     }
+
+   
 
 
     public const int FreeLockMinutes = 30;
@@ -250,47 +224,43 @@ public class SalesQueryService
 
     public long[] Booking(UniqueRoomId urid, DateTime openingDate, DateTime closingDate, int personCount, bool scoped)
     {
+        var room = admin.GetRoom(urid.Value);
+
+        if (room == default)
+        {
+            throw new RoomDoesNotExistException();
+        }
+
+        var hotel = admin.GetHotel(urid.HotelId);
+
+        if (hotel == default)
+        {
+            throw new HotelDoesNotExistException();
+        }
+
+        var hotelCell = geo.RefererGeoIndex(hotel);
+
+        if (hotelCell == null)
+        {
+            throw new HotelNotGeoIndexedException();
+        }
+
         try
         {
             using var scope = !scoped ? null : new TransactionScope();
 
-            var room = admin.GetRoom(urid.Value);
-
-            if (room == default)
-            {
-                throw new RoomDoesNotExistException();
-            }
-
-            var hotel = admin.GetHotel(urid.HotelId);
-
-            if (hotel == default)
-            {
-                throw new HotelDoesNotExistException();
-            }
-
-           
-            var nearestKnownCityName =
-                hotel.Position == default
-                    ? default
-                    : Cities
-                        .Select(city => new
-                        {
-                            cityName = city.name,
-                            km = city.Position == default
-                                ? double.MaxValue
-                                : city?.Cells?[0].Id.EarthKm(hotel.Cells.First().S2CellId)
-                        })
-                        .MinBy(c => c.km)
-                        ?.cityName;
+            var (nearestKnownCity, nearestKnownCityKm) = geo.NearestCity(hotelCell);
 
 
             var firstNight = OvernightStay.From(openingDate);
             var lastNight = OvernightStay.FromCheckOutDate(closingDate);
 
             var vacancies = firstNight
-                .StayUntil(lastNight, personCount, hotel.Latitude, hotel.Longitude, hotel.Cells12,
-                     hotel.HotelName, nearestKnownCityName, urid.Value)
+                .StayUntil(lastNight, personCount, hotel.Latitude, hotel.Longitude,
+                     hotel.HotelName, nearestKnownCity?.name, urid.Value)
                 .ToArray();
+
+            geo.CopyToReferers(hotel, vacancies, scoped);
 
             //
             //

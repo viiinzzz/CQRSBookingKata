@@ -1,7 +1,15 @@
-﻿namespace CQRSBookingKata.Sales;
+﻿namespace VinZ.GeoIndexing;
 
-public record City(string? name = default, string? lat = default, string? lng = default, string? country = default, string? admin1 = default, string? admin2 = default)
-:RecordWithValidation
+public record City
+(
+    string? name = default, 
+    string? lat = default,
+    string? lng = default,
+    string? country = default,
+    string? admin1 = default,
+    string? admin2 = default
+)
+    : RecordWithValidation, IHavePosition
 {
     private double? GetLatitude()
     {
@@ -42,16 +50,10 @@ public record City(string? name = default, string? lat = default, string? lng = 
         return new Position(latitude.Value, longitude.Value);
     }
 
-    public Position? Position;
-    public CellId[]? Cells;
+    public Position? Position { get; private set; }
 
     protected override void Validate()
     {
         Position = GetPosition();
-
-        if (Position != default)
-        {
-            Cells = Position.Value.CellIds();
-        }
     }
 }

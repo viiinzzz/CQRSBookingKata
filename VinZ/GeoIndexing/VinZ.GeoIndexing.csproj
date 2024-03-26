@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>VinZ.GeoIndexing</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="assets\cities.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="assets\cities.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="S2Geometry" Version="1.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NumberHelper\VinZ.NumberHelper.csproj" />
+    <ProjectReference Include="..\PositionHelper\VinZ.PositionHelper.csproj" />
+    <ProjectReference Include="..\GeoIndexing.Contract\VinZ.GeoIndexing.Contract.csproj" />
+    <ProjectReference Include="..\StringHelper\VinZ.StringHelper.csproj" />
+    <ProjectReference Include="..\ToolBox\VinZ.ToolBox.csproj" />
+  </ItemGroup>
+
+</Project>

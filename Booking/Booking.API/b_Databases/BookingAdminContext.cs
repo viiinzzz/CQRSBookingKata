@@ -1,11 +1,10 @@
 ﻿
-namespace CQRSBookingKata.API;
+namespace BookingKata.API;
 
 public class BookingAdminContext : DbContext
 {
     public DbSet<Employee> Employees { get; set; }
     public DbSet<Hotel> Hotels { get; set; }
-    public DbSet<HotelCell> HotelCells { get; set; }
     public DbSet<Room> Rooms { get; set; }
     public DbSet<Booking> Bookings { get; set; }
 
@@ -42,16 +41,9 @@ public class BookingAdminContext : DbContext
 
         builder
             .Entity<Hotel>()
-            .Ignore(hotel => hotel.CellsArray)
-            .Ignore(hotel => hotel.Cells12)
-;
-
-
-        builder
-            .Entity<HotelCell>()
-            .Property(cell => cell.HotelCellId)
-            .ValueGeneratedOnAdd();
-
+            .Ignore(hotel => hotel.CellsArray);
+        
+        
         builder
             .Entity<Hotel>()
             .HasMany(hotel => hotel.Cells);

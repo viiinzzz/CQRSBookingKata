@@ -1,4 +1,4 @@
-﻿namespace CQRSBookingKata.Billing;
+﻿namespace BookingKata.Sales;
 
 public class BookingCommandService
 (
@@ -8,7 +8,8 @@ public class BookingCommandService
     IMoneyRepository money,
     IPlanningRepository planning,
 
-    PaymentCommandService payment,
+    IPaymentCommandService payment,
+    IGazeteerService geo,
 
     IMessageBus bus
 )
@@ -27,23 +28,21 @@ public class BookingCommandService
             throw new AccountLockedException();
         }
 
+        var hotelCell = geo.RefererGeoIndex(hotel);
+
+        if (hotelCell == null)
+        {
+            throw new HotelNotGeoIndexedException();
+        }
+
         try
         {
             using var scope = !scoped ? null : new TransactionScope();
 
-            var nearestKnownCityName =
-            hotel.Position == default
-                ? default
-                : SalesQueryService.Cities
-                    .Select(city => new
-                    {
-                        cityName = city.name,
-                        km = city.Position == default 
-                            ? double.MaxValue 
-                            : city?.Cells?[0].Id.EarthKm(hotel.Cells.First().S2CellId)
-                    })
-                    .MinBy(c => c.km)
-                    ?.cityName;
+            //sales search will be performed against known cities list,
+            //hence determining nearest known city name for geo-indexing
+
+            var (nearestKnownCity, nearestKnownCityKm) = geo.NearestCity(hotelCell);
 
 
             var roomNumbers = admin.Rooms(hotelId);
@@ -70,20 +69,9 @@ public class BookingCommandService
                 .SelectMany(room => dayNumbers
                     .Select(dayNum => new Vacancy(dayNum, 
                         room.PersonMaxCount, hotel.Latitude, hotel.Longitude,
-                        hotel.Cells12.Level12,
-                        hotel.Cells12.Level11,
-                        hotel.Cells12.Level10,
-                        hotel.Cells12.Level9,
-                        hotel.Cells12.Level8,
-                        hotel.Cells12.Level7,
-                        hotel.Cells12.Level6,
-                        hotel.Cells12.Level5,
-                        hotel.Cells12.Level4,
-                        hotel.Cells12.Level3,
-                        hotel.Cells12.Level2,
-                        hotel.Cells12.Level1,
-                        hotel.Cells12.Level0,
-                        hotel.HotelName, nearestKnownCityName, false, room.Urid)));
+                        hotel.HotelName, nearestKnownCity.name, false, room.Urid)));
+
+            geo.CopyToReferers(hotel, vacancies, scoped: false);
 
             sales.AddVacancies(vacancies, scoped);
 

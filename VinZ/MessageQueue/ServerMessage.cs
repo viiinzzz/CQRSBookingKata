@@ -13,5 +13,5 @@ public record ServerMessage
     int RepeatCount = default,
     bool Aggregate = default,
 
-    int MessageId = 0
+    int MessageId = default
 );

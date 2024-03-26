@@ -1,4 +1,4 @@
-﻿namespace CQRSBookingKata.Billing;
+﻿namespace BookingKata.Sales;
 
 public record Booking
 (
@@ -10,6 +10,6 @@ public record Booking
 
     int UniqueRoomId,
     int CustomerId,
-    int BookingId = 0,
+    int BookingId = default,
     bool Cancelled = false
 );

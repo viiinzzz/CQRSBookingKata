@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
 
-namespace CQRSBookingKata.API;
+namespace BookingKata.API;
 
 public partial class AdminRepository
 {
