@@ -1,6 +1,6 @@
 ﻿namespace VinZ.GeoIndexing;
 
-public abstract partial class GazeteerServiceBase : IGazeteerService
+public abstract partial class GazetteerServiceBase : IGazetteerService
 {
     public abstract IQueryable<GeoIndex> Indexes { get; }
     public abstract void AddIndexes(IEnumerable<GeoIndex> indexes, bool scoped);

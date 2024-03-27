@@ -1,30 +1,10 @@
 namespace BookingKata.API.Helpers;
 
-public class PageLinks
-{
-    public PageLinks(string baseUrl, int page, int pageSize, int pageCount)
-    {
-        url = $"{baseUrl}?page={page}&pageSize={pageSize}";
-        next = page >= pageCount ? null : $"{baseUrl}?page={page + 1}&pageSize={pageSize}";
-        prev = page <= 1 ? null : $"{baseUrl}?page={page - 1}&pageSize={pageSize}";
-    }
-
-    public string url { get; }
-    public string? next { get; }
-    public string? prev { get; }
-}
-
-public record PageResult<TEntity>(
-    int page, int pageSize, int pageCount, int itemCount,
-    PageLinks[] links,
-    string type, string elementType, TEntity[] items
-);
-
 public static class ApiHelper
 {
     private static readonly Regex SpaceRx = new(@"\s+", RegexOptions.Multiline);
 
-    private static readonly int DefaultPageSize = 40;
+    private static readonly int DefaultPageSize = 50;
 
 
     public static PageResult<TEntity> Page<TEntity>(this IQueryable<TEntity> query, string baseUrl, int? pageSpec, int? pageSizeSpec) where TEntity : class
@@ -34,7 +14,7 @@ public static class ApiHelper
         var page0 = page - 1;
         var pageSize = pageSizeSpec ?? DefaultPageSize;
         var itemCount = query.Count();
-        var pageCount = itemCount / pageSize;
+        var pageCount = itemCount == 0 ? 0 : 1 + (itemCount / pageSize);
         if (page > pageCount) page = pageCount;
 
         var items = query
@@ -47,7 +27,10 @@ public static class ApiHelper
 
         var links = new PageLinks(baseUrl, page.Value, pageSize, pageCount);
 
-        return new PageResult<TEntity>(page.Value, pageSize, pageCount, itemCount, new []{ links }, type, elementType, items);
+        return new PageResult<TEntity>(
+            page.Value, pageSize, pageCount, itemCount, 
+            new []{ links }, 
+            type, elementType) { Collection = items };
     }
 
     public static IResult AsResult<TEntity>(this TEntity? result) where TEntity : class
@@ -112,24 +95,3 @@ public static class ApiHelper
     }
 
 }
-
-/*
-
-[Aspect(Scope.Global)]
-[Injection(typeof(TransactionCall))]
-public class TransactionCall : Attribute
-{
-    private IDbContextTransaction _transaction;
-
-    [Advice(Kind.Before)]
-    public void LogEnter([Argument(Source.Name)] string methodName)
-    {
-
-        _transaction = _back.Database.BeginTransaction();
-        _transaction.BeginTransaction();
-        _transaction.Commit();
-        _transaction.Rollback();
-    }
-}
-
-*/

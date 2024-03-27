@@ -9,6 +9,8 @@ public partial class DemoService
         {
             using var scope = !scoped ? null : new TransactionScope();
 
+            Console.WriteLine("Demo: Seeding Staff...");
+
             demo.FakeStaffIds = RandomHelper
                 .GenerateFakeEmployees(HotelCount * StaffPerHotel)
                 .Select(fake =>
@@ -20,6 +22,8 @@ public partial class DemoService
                     return employeeId;
                 })
                 .ToArray();
+
+            Console.WriteLine("Demo: Seeding Managers...");
 
             demo.FakeManagerIds = RandomHelper
                 .GenerateFakeEmployees(HotelCount * ManagerPerHotel)

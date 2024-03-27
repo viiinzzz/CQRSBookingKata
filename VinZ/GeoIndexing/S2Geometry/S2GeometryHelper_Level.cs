@@ -12,26 +12,27 @@ public static partial class S2GeometryHelper
             throw new ArgumentException($"must be less than ${nameof(maxKm)}", nameof(minKm));
         }
 
-        int minLevel, maxLevel;
+        int maxLevel, minLevel;
 
-        for (minLevel = 30; minLevel >= 0; minLevel--)
+        for (maxLevel = S2Levels.Length - 1; maxLevel >= 0; maxLevel--)
         {
-            var maxKmLo = S2Level2MinKm[minLevel];
+            var minKmLo = S2Level2MinKm[maxLevel];
 
-            if (maxKm <= maxKmLo) continue;
+            if (minKm > minKmLo) continue;
 
-            if (minLevel > 0) minLevel--;
+            // if (maxLevel > 0) maxLevel--;
 
             break;
         }
 
-        for (maxLevel = 0; maxLevel <= 30; maxLevel++)
+        for (minLevel = 0; minLevel <= S2Levels.Length - 1; minLevel++)
         {
-            var minKmHi = S2Level2MaxKm[maxLevel];
+            var maxKmHi = S2Level2MaxKm[minLevel];
 
-            if (minKm >= minKmHi) continue;
+            if (maxKm < maxKmHi) continue;
 
-            if (maxLevel < 30) maxLevel++;
+            // if (minLevel < S2Levels.Length - 1) minLevel++;
+            if (minLevel > 0) minLevel--;
 
             break;
         }
@@ -46,13 +47,17 @@ public static partial class S2GeometryHelper
     }
 
 
+    private static int[] S2Levels = 
+        0.RangeTo(30)
+            .ToArray();
+
     private static double[] S2Level2MinKm =
-        Enumerable.Range(0, 30)
+        S2Levels
             .Select(EarthMinKmForS2Level_)
             .ToArray();
 
     private static double[] S2Level2MaxKm =
-        Enumerable.Range(0, 30)
+        S2Levels
             .Select(EarthMaxKmForS2Level_)
             .ToArray();
 

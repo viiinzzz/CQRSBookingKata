@@ -98,7 +98,7 @@ public static class RandomHelper
             {
                 var lastName = LastNames[random.Next(LastNames.Length)];
                 var firstName = FirstNames[random.Next(FirstNames.Length)];
-                var emailAddress = $"{norm(firstName)}.{norm(lastName)}@mail.box";
+                var emailAddress = $"{norm(firstName)}.{norm(lastName)}{random.Next(1000)}@mail.box";
                 var debitCardNumber = random.NextInt64(1_0000_0000_0000_0000);
                 var debitCardOwnerName = $"MX {lastName} {firstName}".ToUpper();
                 var expireMonth = random.Next(12) + 1;

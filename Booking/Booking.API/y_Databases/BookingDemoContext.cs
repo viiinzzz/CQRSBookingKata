@@ -1,6 +1,6 @@
 ﻿namespace BookingKata.API;
 
-public class DemoContext
+public class BookingDemoContext
 {
     public int[] FakeStaffIds { get; set; }
     public int[] FakeManagerIds { get; set; }

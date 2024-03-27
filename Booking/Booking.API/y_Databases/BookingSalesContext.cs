@@ -26,5 +26,13 @@ public class BookingSalesContext : DbContext
             .Entity<Customer>()
             .HasIndex(customer => customer.EmailAddress)
             .IsUnique();
+
+
+        builder
+            .Entity<Vacancy>()
+            .Ignore(vacancy => vacancy.Position)
+            .Ignore(hotel => hotel.geoIndex)
+            .Ignore(hotel => hotel.Cells);
+
     }
 }

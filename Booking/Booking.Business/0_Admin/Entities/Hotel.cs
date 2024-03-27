@@ -47,7 +47,9 @@ public record Hotel(
 
     }
 
-    public Position? Position { get; private set; }
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    [Newtonsoft.Json.JsonIgnore]
     public long PrimaryKey => HotelId;
 
     private int CheckInH => EarliestCheckInTime / 100;
@@ -55,16 +57,23 @@ public record Hotel(
     private int CheckOutH => LatestCheckOutTime / 100;
     private int CheckOutM => LatestCheckOutTime % 100;
 
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    [Newtonsoft.Json.JsonIgnore] 
     public double EarliestCheckInHours => CheckInH + CheckInM / 60d;
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    [Newtonsoft.Json.JsonIgnore] 
     public double LatestCheckOutHours => CheckOutH + CheckOutM / 60d;
 
 
     [System.Text.Json.Serialization.JsonIgnore]
     [Newtonsoft.Json.JsonIgnore]
+    public Position? Position { get; private set; }
+
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    [Newtonsoft.Json.JsonIgnore]
     public IList<IGeoIndexCell> Cells { get; set; }
-
-    public string CellsArray 
-        => string.Join(", ", Cells.Select(c => $"{c.S2CellIdSigned:x16}".Substring(0, 8)));
-     
-
+    public string geoIndex { get; set; }
 }

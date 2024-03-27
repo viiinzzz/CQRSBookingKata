@@ -11,7 +11,6 @@ public partial class AdminRepository
     public IQueryable<Hotel> Hotels 
         
         => _admin.Hotels
-            .Include(hotel => hotel.Cells)
             .AsNoTracking();
 
     public IQueryable<Room> Rooms(int hotelId)

@@ -4,7 +4,7 @@
 @inject IAdminRepository admin
 @using Vinz.FakeTime
 @inject ITimeService DateTime
-@inject DemoContext demo
+@inject BookingDemoContext demo
 
 @{
     Layout = "_Layout";
@@ -98,9 +98,14 @@
                     <li><a href="/admin/bookings">List of Bookings</a></li>
                 </ul>
             </li>
+
+            <li>
+                <a href="/admin/geo/indexes">List of GeoIndexes</a>
+            </li>
         </ul>
     </li>
-
+    
+    <br />
     <li>Hotels
         <ul>
             @foreach (var hotel in admin.Hotels)

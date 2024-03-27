@@ -58,5 +58,15 @@ public record StayRequest
         }
     }
 
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    [Newtonsoft.Json.JsonIgnore]
     public Position? Position { get; private set; }
+
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    [Newtonsoft.Json.JsonIgnore]
+    public IList<IGeoIndexCell> Cells { get; set; }
+    public string geoIndex { get; set; }
+
 }

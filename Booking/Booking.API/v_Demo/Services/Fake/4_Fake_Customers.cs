@@ -9,6 +9,8 @@ public partial class DemoService
         {
             using var scope = !scoped ? null : new TransactionScope();
 
+            Console.WriteLine("Demo: Seeding Customers...");
+
             demo.FakeCustomerIds = RandomHelper
                 .GenerateFakeCustomers(CustomerCount)
                 .Select(fake =>

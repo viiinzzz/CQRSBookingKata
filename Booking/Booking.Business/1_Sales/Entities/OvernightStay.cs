@@ -62,7 +62,7 @@ public class OvernightStay
     {
         var firstNight = this;
 
-        return Enumerable.Range(firstNight.DayNum, lastNight.DayNum)
+        return firstNight.DayNum.RangeTo(lastNight.DayNum)
             
             .Select(dayNum => new Vacancy(DayNum, personMaxCount, latitude, longitude,
                 hotelName, cityName, false, urid));

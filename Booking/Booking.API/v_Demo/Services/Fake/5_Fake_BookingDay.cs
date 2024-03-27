@@ -9,6 +9,8 @@ public partial class DemoService
             throw new Exception("FakeCustomer not ready yet.");
         }
 
+        Console.WriteLine("Demo: Seeding Bookings...");
+
         var todayBookingCount = (int)RandomHelper.Rand(CustomerCount * 0.05);
 
         var errors = new List<Exception>();
@@ -31,19 +33,33 @@ public partial class DemoService
                     PersonCount: personCount
                     ) { CityName = "Paris", CountryCode = "FR" };
 
-                var ms = sales2.Find(r);
+                var preferredStayMatches = sales2.Find(r)
+                    .Take(50)//let's say customer only examine 50 first matches (at max)
+                    .AsRandomEnumerable()
+                    .Take(10);//and finally validate only 10 (at max)
 
-                var mi = RandomHelper.Rand(ms.Count());
-                var m = ms.Skip(mi).FirstOrDefault() ?? throw new Exception("stay not found");
+                if (preferredStayMatches.Count() == 0)
+                {
+                    throw new Exception("stay not found");
+                }
 
-                var p = sales2.LockProposition(m);
+                foreach (var m in preferredStayMatches)
+                {
+                    var p = sales2.LockProposition(m);
 
-                var bookingId = booking.Book(p, cid, c.LastName, c.FirstName, c.DebitCardNumber, c.DebitCardSecrets,
-                    scoped: false);
+                    if (p != null)
+                    {
+                        var bookingId = booking.Book(p, cid, c.LastName, c.FirstName, c.DebitCardNumber, c.DebitCardSecrets,
+                            scoped: false);
+
+                        break;
+                    }
+
+                }
             }
             catch (Exception ex)
             {
-                errors.Add(new InvalidOperationException($"Booking failure: Day+{demo.SimulationDay}", ex));
+                errors.Add(new InvalidOperationException($"Booking failure during Day+{demo.SimulationDay}", ex));
             }
         }
 

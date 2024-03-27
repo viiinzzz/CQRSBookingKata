@@ -50,10 +50,19 @@ public record City
         return new Position(latitude.Value, longitude.Value);
     }
 
-    public Position? Position { get; private set; }
-
     protected override void Validate()
     {
         Position = GetPosition();
     }
+
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    // [Newtonsoft.Json.JsonIgnore]
+    public Position? Position { get; private set; }
+
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    public IList<IGeoIndexCell> Cells { get; set; }
+    public string geoIndex { get; set; }
+
 }

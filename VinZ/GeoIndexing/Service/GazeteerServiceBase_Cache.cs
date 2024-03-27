@@ -1,11 +1,11 @@
 ﻿namespace VinZ.GeoIndexing;
 
-public abstract partial class GazeteerServiceBase
+public abstract partial class GazetteerServiceBase
 {
     public GeoIndexCellDistance EarthArcDist(IGeoIndexCell cell1, IGeoIndexCell cell2)
         => cell1.EarthArcDist(cell2);
 
-    public IGeoIndexCell[] SearchGeoIndex<TSearch>(TSearch search, double maxPrecisionKm, double? maxDistanceKm)
+    public IGeoIndexCell[] NewGeoIndex<TSearch>(TSearch search, double maxPrecisionKm, double? maxDistanceKm)
         where TSearch: IHavePosition
     {
         var (minLevel, maxLevel) = S2GeometryHelper.S2MinMaxLevelForKm(maxPrecisionKm, maxDistanceKm);
@@ -25,12 +25,12 @@ public abstract partial class GazeteerServiceBase
             .Select(cell => (IGeoIndexCell)cell)
             .ToArray();
     }
-    public IGeoIndexCell[] GeoIndex<TEntity>(TEntity entity, double maxPrecisionKm) 
+    public IGeoIndexCell[] CacheGeoIndex<TEntity>(TEntity entity, double precisionMaxKm) 
         where TEntity : IHavePosition
     {
-        var (minLevel, maxLevel) = S2GeometryHelper.S2MinMaxLevelForKm(maxPrecisionKm, default);
+        var (minLevel, maxLevel) = S2GeometryHelper.S2MinMaxLevelForKm(precisionMaxKm, default);
 
-        return Get<TEntity>().Get(entity)
+        return GetCache<TEntity>().GetCache(entity)
             .Where(cell => 
                 cell.S2Level <= maxLevel && 
                 cell.S2Level >= minLevel)
@@ -39,35 +39,35 @@ public abstract partial class GazeteerServiceBase
             .ToArray();
     }
 
-    public IGeoIndexCell GeoIndex<TEntity>(TEntity entity) 
+    public IGeoIndexCell CacheGeoIndex<TEntity>(TEntity entity) 
         where TEntity : IHavePosition
     {
-        return Get<TEntity>().Get(entity).Last();
+        return GetCache<TEntity>().GetCache(entity).Last();
     }
 
 
-    private readonly ConcurrentDictionary<Type, CacheGeoIndex> _cacheGeoIndex = new();
+    private readonly ConcurrentDictionary<Type, GeoIndexCache> _cacheGeoIndex = new();
     
     public void ClearCacheGeoIndex()
     {
         _cacheGeoIndex.Clear();
     }
 
-    private CacheGeoIndex Get<TEntity>() 
+    private GeoIndexCache GetCache<TEntity>() 
         where TEntity : IHavePosition
     {
         if (!_cacheGeoIndex.TryGetValue(typeof(TEntity), out var cache))
         {
-            return Cache<TEntity>();
+            return NewCache<TEntity>();
         }
 
         return cache;
     }
 
-    private CacheGeoIndex Cache<TEntity>()
+    private GeoIndexCache NewCache<TEntity>()
         where TEntity : IHavePosition
     {
-        var cache = new CacheGeoIndex();
+        var cache = new GeoIndexCache();
 
         _cacheGeoIndex[typeof(TEntity)] = cache;
 
@@ -75,23 +75,23 @@ public abstract partial class GazeteerServiceBase
     }
 
 
-    private class CacheGeoIndex
+    private class GeoIndexCache
     {
         private readonly ConcurrentDictionary<IHavePosition, GeoIndexCell[]> _cache = new();
 
         public void Clear() => _cache.Clear();
 
-        public GeoIndexCell[] Get(IHavePosition entity)
+        public GeoIndexCell[] GetCache(IHavePosition entity)
         {
             if (!_cache.TryGetValue(entity, out var arr))
             {
-                return Cache(entity);
+                return NewCache(entity);
             }
 
             return arr;
         }
 
-        private GeoIndexCell[] Cache(IHavePosition entity)
+        private GeoIndexCell[] NewCache(IHavePosition entity)
         {
             if (!entity.Position.HasValue)
             {

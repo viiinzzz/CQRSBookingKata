@@ -37,16 +37,9 @@ public class BookingAdminContext : DbContext
 
         builder
             .Entity<Hotel>()
-            .Ignore(hotel => hotel.Position);
-
-        builder
-            .Entity<Hotel>()
-            .Ignore(hotel => hotel.CellsArray);
-        
-        
-        builder
-            .Entity<Hotel>()
-            .HasMany(hotel => hotel.Cells);
+            .Ignore(hotel => hotel.Position)
+            .Ignore(hotel => hotel.geoIndex)
+            .Ignore(hotel => hotel.Cells);
 
 
         builder
@@ -58,5 +51,6 @@ public class BookingAdminContext : DbContext
             .Entity<Booking>()
             .Property(booking => booking.BookingId)
             .ValueGeneratedOnAdd();
+
     }
 }

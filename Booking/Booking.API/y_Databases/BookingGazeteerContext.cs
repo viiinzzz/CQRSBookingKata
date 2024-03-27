@@ -1,13 +1,13 @@
 ﻿
 namespace BookingKata.API;
 
-public class BookingGeoIndexingContext : DbContext
+public class BookingGazeteerContext : DbContext
 {
     public DbSet<GeoIndex> Indexes { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {
-        builder.ConfigureMyWay<BookingGeoIndexingContext>();
+        builder.ConfigureMyWay<BookingGazeteerContext>();
 
         builder.EnableSensitiveDataLogging();
     }

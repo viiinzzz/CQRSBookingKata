@@ -1,7 +1,25 @@
 ﻿namespace VinZ.GeoIndexing;
 
-public abstract partial class GazeteerServiceBase
+public abstract partial class GazetteerServiceBase
 {
+    public TReferer IncludeGeoIndex<TReferer>(TReferer referer)
+        where TReferer : IHavePosition, IHavePrimaryKey
+    {
+        //
+        //
+        referer.Cells = RefererAllGeoIndex(referer);
+        //
+        //
+        referer.geoIndex = referer.GetGeoIndexString();
+
+        return referer;
+    }
+
+    public IEnumerable<TReferer> IncludeGeoIndex<TReferer>(IEnumerable<TReferer> referers)
+        where TReferer : IHavePosition, IHavePrimaryKey
+        
+        => referers.Select(IncludeGeoIndex);
+
     public void AddReferer<TReferer>(TReferer referer, double? minKm, double? maxKm, bool scoped)
         where TReferer : IHavePosition, IHavePrimaryKey
 
@@ -30,6 +48,14 @@ public abstract partial class GazeteerServiceBase
     public IGeoIndexCell? RefererGeoIndex<TReferer>(TReferer referer)
         where TReferer : IHavePrimaryKey
     {
+        var cells = RefererAllGeoIndex(referer);
+
+        return cells.FirstOrDefault();
+    }
+
+    public IList<IGeoIndexCell> RefererAllGeoIndex<TReferer>(TReferer referer)
+        where TReferer : IHavePrimaryKey
+    {
         var (refererTypeHash, refererHash) = referer.GetRefererHashes();
 
         var cells =
@@ -46,43 +72,38 @@ public abstract partial class GazeteerServiceBase
 
             select new GeoIndexCell(index.S2CellIdSigned, index.S2Level);
 
-        return cells.FirstOrDefault();
+        return cells
+            .AsEnumerable()
+            .Select(cell => (IGeoIndexCell)cell)
+            .ToList();
     }
 
-    // public bool IsMatch<TReferer>(IEnumerable<IGeoIndexCell> searchCells)
-    //     where TReferer : IHavePrimaryKey 
-    //
-    //     => QueryMatch<TReferer>(searchCells)
-    //         .Any();
-
-    public IQueryable<int> GetMatchingRefererIntIds<TReferer>(IEnumerable<IGeoIndexCell> searchCells)
-        where TReferer : IHavePrimaryKey 
-
-        => GetMatchingRefererLongIds<TReferer>(searchCells)
-            .Select(id => (int)id);
 
     public IQueryable<long> GetMatchingRefererLongIds<TReferer>(IEnumerable<IGeoIndexCell> searchCells)
-        where TReferer : IHavePrimaryKey 
-
-        => QueryMatch<TReferer>(searchCells)
-            .Distinct();
-
-    private IQueryable<long> QueryMatch<TReferer>(IEnumerable<IGeoIndexCell> searchCells) 
         where TReferer : IHavePrimaryKey
     {
         var (refererTypeHash, _) = default(TReferer).GetRefererHashes();
+
+        var searchIds = searchCells
+            .Select(cell => cell.S2CellIdSigned);
 
         var refererIds =
 
             from index in Indexes
 
-            join search in searchCells
-                on index.S2CellIdSigned equals search.S2CellIdSigned
-
-            where index.RefererTypeHash == refererTypeHash
+            where index.RefererTypeHash == refererTypeHash &&
+                  searchIds.Contains(index.S2CellIdSigned)
 
             select index.RefererId;
 
-        return refererIds;
+        return refererIds.Distinct();
     }
+
+    public IQueryable<int> GetMatchingRefererIntIds<TReferer>(IEnumerable<IGeoIndexCell> searchCells)
+        where TReferer : IHavePrimaryKey
+    {
+        return GetMatchingRefererLongIds<TReferer>(searchCells)
+            .Select(id => (int)id);
+    }
+
 }

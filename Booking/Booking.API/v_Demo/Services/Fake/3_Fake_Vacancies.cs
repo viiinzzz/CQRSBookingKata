@@ -10,6 +10,8 @@ public partial class DemoService
 
             foreach (var hotelId in demo.FakeHotelsIds)
             {
+                Console.WriteLine($"Demo: Seeding Vacancies for hotel#{hotelId}...");
+
                 booking.OpenHotelSeason(
                     hotelId, default,
                     DateTime.UtcNow, DateTime.UtcNow.AddDays(SeasonDayNumbers), scoped: false);

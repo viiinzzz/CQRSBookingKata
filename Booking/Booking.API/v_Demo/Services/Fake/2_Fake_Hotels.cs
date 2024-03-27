@@ -8,6 +8,8 @@ public partial class DemoService
         {
             using var scope = !scoped ? null : new TransactionScope();
 
+            Console.WriteLine("Demo: Seeding Hotels...");
+
             demo.FakeHotelsIds = RandomHelper
                 .GenerateFakeHotels(3)
                 .Select((fake, hotelNum) =>

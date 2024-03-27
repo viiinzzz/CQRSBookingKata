@@ -1,7 +1,21 @@
 ﻿namespace VinZ.GeoIndexing;
 
-public static class GeoIndexHelper
+public static class GazeteerServiceHelper
 {
+    public static IEnumerable<TReferer> IncludeGeoIndex<TReferer>(this IEnumerable<TReferer> referers, double precisionMaxKm, IGazetteerService geo)
+        where TReferer : IHavePosition, IHavePrimaryKey
+    {
+        return geo.IncludeGeoIndex(referers);
+    }
+
+    public static IHaveCollection<TReferer> IncludeGeoIndex<TReferer>(this IHaveCollection<TReferer> haveReferers, double precisionMaxKm, IGazetteerService geo)
+        where TReferer : IHavePosition, IHavePrimaryKey
+    {
+        haveReferers.Collection = geo.IncludeGeoIndex(haveReferers.Collection);
+
+        return haveReferers;
+    }
+
     public static (int RefereTypeHash, long RefererHash) GetRefererHashes<TReferer>(this TReferer? referer)
         where TReferer : IHavePrimaryKey
     {

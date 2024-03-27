@@ -1,10 +1,12 @@
-﻿namespace BookingKata.API;
+﻿using BookingKata.Admin;
 
-public class GazeteerService(
+namespace BookingKata.API;
+
+public class GazetteerService(
     IDbContextFactory factory
-) : GazeteerServiceBase, ITransactionable
+) : GazetteerServiceBase, ITransactionable
 {
-    private readonly BookingGeoIndexingContext _geo = factory.CreateDbContext<BookingGeoIndexingContext>();
+    private readonly BookingGazeteerContext _geo = factory.CreateDbContext<BookingGazeteerContext>();
 
     public TransactionContext AsTransaction() => new TransactionContext() * _geo;
 
@@ -18,6 +20,13 @@ public class GazeteerService(
             using var scope = !scoped ? null : new TransactionScope();
 
             _geo.Indexes.AddRange(indexes);
+
+            foreach (var index in indexes)
+            {
+                _geo.Entry(index).State = EntityState.Detached;
+            }
+
+            _geo.SaveChanges();
 
             scope?.Complete();
         }
@@ -47,6 +56,13 @@ public class GazeteerService(
                     referer2.PrimaryKey, referer2TypeHash, referer2Hash, default);
 
             _geo.Indexes.AddRange(copyIndexes);
+
+            foreach (var index in copyIndexes)
+            {
+                _geo.Entry(index).State = EntityState.Detached;
+            }
+
+            _geo.SaveChanges();
 
             scope?.Complete();
         }

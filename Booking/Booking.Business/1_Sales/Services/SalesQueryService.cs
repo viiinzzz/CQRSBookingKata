@@ -8,7 +8,7 @@ public class SalesQueryService
    
     PricingQueryService pricing, 
     BookingCommandService booking,
-    IGazeteerService geo,
+    IGazetteerService geo,
 
     ITimeService DateTime
 )
@@ -39,7 +39,7 @@ public class SalesQueryService
 
         if (request is { Latitude: not null, Longitude: not null })
         {
-            var positionCells = geo.SearchGeoIndex(request, PrecisionMaxKm, maxKm);
+            var positionCells = geo.NewGeoIndex(request, PrecisionMaxKm, maxKm);
 
             requestCells.AddRange(positionCells);
         };
@@ -49,7 +49,7 @@ public class SalesQueryService
             var citiesCells = geo
                 .QueryCities(request.CityName, request.ApproximateNameMatch, request.CountryCode)
                 .Where(city => city.Position != default)
-                .SelectMany(city => geo.GeoIndex(city, PrecisionMaxKm))
+                .SelectMany(city => geo.CacheGeoIndex(city, PrecisionMaxKm))
                 .AsEnumerable();
 
             requestCells.AddRange(citiesCells);
@@ -130,7 +130,7 @@ public class SalesQueryService
                 (!request.PriceMax.HasValue || stay.Price <= request.PriceMax) &&
                 (!request.PriceMin.HasValue || (request.PriceMax.HasValue && request.PriceMax <= request.PriceMin) || stay.Price >= request.PriceMin) &&
 
-                string.Equals(stay.Currency, request.Currency, StringComparison.InvariantCultureIgnoreCase))
+                (request.Currency == null || string.Equals(stay.Currency, request.Currency, StringComparison.InvariantCultureIgnoreCase)))
 
             .AsQueryable();
 
@@ -199,7 +199,7 @@ public class SalesQueryService
                 ? setHours(request.DepartureDate, hotel.LatestCheckOutTime)
                 : request.DepartureDate;
 
-        var cannotPropose = !sales.HasActiveProposition(now, request.Urid, arrivalDate, departureDate);
+        var cannotPropose = sales.HasActiveProposition(now, request.Urid, arrivalDate, departureDate);
 
         if (cannotPropose)
         {
@@ -215,6 +215,8 @@ public class SalesQueryService
             now,
             now.AddMinutes(FreeLockMinutes),
             request.Urid);
+
+        sales.AddStayProposition(prop);
 
         return prop;
     }

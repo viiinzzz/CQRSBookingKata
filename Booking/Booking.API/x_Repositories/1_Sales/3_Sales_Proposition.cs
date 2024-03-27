@@ -20,7 +20,8 @@ public partial class SalesRepository
         return _sales.Propositions
             .AsNoTracking()
             .Any(prop =>
-                prop.IsValid(now) &&
+                // prop.IsValid(now) &&
+                now >= prop.OptionStartsUtc && now < prop.OptionEndsUtc &&
 
                 prop.Urid == urid &&
 

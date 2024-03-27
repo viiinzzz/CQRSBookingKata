@@ -2,7 +2,7 @@
 
 public partial class AdminRepository(
     IDbContextFactory factory,
-    IGazeteerService geo
+    IGazetteerService geo
     // ITimeService DateTime
     ) : IAdminRepository, ITransactionable
 {

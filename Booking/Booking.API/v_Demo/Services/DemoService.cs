@@ -2,10 +2,11 @@ namespace BookingKata.API.Demo;
 
 public partial class DemoService
 (
-    DemoContext demo,
+    BookingDemoContext demo,
     IAdminRepository admin,
     IMoneyRepository money,
     ISalesRepository sales,
+    IGazetteerService geo,
 
     SalesQueryService sales2,
     BookingCommandService booking,
@@ -30,11 +31,14 @@ public partial class DemoService
         {
             DateTime.Freeze();
 
-            var context = new TransactionContext() * admin * money * sales;
+            var context = new TransactionContext() * admin * money * sales * geo;
 
+            //admin setup
             context.Execute(() => Fake_Employees(false));
             context.Execute(() => Fake_Hotels(false));
             context.Execute(() => Fake_Vacancies(false));
+
+            //sales setup
             context.Execute(() => Fake_Customers(false));
 
 

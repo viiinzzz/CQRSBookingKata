@@ -9,7 +9,7 @@ public class BookingCommandService
     IPlanningRepository planning,
 
     IPaymentCommandService payment,
-    IGazeteerService geo,
+    IGazetteerService geo,
 
     IMessageBus bus
 )
@@ -57,7 +57,7 @@ public class BookingCommandService
             var firstNight = OvernightStay.From(openingDate);
             var lastNight = OvernightStay.FromCheckOutDate(closingDate);
 
-            var dayNumbers = Enumerable.Range(firstNight.DayNum, lastNight.DayNum);
+            var dayNumbers = firstNight.DayNum.RangeTo(lastNight.DayNum);
 
 
             var vacancies = roomNumbers

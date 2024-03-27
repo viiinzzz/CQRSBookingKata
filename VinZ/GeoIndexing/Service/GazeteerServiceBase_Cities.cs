@@ -1,6 +1,6 @@
 ﻿namespace VinZ.GeoIndexing;
 
-public abstract partial class GazeteerServiceBase
+public abstract partial class GazetteerServiceBase
 {
     private static readonly City[] Cities = "cities"
         .GetJsonObjectArray<City>("assets")
@@ -36,7 +36,7 @@ public abstract partial class GazeteerServiceBase
 
             .Select(city =>
             {
-                var cityCell = GeoIndex(city);
+                var cityCell = CacheGeoIndex(city);
 
                 var km = double.MaxValue;
 
