@@ -9,7 +9,7 @@ public partial class DemoService
             throw new Exception("FakeCustomer not ready yet.");
         }
 
-        Console.WriteLine("Demo: Seeding Bookings...");
+        Console.WriteLine($"Demo: Seeding Bookings {demo.SimulationDay}...");
 
         var todayBookingCount = (int)RandomHelper.Rand(CustomerCount * 0.05);
 
@@ -21,7 +21,7 @@ public partial class DemoService
             {
                 var ci = RandomHelper.Rand(demo.FakeCustomerIds.Length);
                 var cid = demo.FakeCustomerIds[ci];
-                var c = demo.FakeCustomers[ci];
+                var c = demo.FakeCustomers[cid];
 
                 var stayStartDays = 1 + RandomHelper.Rand(45);
                 var stayDurationDays = 1 + RandomHelper.Rand(5);
@@ -40,21 +40,24 @@ public partial class DemoService
 
                 if (preferredStayMatches.Count() == 0)
                 {
-                    throw new Exception("stay not found");
+                    Console.WriteLine("Deomo: Booking skipped because no stay were found matching the customer's request!");
+                    continue;
+                    // throw new Exception("stay not found");
                 }
 
                 foreach (var m in preferredStayMatches)
                 {
-                    var p = sales2.LockProposition(m);
+                    var lockProposition = sales2.LockProposition(m);
 
-                    if (p != null)
+                    if (lockProposition == null)
                     {
-                        var bookingId = booking.Book(p, cid, c.LastName, c.FirstName, c.DebitCardNumber, c.DebitCardSecrets,
-                            scoped: false);
-
-                        break;
+                        continue;
                     }
 
+                    var bookingId = booking.Book(lockProposition, cid, c.LastName, c.FirstName, c.DebitCardNumber, c.DebitCardSecrets,
+                        scoped: false);
+
+                    break;
                 }
             }
             catch (Exception ex)

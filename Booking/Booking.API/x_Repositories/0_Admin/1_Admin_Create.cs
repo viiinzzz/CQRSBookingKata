@@ -80,13 +80,13 @@ public partial class AdminRepository
     {
         try
         {
-            using var scope = new TransactionScope();
+            using var scope = !scoped ? null : new TransactionScope();
 
             _admin.Bookings.Add(booking);
             _admin.SaveChanges();
             _admin.Entry(booking).State = EntityState.Detached;
 
-            scope.Complete();
+            scope?.Complete();
         }
         catch (Exception e)
         {

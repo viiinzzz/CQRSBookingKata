@@ -79,6 +79,7 @@ public class PlanningQueryService : MessageBusClientBase
                   check.TaskDone &&
                   !duty.TaskDone
 
+                  //TODO problem!!!
             orderby priority(duty) descending 
 
             select duty;

@@ -106,21 +106,34 @@ public class BookingCommandService
             throw new InvalidAmountException();
         }
 
-        if (!payment.Pay(prop.Price, prop.Currency, debitCardNumber, secrets.ownerName, secrets.expire, secrets.CCV))
-        {
-            throw new PaymentFailureException();
-        }
 
 
         try
         {
             using var scope = !scoped ? null : new TransactionScope();
 
+
+            var paid = payment.Pay(prop.Price, prop.Currency, debitCardNumber, secrets.ownerName, secrets.expire, secrets.CCV);
+
+            if (!paid)
+            {
+                throw new PaymentFailureException();
+            }
+
             var booking = new Booking(prop.ArrivalDate, prop.DepartureDate, lastName, firstName, prop.PersonCount, prop.Urid, customerId);
 
+            //
+            //
             money.AddInvoice(invoice, scoped: false);
-            admin.AddBooking(booking, scoped: false);
+            //
+            //
             
+            //
+            //
+            admin.AddBooking(booking, scoped: false);
+            //
+            //
+
             var beginDay = OvernightStay.From(booking.ArrivalDate);
             var endDay = OvernightStay.FromCheckOutDate(booking.DepartureDate);
 

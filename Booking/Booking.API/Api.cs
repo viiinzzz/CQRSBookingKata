@@ -260,10 +260,12 @@ void MapRoutes(WebApplication app)
 
     room.MapGet("/hotels/{hotelId}",
         (int hotelId, int? page, int? pageSize, [FromServices] PlanningQueryService planning) 
-            => planning.GetServiceRoomPlanning(hotelId).Page($"/service/room/{hotelId}", page, pageSize));
+            => planning.GetServiceRoomPlanning(hotelId)
+                .Page($"/service/room/{hotelId}", page, pageSize));
 
 
     app.MapGet("/booking", (
+            int? page, int? pageSize,
             [FromQuery(Name = "arrival")] DateTime arrivalDate,
             [FromQuery(Name = "departure")] DateTime departureDate,
             [FromQuery(Name = "persons")] int personCount,
@@ -277,15 +279,13 @@ void MapRoutes(WebApplication app)
             [FromQuery(Name = "pricemin")] NullableInt priceMin,
             [FromQuery(Name = "pricemax")] NullableInt priceMax,
             [FromQuery(Name = "currency")] string? currency,
-            int? page, int? pageSize,
             [FromServices] SalesQueryService sales) 
         => sales
             .Find(new StayRequest(
                 arrivalDate, departureDate, personCount,
                 approximateNameMatch, hotelName, countryCode, cityName,
                 latitude.Value, longitude.Value, maxKm.Value,
-                priceMin.Value, priceMax.Value, currency
-            ))
+                priceMin.Value, priceMax.Value, currency))
             .Page($"/booking", page, pageSize));
 
 }

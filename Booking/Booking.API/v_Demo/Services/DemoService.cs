@@ -66,7 +66,7 @@ ERROR: {ex}";
     {
         try
         {
-            var context = new TransactionContext() * admin * money * sales;
+            var context = new TransactionContext() * admin * money * sales * geo;
 
             for (var d = 0; d < days; d++)
             {

@@ -185,19 +185,25 @@ public class SalesQueryService
         var requestCheckInHours = request.ArrivalDate.Hour + request.ArrivalDate.Minute / 60d;
         var requestCheckOutHours = request.DepartureDate.Hour + request.DepartureDate.Minute / 60d;
 
-        var setHours = (DateTime date, double hours) 
-            => new DateTime(date.Year, date.Month, date.Day, 0, 0, 0)
-                .AddHours(hours);
 
-        var arrivalDate =
-            requestCheckInHours < hotel.EarliestCheckInHours 
-                ? setHours(request.ArrivalDate, hotel.EarliestCheckInHours) 
-                : request.ArrivalDate;
+        var arrivalDate = request.ArrivalDate;
 
-        var departureDate =
-            requestCheckOutHours > hotel.LatestCheckOutHours 
-                ? setHours(request.DepartureDate, hotel.LatestCheckOutTime)
-                : request.DepartureDate;
+        if (requestCheckInHours < hotel.EarliestCheckInHours)
+        {
+            arrivalDate = request.ArrivalDate
+                .DayStart()
+                .AddHours(hotel.EarliestCheckInHours);
+        }
+
+        var departureDate = request.DepartureDate;
+
+        if (requestCheckOutHours > hotel.LatestCheckOutHours)
+        {
+            departureDate = request.DepartureDate
+                .DayStart()
+                .AddHours(hotel.LatestCheckOutHours);
+        }
+
 
         var cannotPropose = sales.HasActiveProposition(now, request.Urid, arrivalDate, departureDate);
 

@@ -41,6 +41,9 @@ h2 {
     line-height: 50px;
 }
 
+button {
+    margin: 3em 1em;
+}
 .glow-on-hover {
     width: 220px;
     height: 50px;
