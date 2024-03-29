@@ -192,7 +192,8 @@ public class SalesQueryService
         {
             arrivalDate = request.ArrivalDate
                 .DayStart()
-                .AddHours(hotel.EarliestCheckInHours);
+                .AddHours(hotel.EarliestCheckInHours)
+                .RoundToTheSecond();
         }
 
         var departureDate = request.DepartureDate;
@@ -201,7 +202,8 @@ public class SalesQueryService
         {
             departureDate = request.DepartureDate
                 .DayStart()
-                .AddHours(hotel.LatestCheckOutHours);
+                .AddHours(hotel.LatestCheckOutHours)
+                .RoundToTheSecond();
         }
 
 

@@ -1,16 +1,20 @@
 ﻿
+
 namespace BookingKata.Planning;
 
 public class PlanningQueryService : MessageBusClientBase
 {
     private readonly IPlanningRepository planning;
+
     private readonly ITimeService DateTime;
+    private readonly IServerContextService server;
     private readonly IMessageBus bus;
 
-    public PlanningQueryService(IPlanningRepository planning, ITimeService DateTime, IMessageBus bus) : base(bus)
+    public PlanningQueryService(IPlanningRepository planning, ITimeService DateTime, IServerContextService server, IMessageBus bus) : base(bus)
     {
         this.planning = planning;
         this.DateTime = DateTime;
+        this.server = server;
         this.bus = bus;
 
         bus.Subscribe(this, default, "NEW BOOKING");
@@ -30,12 +34,8 @@ public class PlanningQueryService : MessageBusClientBase
     }
 
 
-    private int Days(DateTime t0, DateTime? t)
-    {
-        return (int)((t ?? System.DateTime.MaxValue) - t0).TotalDays;
-    }
 
-    public IQueryable<ReceptionCheck> GetReceptionPlanning(int hotelId)
+    public IQueryable<ReceptionCheck> GetReceptionFullPlanning(int hotelId)
     {
         var now = System.DateTime.UtcNow;
 
@@ -46,7 +46,58 @@ public class PlanningQueryService : MessageBusClientBase
             from check in planning.Checks
 
             where check.HotelId == hotelId &&
-                  nowDayNum == check.EventDayNum
+                  check.EventDayNum >= nowDayNum
+
+            select check;
+    }
+
+    public IQueryable<ReceptionCheck> GetReceptionTodayPlanning(int hotelId)
+    {
+        var now = System.DateTime.UtcNow;
+
+        var nowDayNum = OvernightStay.From(now).DayNum;
+
+        return 
+
+            from check in planning.Checks
+
+            where check.HotelId == hotelId &&
+                  check.EventDayNum >= nowDayNum &&
+                  check.EventDayNum <= nowDayNum + 1
+
+            select check;
+    }
+
+    public IQueryable<ReceptionCheck> GetReceptionWeekPlanning(int hotelId)
+    {
+        var now = System.DateTime.UtcNow;
+
+        var nowDayNum = OvernightStay.From(now).DayNum;
+
+        return 
+
+            from check in planning.Checks
+
+            where check.HotelId == hotelId &&
+                  check.EventDayNum >= nowDayNum &&
+                  check.EventDayNum <= nowDayNum + 7
+
+            select check;
+    }
+
+    public IQueryable<ReceptionCheck> GetReceptionMonthPlanning(int hotelId)
+    {
+        var now = System.DateTime.UtcNow;
+
+        var nowDayNum = OvernightStay.From(now).DayNum;
+
+        return 
+
+            from check in planning.Checks
+
+            where check.HotelId == hotelId &&
+                  check.EventDayNum >= nowDayNum &&
+                  check.EventDayNum <= nowDayNum + 30
 
             select check;
     }
@@ -54,34 +105,47 @@ public class PlanningQueryService : MessageBusClientBase
 
     public IQueryable<RoomServiceDuty> GetServiceRoomPlanning(int hotelId)
     {
-        var now = System.DateTime.UtcNow;
+        var now = DateTime.UtcNow;
 
-        var priority = (RoomServiceDuty duty) =>
-        {
-            var prevDays = Days(duty.FreeTime, now);
-            var nextDays = Days(now, duty.BusyTime);
-
-            return duty.FloorNum * (
-                nextDays == 0 ? 100_000 //today high priority
-                : nextDays == 1 ? 10_000 //tomorrow medium priority
-                : (prevDays >= 9 ? 9 : prevDays) * 1_000 //then the more stink the more urgent 
-            );
-        };
 
         return
-            
+
             from duty in planning.Duties
+
+            join serverContext in planning.ServerContexts
+                on server.Id equals serverContext.ServerContextId
 
             join check in planning.Checks
                 on duty.BookingId equals check.BookingId
 
-            where check.EventType == ReceptionEventType.CheckOut &&
-                  check.TaskDone &&
-                  !duty.TaskDone
+            where duty.HotelId == hotelId &&
+                  !duty.TaskDone &&
 
-                  //TODO problem!!!
-            orderby priority(duty) descending 
+                  check.EventType == ReceptionEventType.CheckOut &&
+                  check.TaskDone
 
-            select duty;
+            // orderby duty.Priority descending
+            orderby ( //the higher floor the more urgent (up-down priority)
+                    duty.FloorNum *
+                    (
+                        //today deadline is high priority - between day+0 and day+1
+                        (duty.BusyDayNum - serverContext.UtcNowDayNum) >= 0 &&
+                        (duty.BusyDayNum - serverContext.UtcNowDayNum) < 1
+                            ? 100_000
+                            //tomorrow deadline is medium priority - between day+1 and day+2
+                            : (duty.BusyDayNum - serverContext.UtcNowDayNum) >= 1 &&
+                              (duty.BusyDayNum - serverContext.UtcNowDayNum) < 2
+                                ? 10_000
+                                //then the more stink the more urgent
+                                : 1_000 * (
+                                    (serverContext.UtcNowDayNum - duty.FreeDayNum) < 9 // between day-0 and day-9
+                                        ? serverContext.UtcNowDayNum - duty.FreeDayNum
+                                        //cap to max days penalty
+                                        : 9
+                                )
+                    )
+                ) descending
+
+            select duty; //WithTranslation();
     }
 }

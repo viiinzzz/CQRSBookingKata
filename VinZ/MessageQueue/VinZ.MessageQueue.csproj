@@ -13,8 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FakeTime.Contracts\VinZ.FakeTime.Contracts.csproj" />
-    <ProjectReference Include="..\MessageQueue.Contracts\VinZ.MessageQueue.Contracts.csproj" />
+    <ProjectReference Include="..\FakeTime.Contracts\VinZ.FakeTime.Contract.csproj" />
+    <ProjectReference Include="..\MessageQueue.Contracts\VinZ.MessageQueue.Contract.csproj" />
   </ItemGroup>
 
 </Project>

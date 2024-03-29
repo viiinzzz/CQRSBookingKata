@@ -40,7 +40,7 @@ public partial class DemoService
 
                 if (preferredStayMatches.Count() == 0)
                 {
-                    Console.WriteLine("Deomo: Booking skipped because no stay were found matching the customer's request!");
+                    Console.WriteLine("Demo: Booking skipped because no stay were found matching the customer's request!");
                     continue;
                     // throw new Exception("stay not found");
                 }

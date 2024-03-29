@@ -9,7 +9,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orienta&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="~/styles.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="./styles.css" asp-append-version="true"/>
+
+    @RenderSection("head", false)
 </head>
 <body>
 <div class="container">

@@ -2,16 +2,15 @@
 
 public class OvernightStay
 {
-    private const int YearStart = 2024;
     private const int Evening = 18;
     private const int Morning = 8;
 
     private static readonly DateTime BaseCheckInDate = new (
-        YearStart, 1, 1, 
+        DayNumHelper.YearStart, 1, 1, 
         Evening, 0, 0);
 
     private static readonly DateTime BaseCheckOutDate = new(
-        YearStart, 1, 2,
+        DayNumHelper.YearStart, 1, 2,
         Morning, 0, 0);
 
     public int DayNum { get; }

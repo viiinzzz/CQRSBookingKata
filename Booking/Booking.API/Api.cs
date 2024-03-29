@@ -4,22 +4,52 @@
   ╎                                                                            ╎
   ╰----------------------------------------------------------------------------╯*/
 
+var pif = ProgramInfo.Current;
+pif.Print();
 
 
 /*╭-----------------------------------------------------------------------------
   ╎ Storage methods
 */
 
-
 void EnsureDatabaseCreated<TContext>(WebApplication app) where TContext : DbContext
 {
-    app
+    var database = app
         .Services
         .GetRequiredService<IDbContextFactory>()
         .CreateDbContext<TContext>()
-        .Database
-        .EnsureCreated();
+        .Database;
+
+    var created = database.EnsureCreated();
+
+    Console.WriteLine(@$"
+{typeof(TContext).Name}: {(created ? "Created" : "Not created")}. {database.GetConnectionString()}
+");
+
+
+    if (pif.IsDebug)
+    {
+        //for in-memory sqlite, as currently configured for the 'Debug' build configuration,
+        //at least one client connection needs to be kept open, otherwise the database vanishes
+        var dbContext = Activator.CreateInstance(typeof(TContext)) as TContext;
+        
+        var keepAlive = Task.Run(async () =>
+        {
+            while (true)
+            {
+                await Task.Delay(30000);
+
+                dbContext.Database.OpenConnection();
+
+                Console.WriteLine(@$"
+{typeof(TContext).Name}: Keep Alive. {database.GetConnectionString()}
+");
+            }
+        });
+    }
 }
+
+
 
 void EnsureAllDatabasesCreated(WebApplication app)
 {
@@ -58,11 +88,15 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
 {
     var services = builder.Services;
 
-    //adding components to the magic wiring box, aka. DI Container
+    //adding components to the magic wiring box, aka. DI Container to achieve IoC
 
     services.AddRazorPages();
 
     //backend
+    var serverContext = new ServerContextService();
+    services.AddSingleton<IServerContextService>(sp => serverContext);
+    Console.WriteLine($"{nameof(ServerContext)}: Id={serverContext.Id}");
+
     services.AddSingleton<MessageQueueServer>();
     services.AddSingleton<IMessageQueueServer>(sp => sp.GetRequiredService<MessageQueueServer>());
     services.AddSingleton<IMessageBus>(sp => sp.GetRequiredService<MessageQueueServer>());
@@ -77,7 +111,9 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
     services.AddScoped<IGazetteerService, GazetteerService>();
     services.AddScoped<IPaymentCommandService, PaymentCommandService>();
     services.AddScoped<PricingQueryService>();
-    services.AddSingleton<ITimeService, TimeService>();
+
+    var dateTime = new TimeService();
+    services.AddSingleton<ITimeService, TimeService>(sp => dateTime);
 
     // services.AddHttpContextAccessor();
     services.AddAntiforgery();
@@ -249,9 +285,24 @@ void MapRoutes(WebApplication app)
 
     var reception = app.MapGroup("/reception");
 
-    reception.MapGet("/hotels/{hotelId}", 
+    reception.MapGet("/planning/full/hotels/{hotelId}",
         (int hotelId, int? page, int? pageSize, [FromServices] PlanningQueryService planning)
-            => planning.GetReceptionPlanning(hotelId)
+            => planning.GetReceptionFullPlanning(hotelId)
+                .Page($"/reception/{hotelId}", page, pageSize));
+
+    reception.MapGet("/planning/today/hotels/{hotelId}",
+        (int hotelId, int? page, int? pageSize, [FromServices] PlanningQueryService planning)
+            => planning.GetReceptionTodayPlanning(hotelId)
+                .Page($"/reception/{hotelId}", page, pageSize));
+
+    reception.MapGet("/planning/week/hotels/{hotelId}",
+        (int hotelId, int? page, int? pageSize, [FromServices] PlanningQueryService planning)
+            => planning.GetReceptionWeekPlanning(hotelId)
+                .Page($"/reception/{hotelId}", page, pageSize));
+
+    reception.MapGet("/planning/month/hotels/{hotelId}",
+        (int hotelId, int? page, int? pageSize, [FromServices] PlanningQueryService planning)
+            => planning.GetReceptionMonthPlanning(hotelId)
                 .Page($"/reception/{hotelId}", page, pageSize));
 
     var service = app.MapGroup("/service");

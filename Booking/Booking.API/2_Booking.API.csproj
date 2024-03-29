@@ -7,7 +7,23 @@
     <InvariantGlobalization>true</InvariantGlobalization>
     <PublishAot>False</PublishAot>
     <RootNamespace>Booking.API</RootNamespace>
+    <AssemblyName>Booking.API</AssemblyName>
+    <ApplicationIcon>viiinzzz-round.ico</ApplicationIcon>
+    <FileVersion>1.24.3.29</FileVersion>
+    <Authors>VinZ</Authors>
+    <PackageIcon>viiinzzz-round.png</PackageIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="viiinzzz-round.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\viiinzzz-round.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.3" />
@@ -18,6 +34,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\VinZ\GeoIndexing\VinZ.GeoIndexing.csproj" />
     <ProjectReference Include="..\..\VinZ\ParsableHelper\VinZ.ParsableHelper.csproj" />
+    <ProjectReference Include="..\..\VinZ\ServerContext\VinZ.ServerContext.csproj" />
     <ProjectReference Include="..\Booking.Business\1_Booking.Business.csproj" />
     <ProjectReference Include="..\..\VinZ\FakeTime\VinZ.FakeTime.csproj" />
     <ProjectReference Include="..\..\VinZ\MessageQueue\VinZ.MessageQueue.csproj" />

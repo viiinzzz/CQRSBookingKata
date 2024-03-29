@@ -38,13 +38,9 @@ public partial class SalesRepository
 
     public Customer? GetCustomer(int customerId)
     {
-        var customer = _sales.Customers
-            .Find(customerId);
+        var customer = _sales.Customers.Find(customerId);
 
-        if (customer == default)
-        {
-            return default;
-        }
+        if (customer == default) return default;
 
         _sales.Entry(customer).State = EntityState.Detached;
 
@@ -56,10 +52,7 @@ public partial class SalesRepository
         var customer = _sales.Customers
             .FirstOrDefault(customer => customer.EmailAddress == emailAddress);
 
-        if (customer == default)
-        {
-            return default;
-        }
+        if (customer == default) return default;
 
         _sales.Entry(customer).State = EntityState.Detached;
 

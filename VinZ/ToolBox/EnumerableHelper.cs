@@ -23,11 +23,3 @@ public static class EnumerableHelper
         }
     }
 }
-
-public static class DateTimeHelper
-{
-    public static DateTime DayStart(this DateTime date)
-    {
-        return new DateTime(date.Year, date.Month, date.Day, 0, 0, 0);
-    }
-}

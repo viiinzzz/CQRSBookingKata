@@ -1,4 +1,6 @@
 ﻿
+using BookingKata.Planning;
+
 namespace BookingKata.API;
 
 public partial class AdminRepository
@@ -7,7 +9,9 @@ public partial class AdminRepository
     {
         var hotel = _admin.Hotels.Find(hotelId);
 
-        _admin.Entry<Hotel>(hotel).State = EntityState.Detached;
+        if (hotel == default) return default;
+
+        _admin.Entry(hotel).State = EntityState.Detached;
 
         var hotelCells = geo.CacheGeoIndex(hotel, SalesQueryService.PrecisionMaxKm);
 
@@ -18,22 +22,26 @@ public partial class AdminRepository
 
     public Room? GetRoom(int uniqueRoomId)
     {
-        var ret = _admin.Rooms
+        var room = _admin.Rooms
             .Find(uniqueRoomId);
 
-        _admin.Entry<Room>(ret).State = EntityState.Detached;
+        if (room == default) return default;
 
-        return ret;
+        _admin.Entry(room).State = EntityState.Detached;
+
+        return room;
     }
 
     public Employee? GetEmployee(int employeeId)
     {
-        var ret = _admin.Employees
+        var employee = _admin.Employees
             .Find(employeeId);
 
-        _admin.Entry<Employee>(ret).State = EntityState.Detached;
+        if (employee == default) return default;
 
-        return ret;
+        _admin.Entry(employee).State = EntityState.Detached;
+
+        return employee;
     }
 
 }

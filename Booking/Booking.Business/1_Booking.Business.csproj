@@ -22,10 +22,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\VinZ\FakeTime.Contracts\VinZ.FakeTime.Contracts.csproj" />
+    <PackageReference Include="Microsoft.Linq.Translations" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\VinZ\FakeTime.Contracts\VinZ.FakeTime.Contract.csproj" />
     <ProjectReference Include="..\..\VinZ\GeoIndexing.Contract\VinZ.GeoIndexing.Contract.csproj" />
-    <ProjectReference Include="..\..\VinZ\MessageQueue.Contracts\VinZ.MessageQueue.Contracts.csproj" />
+    <ProjectReference Include="..\..\VinZ\MessageQueue.Contracts\VinZ.MessageQueue.Contract.csproj" />
     <ProjectReference Include="..\..\VinZ\PositionHelper\VinZ.PositionHelper.csproj" />
+    <ProjectReference Include="..\..\VinZ\ServerContext.Contract\VinZ.ServerContext.Contract.csproj" />
     <ProjectReference Include="..\..\VinZ\StringHelper\VinZ.StringHelper.csproj" />
     <ProjectReference Include="..\..\VinZ\ToolBox\VinZ.ToolBox.csproj" />
   </ItemGroup>

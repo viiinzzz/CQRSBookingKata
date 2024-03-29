@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace VinZ.ToolBox;
+namespace VinZ.Common;
 
 public static class HashHelper
 {

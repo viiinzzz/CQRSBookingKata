@@ -11,11 +11,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "9_Booking.Tests", "Booking\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.MessageQueue", "VinZ\MessageQueue\VinZ.MessageQueue.csproj", "{4E9989DB-0AB8-4036-ABE4-852C8B91530F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.MessageQueue.Contracts", "VinZ\MessageQueue.Contracts\VinZ.MessageQueue.Contracts.csproj", "{290995D1-BBBB-42C5-9310-9BA79C29A333}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.MessageQueue.Contract", "VinZ\MessageQueue.Contracts\VinZ.MessageQueue.Contract.csproj", "{290995D1-BBBB-42C5-9310-9BA79C29A333}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.FakeTime", "VinZ\FakeTime\VinZ.FakeTime.csproj", "{A9FFC471-B525-402E-8965-65835FFC1EC1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.FakeTime.Contracts", "VinZ\FakeTime.Contracts\VinZ.FakeTime.Contracts.csproj", "{25A73BEF-D025-4A10-8DF5-896057D16789}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.FakeTime.Contract", "VinZ\FakeTime.Contracts\VinZ.FakeTime.Contract.csproj", "{25A73BEF-D025-4A10-8DF5-896057D16789}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Z_VinZ.Common", "Z_VinZ.Common", "{A621E367-C479-4911-A23D-FD879A3277A2}"
 EndProject
@@ -35,7 +35,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.GeoIndexing", "VinZ\Ge
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.GeoIndexing.Contract", "VinZ\GeoIndexing.Contract\VinZ.GeoIndexing.Contract.csproj", "{C8675AC4-324B-4ED9-8A2F-9173A671DAB7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vinz.RecordHelper", "RecordHelper\Vinz.RecordHelper.csproj", "{B2A9726D-BF39-4AED-97A7-264C67E41239}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vinz.RecordHelper", "VinZ\RecordHelper\Vinz.RecordHelper.csproj", "{B2A9726D-BF39-4AED-97A7-264C67E41239}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VinZ.ServerContext", "VinZ\ServerContext\VinZ.ServerContext.csproj", "{FAC18B47-AF81-4A82-9EBD-BDB7CA8A0821}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VinZ.ServerContext.Contract", "VinZ\ServerContext.Contract\VinZ.ServerContext.Contract.csproj", "{711B5667-1E01-4C4F-8B8B-463A529CD7E7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.UUIDHelper", "VinZ\UUIDHelper\VinZ.UUIDHelper.csproj", "{296E560B-CBA0-4E77-8E4A-4E6F1AF016B7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VinZ.Hash64", "VinZ\Hash64\VinZ.Hash64.csproj", "{E140E340-424B-4324-BF3C-10FF5056FB76}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -103,6 +111,22 @@ Global
 		{B2A9726D-BF39-4AED-97A7-264C67E41239}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2A9726D-BF39-4AED-97A7-264C67E41239}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2A9726D-BF39-4AED-97A7-264C67E41239}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FAC18B47-AF81-4A82-9EBD-BDB7CA8A0821}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAC18B47-AF81-4A82-9EBD-BDB7CA8A0821}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAC18B47-AF81-4A82-9EBD-BDB7CA8A0821}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAC18B47-AF81-4A82-9EBD-BDB7CA8A0821}.Release|Any CPU.Build.0 = Release|Any CPU
+		{711B5667-1E01-4C4F-8B8B-463A529CD7E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{711B5667-1E01-4C4F-8B8B-463A529CD7E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{711B5667-1E01-4C4F-8B8B-463A529CD7E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{711B5667-1E01-4C4F-8B8B-463A529CD7E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{296E560B-CBA0-4E77-8E4A-4E6F1AF016B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{296E560B-CBA0-4E77-8E4A-4E6F1AF016B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{296E560B-CBA0-4E77-8E4A-4E6F1AF016B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{296E560B-CBA0-4E77-8E4A-4E6F1AF016B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E140E340-424B-4324-BF3C-10FF5056FB76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E140E340-424B-4324-BF3C-10FF5056FB76}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E140E340-424B-4324-BF3C-10FF5056FB76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E140E340-424B-4324-BF3C-10FF5056FB76}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -123,6 +147,10 @@ Global
 		{B95F1380-5860-4510-89C8-BC42E6FB6944} = {A621E367-C479-4911-A23D-FD879A3277A2}
 		{C8675AC4-324B-4ED9-8A2F-9173A671DAB7} = {A621E367-C479-4911-A23D-FD879A3277A2}
 		{B2A9726D-BF39-4AED-97A7-264C67E41239} = {A621E367-C479-4911-A23D-FD879A3277A2}
+		{FAC18B47-AF81-4A82-9EBD-BDB7CA8A0821} = {A621E367-C479-4911-A23D-FD879A3277A2}
+		{711B5667-1E01-4C4F-8B8B-463A529CD7E7} = {A621E367-C479-4911-A23D-FD879A3277A2}
+		{296E560B-CBA0-4E77-8E4A-4E6F1AF016B7} = {A621E367-C479-4911-A23D-FD879A3277A2}
+		{E140E340-424B-4324-BF3C-10FF5056FB76} = {A621E367-C479-4911-A23D-FD879A3277A2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {590111C3-57D0-485D-BF05-544FE98D0519}

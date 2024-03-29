@@ -4,12 +4,11 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>VinZ.GeoIndexing</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PositionHelper\VinZ.PositionHelper.csproj" />
-    <ProjectReference Include="..\RecordHelper\Vinz.RecordHelper.csproj" />
+    <ProjectReference Include="..\ServerContext.Contract\VinZ.ServerContext.Contract.csproj" />
+    <ProjectReference Include="..\UUIDHelper\VinZ.UUIDHelper.csproj" />
   </ItemGroup>
 
 </Project>

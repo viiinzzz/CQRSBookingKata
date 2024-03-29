@@ -1,12 +1,24 @@
 ﻿
 namespace BookingKata.API;
 
-public class PlanningRepository(IDbContextFactory factory, ITimeService DateTime) : IPlanningRepository, ITransactionable
+public class PlanningRepository(IDbContextFactory factory, IServerContextService serverContext, ITimeService DateTime) : IPlanningRepository, ITransactionable
 {
     private readonly BookingPlanningContext _planning = factory.CreateDbContext<BookingPlanningContext>();
 
-    public TransactionContext AsTransaction() => new TransactionContext() * _planning;
+    private BookingPlanningContext GetContext()
+    {
+        var context = factory.CreateDbContext<BookingPlanningContext>();
 
+        var utcNow = DateTime.UtcNow;
+        var utcNowDayNum = utcNow.FractionalDayNum();
+        var serverContextId = serverContext.Id;
+
+        SetServerContext(new ServerContext(utcNow, utcNowDayNum, serverContextId), scoped: false);
+
+        return context;
+    }
+
+    public TransactionContext AsTransaction() => new TransactionContext() * _planning;
 
     public IQueryable<ReceptionCheck> Checks
 
@@ -18,6 +30,10 @@ public class PlanningRepository(IDbContextFactory factory, ITimeService DateTime
         => _planning.Duties
             .AsNoTracking();
 
+    public IQueryable<ServerContext> ServerContexts
+        
+        => _planning.ServerContext
+            .AsNoTracking();
 
     public void Add(ReceptionCheck check)
     {
@@ -114,4 +130,48 @@ public class PlanningRepository(IDbContextFactory factory, ITimeService DateTime
             throw new ServerErrorException(e);
         }
     }
+
+    public ServerContext? GetServerContext()
+    {
+        var context = _planning.ServerContext.Find(serverContext.Id);
+
+        if (context == default) return default;
+
+        _planning.Entry(serverContext).State = EntityState.Detached;
+
+        return context;
+    }
+
+
+    public void SetServerContext(ServerContext serverContext, bool scoped)
+    {
+        //InsertOrUpdate
+        try
+        {
+            using var scope = !scoped ? null : new TransactionScope();
+
+            var update = _planning.ServerContext
+                .Any(serverContext2 => serverContext2.ServerContextId == serverContext.ServerContextId);
+
+            var entity = _planning.Entry(serverContext);
+
+            entity.State = update 
+                ? EntityState.Modified 
+                : EntityState.Added;
+
+            _planning.SaveChanges();
+
+            entity.State = EntityState.Detached;
+
+            scope?.Complete();
+        }
+        catch (Exception e)
+        {
+            throw new ServerErrorException(e);
+        }
+    }
+
+
+
+
 }

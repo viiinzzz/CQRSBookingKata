@@ -170,7 +170,12 @@ public class BookingCommandService
                 room.RoomNum, false, room.HotelId,
                 booking.BookingId, default, false, default, 0));
 
-            planning.Add(new RoomServiceDuty(booking.DepartureDate, default/****/,
+
+            var departureFracDayNum = OvernightStay.From(booking.DepartureDate).DayNum;
+
+            planning.Add(new RoomServiceDuty(
+                booking.DepartureDate, DateTime.MaxValue,
+                booking.DepartureDate.FractionalDayNum(), DateTime.MaxValue.FractionalDayNum(),
                 room.RoomNum, room.FloorNum, false, room.HotelId, 
                 booking.BookingId, default, 0));
 

@@ -6,8 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\FakeTime.Contracts\VinZ.FakeTime.Contract.csproj" />
-  </ItemGroup>
-
 </Project>
