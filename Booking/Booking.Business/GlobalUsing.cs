@@ -7,8 +7,10 @@ global using BookingKata.Sales;
 global using BookingKata.ThirdParty;
 
 global using VinZ.ToolBox;
-global using Vinz.MessageQueue;
-global using Vinz.FakeTime;
+global using VinZ.MessageQueue;
+global using VinZ.FakeTime;
 global using VinZ.GeoIndexing;
 global using VinZ.ServerContext;
 global using VinZ.Common;
+
+global using VinZ.MessageQueue;

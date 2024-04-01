@@ -1,6 +1,6 @@
-﻿namespace Vinz.MessageQueue;
+﻿namespace VinZ.MessageQueue;
 
-public record DeliveryCount(int Delivered = 0, int Failed = 0)
+public record struct DeliveryCount(int Delivered = 0, int Failed = 0)
 {
     public int Total => Delivered + Failed;
 

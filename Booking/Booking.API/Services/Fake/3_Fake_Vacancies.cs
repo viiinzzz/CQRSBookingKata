@@ -10,7 +10,11 @@ public partial class DemoService
 
             foreach (var hotelId in demo.FakeHotelsIds)
             {
-                Console.WriteLine($"Demo: Seeding Vacancies for hotel#{hotelId}...");
+                bus.Notify(new NotifyMessage(Recipient.Audit, Verb.Audit.Information)
+                {
+                    Message = $"Demo: Seeding Vacancies for hotel#{hotelId}...",
+                    Immediate = true
+                });
 
                 booking.OpenHotelSeason(
                     hotelId, default,

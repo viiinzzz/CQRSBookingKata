@@ -142,18 +142,17 @@ public class BookingCommandService
             sales.RemoveVacancies(booked, scoped: false);
 
 
-            bus.Notify(new NotifyMessage {
-                Recipient = default,
-                Verb = "NEW BOOKING",
-                Message = new
-                {
+            bus.Notify(new NotifyMessage(Bus.Any, Verb.Sales.NewBooking)
+            {
+                Message = new NewBooking
+                (
                     booking.BookingId,
                     booking.ArrivalDate,
                     booking.DepartureDate,
                     booking.LastName,
                     booking.FirstName,
                     booking.UniqueRoomId
-                },
+                )
             });
 
             var room = new UniqueRoomId(booking.UniqueRoomId);
@@ -191,3 +190,12 @@ public class BookingCommandService
 
   
 }
+
+public record NewBooking(
+    int BookingId,
+    DateTime ArrivalDate,
+    DateTime DepartureDate,
+    string LastName,
+    string FirstName,
+    int UniqueRoomId
+);

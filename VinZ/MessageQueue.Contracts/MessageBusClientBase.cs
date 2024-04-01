@@ -1,17 +1,70 @@
-﻿namespace Vinz.MessageQueue;
+﻿namespace VinZ.MessageQueue;
 
-public class MessageBusClientBase(IMessageBus bus) : IMessageBusClient
+
+public class MessageBusClientBase : IMessageBusClient
 {
-    public int Subscribe(string? recipient, string? verb) => bus.Subscribe(this, recipient, verb);
-    public bool Unsubscribe(string? recipient, string? verb) => bus.Unsubscribe(this, recipient, verb);
+    private IMessageBus? _bus;
 
-    public void Notify(INotifyMessage message) => bus.Notify(message);
-
-    public event EventHandler<IClientMessage>? Notified;
-
-    public virtual void OnNotified(IClientMessage message)
+    private void CheckBus()
     {
-        Notified?.Invoke(this, message);
+        if (_bus == null)
+        {
+            throw new InvalidOperationException("Not connected to a bus");
+        }
+    }
+
+    public IMessageBusClient ConnectTo(IMessageBus bus)
+    {
+        if (_bus != null)
+        {
+            throw new InvalidOperationException("Already connected to a bus");
+        }
+
+        _bus = bus;
+
+        return this;
+    }
+
+    public virtual void Configure() { }
+
+    public bool Disconnect()
+    {
+        CheckBus();
+
+
+        var ret = Unsubscribe(Bus.Any, Verb.Any);
+
+        _bus = null;
+
+        return ret;
+    }
+
+    public int Subscribe(string? recipient = default, string? verb = default)
+    {
+        CheckBus();
+
+        return _bus!.Subscribe(this, recipient, verb);
+    }
+
+    public bool Unsubscribe(string? recipient = default, string? verb = default)
+    {
+        CheckBus();
+
+        return _bus!.Unsubscribe(this, recipient, verb);
+    }
+
+    public void Notify(INotifyMessage message)
+    {
+        CheckBus();
+
+        _bus!.Notify(message);
+    }
+
+    public event EventHandler<IClientNotification>? Notified;
+
+    public virtual void OnNotified(IClientNotification notification)
+    {
+        Notified?.Invoke(this, notification);
     }
 
 }

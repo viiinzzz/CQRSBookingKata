@@ -1,6 +1,4 @@
-using System.Text;
-
-namespace BookingKata.Common;
+namespace BookingKata.API.Demo;
 
 public static class RandomHelper
 {

@@ -1,4 +1,4 @@
-namespace BookingKata.API.Helpers;
+namespace VinZ.Paging;
 
 public class PageLinks
 {

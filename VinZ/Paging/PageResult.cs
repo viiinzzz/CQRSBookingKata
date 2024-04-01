@@ -1,4 +1,6 @@
-namespace BookingKata.API.Helpers;
+using VinZ.ToolBox;
+
+namespace VinZ.Paging;
 
 public record PageResult<TEntity>(
 

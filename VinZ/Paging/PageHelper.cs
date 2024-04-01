@@ -1,12 +1,19 @@
-namespace BookingKata.API.Helpers;
+namespace VinZ.Paging;
 
 public static class PageHelper
 {
     private static readonly int DefaultPageSize = 50;
 
 
-    public static PageResult<TEntity> Page<TEntity>(this IQueryable<TEntity> query, string baseUrl, int? pageSpec,
-        int? pageSizeSpec) where TEntity : class
+    public static PageResult<TEntity> Page<TEntity>
+    (
+        this IQueryable<TEntity> query,
+        string baseUrl,
+        int? pageSpec,
+        int? pageSizeSpec,
+        Action<IQueryable<TEntity>>? queryCheck// = default
+    )
+        where TEntity : class
     {
         var page = pageSpec;
         if (page is null or < 1) page = 1;
@@ -19,12 +26,7 @@ public static class PageHelper
             .Skip((page0 ?? 0) * pageSize)
             .Take(pageSize);
 
-
-        if (pageQuery.LostInTranslation(out var sql, out var translationError))
-        {
-            throw new ServerErrorException(new Exception("We are hiring a new developer..."));
-        }
-
+        queryCheck?.Invoke(pageQuery);
 
         //
         //

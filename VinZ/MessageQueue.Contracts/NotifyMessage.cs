@@ -1,4 +1,4 @@
-﻿namespace Vinz.MessageQueue;
+﻿namespace VinZ.MessageQueue;
 
 public record NotifyMessage(
     string? Recipient = default,

@@ -1,4 +1,4 @@
-﻿namespace Vinz.FakeTime;
+﻿namespace VinZ.FakeTime;
 
 public interface ITimeService
 {
@@ -8,4 +8,15 @@ public interface ITimeService
     ITimeService Reset();
     ITimeService Forward(TimeSpan forward);
     DateTime UtcNow { get; }
+
+    event EventHandler<TimeServiceNotification>? Notified;
 }
+
+public record TimeServiceNotification
+(
+    string verb, 
+    DateTime UtcNow,
+    bool Freeze, 
+    bool Fake, 
+    string state
+);

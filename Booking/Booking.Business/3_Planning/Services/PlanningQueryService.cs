@@ -2,39 +2,14 @@
 
 namespace BookingKata.Planning;
 
-public class PlanningQueryService : MessageBusClientBase
+public partial class PlanningQueryService
+(
+    IPlanningRepository planning,
+
+    ITimeService DateTime,
+    IServerContextService server
+)
 {
-    private readonly IPlanningRepository planning;
-
-    private readonly ITimeService DateTime;
-    private readonly IServerContextService server;
-    private readonly IMessageBus bus;
-
-    public PlanningQueryService(IPlanningRepository planning, ITimeService DateTime, IServerContextService server, IMessageBus bus) : base(bus)
-    {
-        this.planning = planning;
-        this.DateTime = DateTime;
-        this.server = server;
-        this.bus = bus;
-
-        bus.Subscribe(this, default, "NEW BOOKING");
-
-        Notified += (sender, message) =>
-        {
-            switch (message.Verb)
-            {
-                case "NEW BOOKING":
-                    var m = message.Message;
-                    break;
-
-                default:
-                    break;
-            }
-        };
-    }
-
-
-
     public IQueryable<ReceptionCheck> GetReceptionFullPlanning(int hotelId)
     {
         var now = System.DateTime.UtcNow;

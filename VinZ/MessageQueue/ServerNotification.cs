@@ -1,6 +1,6 @@
-﻿namespace Vinz.MessageQueue;
+﻿namespace VinZ.MessageQueue;
 
-public record ServerMessage
+public record ServerNotification
 (
     string? Json = default,
     string? Verb = default,
@@ -10,8 +10,17 @@ public record ServerMessage
     DateTime EarliestDelivery = default,
     DateTime LatestDelivery = default,
     TimeSpan RepeatDelay = default,
-    int RepeatCount = default,
     bool Aggregate = default,
 
+    int RepeatCount = default,
+    bool Done = false,
+    DateTime DoneTime = default,
     int MessageId = default
+);
+
+public record ServerNotificationUpdate
+(
+    int? RepeatCount = default,
+    bool? Done = default,
+    DateTime? DoneTime = default
 );

@@ -11,17 +11,19 @@ public partial class DemoService
     SalesQueryService sales2,
     BookingCommandService booking,
 
+    IMessageBus bus,
     ITimeService DateTime
 )
+    : MessageBusClientBase
 {
     private const int StaffPerHotel = 3;
     private const int ManagerPerHotel = 1;
-    private const int HotelCount = 3;
+    private const int HotelCount = 1;//3
     private const int FloorPerHotel = 2;
     private const int RoomPerFloor = 3;
     private const int PersonPerRoom = 2;
 
-    private const int SeasonDayNumbers = 250;
+    private const int SeasonDayNumbers = 50;//250
     private const int CustomerCount = 1000;
 
 
@@ -54,7 +56,12 @@ Demo Seed aborted!
 
 ERROR: {ex}";
 
-            Console.Error.WriteLine(message);
+            // Console.Error.WriteLine(message);
+            bus.Notify(new NotifyMessage(Recipient.Audit, Verb.Audit.Error)
+            {
+                Message = message,
+                Immediate = true
+            });
         }
     }
 
@@ -95,7 +102,12 @@ Demo Forward aborted!
 
 ERROR: {ex}";
 
-            Console.Error.WriteLine(message);
+            // Console.Error.WriteLine(message);
+            bus.Notify(new NotifyMessage(Recipient.Audit, Verb.Audit.Error)
+            {
+                Message = message,
+                Immediate = true
+            });
         }
 
         return DateTime.UtcNow;

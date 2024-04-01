@@ -9,7 +9,11 @@ public partial class DemoService
             throw new Exception("FakeCustomer not ready yet.");
         }
 
-        Console.WriteLine($"Demo: Seeding Bookings {demo.SimulationDay}...");
+        bus.Notify(new NotifyMessage(Recipient.Audit, Verb.Audit.Information)
+        {
+            Message = $"Demo: Seeding Bookings {demo.SimulationDay}...",
+            Immediate = true
+        });
 
         var todayBookingCount = (int)RandomHelper.Rand(CustomerCount * 0.05);
 
@@ -40,7 +44,12 @@ public partial class DemoService
 
                 if (preferredStayMatches.Count() == 0)
                 {
-                    Console.WriteLine("Demo: Booking skipped because no stay were found matching the customer's request!");
+                    bus.Notify(new NotifyMessage(Recipient.Audit, Verb.Audit.Error)
+                    {
+                        Message = "Demo: Booking skipped because no stay were found matching the customer's request!",
+                        Immediate = true
+                    });
+
                     continue;
                     // throw new Exception("stay not found");
                 }

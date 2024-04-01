@@ -1,3 +1,5 @@
+using BookingKata.Admin;
+
 namespace BookingKata.API.Demo;
 
 public partial class DemoService
@@ -9,7 +11,11 @@ public partial class DemoService
         {
             using var scope = !scoped ? null : new TransactionScope();
 
-            Console.WriteLine("Demo: Seeding Customers...");
+            bus.Notify(new NotifyMessage(Recipient.Audit, Verb.Audit.Information)
+            {
+                Message = "Demo: Seeding Customers...",
+                Immediate = true
+            });
 
             demo.FakeCustomerIds = RandomHelper
                 .GenerateFakeCustomers(CustomerCount)

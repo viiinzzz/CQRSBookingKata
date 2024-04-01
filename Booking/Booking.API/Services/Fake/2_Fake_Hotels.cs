@@ -8,10 +8,14 @@ public partial class DemoService
         {
             using var scope = !scoped ? null : new TransactionScope();
 
-            Console.WriteLine("Demo: Seeding Hotels...");
+            bus.Notify(new NotifyMessage(Recipient.Audit, Verb.Audit.Information)
+            {
+                Message = "Demo: Seeding Hotels...",
+                Immediate = true
+            });
 
             demo.FakeHotelsIds = RandomHelper
-                .GenerateFakeHotels(3)
+                .GenerateFakeHotels(HotelCount)
                 .Select((fake, hotelNum) =>
                 {
                     var managerId = demo.FakeManagerIds[hotelNum];

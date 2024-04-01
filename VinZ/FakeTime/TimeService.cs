@@ -1,12 +1,31 @@
-﻿namespace Vinz.FakeTime;
+﻿namespace VinZ.FakeTime;
 
 public class TimeService : ITimeService
 {
     private TimeSpan? _dt;
     private DateTime? _freeze;
 
-    private void Log(string message) 
-        => Console.WriteLine($"{nameof(TimeService)}: [{message}] {UtcNow:s} {(_freeze != default ? "(frozen)" : _dt != default ? "(fake)" : "(real)")}");
+
+    public event EventHandler<TimeServiceNotification>? Notified;
+
+    public virtual void OnNotified(TimeServiceNotification notification)
+    {
+        Notified?.Invoke(this, notification);
+    }
+
+
+    private void Notify(string verb)
+    {
+        var utcNow = UtcNow;
+
+        var freeze = _freeze != default;
+        var fake = _dt != default;
+        var state = freeze ? "frozen" : fake ? "fake" : "real";
+        
+        var notification = new TimeServiceNotification(verb, utcNow, freeze, fake, state);
+        
+        OnNotified(notification);
+    }
 
     public ITimeService SetUtcNow(DateTime time)
     {
@@ -16,7 +35,7 @@ public class TimeService : ITimeService
 
         if (_freeze.HasValue) _freeze = utcNow + _dt;
 
-        Log("set");
+        Notify(Verb.Time.Set);
         return this;
     }
 
@@ -24,7 +43,7 @@ public class TimeService : ITimeService
     {
         _freeze = UtcNow;
 
-        Log("freeze");
+        Notify(Verb.Time.Freeze);
         return this;
     }
 
@@ -32,7 +51,7 @@ public class TimeService : ITimeService
     {
         _freeze = default;
 
-        Log("unfreeze");
+        Notify(Verb.Time.Unfreeze);
         return this;
     }
 
@@ -41,7 +60,7 @@ public class TimeService : ITimeService
         _dt = default;
         _freeze = default;
 
-        Log("reset");
+        Notify(Verb.Time.Reset);
         return this;
     }
 
@@ -49,7 +68,7 @@ public class TimeService : ITimeService
     {
         SetUtcNow(UtcNow + forward);
 
-        Log("forward");
+        Notify(Verb.Time.Forward);
         return this;
     }
 

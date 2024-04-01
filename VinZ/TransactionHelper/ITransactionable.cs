@@ -1,4 +1,4 @@
-namespace BookingKata.API.Helpers;
+namespace VinZ.DbContextHelper;
 
 public interface ITransactionable
 {

@@ -1,4 +1,9 @@
-namespace BookingKata.API.Helpers;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+
+namespace VinZ.DbContextHelper;
 
 public static class DbContextHelper
 {

@@ -9,7 +9,11 @@ public partial class DemoService
         {
             using var scope = !scoped ? null : new TransactionScope();
 
-            Console.WriteLine("Demo: Seeding Staff...");
+            bus.Notify(new NotifyMessage(Recipient.Audit, Verb.Audit.Information)
+            {
+                Message = "Demo: Seeding Staff...",
+                Immediate = true
+            });
 
             demo.FakeStaffIds = RandomHelper
                 .GenerateFakeEmployees(HotelCount * StaffPerHotel)
@@ -23,7 +27,11 @@ public partial class DemoService
                 })
                 .ToArray();
 
-            Console.WriteLine("Demo: Seeding Managers...");
+            bus.Notify(new NotifyMessage(Recipient.Audit, Verb.Audit.Information)
+            {
+                Message = "Demo: Seeding Managers...",
+                Immediate = true
+            });
 
             demo.FakeManagerIds = RandomHelper
                 .GenerateFakeEmployees(HotelCount * ManagerPerHotel)

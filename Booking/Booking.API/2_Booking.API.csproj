@@ -27,14 +27,15 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.3" />
     <PackageReference Include="Zejji.DbContextScope.EFCore" Version="8.0.100.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\VinZ\GeoIndexing\VinZ.GeoIndexing.csproj" />
+    <ProjectReference Include="..\..\VinZ\Paging\VinZ.Paging.csproj" />
     <ProjectReference Include="..\..\VinZ\ParsableHelper\VinZ.ParsableHelper.csproj" />
     <ProjectReference Include="..\..\VinZ\ServerContext\VinZ.ServerContext.csproj" />
+    <ProjectReference Include="..\..\VinZ\TransactionHelper\DbContextHelper.csproj" />
     <ProjectReference Include="..\Booking.Business\1_Booking.Business.csproj" />
     <ProjectReference Include="..\..\VinZ\FakeTime\VinZ.FakeTime.csproj" />
     <ProjectReference Include="..\..\VinZ\MessageQueue\VinZ.MessageQueue.csproj" />
