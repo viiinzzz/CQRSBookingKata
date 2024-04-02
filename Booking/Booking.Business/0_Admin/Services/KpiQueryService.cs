@@ -1,11 +1,11 @@
 ﻿namespace BookingKata.Admin;
 
-public class PkiQueryService
+public class KpiQueryService
 (
     ISalesRepository sales,
     IAdminRepository admin,
-    IMoneyRepository money,
-    IPlanningRepository planning,
+    // IMoneyRepository money,
+    // IPlanningRepository planning,
 
     ITimeService DateTime
 )

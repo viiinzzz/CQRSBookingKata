@@ -7,9 +7,9 @@ public class SalesQueryService
     IAdminRepository admin,
    
     PricingQueryService pricing, 
-    BookingCommandService booking,
-    IGazetteerService geo,
+    // BookingCommandService booking,
 
+    IGazetteerService geo,
     ITimeService DateTime
 )
 {

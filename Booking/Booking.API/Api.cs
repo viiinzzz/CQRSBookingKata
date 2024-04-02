@@ -4,8 +4,6 @@
   ╎                                                                            ╎
   ╰----------------------------------------------------------------------------╯*/
 
-using BookingKata;
-
 var pif = ProgramInfo.Current;
 pif.Print();
 
@@ -128,7 +126,7 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
     services.AddScoped<SalesQueryService>();
     services.AddScoped<BookingCommandService>();
     services.AddScoped<PlanningQueryService>();
-    services.AddScoped<PkiQueryService>();
+    services.AddScoped<KpiQueryService>();
 
     //demo
     services.AddSingleton<BookingDemoContext>();
@@ -205,7 +203,7 @@ void MapRoutes(WebApplication app)
     var admin = app.MapGroup("/admin");
 
     admin.MapGet("/hotels/{id}/kpi", 
-        (int id, [FromServices] PkiQueryService pki) =>
+        (int id, [FromServices] KpiQueryService pki) =>
     {
         var html= @$"
 <h1>B O O K I N G  API</h1>

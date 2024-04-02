@@ -3,6 +3,7 @@
 public class MessageQueueContext : DbContext
 {
     public DbSet<ServerNotification> Notifications { get; set; }
+    public DbSet<ServerNotification> ArchivedNotifications { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {

@@ -6,4 +6,5 @@ public interface IMessageQueueRepository
 
     void AddNotification(ServerNotification notification);
     int UpdateNotification(IEnumerable<ServerNotification> notifications, ServerNotificationUpdate update, bool scoped);
+    int ArchiveNotifications();
 }

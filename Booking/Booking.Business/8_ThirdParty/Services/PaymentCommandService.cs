@@ -1,4 +1,4 @@
-﻿namespace BookingKata.Sales;
+﻿namespace BookingKata.ThirdParty;
 
 public interface IPaymentCommandService
 {

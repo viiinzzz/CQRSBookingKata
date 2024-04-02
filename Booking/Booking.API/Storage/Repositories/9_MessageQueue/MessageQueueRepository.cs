@@ -13,7 +13,6 @@ public class MessageQueueRepository
 
     public TransactionContext AsTransaction() => new TransactionContext() * _queue;
 
-
     public IQueryable<ServerNotification> Notifications
     
         => _queue.Notifications
@@ -26,6 +25,22 @@ public class MessageQueueRepository
         entity.State = EntityState.Detached;
 
         _queue.SaveChanges();
+    }
+
+
+    public int ArchiveNotifications()
+    {
+        var done = 
+            
+            from notification in _queue.Notifications
+
+            where notification.Done
+
+            select notification;
+
+        _queue.ArchivedNotifications.AddRange(done);
+
+        return done.ExecuteDelete();
     }
 
     public int UpdateNotification(IEnumerable<ServerNotification> notifications, ServerNotificationUpdate update, bool scoped)
