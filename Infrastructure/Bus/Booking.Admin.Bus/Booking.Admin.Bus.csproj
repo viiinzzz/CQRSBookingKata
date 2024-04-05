@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>BookingKata.Infrastructure.Bus.Admin</AssemblyName>
+    <RootNamespace>BookingKata.Infrastructure.Bus.Admin</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Business\Booking.Admin\Booking.Admin.csproj" />
+    <ProjectReference Include="..\Application.Bus\Infrastructure.Network.Bus.csproj" />
+  </ItemGroup>
+
+</Project>

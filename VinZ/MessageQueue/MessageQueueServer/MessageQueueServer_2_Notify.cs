@@ -1,21 +1,20 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace VinZ.MessageQueue;
 
 public partial class MessageQueueServer
 {
-    public void Notify(INotifyMessage notifyMessage) => Notify(notifyMessage, CancellationToken.None); //fire and forget
+    public INotifyAck Notify(string originator, INotifyMessage notifyMessage)
+    {
+        return Notify(originator, notifyMessage, CancellationToken.None);
+    }
 
-    public async Task Notify(INotifyMessage notifyMessage, CancellationToken cancel)
+    public INotifyAck Notify(string originator, INotifyMessage notifyMessage, CancellationToken cancel)
     {
         var now = DateTime.UtcNow;
 
         var n = notifyMessage;
-
-        if (n.Message == default && n.Verb == default && n.Recipient == default)
-        {
-            return;
-        }
 
         var immediate = n.Immediate ?? false;
         var selectEarliest = !immediate && n is { EarliestDelivery: { Ticks: > 0 } };
@@ -23,11 +22,21 @@ public partial class MessageQueueServer
         var selectRepeat = n is { RepeatDelay: { Ticks: > 0 }, RepeatCount: > 0 };
         var now2 = immediate && selectRepeat ? now + n.RepeatDelay.Value : now;
 
+        var correlationId = 
+            !n.CorrelationId1.HasValue ||
+            !n.CorrelationId2.HasValue
+                ? CorrelationId.New()
+                : new CorrelationId(n.CorrelationId1.Value, n.CorrelationId2.Value);
+
         var notification = new ServerNotification
         {
-            Json = JsonConvert.SerializeObject(n.Message),
+            Json = n.Message == default ? "{}" : JsonConvert.SerializeObject(n.Message),
             Verb = n.Verb,
             Recipient = n.Recipient,
+
+            Originator = originator,
+            CorrelationId1 = correlationId.Id1,
+            CorrelationId2 = correlationId.Id2,
 
             MessageTime = now,
             EarliestDelivery = selectEarliest ? new[] { now2, now + n.EarliestDelivery.Value }.Max() : now,
@@ -37,9 +46,21 @@ public partial class MessageQueueServer
             Aggregate = n.Aggregate ?? false,
         };
 
+        var ack = new NotifyAck
+        {
+            Valid = true,
+            CorrelationId = correlationId
+        };
+
         if (immediate)
         {
-            await Broadcast(notification, true, cancel);
+            //
+            //
+            Broadcast(notification, true, cancel);
+            //
+            //
+
+            return ack;
         }
 
         if (!immediate || notification.RepeatCount > 0)
@@ -49,10 +70,22 @@ public partial class MessageQueueServer
 
             var queuing = immediate ? "                     <<<Relaying<<< immediate" : "                      <<<Queuing<<< scheduled";
 
-            Console.Out.WriteLine(
-                $"{queuing} message{(immediate ? "" : "Id:" + notification.MessageId)}... {{recipient:{notification.Recipient}, verb:{notification.Verb}, message:{notification.Json.Replace("\"", "")}}}");
+            log.LogInformation(
+                @$"{queuing} message{(immediate ? "" : "Id:" + notification.MessageId)}...
+{{recipient:{notification.Recipient}, verb:{notification.Verb}, message:{notification.Json.Replace("\"", "")}}}");
 
+            //
+            //
             queue.AddNotification(notification);
+            //
+            //
+
+            return ack;
         }
+
+        return new NotifyAck
+        {
+            Valid = false
+        };
     }
 }

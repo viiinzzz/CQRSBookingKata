@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Repository\Booking.Admin.Repository\Booking.Admin.Repository.csproj" />
+    <ProjectReference Include="..\..\Repository\Booking.Planning.Repository\Booking.Planning.Repository.csproj" />
+    <ProjectReference Include="..\..\Repository\Booking.Sales.Repository\Booking.Sales.Repository.csproj" />
+    <ProjectReference Include="..\..\Repository\Bus.Repository\Bus.Repository.csproj" />
+    <ProjectReference Include="..\..\Repository\GeoIndexing.Repository\GeoIndexing.Repository.csproj" />
+    <ProjectReference Include="..\..\Repository\Money.Repository\Money.Repository.csproj" />
+  </ItemGroup>
+
+</Project>

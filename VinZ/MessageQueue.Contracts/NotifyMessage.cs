@@ -8,6 +8,8 @@ public record NotifyMessage(
     TimeSpan? EarliestDelivery = default,
     TimeSpan? LatestDelivery = default,
     TimeSpan? RepeatDelay = default,
+
+    string? CorrelationGuid = default,
     int? RepeatCount = default,
     bool? Aggregate = default,
     bool? Immediate = default

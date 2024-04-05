@@ -1,10 +1,12 @@
-﻿namespace VinZ.MessageQueue;
+﻿using Microsoft.Extensions.Logging;
+
+namespace VinZ.MessageQueue;
 
 public partial class MessageQueueServer
 {
     private async Task<DeliveryCount> ProcessQueue(CancellationToken cancel)
     {
-        // Console.Out.WriteLine("Processing message queue...");
+        // log.LogInformation($"[{nameof(MessageQueueServer)}] Processing message queue...");
 
         using var scope = scp.GetScope<IMessageQueueRepository>(out var queue);
 
@@ -65,13 +67,13 @@ public partial class MessageQueueServer
                 if (duplicateCount > 0) counts.Add($"duplicateCount: {duplicateCount}");
                 if (holdCount > 0) counts.Add($"holdCount: {holdCount}");
 
-                Console.Out.WriteLine($"Message queue purged. {{{string.Join(", ", counts)}}}");
+                log.LogInformation($"[{nameof(MessageQueueServer)}] Message queue purged. {{{string.Join(", ", counts)}}}");
             }
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine(@$"
-{nameof(MessageQueueServer)}: purge failure: {ex.Message}
+            log.LogError(@$"
+[{nameof(MessageQueueServer)}] purge failure: {ex.Message}
 {ex.StackTrace}
 ");
         }
@@ -96,7 +98,7 @@ public partial class MessageQueueServer
             var (_, updates) = (await Task.WhenAll(messages
                     .AsParallel()
                     .WithCancellation(cancel)
-                    .Select(x => Broadcast(x, false, cancel))))
+                    .Select(notification => Broadcast(notification, false, cancel))))
                 .Aggregate((a, b) =>
                 {
                     count = a.Item1 + b.Item1;
@@ -112,8 +114,8 @@ public partial class MessageQueueServer
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine(@$"
-{nameof(MessageQueueServer)}: broadcast failure: {ex.Message}
+            log.LogError(@$"
+[{nameof(MessageQueueServer)}] broadcast failure: {ex.Message}
 {ex.StackTrace}
 ");
         }

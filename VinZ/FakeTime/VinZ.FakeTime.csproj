@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FakeTime.Contracts\VinZ.FakeTime.Contract.csproj" />
+    <ProjectReference Include="..\ToolBox\VinZ.ToolBox.csproj" />
   </ItemGroup>
 
 </Project>

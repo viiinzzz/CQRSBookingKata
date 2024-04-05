@@ -1,12 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace VinZ.MessageQueue;
 
-public partial class MessageQueueServer
+public partial class MessageQueueServer : Initializable, IMessageBus
 {
-    // private IMessageQueueRepository queue;
-    // private IServiceScope scope;
-
     private Dictionary<IServiceScope, IMessageBusClient> _domainBuses = new();
 
     public override void Init()
@@ -40,10 +38,13 @@ public partial class MessageQueueServer
 
             var client = (IMessageBusClient)domainBus;
 
-            client.ConnectTo(this);
+            
+            client.ConnectToBus(this);
+
             client.Configure();
 
-            Console.Out.WriteLine($"{nameof(MessageQueueServer)}: {type.Name} got connected to main bus.");
+
+            log.LogInformation($"{nameof(MessageQueueServer)}: {type.Name} got connected to main bus.");
 
             _domainBuses[scope] = client;
         }

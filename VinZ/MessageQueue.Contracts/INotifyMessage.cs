@@ -9,7 +9,11 @@ public interface INotifyMessage
     TimeSpan? EarliestDelivery { get; }
     TimeSpan? LatestDelivery { get; }
     TimeSpan? RepeatDelay { get; }
+    
     int? RepeatCount { get; }
     bool? Aggregate { get; }
     bool? Immediate { get; }
+
+    long? CorrelationId1 { get; }
+    long? CorrelationId2 { get; }
 }

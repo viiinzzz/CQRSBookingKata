@@ -1,6 +1,5 @@
 ﻿namespace VinZ.MessageQueue;
 
-
 public class MessageBusClientBase : IMessageBusClient
 {
     private IMessageBus? _bus;
@@ -13,7 +12,8 @@ public class MessageBusClientBase : IMessageBusClient
         }
     }
 
-    public IMessageBusClient ConnectTo(IMessageBus bus)
+
+    public IMessageBusClient ConnectToBus(IMessageBus bus)
     {
         if (_bus != null)
         {
@@ -24,8 +24,6 @@ public class MessageBusClientBase : IMessageBusClient
 
         return this;
     }
-
-    public virtual void Configure() { }
 
     public bool Disconnect()
     {
@@ -39,11 +37,15 @@ public class MessageBusClientBase : IMessageBusClient
         return ret;
     }
 
-    public int Subscribe(string? recipient = default, string? verb = default)
+
+    public virtual void Configure() { }
+
+
+    public void Subscribe(string? recipient = default, string? verb = default)
     {
         CheckBus();
 
-        return _bus!.Subscribe(this, recipient, verb);
+        _bus!.Subscribe(this, recipient, verb);
     }
 
     public bool Unsubscribe(string? recipient = default, string? verb = default)
@@ -52,6 +54,7 @@ public class MessageBusClientBase : IMessageBusClient
 
         return _bus!.Unsubscribe(this, recipient, verb);
     }
+
 
     public void Notify(INotifyMessage message)
     {

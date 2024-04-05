@@ -1,13 +1,11 @@
-﻿using System.Collections.Generic;
-
-namespace VinZ.GeoIndexing;
+﻿namespace VinZ.GeoIndexing;
 
 public interface IGazetteerService
 {
-    TReferer IncludeGeoIndex<TReferer>(TReferer referer)
+    TReferer IncludeGeoIndex<TReferer>(TReferer referer, byte maxLevel)
         where TReferer : IHavePosition, IHavePrimaryKey;
 
-    IEnumerable<TReferer> IncludeGeoIndex<TReferer>(IEnumerable<TReferer> referers)
+    IEnumerable<TReferer> IncludeGeoIndex<TReferer>(IEnumerable<TReferer> referers, double precisionMaxKm)
         where TReferer : IHavePosition, IHavePrimaryKey;
 
 
@@ -26,11 +24,11 @@ public interface IGazetteerService
     void ClearCacheGeoIndex();
 
 
-    void AddReferer<TReferer>(TReferer referer, double? minKm, double? maxKm, bool scoped)
+    void AddReferer<TReferer>(TReferer referer, double? minKm, double? maxKm)
         where TReferer : IHavePosition, IHavePrimaryKey;
-    void RemoveReferer<TReferer>(TReferer referer, bool scoped)
+    void RemoveReferer<TReferer>(TReferer referer)
         where TReferer : IHavePosition, IHavePrimaryKey;
-    void CopyToReferers<TReferer, TReferer2>(TReferer referer, IEnumerable<TReferer2> referers2, bool scoped)
+    void CopyToReferers<TReferer, TReferer2>(TReferer referer, IEnumerable<TReferer2> referers2)
         where TReferer : IHavePosition, IHavePrimaryKey
         where TReferer2 : IHavePrimaryKey;
     IGeoIndexCell? RefererGeoIndex<TReferer>(TReferer referer)

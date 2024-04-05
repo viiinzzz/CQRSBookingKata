@@ -1,8 +1,10 @@
-﻿namespace VinZ.MessageQueue;
+﻿using Microsoft.Extensions.Logging;
+
+namespace VinZ.MessageQueue;
 
 public partial class MessageQueueServer
 {
-    private async Task<(DeliveryCount, List<(ServerNotification[], ServerNotificationUpdate)>)> Broadcast(ServerNotification notification, bool immediate,
+    private (DeliveryCount, List<(ServerNotification[], ServerNotificationUpdate)>) Broadcast(ServerNotification notification, bool immediate,
         CancellationToken cancel)
     {
         var updates = new List<(ServerNotification[], ServerNotificationUpdate)>();
@@ -40,9 +42,10 @@ public partial class MessageQueueServer
 
         var dequeuing = immediate ? "            >>>Relaying>>>          immediate" : ">>>Dequeuing>>>                     scheduled";
 
-        Console.Out.WriteLine($"{dequeuing} message{(immediate ? "" : "Id:" + notification.MessageId)
+        log.LogInformation(@$"{dequeuing} message{(immediate ? "" : "Id:" + notification.MessageId)
         } to {subscribers.Count} subscriber{(subscribers.Count > 1 ? "s" : "")
-        }... {{recipient:{notification.Recipient}, verb:{notification.Verb
+        }...
+  {{recipient:{notification.Recipient}, verb:{notification.Verb
         }, message:{notification.Json.Replace("\"", "")}}}");
 
         var updateMessage = () =>
@@ -78,6 +81,9 @@ public partial class MessageQueueServer
             Json = notification.Json,
             Recipient = notification.Recipient,
             Verb = notification.Verb,
+            Originator = notification.Originator,
+            CorrelationId1 = notification.CorrelationId1,
+            CorrelationId2 = notification.CorrelationId2,
         };
 
         var delivering = "            >>>Delivering>>>        scheduled";
@@ -89,16 +95,21 @@ public partial class MessageQueueServer
             {
                 try
                 {
-                    Console.Out.WriteLine(
-                        $"{delivering} messageId:{notification.MessageId} to subscriber {client.GetHashCode():x8}...");
 
                     client.OnNotified(clientMessage);
+
+                    log.LogInformation(
+                        $"{delivering} messageId:{notification.MessageId} to subscriber {client.GetHashCode():x8}...");
 
                     return new DeliveryCount(1, 0);
                 }
                 catch (Exception ex)
                 {
-                    Console.Error.WriteLine(ex.ToString());
+                    log.LogError(
+                        @$"{delivering} messageId:{notification.MessageId} to subscriber {client.GetHashCode():x8}...
+failure: {ex.Message}
+{ex.StackTrace}
+");
 
                     return new DeliveryCount(0, 1);
                 }
@@ -109,8 +120,9 @@ public partial class MessageQueueServer
 
         var delivered = "                         >>>Done>>> scheduled";
 
-        Console.Out.WriteLine(
-            $"{delivered} message{(immediate ? "" : "Id:" + notification.MessageId)} to {subscribers.Count} subscriber{(subscribers.Count > 1 ? "s" : "")}... {{recipient:{notification.Recipient}, verb:{notification.Verb}, message:{notification.Json.Replace("\"", "")}}}");
+        log.LogInformation(
+            @$"{delivered} message{(immediate ? "" : "Id:" + notification.MessageId)} to {subscribers.Count} subscriber{(subscribers.Count > 1 ? "s" : "")}...
+  {{recipient:{notification.Recipient}, verb:{notification.Verb}, message:{notification.Json.Replace("\"", "")}}}");
 
         return (count, updates);
     }

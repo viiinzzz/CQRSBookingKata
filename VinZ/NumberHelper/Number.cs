@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
 
-namespace VinZ.ToolBox;
+namespace VinZ.Number;
 
 //https://stackoverflow.com/questions/40900594/mapping-a-ulong-to-a-long-in-c
 

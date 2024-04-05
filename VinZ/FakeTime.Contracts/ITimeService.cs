@@ -11,12 +11,3 @@ public interface ITimeService
 
     event EventHandler<TimeServiceNotification>? Notified;
 }
-
-public record TimeServiceNotification
-(
-    string verb, 
-    DateTime UtcNow,
-    bool Freeze, 
-    bool Fake, 
-    string state
-);

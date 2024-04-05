@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 
 namespace VinZ.MessageQueue;
 
@@ -9,7 +10,7 @@ public partial class MessageQueueServer
     private readonly ConcurrentDictionary<int, HashSet<IMessageBusClient>> _subscribers_V = new(); //recipient* verb
     private readonly ConcurrentDictionary<int, HashSet<IMessageBusClient>> _subscribers_RV = new(); //recipient verb
   
-    public int Subscribe(IMessageBusClient client, string? recipient, string? verb)
+    public void Subscribe(IMessageBusClient client, string? recipient, string? verb)
     {
         var hash0 = client.GetHashCode();
 
@@ -17,10 +18,11 @@ public partial class MessageQueueServer
         {
             _subscribers_0[hash0] = client;
 
-            Console.WriteLine(
+            log.LogInformation(
                 $"[{nameof(MessageQueueServer)}] NEW client {hash0:x8} subscription, recipient=Any, verb=Any, 0+{hash0:x8}");
 
-            return hash0;
+            // hash = hash0;
+            return;
         }
 
         if (recipient != Bus.Any && verb == Verb.Any)
@@ -35,10 +37,11 @@ public partial class MessageQueueServer
                     return subscribers;
                 });
 
-            Console.WriteLine(
+            log.LogInformation(
                 $"[{nameof(MessageQueueServer)}] NEW client {hash0:x8} subscription, recipient={recipient}, verb=Any, R+{hash1:x8}");
 
-            return hash1;
+            // hash = hash1;
+            return;
         }
 
         if (recipient == Bus.Any && verb != Verb.Any)
@@ -53,10 +56,11 @@ public partial class MessageQueueServer
                     return subscribers;
                 });
 
-            Console.WriteLine(
+            log.LogInformation(
                 $"[{nameof(MessageQueueServer)}] NEW client {hash0:x8} subscription, recipient=Any, verb={verb}, V+{hash1:x8}");
 
-            return hash1;
+            // hash = hash1;
+            return;
         }
 
         var hash2 = (recipient, verb).GetHashCode();
@@ -69,17 +73,18 @@ public partial class MessageQueueServer
                 return subscribers;
             });
 
-        Console.WriteLine(
+        log.LogInformation(
             $"[{nameof(MessageQueueServer)}] ++client {hash0:x8} subscribed, recipient={recipient}, verb={verb}, RV+{hash2:x8}");
 
-        return hash2;
+        // hash = hash2;
+        return;
     }
 
     public bool Unsubscribe(IMessageBusClient client, string? recipient, string? verb)
     {
         var hash0 = client.GetHashCode();
 
-        Console.WriteLine(
+        log.LogInformation(
             $"[{nameof(MessageQueueServer)}] --client {hash0:x8} unsubscribed, recipient=Any, verb=Any, 0+{hash0:x8}");
 
         if (recipient == Bus.Any && verb == Verb.Any)

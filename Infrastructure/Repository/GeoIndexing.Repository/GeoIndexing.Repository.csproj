@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\VinZ\GeoIndexing\VinZ.GeoIndexing.csproj" />
+    <ProjectReference Include="..\Infrastructure.Repository.Common\Infrastructure.Storage.Repository.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -2,12 +2,14 @@
 
 public abstract partial class GazetteerServiceBase
 {
-    public TReferer IncludeGeoIndex<TReferer>(TReferer referer)
+    public TReferer IncludeGeoIndex<TReferer>(TReferer referer, byte maxLevel)
         where TReferer : IHavePosition, IHavePrimaryKey
     {
         //
         //
-        referer.Cells = RefererAllGeoIndex(referer);
+        referer.Cells = RefererAllGeoIndex(referer)
+            .Where(cell => cell.S2Level <= maxLevel)
+            .ToList();
         //
         //
         referer.geoIndex = referer.GetGeoIndexString();
@@ -15,33 +17,36 @@ public abstract partial class GazetteerServiceBase
         return referer;
     }
 
-    public IEnumerable<TReferer> IncludeGeoIndex<TReferer>(IEnumerable<TReferer> referers)
+    public IEnumerable<TReferer> IncludeGeoIndex<TReferer>(IEnumerable<TReferer> referers, double precisionMaxKm)
         where TReferer : IHavePosition, IHavePrimaryKey
-        
-        => referers.Select(IncludeGeoIndex);
+    {
+        var (_, maxLevel) = S2GeometryHelper.S2MinMaxLevelForKm(precisionMaxKm, default);
 
-    public void AddReferer<TReferer>(TReferer referer, double? minKm, double? maxKm, bool scoped)
+        return referers.Select(referer => IncludeGeoIndex(referer, maxLevel));
+    }
+
+    public void AddReferer<TReferer>(TReferer referer, double? minKm, double? maxKm)
         where TReferer : IHavePosition, IHavePrimaryKey
 
     {
         var indexes = S2GeometryHelper.GetGeoIndexes(referer, minKm, maxKm);
 
-        AddIndexes(indexes, scoped);
+        AddIndexes(indexes);
     }
 
-    public void RemoveReferer<TReferer>(TReferer referer, bool scoped)
+    public void RemoveReferer<TReferer>(TReferer referer)
         where TReferer : IHavePosition, IHavePrimaryKey
     {
-        RemoveIndexes(referer, scoped);
+        RemoveIndexes(referer);
     }
 
-    public void CopyToReferers<TReferer, TReferer2>(TReferer referer, IEnumerable<TReferer2> referers2, bool scoped) 
+    public void CopyToReferers<TReferer, TReferer2>(TReferer referer, IEnumerable<TReferer2> referers2) 
         where TReferer : IHavePosition, IHavePrimaryKey
         where TReferer2 : IHavePrimaryKey
     {
         foreach(var referer2 in referers2)
         {
-            CopyIndexes(referer, referer2, scoped);
+            CopyIndexes(referer, referer2);
         }
     }
 

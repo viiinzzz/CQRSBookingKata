@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\JsonHelper\VinZ.JsonHelper.csproj" />
     <ProjectReference Include="..\NumberHelper\VinZ.NumberHelper.csproj" />
     <ProjectReference Include="..\PositionHelper\VinZ.PositionHelper.csproj" />
     <ProjectReference Include="..\GeoIndexing.Contract\VinZ.GeoIndexing.Contract.csproj" />

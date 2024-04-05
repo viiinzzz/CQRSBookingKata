@@ -1,23 +1,19 @@
 ﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using VinZ.FakeTime;
 using VinZ.ToolBox;
 
 namespace VinZ.MessageQueue;
 
-public record MessageQueueServerConfig(Type[]? DomainBusType = default);
-
 public partial class MessageQueueServer
 (
     IScopeProvider scp,
     MessageQueueServerConfig config,
-    ITimeService DateTime
+    ITimeService DateTime,
+    ILogger<MessageQueueServer> log
 )
-    : Initializable, IMessageQueueServer, IHostedLifecycleService
+    : IHostedLifecycleService
 {
-    public int BusRefreshSeconds { get; set; } = 10; //120
-    public int BusRefreshMinSeconds { get; set; } = 10;
-
-
     private Task _executingTask = Task.CompletedTask;
     private CancellationTokenSource _executeCancel = new();
 
@@ -55,13 +51,13 @@ public partial class MessageQueueServer
 
             var seconds = (int)Math.Ceiling((t1 - t0).TotalSeconds);
 
-            if (seconds < BusRefreshSeconds)
+            if (seconds < config.BusRefreshSeconds)
             {
-                var delay = 1000 * (BusRefreshSeconds - seconds);
+                var delay = 1000 * (config.BusRefreshSeconds - seconds);
 
-                if (delay < 1000 * BusRefreshMinSeconds)
+                if (delay < 1000 * config.BusRefreshMinSeconds)
                 {
-                    delay = 1000 * BusRefreshMinSeconds;
+                    delay = 1000 * config.BusRefreshMinSeconds;
                 }
 
                 await Task.Delay(delay, cancel);
