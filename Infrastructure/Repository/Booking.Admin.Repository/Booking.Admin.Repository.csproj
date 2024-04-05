@@ -9,7 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Business\Booking.Admin\Booking.Admin.csproj" />
     <ProjectReference Include="..\..\..\VinZ\GeoIndexing.Contract\VinZ.GeoIndexing.Contract.csproj" />
-    <ProjectReference Include="..\..\..\VinZ\StringHelper\VinZ.StringHelper.csproj" />
+    <ProjectReference Include="..\..\..\VinZ\StringHelper\VinZ.Common.StringHelper.csproj" />
     <ProjectReference Include="..\Infrastructure.Repository.Common\Infrastructure.Storage.Repository.csproj" />
   </ItemGroup>
 

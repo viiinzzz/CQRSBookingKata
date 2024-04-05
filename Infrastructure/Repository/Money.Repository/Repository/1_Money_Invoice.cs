@@ -37,7 +37,7 @@ public partial class MoneyRepository
 
         if (invoice == default)
         {
-            throw new InvalidOperationException(Common.Exceptions.ReferenceInvalid);
+            throw new InvalidOperationException(ReferenceInvalid);
         }
 
         _money.Entry(invoice).State = EntityState.Detached;

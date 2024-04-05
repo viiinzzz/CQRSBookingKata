@@ -12,5 +12,8 @@ public record NotifyMessage(
     string? CorrelationGuid = default,
     int? RepeatCount = default,
     bool? Aggregate = default,
-    bool? Immediate = default
+    bool? Immediate = default,
+
+    long? CorrelationId1 = default,
+    long? CorrelationId2 = default
 ) : INotifyMessage;

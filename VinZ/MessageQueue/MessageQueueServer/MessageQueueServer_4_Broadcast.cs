@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-
-namespace VinZ.MessageQueue;
+﻿namespace VinZ.MessageQueue;
 
 public partial class MessageQueueServer
 {

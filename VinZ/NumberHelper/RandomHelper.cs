@@ -1,4 +1,4 @@
-﻿namespace VinZ.Number;
+﻿namespace VinZ.Common;
 
 public static class RandomHelper
 {
@@ -8,6 +8,14 @@ public static class RandomHelper
     public static long Rand(long max) => random.NextInt64(max);
     public static double Rand(double max) => random.NextDouble() * max;
 
+    public static int Int() => random.Next();
+    public static long Long() => random.NextInt64();
+    public static (long, long) Guid()
+    {
+        var guid = System.Guid.NewGuid();
+
+        return guid.ToLong2();
+    }
 
     public static string ToGuidB(this (long, long) twoLongs)
     {

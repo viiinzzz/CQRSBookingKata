@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-
-namespace VinZ.MessageQueue;
+﻿namespace VinZ.MessageQueue;
 
 public interface IScopeProvider
 {

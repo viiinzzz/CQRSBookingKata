@@ -14,9 +14,9 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\VinZ\FakeTime.Contracts\VinZ.FakeTime.Contract.csproj" />
-    <ProjectReference Include="..\..\..\VinZ\JsonHelper\VinZ.JsonHelper.csproj" />
-    <ProjectReference Include="..\..\..\VinZ\TransactionHelper\VinZ.DbContextHelper.csproj" />
+    <ProjectReference Include="..\..\..\VinZ\FakeTime.Contracts\VinZ.Common.FakeTime.Contract.csproj" />
+    <ProjectReference Include="..\..\..\VinZ\JsonHelper\VinZ.Common.JsonHelper.csproj" />
+    <ProjectReference Include="..\..\..\VinZ\TransactionHelper\VinZ.Common.DbContextHelper.csproj" />
   </ItemGroup>
 
 </Project>

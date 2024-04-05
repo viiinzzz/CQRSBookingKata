@@ -1,4 +1,4 @@
-﻿namespace VinZ.ServerContext;
+﻿namespace VinZ.Common;
 
 public interface IServerContextService
 {

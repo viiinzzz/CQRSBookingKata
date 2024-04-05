@@ -53,7 +53,7 @@ public partial class PlanningBus(IScopeProvider sp) : MessageBusClientBase
                     //         //
                     //         //
                     //
-                    //         Notify(new NotifyMessage(Bus.Recipient.Any, Verb.QuotationEmitted)
+                    //         Notify(new NotifyMessage(AnyRecipient, Verb.QuotationEmitted)
                     //         {
                     //             CorrelationGuid = correlationGuid,
                     //             Message = new { id }

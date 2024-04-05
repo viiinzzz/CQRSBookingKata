@@ -1,6 +1,6 @@
-﻿global using System.Transactions;
+﻿
 global using Microsoft.EntityFrameworkCore;
+global using VinZ.Common;
 global using Zejji.Entity;
 
-global using VinZ.DbContextHelper;
 global using VinZ.GeoIndexing;

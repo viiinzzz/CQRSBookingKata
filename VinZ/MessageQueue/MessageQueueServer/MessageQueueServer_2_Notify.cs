@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace VinZ.MessageQueue;
 
@@ -56,7 +55,7 @@ public partial class MessageQueueServer
         {
             //
             //
-            Broadcast(notification, true, cancel);
+            Broadcast(notification, immediate: true, cancel);
             //
             //
 

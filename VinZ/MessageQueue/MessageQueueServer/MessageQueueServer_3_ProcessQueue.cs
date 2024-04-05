@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-
-namespace VinZ.MessageQueue;
+﻿namespace VinZ.MessageQueue;
 
 public partial class MessageQueueServer
 {
@@ -24,7 +22,7 @@ public partial class MessageQueueServer
             {
                 Done = true,
                 DoneTime = now
-            }, scoped: false);
+            });
 
 
             var duplicates =
@@ -47,7 +45,7 @@ public partial class MessageQueueServer
             {
                 Done = true,
                 DoneTime = now
-            }, scoped: false);
+            });
 
             var hold =
                 from notification in queue.Notifications
@@ -95,20 +93,25 @@ public partial class MessageQueueServer
 
         try
         {
-            var (_, updates) = (await Task.WhenAll(messages
-                    .AsParallel()
-                    .WithCancellation(cancel)
-                    .Select(notification => Broadcast(notification, false, cancel))))
+            var updates = messages
+
+                .AsParallel()
+                .WithCancellation(cancel)
+
+                .Select(notification => Broadcast(notification, immediate: false, cancel))
+
                 .Aggregate((a, b) =>
                 {
                     count = a.Item1 + b.Item1;
                     var updates2 = a.Item2.Concat(b.Item2).ToList();
-                    return (count, updates2);
-                });
 
-            foreach (var update in updates)
+                    return (count, updates2);
+                })
+                .Item2;
+
+            foreach (var (notifications, update) in updates)
             {
-                queue.UpdateNotification(update.Item1, update.Item2, scoped: false);
+                queue.UpdateNotification(notifications, update);
             }
 
         }

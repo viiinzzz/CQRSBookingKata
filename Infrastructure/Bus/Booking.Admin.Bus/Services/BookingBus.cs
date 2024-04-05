@@ -1,4 +1,6 @@
 ﻿
+using VinZ.MessageQueue;
+
 namespace BookingKata.Infrastructure.Network;
 
 public partial class AdminBus(IScopeProvider sp) : MessageBusClientBase
@@ -10,7 +12,6 @@ public partial class AdminBus(IScopeProvider sp) : MessageBusClientBase
         Notified += (sender, notification) =>
         {
             using var scope = sp.GetScope<AdminQueryService>(out var admin);
-            using var scope2 = sp.GetScope<KpiQueryService>(out var kpi);
 
             var originator = notification.Originator;
             var correlationGuid = new CorrelationId(notification.CorrelationId1, notification.CorrelationId2).Guid;
@@ -55,7 +56,7 @@ public partial class AdminBus(IScopeProvider sp) : MessageBusClientBase
                     //         //
                     //         //
                     //
-                    //         Notify(new NotifyMessage(Bus.Recipient.Any, Verb.QuotationEmitted)
+                    //         Notify(new NotifyMessage(AnyRecipient, Verb.QuotationEmitted)
                     //         {
                     //             CorrelationGuid = correlationGuid,
                     //             Message = new { id }
@@ -68,7 +69,7 @@ public partial class AdminBus(IScopeProvider sp) : MessageBusClientBase
             }
             catch (Exception ex)
             {
-                Notify(new NotifyMessage(originator, Bus.Verb.RequestProcessingError)
+                Notify(new NotifyMessage(originator, RequestProcessingError)
                 {
                     CorrelationGuid = correlationGuid,
                     Message = new

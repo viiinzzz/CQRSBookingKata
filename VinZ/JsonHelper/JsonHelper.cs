@@ -1,8 +1,4 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-
-
-namespace VinZ.ToolBox;
+namespace VinZ.Common;
 
 public static class JsonHelper
 {

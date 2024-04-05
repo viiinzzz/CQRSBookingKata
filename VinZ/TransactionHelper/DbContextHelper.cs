@@ -1,9 +1,4 @@
-using System.Reflection;
-using System.Text.RegularExpressions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-
-namespace VinZ.DbContextHelper;
+namespace VinZ.Common;
 
 public static class DbContextHelper
 {

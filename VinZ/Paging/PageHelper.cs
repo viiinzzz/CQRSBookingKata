@@ -1,4 +1,4 @@
-namespace VinZ.Paging;
+namespace VinZ.Common;
 
 public static class PageHelper
 {
@@ -15,6 +15,9 @@ public static class PageHelper
     )
         where TEntity : class
     {
+        var elementType = typeof(TEntity).Name;
+        var type = $"{elementType}Collection";
+
         var page = pageSpec;
         if (page is null or < 1) page = 1;
 
@@ -26,7 +29,23 @@ public static class PageHelper
             .Skip((page0 ?? 0) * pageSize)
             .Take(pageSize);
 
-        queryCheck?.Invoke(pageQuery);
+        try
+        {
+            queryCheck?.Invoke(pageQuery);
+        }
+        catch (Exception ex)
+        {
+            return new PageResult<TEntity>
+            (
+                type, elementType,
+                page.Value, pageSize,
+                error: true, reason: ex.Message,
+                0, 0, Array.Empty<PageLinks>()
+            )
+            {
+                Collection = Enumerable.Empty<TEntity>()
+            };
+        }
 
         //
         //
@@ -47,16 +66,19 @@ public static class PageHelper
         //
         //
 
-        var elementType = typeof(TEntity).Name;
-        var type = $"{elementType}Collection";
-
         var links = new PageLinks(baseUrl, page.Value, pageSize, pageCount);
+        var _links = new[] { links };
 
-        return new PageResult<TEntity>(
-                page.Value, pageSize, pageCount, itemCount,
-                new[] { links },
-                type, elementType
-                ) { Collection = items };
+        return new PageResult<TEntity>
+        (
+            type, elementType,
+            page.Value, pageSize,
+            error: false, reason: null,
+            pageCount, itemCount, _links
+        )
+        {
+            Collection = items
+        };
     }
 
 }

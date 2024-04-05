@@ -2,6 +2,6 @@
 global using Zejji.Entity;
 
 global using BookingKata.Sales;
+global using VinZ.Common;
 
-global using VinZ.DbContextHelper;
-global using VinZ.FakeTime;
+global using static Business.Common.Exceptions;

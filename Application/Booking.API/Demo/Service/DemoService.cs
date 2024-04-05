@@ -26,6 +26,7 @@ public partial class DemoService
     private const int SeasonDayNumbers = 50;//250
     private const int CustomerCount = 1000;
 
+    private const string originator = nameof(demo);
 
     public async Task Execute(CancellationToken cancel)
     {
@@ -57,7 +58,7 @@ Demo Seed aborted!
 ERROR: {ex}";
 
             // Console.Error.WriteLine(message);
-            bus.Notify(new NotifyMessage(Recipient.Audit, Verb.Audit.RequestProcessingError)
+            bus.Notify(originator, new NotifyMessage(Recipient.Audit, RequestProcessingError)
             {
                 Message = message,
                 Immediate = true
@@ -103,7 +104,7 @@ Demo Forward aborted!
 ERROR: {ex}";
 
             // Console.Error.WriteLine(message);
-            bus.Notify(new NotifyMessage(Recipient.Audit, Verb.Audit.RequestProcessingError)
+            bus.Notify(originator, new NotifyMessage(Recipient.Audit, RequestProcessingError)
             {
                 Message = message,
                 Immediate = true

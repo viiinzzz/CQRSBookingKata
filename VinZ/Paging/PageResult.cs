@@ -1,16 +1,15 @@
-using VinZ.ToolBox;
+namespace VinZ.Common;
 
-namespace VinZ.Paging;
+public record PageResult<TEntity>
+(
+    string type, string elementType,
+    int page, int pageSize,
 
-public record PageResult<TEntity>(
-
-    int page, int pageSize, int pageCount, int itemCount,
-
-    PageLinks[] links,
-
-    string type, string elementType
-
-) : IHaveCollection<TEntity>
+    bool error, string? reason,
+    int pageCount, int itemCount,
+    PageLinks[] links
+)
+    : IHaveCollection<TEntity>
 {
     private TEntity[]? items { get; set; }
 

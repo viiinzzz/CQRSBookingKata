@@ -20,19 +20,19 @@ public partial class BillingCommandService
 
         if (quotation == null)
         {
-            throw new ArgumentException(Common.Exceptions.ReferenceInvalid, nameof(quotationId));
+            throw new ArgumentException(ReferenceInvalid, nameof(quotationId));
         }
 
         if (quotation.CorrelationId1 != correlationId1 ||
             quotation.CorrelationId2 != correlationId2)
         {
-            throw new ArgumentException(Common.Exceptions.ReferenceInvalid, nameof(Correlation));
+            throw new ArgumentException(ReferenceInvalid, nameof(Correlation));
         }
 
         if (now < quotation.OptionStartsUtc &&
             now >= quotation.OptionEndsUtc)
         {
-            throw new ArgumentException(Common.Exceptions.ReferenceExpired, nameof(quotationId));
+            throw new ArgumentException(ReferenceExpired, nameof(quotationId));
         }
 
 

@@ -1,6 +1,6 @@
 ﻿namespace BookingKata.Planning;
 
-public partial class PlanningQueryService
+public class PlanningQueryService
 (
     IPlanningRepository planning,
 

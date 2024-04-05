@@ -102,7 +102,7 @@ public partial class AdminRepository
 
         if (hotel == default)
         {
-            throw new ArgumentException(Common.Exceptions.ReferenceInvalid, nameof(hotelId));
+            throw new ArgumentException(ReferenceInvalid, nameof(hotelId));
         }
 
         var newRoomNums = AuthorizedRoomNumbers

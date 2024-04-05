@@ -1,3 +1,3 @@
-﻿namespace VinZ.ToolBox;
+﻿namespace VinZ.Common;
 
 public record struct Position(double Latitude, double Longitude);

@@ -11,22 +11,34 @@ public class ConsoleAuditBus
 {
     public override void Configure()
     {
-        Subscribe(Bus.Any);
+        Subscribe(AnyRecipient);
 
         Notified += (sender, notification) =>
         {
             Log(
-                $"{sender.GetType().Name}:{server.Id:x16}",
                 DateTime.UtcNow.ToString("O"),
-                notification.CorrelationId?.ToString("x16") ?? "NULL",
+                new CorrelationId(notification.CorrelationId1, notification.CorrelationId2).Guid,
+
+                sender == null ? null : $"{sender.GetType().Name}:{server.Id:x16}",
                 notification.Recipient,
-                notification.Verb,
+                notification.Verb ,
+
                 notification.Json
             );
         };
     }
 
-    public void Log(string sender, string correlationId, string time, string recipient, string verb, string message)
+    public void Log
+    (
+        string correlationId,
+        string time,
+        
+        string? sender,
+        string? recipient,
+        string? verb,
+        
+        string? message
+    )
     {
         log.LogInformation(@$"{{sender:{sender},verb:{verb},recipient:{recipient},correlationId:{correlationId}}}
   message:{message}

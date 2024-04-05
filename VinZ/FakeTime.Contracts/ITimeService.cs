@@ -1,4 +1,4 @@
-﻿namespace VinZ.FakeTime;
+﻿namespace VinZ.Common;
 
 public interface ITimeService
 {

@@ -1,4 +1,4 @@
-﻿namespace VinZ.FakeTime;
+﻿namespace VinZ.Common;
 
 public class TimeService : ITimeService
 {
@@ -35,7 +35,7 @@ public class TimeService : ITimeService
 
         if (_freeze.HasValue) _freeze = utcNow + _dt;
 
-        Notify(Verb.Time.Set);
+        Notify(TimeServiceConst.Verb.Set);
         return this;
     }
 
@@ -43,7 +43,7 @@ public class TimeService : ITimeService
     {
         _freeze = UtcNow;
 
-        Notify(Verb.Time.Freeze);
+        Notify(TimeServiceConst.Verb.Freeze);
         return this;
     }
 
@@ -51,7 +51,7 @@ public class TimeService : ITimeService
     {
         _freeze = default;
 
-        Notify(Verb.Time.Unfreeze);
+        Notify(TimeServiceConst.Verb.Unfreeze);
         return this;
     }
 
@@ -60,7 +60,7 @@ public class TimeService : ITimeService
         _dt = default;
         _freeze = default;
 
-        Notify(Verb.Time.Reset);
+        Notify(TimeServiceConst.Verb.Reset);
         return this;
     }
 
@@ -68,7 +68,7 @@ public class TimeService : ITimeService
     {
         SetUtcNow(UtcNow + forward);
 
-        Notify(Verb.Time.Forward);
+        Notify(TimeServiceConst.Verb.Forward);
         return this;
     }
 

@@ -18,13 +18,13 @@ public partial class BillingCommandService
 
         if (invoice == null)
         {
-            throw new ArgumentException(Common.Exceptions.ReferenceInvalid, nameof(invoiceId));
+            throw new ArgumentException(ReferenceInvalid, nameof(invoiceId));
         }
 
         if (invoice.CorrelationId1 != correlationId1 ||
             invoice.CorrelationId2 != correlationId2)
         {
-            throw new ArgumentException(Common.Exceptions.ReferenceInvalid, nameof(Correlation));
+            throw new ArgumentException(ReferenceInvalid, nameof(Correlation));
         }
 
 

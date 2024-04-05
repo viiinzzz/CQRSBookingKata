@@ -30,7 +30,7 @@ public class MessageBusClientBase : IMessageBusClient
         CheckBus();
 
 
-        var ret = Unsubscribe(Bus.Any, Verb.Any);
+        var ret = Unsubscribe(AnyRecipient, AnyVerb);
 
         _bus = null;
 
@@ -60,7 +60,9 @@ public class MessageBusClientBase : IMessageBusClient
     {
         CheckBus();
 
-        _bus!.Notify(message);
+        var originator = this.GetType().Name;
+
+        _bus!.Notify(originator, message);
     }
 
     public event EventHandler<IClientNotification>? Notified;

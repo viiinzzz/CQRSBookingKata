@@ -11,11 +11,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\VinZ\FakeTime.Contracts\VinZ.FakeTime.Contract.csproj" />
+    <ProjectReference Include="..\..\VinZ\DateTimeHelper\VinZ.Common.DateTimeHelper.csproj" />
+    <ProjectReference Include="..\..\VinZ\FakeTime.Contracts\VinZ.Common.FakeTime.Contract.csproj" />
     <ProjectReference Include="..\..\VinZ\GeoIndexing.Contract\VinZ.GeoIndexing.Contract.csproj" />
-    <ProjectReference Include="..\..\VinZ\NumberHelper\VinZ.NumberHelper.csproj" />
-    <ProjectReference Include="..\..\VinZ\RecordHelper\Vinz.RecordHelper.csproj" />
-    <ProjectReference Include="..\..\VinZ\ServerContext.Contract\VinZ.ServerContext.Contract.csproj" />
+    <ProjectReference Include="..\..\VinZ\NumberHelper\VinZ.Common.NumberHelper.csproj" />
+    <ProjectReference Include="..\..\VinZ\RecordHelper\Vinz.Common.RecordHelper.csproj" />
+    <ProjectReference Include="..\..\VinZ\ServerContext.Contract\VinZ.Common.ServerContext.Contract.csproj" />
+    <ProjectReference Include="..\..\VinZ\StringHelper\VinZ.Common.StringHelper.csproj" />
   </ItemGroup>
 
 </Project>

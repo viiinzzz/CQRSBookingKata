@@ -3,20 +3,23 @@
 //sales and marketing, event planning
 
 public class PricingQueryService(
-   ISalesRepository sales,
-   IAdminRepository admin
-    )
+    ) : IPricingQueryService
 {
 
-    public Price GetPrice(int urid, int personCount, DateTime arrivalDate, DateTime departureDate, string? currency, int? customerId = default)
-    {
-        var uniqueRoomId = new UniqueRoomId(urid);
+    public Price GetPrice(
+        //room
+        int personMaxCount, int floorNum, int floorNumMax, int hotelRank, int latitude, int longitude,
 
-        var hotel = admin.GetHotel(uniqueRoomId.HotelId);
-        var room = admin.GetRoom(uniqueRoomId.Value); //check room category, extra
-        var personMaxCount = room.PersonMaxCount; //charge on headcount or capacity?
-        var floorNum = uniqueRoomId.FloorNum; //higher more expensive
-        var roomNum = uniqueRoomId.RoomNum;
+        //booking
+        int personCount, DateTime arrivalDate, DateTime departureDate, string? currency, int? customerId = default)
+    {
+        // var uniqueRoomId = new UniqueRoomId(urid);
+
+        // var hotel = admin.GetHotel(uniqueRoomId.HotelId);
+        // var room = admin.GetRoom(uniqueRoomId.Value); //check room category, extra
+        // var personMaxCount = room.PersonMaxCount; //charge on headcount or capacity?
+        // var floorNum = uniqueRoomId.FloorNum; //higher more expensive
+        // var roomNum = uniqueRoomId.RoomNum;
         //supercharge on peak days special events vacation sport concert weekend
         //lower when load too low
         //user forecast system with news feed, customer history

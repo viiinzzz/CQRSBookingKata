@@ -24,12 +24,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\JsonHelper\VinZ.JsonHelper.csproj" />
-    <ProjectReference Include="..\NumberHelper\VinZ.NumberHelper.csproj" />
-    <ProjectReference Include="..\PositionHelper\VinZ.PositionHelper.csproj" />
+    <ProjectReference Include="..\HashHelper\VinZ.Common.HashHelper.csproj" />
+    <ProjectReference Include="..\JsonHelper\VinZ.Common.JsonHelper.csproj" />
+    <ProjectReference Include="..\NumberHelper\VinZ.Common.NumberHelper.csproj" />
+    <ProjectReference Include="..\PositionHelper\VinZ.Common.PositionHelper.csproj" />
     <ProjectReference Include="..\GeoIndexing.Contract\VinZ.GeoIndexing.Contract.csproj" />
-    <ProjectReference Include="..\StringHelper\VinZ.StringHelper.csproj" />
-    <ProjectReference Include="..\ToolBox\VinZ.ToolBox.csproj" />
+    <ProjectReference Include="..\StringHelper\VinZ.Common.StringHelper.csproj" />
+    <ProjectReference Include="..\ToolBox\VinZ.Common.ToolBox.csproj" />
   </ItemGroup>
 
 </Project>

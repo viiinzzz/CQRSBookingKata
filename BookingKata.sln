@@ -9,41 +9,39 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.MessageQueue", "VinZ\M
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.MessageQueue.Contract", "VinZ\MessageQueue.Contracts\VinZ.MessageQueue.Contract.csproj", "{290995D1-BBBB-42C5-9310-9BA79C29A333}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.FakeTime", "VinZ\FakeTime\VinZ.FakeTime.csproj", "{A9FFC471-B525-402E-8965-65835FFC1EC1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.Common.FakeTime", "VinZ\FakeTime\VinZ.Common.FakeTime.csproj", "{A9FFC471-B525-402E-8965-65835FFC1EC1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.FakeTime.Contract", "VinZ\FakeTime.Contracts\VinZ.FakeTime.Contract.csproj", "{25A73BEF-D025-4A10-8DF5-896057D16789}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.Common.FakeTime.Contract", "VinZ\FakeTime.Contracts\VinZ.Common.FakeTime.Contract.csproj", "{25A73BEF-D025-4A10-8DF5-896057D16789}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "9_Common", "9_Common", "{A621E367-C479-4911-A23D-FD879A3277A2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2_Business", "2_Business", "{1B6C735A-8887-4B74-86E8-88999D61D72A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.ToolBox", "VinZ\ToolBox\VinZ.ToolBox.csproj", "{16143EDE-016E-44BF-84EA-BC552A100DA6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.Common.ToolBox", "VinZ\ToolBox\VinZ.Common.ToolBox.csproj", "{16143EDE-016E-44BF-84EA-BC552A100DA6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.ParsableHelper", "VinZ\ParsableHelper\VinZ.ParsableHelper.csproj", "{94421652-1370-46DE-96E0-3E0CDBD71BE7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.Common.ParsableHelper", "VinZ\ParsableHelper\VinZ.Common.ParsableHelper.csproj", "{94421652-1370-46DE-96E0-3E0CDBD71BE7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.PositionHelper", "VinZ\PositionHelper\VinZ.PositionHelper.csproj", "{6742988D-08AF-4F74-B4F3-88C047D5E2E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.Common.PositionHelper", "VinZ\PositionHelper\VinZ.Common.PositionHelper.csproj", "{6742988D-08AF-4F74-B4F3-88C047D5E2E5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.NumberHelper", "VinZ\NumberHelper\VinZ.NumberHelper.csproj", "{2EAFC4AC-9EE7-4043-9356-25A4FB1DF21A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.Common.NumberHelper", "VinZ\NumberHelper\VinZ.Common.NumberHelper.csproj", "{2EAFC4AC-9EE7-4043-9356-25A4FB1DF21A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.StringHelper", "VinZ\StringHelper\VinZ.StringHelper.csproj", "{8ADF3DD9-D99C-47A9-A304-F0CFEBBBA442}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.Common.StringHelper", "VinZ\StringHelper\VinZ.Common.StringHelper.csproj", "{8ADF3DD9-D99C-47A9-A304-F0CFEBBBA442}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.GeoIndexing", "VinZ\GeoIndexing\VinZ.GeoIndexing.csproj", "{B95F1380-5860-4510-89C8-BC42E6FB6944}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.GeoIndexing.Contract", "VinZ\GeoIndexing.Contract\VinZ.GeoIndexing.Contract.csproj", "{C8675AC4-324B-4ED9-8A2F-9173A671DAB7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vinz.RecordHelper", "VinZ\RecordHelper\Vinz.RecordHelper.csproj", "{B2A9726D-BF39-4AED-97A7-264C67E41239}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vinz.Common.RecordHelper", "VinZ\RecordHelper\Vinz.Common.RecordHelper.csproj", "{B2A9726D-BF39-4AED-97A7-264C67E41239}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.ServerContext", "VinZ\ServerContext\VinZ.ServerContext.csproj", "{FAC18B47-AF81-4A82-9EBD-BDB7CA8A0821}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.Common.ServerContext", "VinZ\ServerContext\VinZ.Common.ServerContext.csproj", "{FAC18B47-AF81-4A82-9EBD-BDB7CA8A0821}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.ServerContext.Contract", "VinZ\ServerContext.Contract\VinZ.ServerContext.Contract.csproj", "{711B5667-1E01-4C4F-8B8B-463A529CD7E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.Common.ServerContext.Contract", "VinZ\ServerContext.Contract\VinZ.Common.ServerContext.Contract.csproj", "{711B5667-1E01-4C4F-8B8B-463A529CD7E7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.UUIDHelper", "VinZ\UUIDHelper\VinZ.UUIDHelper.csproj", "{296E560B-CBA0-4E77-8E4A-4E6F1AF016B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.Common.UUIDHelper", "VinZ\UUIDHelper\VinZ.Common.UUIDHelper.csproj", "{296E560B-CBA0-4E77-8E4A-4E6F1AF016B7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.Hash64", "VinZ\Hash64\VinZ.Hash64.csproj", "{E140E340-424B-4324-BF3C-10FF5056FB76}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.Common.Paging", "VinZ\Paging\VinZ.Common.Paging.csproj", "{5D1242B1-1B11-40B9-8681-4F02EFFF0CB8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.Paging", "VinZ\Paging\VinZ.Paging.csproj", "{5D1242B1-1B11-40B9-8681-4F02EFFF0CB8}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.DbContextHelper", "VinZ\TransactionHelper\VinZ.DbContextHelper.csproj", "{0CBECF1C-21DF-4806-9AF1-92C769A12A56}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.Common.DbContextHelper", "VinZ\TransactionHelper\VinZ.Common.DbContextHelper.csproj", "{0CBECF1C-21DF-4806-9AF1-92C769A12A56}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1_Application", "1_Application", "{E6711E40-9496-40AF-849F-6DB744F072CF}"
 EndProject
@@ -69,8 +67,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThirdParty", "Business\Thir
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3_Infrastructure", "3_Infrastructure", "{3EE78606-F45F-41AF-9280-B96796905DF8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure.Network.Bus", "Infrastructure\Bus\Application.Bus\Infrastructure.Network.Bus.csproj", "{4139F28B-F78A-4C5E-8820-75662541C37D}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Business.Common", "Business\Business.Common\Business.Common.csproj", "{731DE7D2-8B18-4D80-9EDD-CFA6B79E177E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure.Common", "Infrastructure\Infrastructure.Common\Infrastructure.Common.csproj", "{89DF4F2C-1B5C-4CE2-ACE0-705AA8D4D486}"
@@ -91,7 +87,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bus.Repository", "Infrastru
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure.Storage.Repository", "Infrastructure\Repository\Infrastructure.Repository.Common\Infrastructure.Storage.Repository.csproj", "{2373D641-4993-4637-903B-E36FA0F1C8BA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Booking.Enterprise.Bus", "Infrastructure\BookingKata.Enterprise\Enterprise.Bus\Booking.Enterprise.Bus.csproj", "{02B566B8-3B23-41EB-B624-A03F51EAF59C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Booking.Enterprise.Network", "Infrastructure\BookingKata.Enterprise\Enterprise.Bus\Booking.Enterprise.Network.csproj", "{02B566B8-3B23-41EB-B624-A03F51EAF59C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Booking.Enterprise.Storage", "Infrastructure\BookingKata.Enterprise\Enterprise.Repository\Booking.Enterprise.Storage.csproj", "{9BD9DD31-0ACC-43F6-8DAB-2C7335E00100}"
 EndProject
@@ -99,7 +95,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Booking", "Booking", "{914E
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Booking", "Booking", "{E2C91C3C-F44B-4684-A952-A714851919C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VinZ.JsonHelper", "VinZ\JsonHelper\VinZ.JsonHelper.csproj", "{1AEF19F0-BADF-42C8-B2D9-01F627576BBD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.Common.JsonHelper", "VinZ\JsonHelper\VinZ.Common.JsonHelper.csproj", "{1AEF19F0-BADF-42C8-B2D9-01F627576BBD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.Common.DateTimeHelper", "VinZ\DateTimeHelper\VinZ.Common.DateTimeHelper.csproj", "{8D87D3CE-8BE2-4EFE-AFD2-2810B9E43DB9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ThirdParty.Contract", "Business\ThirdParty.Contract\ThirdParty.Contract.csproj", "{F4E5CE2C-DF39-4661-861E-83A3D9A202A9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.Common.HashHelper", "VinZ\HashHelper\VinZ.Common.HashHelper.csproj", "{7601E96A-243C-4FD5-94DC-B7A02CEF38D5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.Common.ProgramHelper", "VinZ\ProgramHelper\VinZ.Common.ProgramHelper.csproj", "{C366C564-DF3F-4E9C-B2E1-11A5FD5DAACC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -171,10 +175,6 @@ Global
 		{296E560B-CBA0-4E77-8E4A-4E6F1AF016B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{296E560B-CBA0-4E77-8E4A-4E6F1AF016B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{296E560B-CBA0-4E77-8E4A-4E6F1AF016B7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E140E340-424B-4324-BF3C-10FF5056FB76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E140E340-424B-4324-BF3C-10FF5056FB76}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E140E340-424B-4324-BF3C-10FF5056FB76}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E140E340-424B-4324-BF3C-10FF5056FB76}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5D1242B1-1B11-40B9-8681-4F02EFFF0CB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5D1242B1-1B11-40B9-8681-4F02EFFF0CB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D1242B1-1B11-40B9-8681-4F02EFFF0CB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -219,10 +219,6 @@ Global
 		{6042D693-B7A8-4B0D-AC10-92054622371E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6042D693-B7A8-4B0D-AC10-92054622371E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6042D693-B7A8-4B0D-AC10-92054622371E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4139F28B-F78A-4C5E-8820-75662541C37D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4139F28B-F78A-4C5E-8820-75662541C37D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4139F28B-F78A-4C5E-8820-75662541C37D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4139F28B-F78A-4C5E-8820-75662541C37D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{731DE7D2-8B18-4D80-9EDD-CFA6B79E177E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{731DE7D2-8B18-4D80-9EDD-CFA6B79E177E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{731DE7D2-8B18-4D80-9EDD-CFA6B79E177E}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -271,6 +267,22 @@ Global
 		{1AEF19F0-BADF-42C8-B2D9-01F627576BBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1AEF19F0-BADF-42C8-B2D9-01F627576BBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1AEF19F0-BADF-42C8-B2D9-01F627576BBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D87D3CE-8BE2-4EFE-AFD2-2810B9E43DB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D87D3CE-8BE2-4EFE-AFD2-2810B9E43DB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D87D3CE-8BE2-4EFE-AFD2-2810B9E43DB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D87D3CE-8BE2-4EFE-AFD2-2810B9E43DB9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4E5CE2C-DF39-4661-861E-83A3D9A202A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4E5CE2C-DF39-4661-861E-83A3D9A202A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4E5CE2C-DF39-4661-861E-83A3D9A202A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4E5CE2C-DF39-4661-861E-83A3D9A202A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7601E96A-243C-4FD5-94DC-B7A02CEF38D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7601E96A-243C-4FD5-94DC-B7A02CEF38D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7601E96A-243C-4FD5-94DC-B7A02CEF38D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7601E96A-243C-4FD5-94DC-B7A02CEF38D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C366C564-DF3F-4E9C-B2E1-11A5FD5DAACC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C366C564-DF3F-4E9C-B2E1-11A5FD5DAACC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C366C564-DF3F-4E9C-B2E1-11A5FD5DAACC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C366C564-DF3F-4E9C-B2E1-11A5FD5DAACC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -292,7 +304,6 @@ Global
 		{FAC18B47-AF81-4A82-9EBD-BDB7CA8A0821} = {A621E367-C479-4911-A23D-FD879A3277A2}
 		{711B5667-1E01-4C4F-8B8B-463A529CD7E7} = {A621E367-C479-4911-A23D-FD879A3277A2}
 		{296E560B-CBA0-4E77-8E4A-4E6F1AF016B7} = {A621E367-C479-4911-A23D-FD879A3277A2}
-		{E140E340-424B-4324-BF3C-10FF5056FB76} = {A621E367-C479-4911-A23D-FD879A3277A2}
 		{5D1242B1-1B11-40B9-8681-4F02EFFF0CB8} = {A621E367-C479-4911-A23D-FD879A3277A2}
 		{0CBECF1C-21DF-4806-9AF1-92C769A12A56} = {A621E367-C479-4911-A23D-FD879A3277A2}
 		{46323A0F-6EB7-4E54-A28D-3E88580061FB} = {1B6C735A-8887-4B74-86E8-88999D61D72A}
@@ -305,7 +316,6 @@ Global
 		{8A0FE9AE-4056-404E-AB6B-231095787C1A} = {914E9794-EE05-4D3A-A8B9-2B1CE260BB35}
 		{772CABC4-AF89-4028-8CFD-7972D26F0E69} = {3EE78606-F45F-41AF-9280-B96796905DF8}
 		{6042D693-B7A8-4B0D-AC10-92054622371E} = {1B6C735A-8887-4B74-86E8-88999D61D72A}
-		{4139F28B-F78A-4C5E-8820-75662541C37D} = {3EE78606-F45F-41AF-9280-B96796905DF8}
 		{731DE7D2-8B18-4D80-9EDD-CFA6B79E177E} = {1B6C735A-8887-4B74-86E8-88999D61D72A}
 		{89DF4F2C-1B5C-4CE2-ACE0-705AA8D4D486} = {3EE78606-F45F-41AF-9280-B96796905DF8}
 		{622DE17F-8186-49C7-916B-97BDCCC4EAB6} = {3EE78606-F45F-41AF-9280-B96796905DF8}
@@ -321,6 +331,10 @@ Global
 		{914E9794-EE05-4D3A-A8B9-2B1CE260BB35} = {772CABC4-AF89-4028-8CFD-7972D26F0E69}
 		{E2C91C3C-F44B-4684-A952-A714851919C1} = {622DE17F-8186-49C7-916B-97BDCCC4EAB6}
 		{1AEF19F0-BADF-42C8-B2D9-01F627576BBD} = {A621E367-C479-4911-A23D-FD879A3277A2}
+		{8D87D3CE-8BE2-4EFE-AFD2-2810B9E43DB9} = {A621E367-C479-4911-A23D-FD879A3277A2}
+		{F4E5CE2C-DF39-4661-861E-83A3D9A202A9} = {1B6C735A-8887-4B74-86E8-88999D61D72A}
+		{7601E96A-243C-4FD5-94DC-B7A02CEF38D5} = {A621E367-C479-4911-A23D-FD879A3277A2}
+		{C366C564-DF3F-4E9C-B2E1-11A5FD5DAACC} = {A621E367-C479-4911-A23D-FD879A3277A2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {590111C3-57D0-485D-BF05-544FE98D0519}

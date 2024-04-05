@@ -1,15 +1,12 @@
-﻿using Booking.Sales.Services;
-
-namespace BookingKata.Sales;
+﻿namespace BookingKata.Sales;
 
 
 public class SalesQueryService
 (
     ISalesRepository sales, 
-    IAdminRepository admin,
+    AdminQueryService admin,
    
-    PricingQueryService pricing, 
-    // BookingCommandService booking,
+    IPricingQueryService pricing,
 
     IGazetteerService geo,
     ITimeService DateTime
@@ -20,7 +17,7 @@ public class SalesQueryService
 
 
 
-    public IQueryable<StayMatch> Find(StayRequest request)
+    public IQueryable<StayMatch> Find(StayRequest request, int customerId)
     {
         var firstNight = OvernightStay.From(request.ArrivalDate);
         var lastNight = OvernightStay.FromCheckOutDate(request.DepartureDate);
@@ -40,7 +37,7 @@ public class SalesQueryService
 
         if (request is { Latitude: not null, Longitude: not null })
         {
-            var positionCells = geo.NewGeoIndex(request, Business.Common.PrecisionMaxKm, maxKm);
+            var positionCells = geo.NewGeoIndex(request, PrecisionMaxKm, maxKm);
 
             requestCells.AddRange(positionCells);
         };
@@ -50,7 +47,7 @@ public class SalesQueryService
             var citiesCells = geo
                 .QueryCities(request.CityName, request.ApproximateNameMatch, request.CountryCode)
                 .Where(city => city.Position != default)
-                .SelectMany(city => geo.CacheGeoIndex(city, Business.Common.PrecisionMaxKm))
+                .SelectMany(city => geo.CacheGeoIndex(city, PrecisionMaxKm))
                 .AsEnumerable();
 
             requestCells.AddRange(citiesCells);
@@ -110,12 +107,42 @@ public class SalesQueryService
             select stay.urid;
 
 
-        var stays = urids
-            .ToArray() //fetch into db good size, localization and timing
+        var roomDetails = urids
 
-            .Select(urid =>
+            //fetch into db good size, localization and timing
+            .AsEnumerable()
+            // .ToArray()
+
+            .Select(urid => admin.GetRoomDetails(urid, default));
+
+
+        CustomerProfile? customerProfile = default;
+
+        if (sales.Customers.Any(customer => customer.CustomerId == customerId))
+        {
+            customerProfile = new CustomerProfile(customerId)
             {
-                var price = pricing.GetPrice(urid, request.PersonCount, request.ArrivalDate, request.DepartureDate, request.Currency);
+                Booked = (
+                    from booking in sales.Bookings
+                    where booking.CustomerId == customerId &&
+                          !booking.Cancelled
+                    select booking
+                ).ToList()
+
+            };
+        }
+
+
+        var stays = RoomDetails
+
+            .Select(room =>
+            {
+                var price = pricing.GetPrice(
+                    //room
+                    room.PersonMaxCount, room.FloorNum, room.FloorNumMax, room.HotelRank, room.Latitude, room.Longitude,
+
+                    //booking
+                    request.PersonCount, request.ArrivalDate, request.DepartureDate, request.Currency, customerProfile);
 
                 var match = new StayMatch(
                     request.PersonCount,
@@ -233,20 +260,20 @@ public class SalesQueryService
     
 
 
-    public long[] Booking(UniqueRoomId urid, DateTime openingDate, DateTime closingDate, int personCount, bool scoped)
+    public long[] Booking(UniqueRoomId urid, DateTime openingDate, DateTime closingDate, int personCount)
     {
         var room = admin.GetRoom(urid.Value);
 
         if (room == default)
         {
-            throw new RoomDoesNotExistException();
+            new ArgumentException(ReferenceInvalid, nameof(urid));
         }
 
         var hotel = admin.GetHotel(urid.HotelId);
 
         if (hotel == default)
         {
-            throw new HotelDoesNotExistException();
+            throw new ArgumentException(ReferenceInvalid, nameof(urid.HotelId));
         }
 
         var hotelCell = geo.RefererGeoIndex(hotel);
@@ -256,67 +283,44 @@ public class SalesQueryService
             throw new HotelNotGeoIndexedException();
         }
 
-        try
-        {
-            using var scope = !scoped ? null : new TransactionScope();
-
-            var (nearestKnownCity, nearestKnownCityKm) = geo.NearestCity(hotelCell);
+        var (nearestKnownCity, nearestKnownCityKm) = geo.NearestCity(hotelCell);
 
 
-            var firstNight = OvernightStay.From(openingDate);
-            var lastNight = OvernightStay.FromCheckOutDate(closingDate);
+        var firstNight = OvernightStay.From(openingDate);
+        var lastNight = OvernightStay.FromCheckOutDate(closingDate);
 
-            var vacancies = firstNight
-                .StayUntil(lastNight, personCount, hotel.Latitude, hotel.Longitude,
-                     hotel.HotelName, nearestKnownCity?.name, urid.Value)
-                .ToArray();
+        var vacancies = firstNight
+            .StayUntil(lastNight, personCount, hotel.Latitude, hotel.Longitude,
+                 hotel.HotelName, nearestKnownCity?.name, urid.Value)
+            .ToArray();
 
-            geo.CopyToReferers(hotel, vacancies, scoped);
+        geo.CopyToReferers(hotel, vacancies);
 
-            //
-            //
-            sales.AddVacancies(vacancies, false);
-            //
-            //
+        //
+        //
+        sales.AddVacancies(vacancies);
+        //
+        //
 
-            scope?.Complete();
-
-            return vacancies
-                .Select(vacancy => vacancy.VacancyId)
-                .ToArray();
-        }
-        catch (Exception e)
-        {
-            throw new ServerErrorException(e);
-        }
+        return vacancies
+            .Select(vacancy => vacancy.VacancyId)
+            .ToArray();
     }
 
-    public long[] CloseBooking(UniqueRoomId urid, DateTime openingDate, DateTime closingDate, bool scoped)
+    public long[] CloseBooking(UniqueRoomId urid, DateTime openingDate, DateTime closingDate)
     {
+        var firstNight = OvernightStay.From(openingDate);
+        var lastNight = OvernightStay.FromCheckOutDate(closingDate);
 
-        try
-        {
-            using var scope = !scoped ? null : new TransactionScope();
+        var vacancyIds = firstNight.StayUntil(lastNight, urid.Value);
 
-            var firstNight = OvernightStay.From(openingDate);
-            var lastNight = OvernightStay.FromCheckOutDate(closingDate);
+        //
+        //
+        sales.RemoveVacancies(vacancyIds);
+        //
+        //
 
-            var vacancyIds = firstNight.StayUntil(lastNight, urid.Value);
-
-            //
-            //
-            sales.RemoveVacancies(vacancyIds, false);
-            //
-            //
-
-            scope?.Complete();
-
-            return vacancyIds;
-        }
-        catch (Exception e)
-        {
-            throw new ServerErrorException(e);
-        }
+        return vacancyIds;
     }
 
 }

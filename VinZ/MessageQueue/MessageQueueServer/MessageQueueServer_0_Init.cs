@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace VinZ.MessageQueue;
 
@@ -15,7 +14,9 @@ public partial class MessageQueueServer : Initializable, IMessageBus
         {
             var message = $"{time.UtcNow:s} ({time.state})";
 
-            Notify(new NotifyMessage(default, time.verb)
+            var originator = GetType().Name;
+
+            Notify(originator, new NotifyMessage(default, time.verb)
             {
                 Message = message,
                 Immediate = true

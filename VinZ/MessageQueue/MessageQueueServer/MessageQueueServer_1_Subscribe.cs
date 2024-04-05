@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using System.Collections.Concurrent;
-
-namespace VinZ.MessageQueue;
+﻿namespace VinZ.MessageQueue;
 
 public partial class MessageQueueServer
 {
@@ -14,7 +11,7 @@ public partial class MessageQueueServer
     {
         var hash0 = client.GetHashCode();
 
-        if (recipient == Bus.Any && verb == Verb.Any)
+        if (recipient == AnyRecipient && verb == AnyVerb)
         {
             _subscribers_0[hash0] = client;
 
@@ -25,7 +22,7 @@ public partial class MessageQueueServer
             return;
         }
 
-        if (recipient != Bus.Any && verb == Verb.Any)
+        if (recipient != AnyRecipient && verb == AnyVerb)
         {
             var hash1 = recipient.GetHashCode();
 
@@ -44,7 +41,7 @@ public partial class MessageQueueServer
             return;
         }
 
-        if (recipient == Bus.Any && verb != Verb.Any)
+        if (recipient == AnyRecipient && verb != AnyVerb)
         {
             var hash1 = verb.GetHashCode();
 
@@ -87,12 +84,12 @@ public partial class MessageQueueServer
         log.LogInformation(
             $"[{nameof(MessageQueueServer)}] --client {hash0:x8} unsubscribed, recipient=Any, verb=Any, 0+{hash0:x8}");
 
-        if (recipient == Bus.Any && verb == Verb.Any)
+        if (recipient == AnyRecipient && verb == AnyVerb)
         {
             return _subscribers_0.Remove(client.GetHashCode(), out _);
         }
 
-        if (recipient != Bus.Any && verb == Verb.Any)
+        if (recipient != AnyRecipient && verb == AnyVerb)
         {
             return !_subscribers_R.AddOrUpdate(recipient.GetHashCode(),
                     new HashSet<IMessageBusClient>(),
@@ -104,7 +101,7 @@ public partial class MessageQueueServer
                 .Contains(client);
         }
 
-        if (recipient == Bus.Any && verb != Verb.Any)
+        if (recipient == AnyRecipient && verb != AnyVerb)
         {
             return !_subscribers_V.AddOrUpdate(verb.GetHashCode(),
                     new HashSet<IMessageBusClient>(),

@@ -1,4 +1,4 @@
-﻿namespace VinZ.ToolBox;
+﻿namespace VinZ.Common;
 
 
 public static class PositionHelper

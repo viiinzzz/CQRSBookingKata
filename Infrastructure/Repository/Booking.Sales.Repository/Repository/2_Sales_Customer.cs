@@ -15,7 +15,7 @@ public partial class SalesRepository
 
         if (customerId != default)
         {
-            throw new ArgumentException(Business.Common.Exceptions.ReferenceInvalid, nameof(emailAddress));
+            throw new ArgumentException(ReferenceInvalid, nameof(emailAddress));
         }
 
         var newbie = new Customer(emailAddress);
@@ -77,7 +77,7 @@ public partial class SalesRepository
 
         if (customer == default)
         {
-            throw new ArgumentException(Business.Common.Exceptions.ReferenceInvalid, nameof(customerId));
+            throw new ArgumentException(ReferenceInvalid, nameof(customerId));
         }
 
         var entity = _sales.Customers.Update(customer with

@@ -1,37 +1,38 @@
 ﻿namespace BookingKata.Admin;
 
+
 public class AdminQueryService
 (
     IAdminRepository admin,
     IGazetteerService geo
 )
 {
-    public IQueryable<RoomDetails> GetHotelDetails(int hotelId, int[]? exceptRoomNumbers)
+    public IQueryable<RoomDetails> GetRoomDetails(int hotelId, int[]? exceptRoomNumbers)
     {
         var hotel = admin.GetHotel(hotelId);
 
         if (hotel == default)
         {
-            throw new ArgumentException(Common.Exceptions.ReferenceInvalid, nameof(hotelId));
+            throw new ArgumentException(ReferenceInvalid, nameof(hotelId));
         }
 
         if (hotel.Disabled)
         {
-            throw new ArgumentException(Common.Exceptions.ReferenceDisabled, nameof(hotelId));
+            throw new ArgumentException(ReferenceDisabled, nameof(hotelId));
         }
 
         var hotelCell = geo.RefererGeoIndex(hotel);
 
         if (hotelCell == null)
         {
-            throw new ArgumentException(Common.Exceptions.ReferenceNotIndexed, nameof(hotelId));
+            throw new ArgumentException(ReferenceNotIndexed, nameof(hotelId));
         }
 
         //sales search will be performed against known cities list,
         //hence determining nearest known city name for geo-indexing
 
         var (nearestKnownCity, nearestKnownCityKm) = geo.NearestCity(hotelCell);
-
+        var nearestKnownCityName = nearestKnownCity?.name;
 
         var rooms = admin.Rooms(hotelId);
 
@@ -41,6 +42,7 @@ public class AdminQueryService
                 .Where(room => !exceptRoomNumbers.Contains(room.RoomNum));
         }
 
+        var floorNumMax = new UniqueRoomId(rooms.Max(room => room.Urid)).FloorNum;
 
         var roomDetails = rooms
             .Select(room => new RoomDetails(
@@ -48,7 +50,10 @@ public class AdminQueryService
                 hotel.Latitude,
                 hotel.Longitude,
                 hotel.HotelName,
-                nearestKnownCity.name,
+                hotel.ranking,
+                nearestKnownCityName,
+                new UniqueRoomId(room.Urid).FloorNum,
+                floorNumMax,
                 room.Urid
             ));
 

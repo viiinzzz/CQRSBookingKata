@@ -1,4 +1,4 @@
-namespace VinZ.Paging;
+namespace VinZ.Common;
 
 public class PageLinks
 {

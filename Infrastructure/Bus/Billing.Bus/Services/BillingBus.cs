@@ -53,7 +53,7 @@ public partial class BillingBus(IScopeProvider sp) : MessageBusClientBase
                             //
                             //
 
-                            Notify(new NotifyMessage(Infrastructure.Network.Bus.Recipient.Any, Verb.QuotationEmitted)
+                            Notify(new NotifyMessage(AnyRecipient, Verb.QuotationEmitted)
                             {
                                 CorrelationGuid = correlationGuid,
                                 Message = new { id }
@@ -84,7 +84,7 @@ public partial class BillingBus(IScopeProvider sp) : MessageBusClientBase
                             //
                             //
 
-                            Notify(new NotifyMessage(Bus.Recipient.Any, Verb.QuotationEmitted)
+                            Notify(new NotifyMessage(AnyRecipient, Verb.QuotationEmitted)
                             {
                                 CorrelationGuid = correlationGuid,
                                 Message = new { id }
@@ -114,7 +114,7 @@ public partial class BillingBus(IScopeProvider sp) : MessageBusClientBase
                             //
                             //
 
-                            Notify(new NotifyMessage(Bus.Recipient.Any, Verb.QuotationEmitted)
+                            Notify(new NotifyMessage(AnyRecipient, Verb.QuotationEmitted)
                             {
                                 CorrelationGuid = correlationGuid,
                                 Message = new { id }
@@ -139,7 +139,7 @@ public partial class BillingBus(IScopeProvider sp) : MessageBusClientBase
                             //
                             //
 
-                            Notify(new NotifyMessage(Bus.Recipient.Any, Verb.QuotationEmitted)
+                            Notify(new NotifyMessage(AnyRecipient, Verb.QuotationEmitted)
                             {
                                 CorrelationGuid = correlationGuid,
                                 Message = new { id }
@@ -150,7 +150,7 @@ public partial class BillingBus(IScopeProvider sp) : MessageBusClientBase
             }
             catch (Exception ex)
             {
-                Notify(new NotifyMessage(originator, Infrastructure.Network.Bus.Verb.RequestProcessingError)
+                Notify(new NotifyMessage(originator, RequestProcessingError)
                 {
                     CorrelationGuid = correlationGuid,
                     Message = new

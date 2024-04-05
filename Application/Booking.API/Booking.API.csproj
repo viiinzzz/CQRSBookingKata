@@ -31,14 +31,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Infrastructure\BookingKata.Enterprise\Enterprise.Bus\Booking.Enterprise.Bus.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\BookingKata.Enterprise\Enterprise.Bus\Booking.Enterprise.Network.csproj" />
     <ProjectReference Include="..\..\Infrastructure\BookingKata.Enterprise\Enterprise.Repository\Booking.Enterprise.Storage.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Infrastructure.Common\Infrastructure.Common.csproj" />
     <ProjectReference Include="..\..\VinZ\GeoIndexing\VinZ.GeoIndexing.csproj" />
-    <ProjectReference Include="..\..\VinZ\Paging\VinZ.Paging.csproj" />
-    <ProjectReference Include="..\..\VinZ\ParsableHelper\VinZ.ParsableHelper.csproj" />
-    <ProjectReference Include="..\..\VinZ\ServerContext\VinZ.ServerContext.csproj" />
-    <ProjectReference Include="..\..\VinZ\FakeTime\VinZ.FakeTime.csproj" />
+    <ProjectReference Include="..\..\VinZ\Paging\VinZ.Common.Paging.csproj" />
+    <ProjectReference Include="..\..\VinZ\ParsableHelper\VinZ.Common.ParsableHelper.csproj" />
+    <ProjectReference Include="..\..\VinZ\ProgramHelper\VinZ.Common.ProgramHelper.csproj" />
+    <ProjectReference Include="..\..\VinZ\ServerContext\VinZ.Common.ServerContext.csproj" />
+    <ProjectReference Include="..\..\VinZ\FakeTime\VinZ.Common.FakeTime.csproj" />
     <ProjectReference Include="..\..\VinZ\MessageQueue\VinZ.MessageQueue.csproj" />
   </ItemGroup>
 

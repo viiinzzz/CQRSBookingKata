@@ -1,6 +1,4 @@
-﻿using Booking.Sales.Services;
-
-namespace BookingKata.Sales;
+﻿namespace BookingKata.Sales;
 
 public class BookingCommandService
 (
@@ -17,7 +15,7 @@ public class BookingCommandService
 {
     public void OpenHotelSeason(int hotelId, int[]? exceptRoomNumbers, DateTime openingDate, DateTime closingDate)
     {
-        var roomDetails = admin.GetHotelDetails(hotelId, exceptRoomNumbers);
+        var roomDetails = admin.GetRoomDetails(hotelId, exceptRoomNumbers);
 
 
         var firstNight = OvernightStay.From(openingDate);
@@ -79,10 +77,7 @@ public class BookingCommandService
         //
 
 
-        try
-    {
-        using var scope = !scoped ? null : new TransactionScope();
-
+       
 
         var paid = payment.Pay(prop.Price, prop.Currency, debitCardNumber, secrets.ownerName, secrets.expire, secrets.CCV);
 
@@ -95,7 +90,7 @@ public class BookingCommandService
 
         //
         //
-        bus.Notify(new NotifyMessage(Recipient.Billing, Verb.Billing.QuotationEmitError)
+        bus.Notify(new NotifyMessage(Recipient.Billing, TimeServiceConst.Verb.Billing.QuotationEmitError)
         {
             CorrelationGuid = correlationId.Guid,
             Message = new { id = quotationId }
@@ -121,7 +116,7 @@ public class BookingCommandService
         sales.RemoveVacancies(booked, scoped: false);
 
 
-        bus.Notify(new NotifyMessage(Bus.Any, Verb.Sales.NewBooking)
+        bus.Notify(new NotifyMessage(AnyRecipient, TimeServiceConst.Verb.NewBooking)
         {
             Message = new NewBooking
             (

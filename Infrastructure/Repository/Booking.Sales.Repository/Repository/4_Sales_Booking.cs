@@ -3,12 +3,12 @@
 public partial class SalesRepository
 {
 
-    public IQueryable<Booking> Bookings
+    public IQueryable<Sales.Booking> Bookings
 
         => _sales.Bookings
             .AsNoTracking();
 
-    public int AddBooking(Booking booking)
+    public int AddBooking(Sales.Booking booking)
     {
         var entity = _sales.Bookings.Add(booking);
         _sales.SaveChanges();

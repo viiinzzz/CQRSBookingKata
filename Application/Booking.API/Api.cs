@@ -4,7 +4,8 @@
   ╎                                                                            ╎
   ╰----------------------------------------------------------------------------╯*/
 
-using Infrastructure.Common;
+_ = nameof(BookingKata.Infrastructure.EnterpriseStorage);
+_ = nameof(BookingKata.Infrastructure.EnterpriseNetwork);
 
 var pif = ProgramInfo.Current;
 pif.Print();
@@ -189,7 +190,7 @@ void MapRoutes(WebApplication app)
     demo.MapGet("/forward",
         async (
         int days,
-        NullableDouble speedFactor,
+        ParsableNullableDouble speedFactor,
         [FromServices] DemoService demos) => 
         {
             try
@@ -227,7 +228,7 @@ void MapRoutes(WebApplication app)
     {
         if (query.LostInTranslation(out var sql, out var translationError))
         {
-            throw new ServerErrorException(new Exception("We are hiring a new developer..."));
+            throw new Exception($"We apologize, we got lost in translation: {translationError}");
         }
     }
 
@@ -254,12 +255,12 @@ void MapRoutes(WebApplication app)
         (int? page, int? pageSize, [FromServices] IAdminRepository admin, [FromServices] IGazetteerService geo)
             => admin.Hotels
                 .Page("/admin/hotels", page, pageSize, QueryCheck)
-                .IncludeGeoIndex(Common.PrecisionMaxKm, geo));
+                .IncludeGeoIndex(PrecisionMaxKm, geo));
     admin.MapGet("/vacancies",
         (int? page, int? pageSize, [FromServices] ISalesRepository sales, [FromServices] IGazetteerService geo)
             => sales.Vacancies
                 .Page("/admin/vacancies", page, pageSize, QueryCheck)
-                .IncludeGeoIndex(Business.Common.PrecisionMaxKm, geo));
+                .IncludeGeoIndex(PrecisionMaxKm, geo));
     admin.MapGet("/bookings",
         (int? page, int? pageSize, [FromServices] ISalesRepository sales)
             => sales.Bookings
@@ -341,11 +342,11 @@ void MapRoutes(WebApplication app)
             [FromQuery(Name = "hotel")] string? hotelName,
             [FromQuery(Name = "country")] string? countryCode,
             [FromQuery(Name = "city")] string? cityName,
-            [FromQuery(Name = "lat")] NullableDouble latitude,
-            [FromQuery(Name = "lon")] NullableDouble longitude,
-            [FromQuery(Name = "km")] NullableInt maxKm,
-            [FromQuery(Name = "pricemin")] NullableInt priceMin,
-            [FromQuery(Name = "pricemax")] NullableInt priceMax,
+            [FromQuery(Name = "lat")] ParsableNullableDouble latitude,
+            [FromQuery(Name = "lon")] ParsableNullableDouble longitude,
+            [FromQuery(Name = "km")] ParsableNullableInt maxKm,
+            [FromQuery(Name = "pricemin")] ParsableNullableInt priceMin,
+            [FromQuery(Name = "pricemax")] ParsableNullableInt priceMax,
             [FromQuery(Name = "currency")] string? currency,
             [FromServices] SalesQueryService sales) 
         => sales

@@ -1,7 +1,4 @@
-using System.Globalization;
-using System.Text.RegularExpressions;
-
-namespace VinZ.ToolBox;
+namespace VinZ.Common;
 
 public static class StringHelper
 {

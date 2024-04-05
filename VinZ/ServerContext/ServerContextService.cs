@@ -1,6 +1,4 @@
-﻿using VinZ.Common;
-
-namespace VinZ.ServerContext;
+﻿namespace VinZ.Common;
 
 public class ServerContextService : IServerContextService
 {

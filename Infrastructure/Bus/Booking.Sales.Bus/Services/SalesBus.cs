@@ -1,4 +1,6 @@
-﻿namespace BookingKata.Infrastructure.Bus.Sales;
+﻿using Business.Common;
+
+namespace BookingKata.Infrastructure.Bus.Sales;
 
 public partial class SalesBus(IScopeProvider sp) : MessageBusClientBase
 {
@@ -9,6 +11,7 @@ public partial class SalesBus(IScopeProvider sp) : MessageBusClientBase
         Notified += (sender, notification) =>
         {
             using var scope = sp.GetScope<BookingCommandService>(out var booking);
+            using var scope2 = sp.GetScope<KpiQueryService>(out var kpi);
 
             var originator = notification.Originator;
             var correlationGuid = new CorrelationId(notification.CorrelationId1, notification.CorrelationId2).Guid;
@@ -34,18 +37,19 @@ public partial class SalesBus(IScopeProvider sp) : MessageBusClientBase
                         //
                         //
                         booking.OpenHotelSeason(
-                            openingDate, 
-                            closingDate,
+                            request.hotelId,
                             request.exceptRoomNumbers,
 
-                            request.hotelId,
-                            notification.CorrelationId1,
-                            notification.CorrelationId2
+                            openingDate, 
+                            closingDate
+                            //
+                            // notification.CorrelationId1,
+                            // notification.CorrelationId2
                         );
                         //
                         //
 
-                        Notify(new NotifyMessage(Bus.Recipient.Any, Verb.HotelSeasonOpened)
+                        Notify(new NotifyMessage(AnyRecipient, Verb.HotelSeasonOpened)
                         {
                             CorrelationGuid = correlationGuid,
                             Message = new { }
@@ -60,20 +64,27 @@ public partial class SalesBus(IScopeProvider sp) : MessageBusClientBase
                             ? throw new Exception("invalid request")
                             : JsonConvert.DeserializeObject<BookRequest>(notification.Json);
 
+                        var debitCardSecrets = new DebitCardSecrets(request.debitCardOwner, request.debitCardExpire, request.debitCardCCV);
                         //
                         //
-                        var id = booking.Book(
-                            request.arrivalTime,
-                            request.departureTime,
+                        var id = booking.Book
+                        (
+                            request.lastName,
+                            request.firstName,
 
+                            request.debitCardNumber,
+                            debitCardSecrets,
+
+                            request.customerId,
                             request.stayPropositionId,
+
                             notification.CorrelationId1,
                             notification.CorrelationId2
                         );
                         //
                         //
 
-                        Notify(new NotifyMessage(Bus.Recipient.Any, Verb.BookConfirmed)
+                        Notify(new NotifyMessage(AnyRecipient, Verb.BookConfirmed)
                         {
                             CorrelationGuid = correlationGuid,
                             Message = new { id }
@@ -84,7 +95,7 @@ public partial class SalesBus(IScopeProvider sp) : MessageBusClientBase
             }
             catch (Exception ex)
             {
-                Notify(new NotifyMessage(originator, Bus.Verb.RequestProcessingError)
+                Notify(new NotifyMessage(originator, RequestProcessingError)
                 {
                     CorrelationGuid = correlationGuid,
                     Message = new

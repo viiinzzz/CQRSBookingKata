@@ -21,7 +21,7 @@ public partial class AdminRepository
         _admin.SaveChanges();
         entity.State = EntityState.Detached;
 
-        geo.AddReferer(hotel,Business.Common.PrecisionMaxKm, default);
+        geo.AddReferer(hotel, PrecisionMaxKm, default);
 
         return hotel.HotelId;
     }
@@ -42,7 +42,7 @@ public partial class AdminRepository
 
         if (hotel == default)
         {
-            throw new ArgumentException(Common.Exceptions.ReferenceInvalid, nameof(newRooms.HotelId));
+            throw new ArgumentException(ReferenceInvalid, nameof(newRooms.HotelId));
         }
 
       

@@ -1,4 +1,4 @@
-namespace VinZ.DbContextHelper;
+namespace VinZ.Common;
 
 public interface ITransactionable
 {

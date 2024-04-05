@@ -9,7 +9,7 @@ public partial class DemoService
             throw new Exception("FakeCustomer not ready yet.");
         }
 
-        bus.Notify(new NotifyMessage(Recipient.Audit, Verb.Audit.Information)
+        bus.Notify(new NotifyMessage(Recipient.Audit, InformationMessage)
         {
             Message = $"Demo: Seeding Bookings {demo.SimulationDay}...",
             Immediate = true
@@ -44,7 +44,7 @@ public partial class DemoService
 
                 if (preferredStayMatches.Count() == 0)
                 {
-                    bus.Notify(new NotifyMessage(Recipient.Audit, Verb.Audit.RequestProcessingError)
+                    bus.Notify(new NotifyMessage(Recipient.Audit, RequestProcessingError)
                     {
                         Message = "Demo: Booking skipped because no stay were found matching the customer's request!",
                         Immediate = true

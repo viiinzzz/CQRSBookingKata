@@ -10,7 +10,7 @@ public partial class AdminRepository
 
         _admin.Entry(hotel).State = EntityState.Detached;
 
-        var hotelCells = geo.CacheGeoIndex(hotel, Business.Common.PrecisionMaxKm);
+        var hotelCells = geo.CacheGeoIndex(hotel, PrecisionMaxKm);
 
         hotel.Cells = hotelCells;
 

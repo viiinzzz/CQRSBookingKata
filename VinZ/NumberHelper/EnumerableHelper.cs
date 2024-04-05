@@ -1,4 +1,4 @@
-﻿namespace VinZ.Number;
+﻿namespace VinZ.Common;
 
 public static class EnumerableHelper
 {

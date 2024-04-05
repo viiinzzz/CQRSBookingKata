@@ -1,7 +1,4 @@
-﻿using System.Linq.Expressions;
-using System.Reflection;
-
-namespace VinZ.Number;
+﻿namespace VinZ.Common;
 
 //https://stackoverflow.com/questions/40900594/mapping-a-ulong-to-a-long-in-c
 

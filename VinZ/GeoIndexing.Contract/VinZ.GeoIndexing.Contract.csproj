@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PositionHelper\VinZ.PositionHelper.csproj" />
-    <ProjectReference Include="..\RecordHelper\Vinz.RecordHelper.csproj" />
+    <ProjectReference Include="..\PositionHelper\VinZ.Common.PositionHelper.csproj" />
+    <ProjectReference Include="..\RecordHelper\Vinz.Common.RecordHelper.csproj" />
   </ItemGroup>
 
 </Project>
