@@ -4,6 +4,6 @@ public record MessageQueueServerConfig
 (
     Type[]? DomainBusType = default,
 
-    int BusRefreshSeconds = 10, //120
-    int BusRefreshMinSeconds = 10
+    int BusRefreshMinMilliseconds = 100,
+    int BusRefreshMaxMilliseconds = 15000
 );

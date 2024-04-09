@@ -19,8 +19,17 @@ public static class GazeteerServiceHelper
     public static (int RefereTypeHash, long RefererHash) GetRefererHashes<TReferer>(this TReferer? referer)
         where TReferer : IHavePrimaryKey
     {
-        var refererType = typeof(TReferer).FullName
+        string refererType;
+
+        if (referer is GeoProxy proxy)
+        {
+            refererType = proxy.TypeFullName;
+        }
+        else
+        {
+            refererType = typeof(TReferer).FullName
                           ?? throw new ArgumentException("type must have FullName", nameof(TReferer));
+        }
 
         var refererTypeHash = refererType.GetHashCode();
 

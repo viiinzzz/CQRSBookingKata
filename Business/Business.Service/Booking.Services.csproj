@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\VinZ\MessageQueue.Contracts\VinZ.MessageQueue.Contract.csproj" />
+    <ProjectReference Include="..\Booking.Shared\Booking.Shared.csproj" />
+    <ProjectReference Include="..\Business.Common\Business.Common.csproj" />
+    <ProjectReference Include="..\ThirdParty.Contract\ThirdParty.Contract.csproj" />
+  </ItemGroup>
+
+</Project>

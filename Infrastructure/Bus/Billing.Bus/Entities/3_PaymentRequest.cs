@@ -1,4 +1,4 @@
-﻿namespace BookingKata.Infrastructure.Network;
+﻿namespace Common.Infrastructure.Network;
 
 public record PaymentRequest
 (

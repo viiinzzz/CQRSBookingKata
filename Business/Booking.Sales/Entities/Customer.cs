@@ -6,9 +6,3 @@ public record Customer(
     int CustomerId = default,
     bool Disabled = false
 );
-
-
-public record CustomerProfile(int CustomerId)
-{
-    public IList<Booking> Booked { get; set; }
-}

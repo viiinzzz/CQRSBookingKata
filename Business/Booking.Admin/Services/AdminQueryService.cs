@@ -7,6 +7,11 @@ public class AdminQueryService
     IGazetteerService geo
 )
 {
+    public string GetHotelTypeFullName()
+    {
+        return typeof(Hotel).FullName;
+    }
+
     public IQueryable<RoomDetails> GetRoomDetails(int hotelId, int[]? exceptRoomNumbers)
     {
         var hotel = admin.GetHotel(hotelId);

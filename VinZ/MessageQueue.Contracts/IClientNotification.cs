@@ -2,7 +2,9 @@
 
 public interface IClientNotification
 {
-    string? Json { get; }
+    string? Message { get; }
+    string? MessageType { get; }
+    TMessage MessageAs<TMessage>();
     string? Verb { get; }
     string? Recipient { get; }
     string? Originator { get; }

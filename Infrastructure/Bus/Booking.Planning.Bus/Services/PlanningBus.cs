@@ -1,10 +1,12 @@
-﻿namespace BookingKata.Infrastructure.Network;
+﻿using BookingKata.Services;
 
-public partial class PlanningBus(IScopeProvider sp) : MessageBusClientBase
+namespace BookingKata.Infrastructure.Network;
+
+public class PlanningBus(IScopeProvider sp) : MessageBusClientBase
 {
     public override void Configure()
     {
-        Subscribe(Recipient);
+        Subscribe(Recipient.Planning);
 
         Notified += (sender, notification) =>
         {
@@ -17,61 +19,20 @@ public partial class PlanningBus(IScopeProvider sp) : MessageBusClientBase
             {
                 switch (notification.Verb)
                 {
-                    // case Verb.QuotationRequest:
-                    //     {
-                    //         var request = notification.Json == default
-                    //             ? throw new Exception("invalid request")
-                    //             : JsonConvert.DeserializeObject<QuotationRequest>(notification.Json);
-                    //
-                    //         var optionStartUtc = request.optionStartUtc == default
-                    //             ? default
-                    //             : DateTime.ParseExact(request.optionStartUtc, "s", CultureInfo.InvariantCulture,
-                    //                 DateTimeStyles.AssumeUniversal);
-                    //         var optionEndUtc = request.optionEndUtc == default
-                    //             ? default
-                    //             : DateTime.ParseExact(request.optionEndUtc, "s", CultureInfo.InvariantCulture,
-                    //                 DateTimeStyles.AssumeUniversal);
-                    //
-                    //         var jsonMeta = request.jsonMeta == default
-                    //             ? "{}"
-                    //             : JsonConvert.SerializeObject(JsonConvert.DeserializeObject(request.jsonMeta));
-                    //
-                    //         //
-                    //         //
-                    //         var id = billing.EmitQuotation
-                    //         (
-                    //             request.price,
-                    //             request.currency,
-                    //             optionStartUtc,
-                    //             optionEndUtc,
-                    //             jsonMeta,
-                    //
-                    //             request.referenceId,
-                    //             notification.CorrelationId1,
-                    //             notification.CorrelationId2
-                    //         );
-                    //         //
-                    //         //
-                    //
-                    //         Notify(new NotifyMessage(AnyRecipient, Verb.QuotationEmitted)
-                    //         {
-                    //             CorrelationGuid = correlationGuid,
-                    //             Message = new { id }
-                    //         });
-                    //     }
-                    //     break;
+                  
 
 
                 }
             }
             catch (Exception ex)
             {
-                Notify(new NotifyMessage(originator, RequestProcessingError)
+                Notify(new NotifyMessage(originator, ErrorProcessingRequest)
                 {
                     CorrelationGuid = correlationGuid,
                     Message = new
                     {
-                        request = notification.Json,
+                        message = notification.Message,
+                        messageType = notification.MessageType,
                         error = ex.Message,
                         stackTrace = ex.StackTrace
                     }

@@ -32,7 +32,7 @@ public partial class MessageQueueServer
                 group notification by new { notification.Recipient, notification.Verb }
                 into g
                 where g.Count() > 1
-                select g.OrderBy(ss => ss.MessageTime).Skip(1);
+                select g.OrderBy(ss => ss.NotificationTime).Skip(1);
 
             var duplicates2 = new List<ServerNotification>();
 
@@ -81,7 +81,7 @@ public partial class MessageQueueServer
             from notification in queue.Notifications
             where now >= notification.EarliestDelivery &&
                   !notification.Done
-            orderby notification.MessageTime descending
+            orderby notification.NotificationTime descending
             select notification;
 
         var count = new DeliveryCount();

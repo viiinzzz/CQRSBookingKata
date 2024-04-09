@@ -1,7 +1,12 @@
 ﻿namespace VinZ.MessageQueue;
 
 public record NotifyAck
-(
-    bool Valid = false,
-    ICorrelationId? CorrelationId = default
-) : INotifyAck;
+    (
+        bool Valid = false,
+        string? data = default,
+        ICorrelationId? CorrelationId = default
+    )
+    : INotifyAck
+{
+    public Task<object?> Response { get; set; } = Task.FromResult<object?>(null);
+}

@@ -1,4 +1,4 @@
-﻿namespace Business.Common;
+﻿namespace BookingKata.Infrastructure.Common;
 
 public class Const
 {

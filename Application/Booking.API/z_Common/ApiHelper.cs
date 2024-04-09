@@ -13,6 +13,21 @@ public static class ApiHelper
     }
 
 
-
+    public static async Task<IResult> WithStackTrace(this Func<Task<IResult>> fetch)
+    {
+        try
+        {
+            return await fetch();
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem(new ProblemDetails
+            {
+                Title = ex.Message, 
+                Detail = ex.StackTrace, 
+                Status = 500
+            });
+        }
+    }
 
 }

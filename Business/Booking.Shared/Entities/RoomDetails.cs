@@ -1,4 +1,4 @@
-﻿namespace BookingKata.Admin;
+﻿namespace BookingKata.Shared;
 
 public record RoomDetails
 (

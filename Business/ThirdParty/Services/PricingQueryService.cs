@@ -1,4 +1,6 @@
-﻿namespace BookingKata.ThirdParty;
+﻿using BookingKata.Shared;
+
+namespace BookingKata.ThirdParty;
 
 //sales and marketing, event planning
 
@@ -11,7 +13,8 @@ public class PricingQueryService(
         int personMaxCount, int floorNum, int floorNumMax, int hotelRank, int latitude, int longitude,
 
         //booking
-        int personCount, DateTime arrivalDate, DateTime departureDate, string? currency, int? customerId = default)
+        int personCount, DateTime arrivalDate, DateTime departureDate, string? currency, CustomerProfile? customerProfile
+        )
     {
         // var uniqueRoomId = new UniqueRoomId(urid);
 

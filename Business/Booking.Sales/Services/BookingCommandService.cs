@@ -1,10 +1,13 @@
-﻿namespace BookingKata.Sales;
+﻿using BookingKata.Services;
+
+namespace BookingKata.Sales;
 
 public class BookingCommandService
 (
     ISalesRepository sales,
 
-    AdminQueryService admin,
+    // AdminQueryService admin,//should not use that way for microservicing
+    IMessageBus bus,//wanna collaborate with other microservices
     // IMoneyRepository money,
     // IPlanningRepository planning,
     // IPaymentCommandService payment,
@@ -15,7 +18,19 @@ public class BookingCommandService
 {
     public void OpenHotelSeason(int hotelId, int[]? exceptRoomNumbers, DateTime openingDate, DateTime closingDate)
     {
-        var roomDetails = admin.GetRoomDetails(hotelId, exceptRoomNumbers);
+        var originator = this.GetType().FullName;
+
+        INotifyAck ack = bus.Notify(originator, new NotifyMessage(Services.Recipient.Admin, RoomDetailsRequest));
+
+
+
+
+
+        var roomDetails = admin
+            .GetRoomDetails(hotelId, exceptRoomNumbers)
+            .AsEnumerable(); //query db
+
+
 
 
         var firstNight = OvernightStay.From(openingDate);
@@ -25,18 +40,25 @@ public class BookingCommandService
 
 
         var vacancies = roomDetails
-           
-            .SelectMany(roomDetail => dayNumbers
-                .Select(dayNum => new Vacancy(dayNum,
-                    roomDetails.PersonMaxCount, roomDetails.Latitude, roomDetails.Longitude,
-                    roomDetails.HotelName, roomDetails.NearestKnownCityName, false, roomDetails.Urid)))
-            //
-            //
-            .ToArray(); //query db
-            //
-            //
 
-        geo.CopyToReferers(hotel, vacancies);
+            .SelectMany(roomDetail => dayNumbers
+
+                .Select(dayNum => new Vacancy(dayNum,
+
+                    roomDetail.PersonMaxCount, roomDetail.Latitude, roomDetail.Longitude,
+
+                    roomDetail.HotelName, roomDetail.NearestKnownCityName, false, roomDetail.Urid)
+                )
+            ).ToList();
+
+
+        var hotelTypeFullName = admin.GetHotelTypeFullName();
+
+        var position = new Position(vacancies.First().Latitude, vacancies.First().Longitude);
+
+        var hotelGeoProxy = new GeoProxy(hotelTypeFullName, hotelId, position);
+
+        geo.CopyToReferers(hotelGeoProxy, vacancies);
 
         sales.AddVacancies(vacancies);
     }
@@ -90,7 +112,7 @@ public class BookingCommandService
 
         //
         //
-        bus.Notify(new NotifyMessage(Recipient.Billing, TimeServiceConst.Verb.Billing.QuotationEmitError)
+        bus.Notify(new NotifyMessage(Recipient.Billing, Billing.QuotationEmitError)
         {
             CorrelationGuid = correlationId.Guid,
             Message = new { id = quotationId }
@@ -104,7 +126,7 @@ public class BookingCommandService
         
         //
         //
-        sales.AddBooking(booking, scoped: false);
+        sales.AddBooking(booking);
         //
         //
 
@@ -113,10 +135,10 @@ public class BookingCommandService
 
         var booked = beginDay.StayUntil(endDay, booking.UniqueRoomId);
 
-        sales.RemoveVacancies(booked, scoped: false);
+        sales.RemoveVacancies(booked);
 
 
-        bus.Notify(new NotifyMessage(AnyRecipient, TimeServiceConst.Verb.NewBooking)
+        bus.Notify(new NotifyMessage(Omni, BookConfirmed)
         {
             Message = new NewBooking
             (

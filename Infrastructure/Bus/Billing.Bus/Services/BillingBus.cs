@@ -1,14 +1,18 @@
-﻿namespace BookingKata.Infrastructure.Network;
+﻿using BookingKata.Infrastructure.Common;
+using VinZ.Common;
 
-public partial class BillingBus(IScopeProvider sp) : MessageBusClientBase
+namespace Common.Infrastructure.Bus.Billing;
+
+public class BillingBus(IScopeProvider sp) : MessageBusClientBase
 {
     public override void Configure()
     {
-        Subscribe(Recipient);
+        Subscribe(Recipient.Billing);
 
         Notified += (sender, notification) =>
         {
             using var scope = sp.GetScope<BillingCommandService>(out var billing);
+            using var scope2 = sp.GetScope<IMoneyRepository>(out var moneyRepository);
 
             var originator = notification.Originator;
             var correlationGuid = new CorrelationId(notification.CorrelationId1, notification.CorrelationId2).Guid;
@@ -17,145 +21,181 @@ public partial class BillingBus(IScopeProvider sp) : MessageBusClientBase
             {
                 switch (notification.Verb)
                 {
-                    case Verb.QuotationRequest:
+                    case Verb.Billing.QuotationRequest:
+                    {
+                        var request = notification.MessageAs<QuotationRequest>();
+
+                        var optionStartUtc = request.optionStartUtc == default
+                            ? default
+                            : DateTime.ParseExact(request.optionStartUtc, "s", CultureInfo.InvariantCulture,
+                                DateTimeStyles.AssumeUniversal);
+                        var optionEndUtc = request.optionEndUtc == default
+                            ? default
+                            : DateTime.ParseExact(request.optionEndUtc, "s", CultureInfo.InvariantCulture,
+                                DateTimeStyles.AssumeUniversal);
+
+                        var jsonMeta = request.jsonMeta == default
+                            ? "{}"
+                            : JsonConvert.SerializeObject(JsonConvert.DeserializeObject(request.jsonMeta));
+
+                        //
+                        //
+                        var id = billing.EmitQuotation
+                        (
+                            request.price,
+                            request.currency,
+                            optionStartUtc,
+                            optionEndUtc,
+                            jsonMeta,
+
+                            request.referenceId,
+                            notification.CorrelationId1,
+                            notification.CorrelationId2
+                        );
+                        //
+                        //
+
+                        Notify(new NotifyMessage(Omni, QuotationEmitted)
                         {
-                            var request = notification.Json == default
-                                ? throw new Exception("invalid request")
-                                : JsonConvert.DeserializeObject<QuotationRequest>(notification.Json);
+                            CorrelationGuid = correlationGuid,
+                            Message = new { id }
+                        });
 
-                            var optionStartUtc = request.optionStartUtc == default
-                                ? default
-                                : DateTime.ParseExact(request.optionStartUtc, "s", CultureInfo.InvariantCulture,
-                                    DateTimeStyles.AssumeUniversal);
-                            var optionEndUtc = request.optionEndUtc == default
-                                ? default
-                                : DateTime.ParseExact(request.optionEndUtc, "s", CultureInfo.InvariantCulture,
-                                    DateTimeStyles.AssumeUniversal);
-
-                            var jsonMeta = request.jsonMeta == default
-                                ? "{}"
-                                : JsonConvert.SerializeObject(JsonConvert.DeserializeObject(request.jsonMeta));
-
-                            //
-                            //
-                            var id = billing.EmitQuotation
-                            (
-                                request.price,
-                                request.currency,
-                                optionStartUtc,
-                                optionEndUtc,
-                                jsonMeta,
-
-                                request.referenceId,
-                                notification.CorrelationId1,
-                                notification.CorrelationId2
-                            );
-                            //
-                            //
-
-                            Notify(new NotifyMessage(AnyRecipient, Verb.QuotationEmitted)
-                            {
-                                CorrelationGuid = correlationGuid,
-                                Message = new { id }
-                            });
-                        }
                         break;
+                    }
 
+                    case Verb.Billing.InvoiceRequest:
+                    {
+                        var request = notification.MessageAs<InvoiceRequest>();
 
+                        //
+                        //
+                        var id = billing.EmitInvoice
+                        (
+                            request.amount,
+                            request.currency,
 
-                    case Verb.InvoiceRequest:
+                            request.customerId,
+                            request.quotationId,
+                            notification.CorrelationId1,
+                            notification.CorrelationId2
+                        );
+                        //
+                        //
+
+                        Notify(new NotifyMessage(Omni, QuotationEmitted)
                         {
-                            var request = notification.Json == default
-                                ? throw new Exception("invalid request")
-                                : JsonConvert.DeserializeObject<InvoiceRequest>(notification.Json);
+                            CorrelationGuid = correlationGuid,
+                            Message = new { id }
+                        });
 
-                            //
-                            //
-                            var id = billing.EmitInvoice
-                            (
-                                request.amount,
-                                request.currency,
-
-                                request.customerId,
-                                request.quotationId,
-                                notification.CorrelationId1,
-                                notification.CorrelationId2
-                            );
-                            //
-                            //
-
-                            Notify(new NotifyMessage(AnyRecipient, Verb.QuotationEmitted)
-                            {
-                                CorrelationGuid = correlationGuid,
-                                Message = new { id }
-                            });
-                        }
                         break;
+                    }
 
+                    case Verb.Billing.PaymentRequest:
+                    {
+                        var request = notification.MessageAs<PaymentRequest>();
 
-                    case Verb.PaymentRequest:
+                        var secret = new DebitCardSecrets(request.ownerName, request.expire, request.CCV);
+
+                        //
+                        //
+                        var id = billing.EmitReceipt
+                        (
+                            request.debitCardNumber,
+                            secret,
+
+                            request.invoiceId,
+                            notification.CorrelationId1,
+                            notification.CorrelationId2
+                        );
+                        //
+                        //
+
+                        Notify(new NotifyMessage(Omni, QuotationEmitted)
                         {
-                            var request = notification.Json == default
-                                ? throw new Exception("invalid request")
-                                : JsonConvert.DeserializeObject<PaymentRequest>(notification.Json);
+                            CorrelationGuid = correlationGuid,
+                            Message = new { id }
+                        });
 
-                            var secret = new DebitCardSecrets(request.ownerName, request.expire, request.CCV);
-                            //
-                            //
-                            var id = billing.EmitReceipt
-                            (
-                                request.debitCardNumber,
-                                secret,
-
-                                request.invoiceId,
-                                notification.CorrelationId1,
-                                notification.CorrelationId2
-                            );
-                            //
-                            //
-
-                            Notify(new NotifyMessage(AnyRecipient, Verb.QuotationEmitted)
-                            {
-                                CorrelationGuid = correlationGuid,
-                                Message = new { id }
-                            });
-                        }
                         break;
+                    }
 
+                    case Verb.Billing.RefundRequest:
+                    {
+                        var request = notification.MessageAs<RefundRequest>();
 
-                    case Verb.RefundRequest:
+                        //
+                        //
+                        var id = billing.EmitRefund
+                        (
+                            request.receiptId,
+                            notification.CorrelationId1,
+                            notification.CorrelationId2
+                        );
+                        //
+                        //
+
+                        Notify(new NotifyMessage(Omni, QuotationEmitted)
                         {
-                            var request = notification.Json == default
-                                ? throw new Exception("invalid request")
-                                : JsonConvert.DeserializeObject<RefundRequest>(notification.Json);
-                            //
-                            //
-                            var id = billing.EmitRefund
-                            (
-                                request.receiptId,
-                                notification.CorrelationId1,
-                                notification.CorrelationId2
-                            );
-                            //
-                            //
+                            CorrelationGuid = correlationGuid,
+                            Message = new { id }
+                        });
 
-                            Notify(new NotifyMessage(AnyRecipient, Verb.QuotationEmitted)
-                            {
-                                CorrelationGuid = correlationGuid,
-                                Message = new { id }
-                            });
-                        }
                         break;
+                    }
+
+                    case RequestPage:
+                    {
+                        var request = notification.MessageAs<PageRequest>();
+
+                        object? page;
+
+                        switch (request.Path)
+                        {
+                            case "/money/payrolls":
+                            {
+                                page = moneyRepository
+                                    .Payrolls
+                                    .Page(request.Path, request.Page, request.PageSize);
+
+                                break;
+                            }
+
+                            case "/money/invoices":
+                            {
+                                page = moneyRepository
+                                    .Invoices
+                                    .Page(request.Path, request.Page, request.PageSize);
+
+                                break;
+                            }
+
+                            default:
+                            {
+                                throw new NotImplementedException($"page request for path not supported: {request.Path}");
+                            }
+                        }
+
+                        Notify(new NotifyMessage(originator, RespondPage)
+                        {
+                            CorrelationGuid = correlationGuid,
+                            Message = page
+                        });
+
+                        break;
+                    }
                 }
             }
             catch (Exception ex)
             {
-                Notify(new NotifyMessage(originator, RequestProcessingError)
+                Notify(new NotifyMessage(originator, ErrorProcessingRequest)
                 {
                     CorrelationGuid = correlationGuid,
                     Message = new
                     {
-                        request = notification.Json,
+                        message = notification.Message,
+                        messageType = notification.MessageType,
                         error = ex.Message,
                         stackTrace = ex.StackTrace
                     }

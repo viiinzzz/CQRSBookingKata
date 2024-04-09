@@ -5,4 +5,3 @@ global using Zejji.Entity;
 global using BookingKata.Planning;
 global using Business.Common;
 global using VinZ.Common;
-global using VinZ.ServerContext;

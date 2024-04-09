@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ToolBox\VinZ.Common.ToolBox.csproj" />
+    <ProjectReference Include="..\TransactionHelper\VinZ.Common.DbContextHelper.csproj" />
   </ItemGroup>
 
 </Project>

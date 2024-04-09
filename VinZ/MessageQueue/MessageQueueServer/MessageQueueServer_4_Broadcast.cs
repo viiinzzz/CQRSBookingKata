@@ -44,7 +44,7 @@ public partial class MessageQueueServer
         } to {subscribers.Count} subscriber{(subscribers.Count > 1 ? "s" : "")
         }...
   {{recipient:{notification.Recipient}, verb:{notification.Verb
-        }, message:{notification.Json.Replace("\"", "")}}}");
+        }, message:{notification.Message.Replace("\"", "")}}}");
 
         var updateMessage = () =>
         {
@@ -76,7 +76,7 @@ public partial class MessageQueueServer
 
         var clientMessage = new ClientNotification
         {
-            Json = notification.Json,
+            Message = notification.Message,
             Recipient = notification.Recipient,
             Verb = notification.Verb,
             Originator = notification.Originator,
@@ -120,7 +120,7 @@ failure: {ex.Message}
 
         log.LogInformation(
             @$"{delivered} message{(immediate ? "" : "Id:" + notification.MessageId)} to {subscribers.Count} subscriber{(subscribers.Count > 1 ? "s" : "")}...
-  {{recipient:{notification.Recipient}, verb:{notification.Verb}, message:{notification.Json.Replace("\"", "")}}}");
+  {{recipient:{notification.Recipient}, verb:{notification.Verb}, message:{notification.Message.Replace("\"", "")}}}");
 
         return (count, updates);
     }

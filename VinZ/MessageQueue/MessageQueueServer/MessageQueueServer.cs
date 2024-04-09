@@ -32,6 +32,9 @@ public partial class MessageQueueServer
 
     private async Task Execute(CancellationToken cancel)
     {
+        var refresh = config.BusRefreshMinMilliseconds;
+        var logRefresh = () => log.LogInformation($"Throttling refresh rate @{refresh}ms");
+
         while (!cancel.IsCancellationRequested)
         {
             var t0 = DateTime.UtcNow;
@@ -44,19 +47,33 @@ public partial class MessageQueueServer
 
             var t1 = DateTime.UtcNow;
 
-            var seconds = (int)Math.Ceiling((t1 - t0).TotalSeconds);
+            var dt = (int)Math.Ceiling((t1 - t0).TotalMilliseconds);
 
-            if (seconds < config.BusRefreshSeconds)
+            if (dt >= refresh)
             {
-                var delay = 1000 * (config.BusRefreshSeconds - seconds);
-
-                if (delay < 1000 * config.BusRefreshMinSeconds)
+                if (refresh / 2 >= config.BusRefreshMinMilliseconds)
                 {
-                    delay = 1000 * config.BusRefreshMinSeconds;
+                    refresh /= 2;
+                    logRefresh();
                 }
 
-                await Task.Delay(delay, cancel);
+                continue;
             }
+
+            var delay = refresh - dt;
+
+            if (delay < refresh)
+            {
+                delay = refresh;
+            }
+
+            if (refresh * 2 <= config.BusRefreshMaxMilliseconds)
+            {
+                refresh *= 2;
+                logRefresh();
+            }
+
+            await Task.Delay(delay, cancel);
         }
     }
 

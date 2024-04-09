@@ -2,8 +2,6 @@ namespace VinZ.Common;
 
 public static class DbContextHelper
 {
-
-
     private static readonly Regex contextRx = new("^(.*)Context$", RegexOptions.IgnoreCase);
     private static readonly Regex connectionStringRx = new(@"\(\$Context\)", RegexOptions.IgnoreCase);
 
@@ -42,7 +40,8 @@ public static class DbContextHelper
     (
         this IQueryable<TEntity> query,
         out string? sql,
-        out string? translationError
+        out string? translationError,
+        bool doThrow = false
     ) 
         where TEntity : class
     {
@@ -57,6 +56,11 @@ public static class DbContextHelper
         {
             sql = null;
             translationError = ex.Message;
+
+            if (doThrow)
+            {
+                throw new Exception($"We apologize, we got lost in translation: {translationError}");
+            }
 
             Console.Error.WriteLine($@"
 !!!ERROR!!!

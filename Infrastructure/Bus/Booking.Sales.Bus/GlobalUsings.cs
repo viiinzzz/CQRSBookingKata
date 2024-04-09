@@ -1,7 +1,10 @@
 ﻿global using System.Globalization;
-global using Newtonsoft.Json;
-
+global using BookingKata.Infrastructure.Common;
 global using BookingKata.Sales;
+global using BookingKata.Services;
+global using Business.Common;
+global using VinZ.Common;
+global using VinZ.GeoIndexing;
 global using VinZ.MessageQueue;
-global using static VinZ.MessageQueue.Recipient;
-global using static VinZ.MessageQueue.Verb;
+global using static VinZ.MessageQueue.Const;
+global using static BookingKata.Infrastructure.Common.Const;

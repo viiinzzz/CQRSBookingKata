@@ -2,7 +2,7 @@ namespace BookingKata.API.Demo;
 
 public partial class DemoService
 {
-    private void Fake_BookingDay(bool scoped)
+    private void Fake_BookingDay()
     {
         if (demo.FakeCustomerIds == null)
         {
@@ -44,7 +44,7 @@ public partial class DemoService
 
                 if (preferredStayMatches.Count() == 0)
                 {
-                    bus.Notify(new NotifyMessage(Recipient.Audit, RequestProcessingError)
+                    bus.Notify(new NotifyMessage(Recipient.Audit, ErrorProcessingRequest)
                     {
                         Message = "Demo: Booking skipped because no stay were found matching the customer's request!",
                         Immediate = true
@@ -63,8 +63,13 @@ public partial class DemoService
                         continue;
                     }
 
-                    var bookingId = booking.Book(lockProposition, cid, c.LastName, c.FirstName, c.DebitCardNumber, c.DebitCardSecrets,
-                        scoped: false);
+                    var bookingId = booking.Book(
+                        c.LastName, c.FirstName,
+                        c.DebitCardNumber, c.DebitCardSecrets,
+                        cid,
+                        lockProposition,
+                        correlationId1, correlationId2
+                        );
 
                     break;
                 }

@@ -11,7 +11,7 @@ public record Vacancy
     double Longitude,
 
     string HotelName,
-    string CityName,
+    string? CityName,
 
     bool Cancelled = false,
     int UniqueRoomId = default

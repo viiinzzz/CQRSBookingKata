@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace VinZ.MessageQueue;
+﻿namespace VinZ.MessageQueue;
 
 public partial class MessageQueueServer
 {
@@ -29,7 +27,9 @@ public partial class MessageQueueServer
 
         var notification = new ServerNotification
         {
-            Json = n.Message == default ? "{}" : JsonConvert.SerializeObject(n.Message),
+            Message = n.Message == default ? "{}" : JsonConvert.SerializeObject(n.Message),
+            MessageType = n.Message == default ? string.Empty : n.Message.GetType().Name,
+
             Verb = n.Verb,
             Recipient = n.Recipient,
 
@@ -37,7 +37,7 @@ public partial class MessageQueueServer
             CorrelationId1 = correlationId.Id1,
             CorrelationId2 = correlationId.Id2,
 
-            MessageTime = now,
+            NotificationTime = now,
             EarliestDelivery = selectEarliest ? new[] { now2, now + n.EarliestDelivery.Value }.Max() : now,
             LatestDelivery = selectLatest ? now + n.LatestDelivery.Value : System.DateTime.MaxValue,
             RepeatDelay = n.RepeatDelay ?? TimeSpan.Zero,
@@ -71,7 +71,7 @@ public partial class MessageQueueServer
 
             log.LogInformation(
                 @$"{queuing} message{(immediate ? "" : "Id:" + notification.MessageId)}...
-{{recipient:{notification.Recipient}, verb:{notification.Verb}, message:{notification.Json.Replace("\"", "")}}}");
+{{recipient:{notification.Recipient}, verb:{notification.Verb}, message:{notification.Message.Replace("\"", "")}}}");
 
             //
             //
@@ -86,5 +86,42 @@ public partial class MessageQueueServer
         {
             Valid = false
         };
+    }
+
+    private ConcurrentDictionary<WaitedResponseFilter, object> _waitedResponses = new ();
+
+    public async Task<TReturn> Wait<TReturn>(INotifyAck ack, string recipient, string respondVerb,
+        CancellationToken cancellationToken)
+    {
+        var filter = new WaitedResponseFilter(ack.CorrelationId, recipient, respondVerb);
+
+        _waitedResponses[filter] = null;
+
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            await Task.Delay(100);
+
+            var waitedResponse = _waitedResponses[filter];
+
+            if (waitedResponse == null)
+            {
+                continue;
+            }
+
+            return (TReturn)waitedResponse;
+        }
+    }
+
+
+
+}
+
+public record WaitedResponseFilter(ICorrelationId correlationId, string recipient, string respondVerb)
+{
+    public override int GetHashCode()
+    {
+        return (correlationId.Id1, correlationId.Id2, recipient, respondVerb).GetHashCode();
     }
 }
