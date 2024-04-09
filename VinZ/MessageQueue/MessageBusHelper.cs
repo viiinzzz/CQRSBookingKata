@@ -6,9 +6,20 @@ public static class MessageBusHelper
 
     public const int ResponseTimeoutSeconds = 2 * 60;
 
-    public static async Task<TReturn> Ask<TReturn>(
+    public static async Task<TReturn?> Ask<TReturn>(
         this IMessageBus mq, 
-        string recipient, string requestVerb, object? message, string respondVerb,
+        string recipient, string requestVerb, object? message,
+        CancellationToken requestCancel, int responseTimeoutSeconds = ResponseTimeoutSeconds
+    )
+    {
+        var ret = await Ask(mq, recipient, requestVerb, message, requestCancel, responseTimeoutSeconds);
+
+        return (TReturn?)ret;
+    }
+
+    public static async Task<object?> Ask(
+        this IMessageBus mq, 
+        string recipient, string requestVerb, object? message,
         CancellationToken requestCancel, int responseTimeoutSeconds = ResponseTimeoutSeconds
     )
     {
@@ -22,7 +33,7 @@ public static class MessageBusHelper
             }
         );
 
-        var ret = await mq.Wait<TReturn>(requestAck, recipient, respondVerb, cancellationToken);
+        var ret = await mq.Wait(requestAck, cancellationToken);
 
         return ret;
     }

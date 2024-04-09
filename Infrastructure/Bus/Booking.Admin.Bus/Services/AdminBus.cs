@@ -1,6 +1,6 @@
 ﻿namespace BookingKata.Infrastructure.Bus.Admin;
 
-public class AdminBus(IScopeProvider sp) : MessageBusClientBase
+public partial class AdminBus(IScopeProvider sp, BookingConfiguration bconf) : MessageBusClientBase
 {
     public override void Configure()
     {
@@ -8,101 +8,27 @@ public class AdminBus(IScopeProvider sp) : MessageBusClientBase
 
         Notified += (sender, notification) =>
         {
-            using var scope = sp.GetScope<AdminQueryService>(out var adminQueryService);
-            using var scope2 = sp.GetScope<IAdminRepository>(out var adminRepository);
-            using var scope3 = sp.GetScope<IGazetteerService>(out var geo);
-
-            var originator = notification.Originator;
-            var correlationGuid = new CorrelationId(notification.CorrelationId1, notification.CorrelationId2).Guid;
-
             try
             {
                 switch (notification.Verb)
                 {
                     case Verb.Admin.RequestRoomDetails:
-                    {
-                        var request = notification.MessageAs<RoomDetailsRequest>();
-                       
-                        //
-                        //
-                        var roomDetails = adminQueryService
-                            .GetRoomDetails(request.hotelId, request.exceptRoomNumbers)
-                            .ToArray();
-                        //
-                        //
                         
-                        Notify(new NotifyMessage(Omni, Verb.Admin.RespondRoomDetails)
-                        {
-                            CorrelationGuid = correlationGuid,
-                            Message = roomDetails
-                        });
-
+                        Verb_Is_RequestRoomDetails(notification, sp);
                         break;
-                    }
-
-
+                    
                     case RequestPage:
-                    {
-                        var request = notification.MessageAs<PageRequest>();
-
-                        object? page;
-
-                        switch (request.Path)
-                        {
-                            case "/admin/hotels":
-                            {
-                                page = adminRepository
-                                    .Hotels
-                                    .Page(request.Path, request.Page, request.PageSize)
-                                    .IncludeGeoIndex(PrecisionMaxKm, geo);
-
-                                break;
-                            }
-
-                            case "/admin/employees":
-                            {
-                                page = adminRepository
-                                    .Employees
-                                    .Page(request.Path, request.Page, request.PageSize);
-
-                                break;
-                            }
-
-                            case "/admin/geo/indexes":
-                            {
-                                page = ((GazetteerService)geo)
-                                    .Indexes
-                                    .Page(request.Path, request.Page, request.PageSize);
-
-                                break;
-                            }
-
-                            default:
-                            {
-                                throw new NotImplementedException($"page request for path not supported: {request.Path}");
-                            }
-                        }
-
-                        Notify(new NotifyMessage(originator, RespondPage)
-                        {
-                            CorrelationGuid = correlationGuid,
-                            Message = page
-                        });
-
+                    
+                        Verb_Is_RequestPage(notification, sp, bconf);
                         break;
-                    }
-
-
-                   
-
-
+                    
                 }
             }
             catch (Exception ex)
             {
-                Notify(new NotifyMessage(originator, ErrorProcessingRequest)
+                Notify(new NotifyMessage(notification.Originator, ErrorProcessingRequest)
                 {
-                    CorrelationGuid = correlationGuid,
+                    CorrelationGuid = notification.CorrelationGuid(),
                     Message = new
                     {
                         message = notification.Message,

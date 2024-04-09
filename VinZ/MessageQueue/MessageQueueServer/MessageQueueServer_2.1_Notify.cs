@@ -87,41 +87,4 @@ public partial class MessageQueueServer
             Valid = false
         };
     }
-
-    private ConcurrentDictionary<WaitedResponseFilter, object> _waitedResponses = new ();
-
-    public async Task<TReturn> Wait<TReturn>(INotifyAck ack, string recipient, string respondVerb,
-        CancellationToken cancellationToken)
-    {
-        var filter = new WaitedResponseFilter(ack.CorrelationId, recipient, respondVerb);
-
-        _waitedResponses[filter] = null;
-
-        while (true)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            await Task.Delay(100);
-
-            var waitedResponse = _waitedResponses[filter];
-
-            if (waitedResponse == null)
-            {
-                continue;
-            }
-
-            return (TReturn)waitedResponse;
-        }
-    }
-
-
-
-}
-
-public record WaitedResponseFilter(ICorrelationId correlationId, string recipient, string respondVerb)
-{
-    public override int GetHashCode()
-    {
-        return (correlationId.Id1, correlationId.Id2, recipient, respondVerb).GetHashCode();
-    }
 }

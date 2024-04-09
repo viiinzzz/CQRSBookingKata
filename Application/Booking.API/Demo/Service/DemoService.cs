@@ -88,7 +88,7 @@ ERROR: {ex}";
                 DateTime.Forward(TimeSpan.FromDays(1));
                 demo.SimulationDay++;
 
-                context.Execute(() => Fake_BookingDay(false));
+                context.Execute(() => Fake_BookingDay());
 
                 if (days == SeasonDayNumbers)
                 {

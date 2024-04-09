@@ -20,7 +20,7 @@ public class BookingCommandService
     {
         var originator = this.GetType().FullName;
 
-        INotifyAck ack = bus.Notify(originator, new NotifyMessage(Services.Recipient.Admin, RoomDetailsRequest));
+        INotifyAck ack = bus.Notify(originator, new NotifyMessage(Recipient.Admin, RoomDetailsRequest));
 
 
 
@@ -138,7 +138,7 @@ public class BookingCommandService
         sales.RemoveVacancies(booked);
 
 
-        bus.Notify(new NotifyMessage(Omni, BookConfirmed)
+        bus.Notify(originator, new NotifyMessage(Omni, BookConfirmed)
         {
             Message = new NewBooking
             (

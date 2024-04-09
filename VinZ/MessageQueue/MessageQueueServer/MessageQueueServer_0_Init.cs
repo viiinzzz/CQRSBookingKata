@@ -2,7 +2,8 @@
 
 namespace VinZ.MessageQueue;
 
-public partial class MessageQueueServer : Initializable, IMessageBus
+public partial class MessageQueueServer 
+    : Initializable, IMessageBus
 {
     private Dictionary<IServiceScope, IMessageBusClient> _domainBuses = new();
 

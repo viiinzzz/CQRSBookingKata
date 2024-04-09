@@ -1,8 +1,11 @@
-﻿namespace BookingKata.Infrastructure.Storage;
+﻿using BookingKata.Shared;
+
+namespace BookingKata.Infrastructure.Storage;
 
 public partial class AdminRepository(
     IDbContextFactory factory,
-    IGazetteerService geo
+    IGazetteerService geo,
+    BookingConfiguration bconf
     // ITimeService DateTime
     ) : IAdminRepository, ITransactionable
 {

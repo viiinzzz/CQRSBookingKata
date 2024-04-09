@@ -4,6 +4,8 @@
   ╎                                                                            ╎
   ╰----------------------------------------------------------------------------╯*/
 
+using BookingKata.Shared;
+
 {
     //for type dependency diagram, establish dependency
     _ = nameof(BookingKata.Infrastructure.EnterpriseStorage);
@@ -147,6 +149,12 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
     services.AddScoped<PlanningQueryService>();
     services.AddScoped<KpiQueryService>();
 
+    var bconf = new BookingConfiguration
+    {
+        PrecisionMaxKm = 0.5
+    };
+    services.AddSingleton(bconf);
+
     //demo
     services.AddSingleton<BookingDemoContext>();
     services.AddScoped<DemoService>();
@@ -227,6 +235,8 @@ void MapRoutes(WebApplication app)
         }).WithOpenApi();
     }
 
+
+
     {
         var admin = app.MapGroup("/admin")
             .WithOpenApi();
@@ -281,8 +291,8 @@ void MapRoutes(WebApplication app)
         {
             var kpi = await mq.Ask<KeyPerformanceIndicators>
             (
-                Recipient.Sales, Verb.Sales.RequestKpi, id, 
-                Verb.Sales.RespondKpi, requestCancel, responseTimeoutSeconds
+                Recipient.Sales, Verb.Sales.RequestKpi, id,
+                requestCancel, responseTimeoutSeconds
             );
 
 
@@ -297,19 +307,7 @@ void MapRoutes(WebApplication app)
             return Results.Content(html, "text/html");
         }).WithOpenApi();
 
-//         admin.MapGet("/hotels/{id}/kpi",
-//             (int id, [FromServices] KpiQueryService kpi) =>
-//             {
-//                 var html = @$"
-// <h1>B O O K I N G  API</h1>
-// <h2>Key Performance Indicators</h2>
-// <ul>
-// <li>Occupancy Rate: {kpi.GetOccupancyRate(id):P}
-// </ul>
-// ";
-//                 return Results.Content(html, "text/html");
-//             })
-//             .WithOpenApi();
+
 
         {
             var employees = admin.MapGroup("/employees")
@@ -356,6 +354,8 @@ void MapRoutes(WebApplication app)
                 .WithOpenApi();
         }
 
+
+
         {
             var hotels = admin.MapGroup("/hotels")
                 .WithOpenApi();
@@ -394,6 +394,8 @@ void MapRoutes(WebApplication app)
         }
     }
 
+
+
     {
         var money = app.MapGroup("/money")
             .WithOpenApi();
@@ -429,6 +431,8 @@ void MapRoutes(WebApplication app)
         ).WithOpenApi();
     }
 
+
+
     {
         var sales = app.MapGroup("/sales")
             .WithOpenApi();
@@ -441,6 +445,8 @@ void MapRoutes(WebApplication app)
                 => sales2.Customers.Page("/sales/customers", page, pageSize))
             .WithOpenApi();
     }
+
+
 
     {
         var reception = app.MapGroup("/reception")
@@ -471,6 +477,8 @@ void MapRoutes(WebApplication app)
             .WithOpenApi();
     }
 
+
+
     {
         var service = app.MapGroup("/service")
             .WithOpenApi();
@@ -485,7 +493,12 @@ void MapRoutes(WebApplication app)
             .WithOpenApi();
     }
 
+
+
     {
+        //TODO
+        var todocustomerId = 0;
+
         app.MapGet("/booking", (
                 int? page, int? pageSize,
                 [FromQuery(Name = "arrival")] DateTime arrivalDate,
@@ -508,7 +521,7 @@ void MapRoutes(WebApplication app)
                     arrivalDate, departureDate, personCount,
                     approximateNameMatch, hotelName, countryCode, cityName,
                     latitude.Value, longitude.Value, maxKm.Value,
-                    priceMin.Value, priceMax.Value, currency), customerId)
+                    priceMin.Value, priceMax.Value, currency), todocustomerId)
                 .Page($"/booking", page, pageSize))
             .WithOpenApi();
     }

@@ -30,7 +30,7 @@ public class MessageBusClientBase : IMessageBusClient
         CheckBus();
 
 
-        var ret = Unsubscribe(AnyRecipient, AnyVerb);
+        var ret = Unsubscribe(Omni, AnyVerb);
 
         _bus = null;
 

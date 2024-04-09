@@ -3,14 +3,13 @@ namespace BookingKata.Services;
 
 public static class Recipient
 {
-    // public const string Application = nameof(Application);
     public const string Audit = nameof(Audit);
     public const string Time = nameof(Time);
 
     public const string Admin = nameof(Admin);
     public const string Planning = nameof(Planning);
     public const string Sales = nameof(Sales);
-    public const string Billing = nameof(Billing);
+    // public const string Billing = nameof(Billing);
 }
 
 public static class Verb
@@ -40,8 +39,8 @@ public static class Verb
         public const string RequestBook = $"{Recipient.Sales}:{nameof(RequestBook)}";
         public const string BookConfirmed = $"{Recipient.Sales}:{nameof(BookConfirmed)}";
 
-        public const string RequestKpi = $"{Recipient.Admin}:{nameof(RequestKpi)}";
-        public const string RespondKpi = $"{Recipient.Admin}:{nameof(RespondKpi)}";
+        public const string RequestKpi = $"{Recipient.Sales}:{nameof(RequestKpi)}";
+        public const string RespondKpi = $"{Recipient.Sales}:{nameof(RespondKpi)}";
 
 
     }

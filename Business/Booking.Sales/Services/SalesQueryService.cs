@@ -1,14 +1,17 @@
-﻿namespace BookingKata.Sales;
+﻿using BookingKata.Shared;
+
+namespace BookingKata.Sales;
 
 
 public class SalesQueryService
 (
     ISalesRepository sales, 
-    AdminQueryService admin,
+    // AdminQueryService admin,
    
     IPricingQueryService pricing,
 
     IGazetteerService geo,
+    BookingConfiguration bconf,
     ITimeService DateTime
 )
 {
@@ -37,7 +40,7 @@ public class SalesQueryService
 
         if (request is { Latitude: not null, Longitude: not null })
         {
-            var positionCells = geo.NewGeoIndex(request, PrecisionMaxKm, maxKm);
+            var positionCells = geo.NewGeoIndex(request, bconf.PrecisionMaxKm, maxKm);
 
             requestCells.AddRange(positionCells);
         };
@@ -47,7 +50,7 @@ public class SalesQueryService
             var citiesCells = geo
                 .QueryCities(request.CityName, request.ApproximateNameMatch, request.CountryCode)
                 .Where(city => city.Position != default)
-                .SelectMany(city => geo.CacheGeoIndex(city, PrecisionMaxKm))
+                .SelectMany(city => geo.CacheGeoIndex(city, bconf.PrecisionMaxKm))
                 .AsEnumerable();
 
             requestCells.AddRange(citiesCells);
@@ -97,40 +100,34 @@ public class SalesQueryService
             
             from stay in (
                 from vacancy in vacancies
+
                 group vacancy by vacancy.UniqueRoomId
+
                 into stay
-                select new { urid = stay.Key, nightsCount = stay.Count(), personMaxCount = stay.First().PersonMaxCount }
-                )
+
+                select new
+                {
+                    urid = stay.Key, 
+                    nightsCount = stay.Count(),
+                    personMaxCount = stay.First().PersonMaxCount
+                }
+            )
+            
             where stay.nightsCount == nightsCount
+            
             orderby stay.personMaxCount
 
             select stay.urid;
 
 
         var roomDetails = urids
+            .AsEnumerable() //fetch into db only good room size, geo-localization and availability timing
 
-            //fetch into db good size, localization and timing
-            .AsEnumerable()
-            // .ToArray()
-
-            .Select(urid => admin.GetRoomDetails(urid, default));
+            // .Select(urid => admin.GetRoomDetails(urid, default))
+            ;
 
 
-        CustomerProfile? customerProfile = default;
-
-        if (sales.Customers.Any(customer => customer.CustomerId == customerId))
-        {
-            customerProfile = new CustomerProfile(customerId)
-            {
-                Booked = (
-                    from booking in sales.Bookings
-                    where booking.CustomerId == customerId &&
-                          !booking.Cancelled
-                    select booking
-                ).ToList()
-
-            };
-        }
+        var customerProfile = GetCustomerProfile(customerId);
 
 
         var stays = RoomDetails
@@ -175,12 +172,32 @@ public class SalesQueryService
         return stays;
     }
 
-   
+    public CustomerProfile? GetCustomerProfile(int customerId)
+    {
+        if (!sales.Customers.Any(customer => customer.CustomerId == customerId))
+        {
+            return default;
+        }
+
+        return new CustomerProfile(customerId)
+        {
+            BookingHistory =
+            (
+                from booking in sales.Bookings
+
+                where booking.CustomerId == customerId &&
+                      !booking.Cancelled
+
+                select booking
+            )
+            .ToList()
+        };
+    }
 
 
     public const int FreeLockMinutes = 30;
 
-    public StayProposition? LockProposition(StayMatch request)
+    public StayProposition? LockProposition(StayMatch request, int customerId)
     {
         var now = DateTime.UtcNow;
         ;
@@ -242,7 +259,13 @@ public class SalesQueryService
             return default;
         }
 
-        var price = pricing.GetPrice(request.Urid, request.PersonCount, arrivalDate, departureDate, request.Currency);
+        var room = admin.GetRoomDetails(uniqueRoomId.HotelId, default);
+
+        var customerProfile = GetCustomerProfile(customerId);
+
+        var price = pricing.GetPrice(
+            room.PersonMaxCount, room.FloorNum, room.FlootNumMax, room.HotelRank, room.Latitude, room.Longitude,
+            request.PersonCount, arrivalDate, departureDate, request.Currency, customerProfile);
 
         var prop = new StayProposition(
             request.PersonCount,

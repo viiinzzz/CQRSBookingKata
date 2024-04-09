@@ -8,5 +8,5 @@ public interface IMessageBus
 
     INotifyAck Notify(string originator, INotifyMessage notifyMessage);
 
-    Task<TReturn> Wait<TReturn>(INotifyAck ack, string recipient, string respondVerb, CancellationToken cancellationToken);
+    Task<object?> Wait(INotifyAck ack, CancellationToken cancellationToken);
 }

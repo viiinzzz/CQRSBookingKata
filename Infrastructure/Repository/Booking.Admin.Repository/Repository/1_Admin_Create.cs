@@ -21,7 +21,7 @@ public partial class AdminRepository
         _admin.SaveChanges();
         entity.State = EntityState.Detached;
 
-        geo.AddReferer(hotel, PrecisionMaxKm, default);
+        geo.AddReferer(hotel, bconf.PrecisionMaxKm, default);
 
         return hotel.HotelId;
     }

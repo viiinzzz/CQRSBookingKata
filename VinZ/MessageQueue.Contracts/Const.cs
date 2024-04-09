@@ -9,7 +9,8 @@ public static class Const
         public const string ErrorProcessingRequest = $"{nameof(ErrorProcessingRequest)}";
 
         public const string RequestPage = $"{nameof(RequestPage)}";
-        public const string RespondPage = $"{nameof(RespondPage)}";
+
+        public const string Respond = $"{nameof(Respond)}";
 
 
         public const string ImportantMessage = $"{nameof(ImportantMessage)}";

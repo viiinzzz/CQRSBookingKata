@@ -12,9 +12,6 @@ public class PlanningBus(IScopeProvider sp) : MessageBusClientBase
         {
             using var scope = sp.GetScope<PlanningQueryService>(out var planning);
 
-            var originator = notification.Originator;
-            var correlationGuid = new CorrelationId(notification.CorrelationId1, notification.CorrelationId2).Guid;
-
             try
             {
                 switch (notification.Verb)
@@ -26,9 +23,9 @@ public class PlanningBus(IScopeProvider sp) : MessageBusClientBase
             }
             catch (Exception ex)
             {
-                Notify(new NotifyMessage(originator, ErrorProcessingRequest)
+                Notify(new NotifyMessage(notification.Originator, ErrorProcessingRequest)
                 {
-                    CorrelationGuid = correlationGuid,
+                    CorrelationGuid = notification.CorrelationGuid(),
                     Message = new
                     {
                         message = notification.Message,

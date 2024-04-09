@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\VinZ\DateTimeHelper\VinZ.Common.DateTimeHelper.csproj" />
     <ProjectReference Include="..\..\VinZ\FakeTime.Contracts\VinZ.Common.FakeTime.Contract.csproj" />
     <ProjectReference Include="..\..\VinZ\GeoIndexing.Contract\VinZ.GeoIndexing.Contract.csproj" />

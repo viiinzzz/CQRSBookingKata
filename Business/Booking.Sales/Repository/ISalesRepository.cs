@@ -20,6 +20,6 @@ public interface ISalesRepository
     bool HasActiveProposition(DateTime now, int urid, DateTime arrival, DateTime departure);
 
 
-    IQueryable<Booking> Bookings { get; }
-    int AddBooking(Booking booking);
+    IQueryable<Shared.Booking> Bookings { get; }
+    int AddBooking(Shared.Booking booking);
 }

@@ -9,7 +9,7 @@ public partial class DemoService
             throw new Exception("FakeCustomer not ready yet.");
         }
 
-        bus.Notify(new NotifyMessage(Recipient.Audit, InformationMessage)
+        bus.Notify(originator, new NotifyMessage(Recipient.Audit, InformationMessage)
         {
             Message = $"Demo: Seeding Bookings {demo.SimulationDay}...",
             Immediate = true
@@ -37,14 +37,14 @@ public partial class DemoService
                     PersonCount: personCount
                     ) { CityName = "Paris", CountryCode = "FR" };
 
-                var preferredStayMatches = sales2.Find(r)
+                var preferredStayMatches = sales2.Find(r, cid)
                     .Take(50)//let's say customer only examine 50 first matches (at max)
                     .AsRandomEnumerable()
                     .Take(10);//and finally validate only 10 (at max)
 
                 if (preferredStayMatches.Count() == 0)
                 {
-                    bus.Notify(new NotifyMessage(Recipient.Audit, ErrorProcessingRequest)
+                    bus.Notify(originator, new NotifyMessage(Recipient.Audit, ErrorProcessingRequest)
                     {
                         Message = "Demo: Booking skipped because no stay were found matching the customer's request!",
                         Immediate = true
