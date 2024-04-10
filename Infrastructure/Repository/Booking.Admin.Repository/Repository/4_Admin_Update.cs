@@ -2,7 +2,7 @@
 
 public partial class AdminRepository
 {
-    public void Update(int employeeId, UpdateEmployee update)
+    public Employee Update(int employeeId, UpdateEmployee update)
     {
         var employee = _admin.Employees
             .Find(employeeId);
@@ -19,10 +19,12 @@ public partial class AdminRepository
         var entity = _admin.Employees.Update(employee);
         _admin.SaveChanges();
         entity.State = EntityState.Detached;
+
+        return employee;
     }
 
 
-    public void Update(int hotelId, UpdateHotel update)
+    public Hotel Update(int hotelId, UpdateHotel update)
     {
         var hotel = _admin.Hotels
             .Find(hotelId);
@@ -39,10 +41,12 @@ public partial class AdminRepository
         var entity = _admin.Hotels.Update(hotel);
         _admin.SaveChanges();
         entity.State = EntityState.Detached;
+
+        return hotel;
     }
 
 
-    public void Update(int urid, UpdateRoom update)
+    public Room Update(int urid, UpdateRoom update)
     {
         var room = _admin.Rooms
             .Find(urid);
@@ -59,6 +63,8 @@ public partial class AdminRepository
         var entity = _admin.Rooms.Update(room);
         _admin.SaveChanges();
         entity.State = EntityState.Detached;
+
+        return room;
     }
 
 }

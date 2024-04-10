@@ -2,7 +2,7 @@
 
 public partial class AdminRepository
 {
-    public void DisableHotel(int hotelId, bool disable)
+    public Hotel DisableHotel(int hotelId, bool disable)
     {
         var hotel = GetHotel(hotelId);
 
@@ -19,6 +19,29 @@ public partial class AdminRepository
         var entity = _admin.Hotels.Update(update);
         _admin.SaveChanges();
         entity.State = EntityState.Detached;
+
+        return update;
+    }
+
+    public Employee DisableEmployee(int employeeId, bool disable)
+    {
+        var employee = _admin.Employees.Find(employeeId);
+
+        if (employee == default)
+        {
+            throw new InvalidOperationException("employeeId not found");
+        }
+
+        var update = employee with
+        {
+            Disabled = disable
+        };
+
+        var entity = _admin.Employees.Update(update);
+        _admin.SaveChanges();
+        entity.State = EntityState.Detached;
+
+        return update;
     }
 
     public void DeleteRoom(int roomId)
@@ -36,22 +59,4 @@ public partial class AdminRepository
         entity.State = EntityState.Detached;
     }
 
-    public void DisableEmployee(int employeeId, bool disable)
-    {
-        var employee = _admin.Employees.Find(employeeId);
-
-        if (employee == default)
-        {
-            throw new InvalidOperationException("employeeId not found");
-        }
-
-        var update = employee with
-        {
-            Disabled = disable
-        };
-
-        var entity = _admin.Employees.Update(update);
-        _admin.SaveChanges();
-        entity.State = EntityState.Detached;
-    }
 }

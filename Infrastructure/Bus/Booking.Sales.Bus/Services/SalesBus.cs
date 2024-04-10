@@ -31,7 +31,38 @@ public partial class SalesBus(IScopeProvider sp, BookingConfiguration bconf) : M
                     
                         Verb_Is_RequestPage(notification, sp, bconf);
                         break;
-                    
+
+                    case Verb.Sales.RequestStay:
+                    {
+                        var pageRequest = notification.MessageAs<PageRequest>();
+                        var stayRequest = pageRequest.Filter as StayRequest;
+
+                        if (stayRequest == null)
+                        {
+                            throw new ArgumentNullException(nameof(pageRequest.Filter));
+                        }
+
+                        using var scope = sp.GetScope<SalesQueryService>(out var sales);
+
+                        //TODO
+                        var todocustomerId = 0;
+
+                        //
+                        //
+                        var page = sales
+                            .Find(stayRequest, todocustomerId)
+                            .Page($"/booking", pageRequest.Page, pageRequest.PageSize));
+                        //
+                        //
+
+                        Notify(new NotifyMessage(Omni, Verb.Sales.StayFound)
+                        {
+                            CorrelationGuid = notification.CorrelationGuid(),
+                            Message = page
+                        });
+
+                        break;
+                    }
                 }
             }
             catch (Exception ex)

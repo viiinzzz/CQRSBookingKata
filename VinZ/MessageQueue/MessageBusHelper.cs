@@ -1,5 +1,6 @@
 ﻿namespace VinZ.MessageQueue;
 
+
 public static class MessageBusHelper
 {
     public const string Application = nameof(Application);

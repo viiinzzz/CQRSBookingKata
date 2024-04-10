@@ -1,4 +1,4 @@
-namespace BookingKata.API.Helpers;
+namespace VinZ.Common;
 
 public static class ApiHelper
 {
@@ -10,6 +10,13 @@ public static class ApiHelper
         return result == default
             ? Results.NotFound()
             : Results.Ok(result);
+    }
+
+    public static IResult AsAccepted<TEntity>(this TEntity? result) where TEntity : class
+    {
+      return result == default
+          ? Results.NoContent()
+          : Results.Accepted(null, result);
     }
 
 
@@ -29,5 +36,4 @@ public static class ApiHelper
             });
         }
     }
-
 }
