@@ -18,7 +18,7 @@ public record StayRequest
     double? PriceMin = default,
     double? PriceMax = default,
     string? Currency = default
-) : RecordWithValidation, IHavePosition
+) : RecordWithValidation, IHavePrimaryKeyAndPosition
 {
     protected override void Validate()
     {

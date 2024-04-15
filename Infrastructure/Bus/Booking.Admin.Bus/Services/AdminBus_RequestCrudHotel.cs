@@ -1,4 +1,7 @@
-﻿namespace BookingKata.Infrastructure.Bus.Admin;
+﻿using BookingKata.Admin;
+using static BookingKata.Services.Verb;
+
+namespace BookingKata.Infrastructure.Bus.Admin;
 
 public partial class AdminBus
 {
@@ -10,7 +13,7 @@ public partial class AdminBus
 
         repo.DisableHotel(request.id, request.disable);
 
-        Notify(new NotifyMessage(notification.Originator, HotelDisabled)
+        Notify(new Notification(notification.Originator, HotelDisabled)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = request
@@ -25,7 +28,7 @@ public partial class AdminBus
 
         var ret = repo.Update(request.id, request.data);
 
-        Notify(new NotifyMessage(notification.Originator, HotelModified)
+        Notify(new Notification(notification.Originator, HotelModified)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = ret
@@ -40,10 +43,27 @@ public partial class AdminBus
 
         var ret = repo.GetHotel(request.id);
 
-        Notify(new NotifyMessage(notification.Originator, HotelFetched)
+        Notify(new Notification(notification.Originator, HotelFetched)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = ret
+        });
+    }
+    
+    private void Verb_Is_RequestFetchHotelGeoProxy(IClientNotification notification, IScopeProvider sp)
+    {
+        var request = notification.MessageAs<Id>();
+
+        using var scope = sp.GetScope<IAdminRepository>(out var repo);
+
+        var ret = repo.GetHotel(request.id);
+
+        var geoProxy = ret?.GetGeoProxy();
+        
+        Notify(new Notification(notification.Originator, HotelFetched)
+        {
+            CorrelationGuid = notification.CorrelationGuid(),
+            Message = geoProxy
         });
     }
 
@@ -55,7 +75,7 @@ public partial class AdminBus
 
         var ret = repo.Create(request);
 
-        Notify(new NotifyMessage(notification.Originator, HotelCreated)
+        Notify(new Notification(notification.Originator, HotelCreated)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = ret

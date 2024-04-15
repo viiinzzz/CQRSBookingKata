@@ -1,6 +1,6 @@
 ﻿namespace VinZ.MessageQueue;
 
-public record NotifyMessage(
+public record Notification(
     string? Recipient = default,
     string? Verb = default,
     object? Message = default,
@@ -16,4 +16,4 @@ public record NotifyMessage(
 
     long? CorrelationId1 = default,
     long? CorrelationId2 = default
-) : INotifyMessage;
+) : INotification;

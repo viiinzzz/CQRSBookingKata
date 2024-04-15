@@ -8,7 +8,7 @@ public partial class DemoService
         {
             using var scope = !scoped ? null : new TransactionScope();
 
-            bus.Notify(new NotifyMessage(Recipient.Audit, Verb.Audit.Information)
+            bus.Notify(new Notification(Recipient.Audit, Verb.Audit.Information)
             {
                 Message = "Demo: Seeding Hotels...",
                 Immediate = true

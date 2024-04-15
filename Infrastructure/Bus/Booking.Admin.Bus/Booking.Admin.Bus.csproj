@@ -14,4 +14,8 @@
     <ProjectReference Include="..\..\Repository\GeoIndexing.Repository\GeoIndexing.Repository.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Entities\" />
+  </ItemGroup>
+
 </Project>

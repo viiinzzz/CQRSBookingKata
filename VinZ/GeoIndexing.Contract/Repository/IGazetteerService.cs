@@ -3,10 +3,10 @@
 public interface IGazetteerService
 {
     TReferer IncludeGeoIndex<TReferer>(TReferer referer, byte maxLevel)
-        where TReferer : IHavePosition, IHavePrimaryKey;
+        where TReferer : IHavePrimaryKeyAndPosition;
 
     IEnumerable<TReferer> IncludeGeoIndex<TReferer>(IEnumerable<TReferer> referers, double precisionMaxKm)
-        where TReferer : IHavePosition, IHavePrimaryKey;
+        where TReferer : IHavePrimaryKeyAndPosition;
 
 
     IQueryable<City> QueryCities(string cityName, bool? approximateNameMatch, string? countryCode);
@@ -25,9 +25,9 @@ public interface IGazetteerService
 
 
     void AddReferer<TReferer>(TReferer referer, double? minKm, double? maxKm)
-        where TReferer : IHavePosition, IHavePrimaryKey;
+        where TReferer : IHavePrimaryKeyAndPosition;
     void RemoveReferer<TReferer>(TReferer referer)
-        where TReferer : IHavePosition, IHavePrimaryKey;
+        where TReferer : IHavePrimaryKeyAndPosition;
     void CopyToReferers<TReferer, TReferer2>(TReferer referer, IEnumerable<TReferer2> referers2)
         where TReferer : IHavePosition, IHavePrimaryKey
         where TReferer2 : IHavePrimaryKey;

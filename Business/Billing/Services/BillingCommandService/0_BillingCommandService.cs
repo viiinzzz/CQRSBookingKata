@@ -1,14 +1,15 @@
 ﻿
+using VinZ.MessageQueue;
+
 namespace BookingKata.Billing;
 
 public partial class BillingCommandService
 (
     IMoneyRepository money,
 
-    IPaymentCommandService payment,
+    IMessageBus bus,
 
-    ITimeService DateTime,
-    IRandomService rand
+    ITimeService DateTime
 )
 {
 

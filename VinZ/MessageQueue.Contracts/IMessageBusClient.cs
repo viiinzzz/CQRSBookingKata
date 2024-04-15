@@ -12,7 +12,7 @@ public interface IMessageBusClient
     void Subscribe(string? recipient, string? verb);
     bool Unsubscribe(string? recipient, string? verb);
 
-    void Notify(INotifyMessage message);
+    void Notify(INotification message);
     void OnNotified(IClientNotification notification);
 
     event EventHandler<IClientNotification>? Notified;

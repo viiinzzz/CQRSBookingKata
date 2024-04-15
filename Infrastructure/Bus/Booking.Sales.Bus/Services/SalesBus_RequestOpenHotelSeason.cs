@@ -35,7 +35,7 @@ public partial class SalesBus
             closingDate
         };
 
-        Notify(new NotifyMessage(Omni, Verb.Sales.HotelSeasonOpening)
+        Notify(new Notification(Omni, Verb.Sales.HotelSeasonOpening)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = opening

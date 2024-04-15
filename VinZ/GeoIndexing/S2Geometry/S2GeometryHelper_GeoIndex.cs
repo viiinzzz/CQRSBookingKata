@@ -3,7 +3,7 @@
 public static partial class S2GeometryHelper
 {
     public static IEnumerable<GeoIndex> GetGeoIndexes<TReferer>(TReferer referer, double? minKm, double? maxKm) 
-        where TReferer : IHavePosition, IHavePrimaryKey
+        where TReferer : IHavePrimaryKeyAndPosition
     {
         var (refererTypeHash, refererHash) = referer.GetRefererHashes();
 

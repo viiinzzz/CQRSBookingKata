@@ -17,13 +17,13 @@ public class MessageBus(IMessageBus server) : IMessageBus
         return server.Unsubscribe(client, recipient, verb);
     }
 
-    public INotifyAck Notify(string originator, INotifyMessage notifyMessage)
+    public INotifyAck Notify(string originator, INotification notification)
     {
-        return server.Notify(GetType().Name, notifyMessage);
+        return server.Notify(GetType().Name, notification);
     }
 
-    public INotifyAck Notify(INotifyMessage notifyMessage)
+    public INotifyAck Notify(INotification notification)
     {
-        return server.Notify(GetType().Name, notifyMessage);
+        return server.Notify(GetType().Name, notification);
     }
 }

@@ -1,11 +1,14 @@
-﻿namespace BookingKata.Billing;
+﻿using Common.Infrastructure.Network;
+using VinZ.MessageQueue;
+
+namespace BookingKata.Billing;
 
 public partial class BillingCommandService
 {
     public int EmitReceipt
     (
         long debitCardNumber,
-        DebitCardSecrets secret,
+        DebitCardSecrets secrets,
         
         int invoiceId,
         long correlationId1,
@@ -27,21 +30,21 @@ public partial class BillingCommandService
             throw new ArgumentException(ReferenceInvalid, nameof(Correlation));
         }
 
+        var originator = GetType().FullName 
+                         ?? throw new ArgumentException("invalid originator");
 
-        var paid = payment.Pay(
-            invoice.Amount, 
-            invoice.Currency,
-            debitCardNumber, 
-            secret.ownerName,
-            secret.expire,
-            secret.CCV
-         );
+        //
+        //
+        var paid = bus.AskResult<PaymentRequestResponse>(
+            originator, Common.Services.ThirdParty.Recipient, Common.Services.ThirdParty.Verb.RequestPayment,
+            new Common.Infrastructure.Network.PaymentOrder(debitCardNumber, secrets.ownerName, secrets.expire, secrets.CCV, invoiceId));
+        //
+        //
 
-        if (!paid)
+        if (paid is not { Accepted: true })
         {
             throw new PaymentFailureException();
         }
-
 
         var receipt = new Receipt(
             debitCardNumber,

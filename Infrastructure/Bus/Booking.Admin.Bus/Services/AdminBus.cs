@@ -13,62 +13,88 @@ public partial class AdminBus(IScopeProvider sp, BookingConfiguration bconf) : M
                 switch (notification.Verb)
                 {
                     case RequestPage:
-
+                    {
                         Verb_Is_RequestPage(notification, sp, bconf);
                         break;
-
+                    }
 
                     case RequestCreateEmployee:
-                    
+                    {
                         Verb_Is_RequestCreateEmployee(notification, sp);
                         break;
+                    }
 
                     case RequestFetchEmployee:
-                    
+                    {
                         Verb_Is_RequestFetchEmployee(notification, sp);
                         break;
+                    }
 
                     case RequestModifyEmployee:
-                    
+                    {
                         Verb_Is_RequestModifyEmployee(notification, sp);
                         break;
+                    }
 
                     case RequestDisableEmployee:
-                    
+                    {
                         Verb_Is_RequestDisableEmployee(notification, sp);
                         break;
+                    }
 
 
                     case RequestCreateHotel:
-                    
+                    {
                         Verb_Is_RequestCreateHotel(notification, sp);
                         break;
+                    }
 
                     case RequestFetchHotel:
-                    
+                    {
                         Verb_Is_RequestFetchHotel(notification, sp);
                         break;
+                    }
+
+                    case RequestFetchHotelGeoProxy:
+                    {
+                        Verb_Is_RequestFetchHotelGeoProxy(notification, sp);
+                        break;
+                    }
 
                     case RequestModifyHotel:
-                    
+                    {
                         Verb_Is_RequestModifyHotel(notification, sp);
                         break;
+                    }
 
                     case RequestDisableHotel:
-                    
+                    {
                         Verb_Is_RequestDisableHotel(notification, sp);
                         break;
+                    }
 
 
                     case RequestRoomDetails:
-
+                    {
                         Verb_Is_RequestRoomDetails(notification, sp);
                         break;
+                    }
+
+                    case RequestSingleRoomDetails:
+                    {
+                        Verb_Is_RequestSingleRoomDetails(notification, sp);
+                        break;
+                    }
+
+                    default:
+                    {
+                        throw new VerbInvalidException(notification.Verb);
+                    }
                 }
             }
             catch (Exception ex)
             {
-                Notify(new NotifyMessage(notification.Originator, ErrorProcessingRequest)
+                Notify(new Notification(notification.Originator, ErrorProcessingRequest)
                 {
                     CorrelationGuid = notification.CorrelationGuid(),
                     Message = new

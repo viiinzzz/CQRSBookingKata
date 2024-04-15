@@ -13,24 +13,25 @@ public partial class SalesBus(IScopeProvider sp, BookingConfiguration bconf) : M
                 switch (notification.Verb)
                 {
                     case Verb.Sales.RequestOpenHotelSeason:
-                    
+                    {
                         Verb_Is_RequestOpenHotelSeason(notification, sp);
                         break;
-
+                    }
                     case Verb.Sales.RequestBook:
-                    
+                    {
                         Verb_Is_RequestBook(notification, sp);
                         break;
-                    
+                    }
                     case Verb.Sales.RequestKpi:
-                    
+                    {
                         Verb_Is_RequestKpi(notification, sp);
                         break;
-
+                    }
                     case RequestPage:
-                    
+                    {
                         Verb_Is_RequestPage(notification, sp, bconf);
                         break;
+                    }
 
                     case Verb.Sales.RequestStay:
                     {
@@ -51,11 +52,11 @@ public partial class SalesBus(IScopeProvider sp, BookingConfiguration bconf) : M
                         //
                         var page = sales
                             .Find(stayRequest, todocustomerId)
-                            .Page($"/booking", pageRequest.Page, pageRequest.PageSize));
+                            .Page($"/booking", pageRequest.Page, pageRequest.PageSize);
                         //
                         //
 
-                        Notify(new NotifyMessage(Omni, Verb.Sales.StayFound)
+                        Notify(new Notification(Omni, Verb.Sales.StayFound)
                         {
                             CorrelationGuid = notification.CorrelationGuid(),
                             Message = page
@@ -63,11 +64,16 @@ public partial class SalesBus(IScopeProvider sp, BookingConfiguration bconf) : M
 
                         break;
                     }
+
+                    default:
+                    {
+                        throw new VerbInvalidException(notification.Verb);
+                    }
                 }
             }
             catch (Exception ex)
             {
-                Notify(new NotifyMessage(notification.Originator, ErrorProcessingRequest)
+                Notify(new Notification(notification.Originator, ErrorProcessingRequest)
                 {
                     CorrelationGuid = notification.CorrelationGuid(),
                     Message = new

@@ -6,7 +6,7 @@ public interface IMessageBus
     void Subscribe(IMessageBusClient client, string? recipient, string? verb);
     bool Unsubscribe(IMessageBusClient client, string? recipient, string? verb);
 
-    INotifyAck Notify(string originator, INotifyMessage notifyMessage);
+    INotifyAck Notify(string originator, INotification notification);
 
     Task<object?> Wait(INotifyAck ack, CancellationToken cancellationToken);
 }

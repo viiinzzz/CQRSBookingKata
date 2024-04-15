@@ -16,7 +16,7 @@ public record Vacancy
     bool Cancelled = false,
     int UniqueRoomId = default
 )
-    : RecordWithValidation, IHavePosition, IHavePrimaryKey
+    : RecordWithValidation, IHavePrimaryKeyAndPosition
 {
     public long VacancyId { get; set; } = default;
     

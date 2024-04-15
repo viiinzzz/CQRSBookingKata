@@ -6,7 +6,7 @@ public record GeoProxy
     long PrimaryKey,
     Position? Position
 ) 
-    : IHavePrimaryKey, IHavePosition
+    : IHavePrimaryKeyAndPosition
 {
     public IList<IGeoIndexCell> Cells { get; set; }
     public string geoIndex { get; set; }

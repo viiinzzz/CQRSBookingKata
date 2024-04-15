@@ -3,6 +3,7 @@
 public record StayProposition
 (
     int PersonCount,
+    int NightsCount,
     DateTime ArrivalDate,
     DateTime DepartureDate,
 

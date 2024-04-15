@@ -1,6 +1,7 @@
 ﻿namespace BookingKata.Admin;
 
-public record Hotel(
+public record Hotel
+(
     string HotelName,
 
     double Latitude,
@@ -19,7 +20,7 @@ public record Hotel(
     int HotelId = default,
     bool Disabled = false
 ) 
-    : RecordWithValidation, IHavePosition, IHavePrimaryKey
+    : RecordWithValidation, IHavePrimaryKeyAndPosition
 {
     protected override void Validate()
     {

@@ -27,7 +27,7 @@ public partial class SalesBus
         //
         //
 
-        Notify(new NotifyMessage(Omni, Verb.Sales.BookConfirmed)
+        Notify(new Notification(Omni, Verb.Sales.BookConfirmed)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = new

@@ -2,16 +2,16 @@
 
 public partial class MessageQueueServer
 {
-    public INotifyAck Notify(string originator, INotifyMessage notifyMessage)
+    public INotifyAck Notify(string originator, INotification notification)
     {
-        return Notify(originator, notifyMessage, CancellationToken.None);
+        return Notify(originator, notification, CancellationToken.None);
     }
 
-    public INotifyAck Notify(string originator, INotifyMessage notifyMessage, CancellationToken cancel)
+    public INotifyAck Notify(string originator, INotification clientNotification, CancellationToken cancel)
     {
         var now = DateTime.UtcNow;
 
-        var n = notifyMessage;
+        var n = clientNotification;
 
         var immediate = n.Immediate ?? false;
         var selectEarliest = !immediate && n is { EarliestDelivery: { Ticks: > 0 } };

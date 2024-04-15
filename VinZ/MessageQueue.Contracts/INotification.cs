@@ -1,6 +1,6 @@
 ﻿namespace VinZ.MessageQueue;
 
-public interface INotifyMessage
+public interface INotification
 {
     string? Recipient { get; }
     string? Verb { get; }

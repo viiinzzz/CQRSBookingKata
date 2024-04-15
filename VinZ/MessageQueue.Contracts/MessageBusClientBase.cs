@@ -56,7 +56,7 @@ public class MessageBusClientBase : IMessageBusClient
     }
 
 
-    public void Notify(INotifyMessage message)
+    public void Notify(INotification message)
     {
         CheckBus();
 

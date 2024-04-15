@@ -65,7 +65,8 @@ public class PlanningBus(IScopeProvider sp, BookingConfiguration bconf) : Messag
 
                                 page = planning
                                     .GetReceptionMonthPlanning(hotelId)
-                                    .Page(path, request.Page, request.PageSize);
+                                    .Page(path, request.Page, request.PageSize)
+                                    .IncludeGeoIndex(bconf.PrecisionMaxKm, geo);
 
                                 break;
                             }
@@ -77,7 +78,8 @@ public class PlanningBus(IScopeProvider sp, BookingConfiguration bconf) : Messag
 
                                 page = planning
                                     .GetServiceRoomPlanning(hotelId)
-                                    .Page(path, request.Page, request.PageSize);
+                                    .Page(path, request.Page, request.PageSize)
+                                    .IncludeGeoIndex(bconf.PrecisionMaxKm, geo);
 
                                 break;
                             }
@@ -88,19 +90,24 @@ public class PlanningBus(IScopeProvider sp, BookingConfiguration bconf) : Messag
                             }
                         }
 
-                        Notify(new NotifyMessage(notification.Originator, Respond)
+                        Notify(new Notification(notification.Originator, Respond)
                         {
                             CorrelationGuid = notification.CorrelationGuid(),
                             Message = page
                         });
+
+                        break;
                     }
 
-
+                    default:
+                    {
+                        throw new VerbInvalidException(notification.Verb);
+                    }
                 }
             }
             catch (Exception ex)
             {
-                Notify(new NotifyMessage(notification.Originator, ErrorProcessingRequest)
+                Notify(new Notification(notification.Originator, ErrorProcessingRequest)
                 {
                     CorrelationGuid = notification.CorrelationGuid(),
                     Message = new

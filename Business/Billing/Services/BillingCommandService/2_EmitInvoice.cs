@@ -36,6 +36,17 @@ public partial class BillingCommandService
         }
 
 
+        if (Math.Abs(amount - quotation.Price) >= 0.01)
+        {
+            throw new ArgumentException(ReferenceInvalid, nameof(amount));
+        }
+
+        if (currency != quotation.Currency)
+        {
+            throw new ArgumentException(ReferenceInvalid, nameof(currency));
+        }
+
+
         var invoice = new Invoice(
             amount, 
             currency, 

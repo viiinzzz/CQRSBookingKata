@@ -26,7 +26,7 @@ public record Booking
 
     bool Cancelled = false
 )
-    : RecordWithValidation, IHavePosition
+    : RecordWithValidation, IHavePrimaryKeyAndPosition
 {
 
     protected override void Validate()

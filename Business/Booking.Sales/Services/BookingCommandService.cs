@@ -1,4 +1,7 @@
 ﻿using BookingKata.Services;
+using BookingKata.Shared;
+using Common.Infrastructure.Network;
+using Newtonsoft.Json;
 
 namespace BookingKata.Sales;
 
@@ -20,18 +23,26 @@ public class BookingCommandService
     {
         var originator = this.GetType().FullName;
 
-        INotifyAck ack = bus.Notify(originator, new NotifyMessage(Recipient.Admin, RoomDetailsRequest));
+
+        var hotelGeoProxy = bus.AskResult<GeoProxy>(
+            originator, Recipient.Admin, Verb.Admin.RequestFetchHotelGeoProxy,
+            new Id(hotelId));
+
+        if (hotelGeoProxy == null)
+        {
+            throw new HotelNotFoundException();
+        }
 
 
+        var roomDetails = bus.AskResult<RoomDetails[]>(
+            originator, Recipient.Admin, Verb.Admin.RequestRoomDetails, 
+            new RoomDetailsRequest(hotelId, exceptRoomNumbers));
 
-
-
-        var roomDetails = admin
-            .GetRoomDetails(hotelId, exceptRoomNumbers)
-            .AsEnumerable(); //query db
-
-
-
+        if (roomDetails is null or { Length: 0 })
+        {
+            throw new RoomNotFoundException();
+        }
+        
 
         var firstNight = OvernightStay.From(openingDate);
         var lastNight = OvernightStay.FromCheckOutDate(closingDate);
@@ -51,12 +62,6 @@ public class BookingCommandService
                 )
             ).ToList();
 
-
-        var hotelTypeFullName = admin.GetHotelTypeFullName();
-
-        var position = new Position(vacancies.First().Latitude, vacancies.First().Longitude);
-
-        var hotelGeoProxy = new GeoProxy(hotelTypeFullName, hotelId, position);
 
         geo.CopyToReferers(hotelGeoProxy, vacancies);
 
@@ -85,34 +90,117 @@ public class BookingCommandService
             throw new AccountLockedException();
         }
 
-        var invoice = new Invoice(prop.Price, prop.Currency, DateTime.UtcNow, customerId);
 
-        if (invoice.Amount != prop.Price || invoice.Currency != prop.Currency)
+        var originator = GetType().FullName 
+                         ?? throw new Exception("invalid originator");
+
+        var stayProposition = sales.Propositions
+            .FirstOrDefault(proposition => proposition.StayPropositionId == stayPropositionId);
+
+        if (stayProposition == null)
         {
-            throw new InvalidAmountException();
+            throw new PropositionNotFoundException();
         }
 
+        var roomDetails = bus.AskResult<RoomDetails>(
+            originator, Recipient.Admin, Verb.Admin.RequestSingleRoomDetails,
+            new Id(stayProposition.Urid));
+
+        if (roomDetails == null)
+        {
+            throw new RoomNotFoundException();
+        }
+
+        var quotationSpec = new
+        {
+            personCount = stayProposition.PersonCount,
+            nightCount = stayProposition.NightsCount,
+            arrivalDate = stayProposition.ArrivalDate,
+            departureDate = stayProposition.DepartureDate,
+            hotelName = roomDetails.HotelName,
+            hotelRank = roomDetails.HotelRank,
+            cityName = roomDetails.NearestKnownCityName,
+            latitude = roomDetails.Latitude,
+            longitude = roomDetails.Longitude
+        };
+
+        var quotationId = bus.AskResult<Id>(
+            originator, Common.Services.Billing.Recipient, Common.Services.Billing.Verb.RequestQuotation,
+            new QuotationRequest
+            {
+                price = stayProposition.Price,
+                currency = stayProposition.Currency,
+
+                optionStartUtc = (stayProposition.OptionStartsUtc ?? DateTime.UtcNow).ToString("u"),
+                optionEndUtc = (stayProposition.OptionEndsUtc ?? System.DateTime.MaxValue).ToString("u"),
+
+                jsonMeta = System.Text.Json.JsonSerializer.Serialize(quotationSpec),
+
+                referenceId = stayPropositionId
+            });
+
+        if (quotationId == null)
+        {
+            throw new ArgumentException(ReferenceInvalid, nameof(stayPropositionId));
+        }
+
+        var invoiceId = bus.AskResult<Id>(
+            originator, Common.Services.Billing.Recipient, Common.Services.Billing.Verb.RequestInvoice,
+            new InvoiceRequest
+            {
+                amount = stayProposition.Price,
+                currency = stayProposition.Currency,
+
+                customerId = customerId,
+                quotationId = quotationId.id
+            });
+
+        if (invoiceId == null)
+        {
+            throw new ArgumentException(ReferenceInvalid, nameof(quotationId));
+        }
+
+
+
         //
         //
-        money.AddInvoice(invoice, scoped: false);
+        var paid = bus.AskResult<PaymentRequestResponse>(
+            originator, Common.Services.ThirdParty.Recipient, Common.Services.ThirdParty.Verb.RequestPayment,
+            new PaymentRequest(debitCardNumber, secrets.ownerName, secrets.expire, secrets.CCV, invoiceId.id));
         //
         //
 
-
-       
-
-        var paid = payment.Pay(prop.Price, prop.Currency, debitCardNumber, secrets.ownerName, secrets.expire, secrets.CCV);
-
-        if (!paid)
+        if (paid is not { Accepted: true})
         {
             throw new PaymentFailureException();
         }
+
+
+
+
+
+        var receiptId = bus.AskResult<Id>(
+            originator, Common.Services.Billing.Recipient, Common.Services.Billing.Verb.RequestPayment,
+            new InvoiceRequest
+            {
+                amount = stayProposition.Price,
+                currency = stayProposition.Currency,
+
+                customerId = customerId,
+                quotationId = quotationId.id
+            });
+
+        if (invoiceId == null)
+        {
+            throw new ArgumentException(ReferenceInvalid, nameof(quotationId));
+        }
+
 
         var receipt = new Receipt(debitCardNumber, prop.Price, prop.Currency, DateTime.UtcNow, customerId, invoice.InvoiceId);
 
         //
         //
-        bus.Notify(new NotifyMessage(Recipient.Billing, Billing.QuotationEmitError)
+        bus.Notify(new Notification(Recipient.Billing, Billing.QuotationEmitError)
         {
             CorrelationGuid = correlationId.Guid,
             Message = new { id = quotationId }
@@ -138,7 +226,7 @@ public class BookingCommandService
         sales.RemoveVacancies(booked);
 
 
-        bus.Notify(originator, new NotifyMessage(Omni, BookConfirmed)
+        bus.Notify(originator, new Notification(Omni, BookConfirmed)
         {
             Message = new NewBooking
             (
