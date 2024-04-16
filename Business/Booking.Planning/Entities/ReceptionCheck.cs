@@ -2,27 +2,25 @@
 
 public record ReceptionCheck
 (
-    int EventDayNum,
-    DateTime EventTime,
-    ReceptionEventType EventType,
+    int EventDayNum = default,
+    DateTime EventTime = default,
+    ReceptionEventType EventType = default,
 
-    string CustomerLastName,
-    string CustomerFirstName,
+    string CustomerLastName = default,
+    string CustomerFirstName = default,
 
-    int RoomNum,
-    bool TaskDone,
+    int RoomNum = default,
+    int FloorNum = default,
+    int HotelId = default,
+    double Latitude = default,
+    double Longitude = default,
 
-    double Latitude,
-    double Longitude,
-
-    int HotelId,
-    int BookingId,
-    
-    DateTime? CancelledDate,
-    bool Cancelled,
-    
-    int? EmployeeId,
-    int CheckId
+    int BookingId = default,
+    int? EmployeeId = default,
+    bool TaskDone = default,
+    bool Cancelled = default,
+    DateTime? CancelledDate = default,
+    int CheckId = default
 ) 
     : RecordWithValidation, IHavePrimaryKeyAndPosition
 {

@@ -20,8 +20,8 @@ public partial class ThirdPartyBus
 
             request.debitCardNumber,
             request.debitCardOwnerName,
-            request.expire,
-            request.CCV,
+            request.debitCardExpire,
+            request.debitCardCCV,
 
             request.vendorId,
             request.terminalId,

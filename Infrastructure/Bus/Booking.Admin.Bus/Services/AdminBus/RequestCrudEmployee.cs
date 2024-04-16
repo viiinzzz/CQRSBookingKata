@@ -2,7 +2,7 @@
 
 public partial class AdminBus
 {
-    private void Verb_Is_RequestDisableEmployee(IClientNotification notification, IScopeProvider sp)
+    private void Verb_Is_RequestDisableEmployee(IClientNotification notification)
     {
         var request = notification.MessageAs<IdDisable>();
 
@@ -17,7 +17,7 @@ public partial class AdminBus
         });
     }
 
-    private void Verb_Is_RequestModifyEmployee(IClientNotification notification, IScopeProvider sp)
+    private void Verb_Is_RequestModifyEmployee(IClientNotification notification)
     {
         var request = notification.MessageAs<IdData<UpdateEmployee>>();
 
@@ -32,7 +32,7 @@ public partial class AdminBus
         });
     }
 
-    private void Verb_Is_RequestFetchEmployee(IClientNotification notification, IScopeProvider sp)
+    private void Verb_Is_RequestFetchEmployee(IClientNotification notification)
     {
         var request = notification.MessageAs<Id>();
 
@@ -47,7 +47,7 @@ public partial class AdminBus
         });
     }
 
-    private void Verb_Is_RequestCreateEmployee(IClientNotification notification, IScopeProvider sp)
+    private void Verb_Is_RequestCreateEmployee(IClientNotification notification)
     {
         var request = notification.MessageAs<NewEmployee>();
 

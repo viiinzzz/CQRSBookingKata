@@ -4,6 +4,8 @@ public record Booking
 (
     DateTime ArrivalDate = default,
     DateTime DepartureDate = default,
+    int ArrivalDayNum = default,
+    int DepartureDayNum = default,
     int NightsCount = default,
 
     double Latitude = default,
@@ -20,10 +22,13 @@ public record Booking
     double Price = default,
     string Currency = default,
 
+    int RoomNum = default,
+    int FloorNum = default,
+    int HotelId = default,
+
     int UniqueRoomId = default,
     int CustomerId = default,
     int BookingId = default,
-
     bool Cancelled = false
 )
     : RecordWithValidation, IHavePrimaryKeyAndPosition
@@ -48,4 +53,5 @@ public record Booking
     public IList<IGeoIndexCell> Cells { get; set; }
     public string geoIndex { get; set; }
 
+    public long PrimaryKey => BookingId;
 }

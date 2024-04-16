@@ -2,7 +2,7 @@
 
 public partial class SalesBus
 {
-    private void Verb_Is_RequestOpenHotelSeason(IClientNotification notification, IScopeProvider sp)
+    private void Verb_Is_RequestOpenHotelSeason(IClientNotification notification)
     {
         var request = notification.MessageAs<OpenHotelSeasonRequest>();
 

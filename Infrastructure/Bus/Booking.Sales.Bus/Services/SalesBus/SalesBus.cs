@@ -1,10 +1,10 @@
-﻿namespace Common.Infrastructure.Bus.Billing;
+﻿namespace BookingKata.Infrastructure.Bus.Sales;
 
-public partial class BillingBus(IScopeProvider sp) : MessageBusClientBase
+public partial class SalesBus(IScopeProvider sp, BookingConfiguration bconf) : MessageBusClientBase
 {
     public override void Configure()
     {
-        Subscribe(Recipient);
+        Subscribe(Recipient.Sales);
 
         Notified += (sender, notification) =>
         {
@@ -12,29 +12,30 @@ public partial class BillingBus(IScopeProvider sp) : MessageBusClientBase
             {
                 switch (notification.Verb)
                 {
-                    case RequestQuotation:
+                    case Verb.Sales.RequestOpenHotelSeason:
                     {
-                        Verb_Is_RequestQuotation(notification, sp);
+                        Verb_Is_RequestOpenHotelSeason(notification);
                         break;
                     }
-                    case RequestInvoice:
+                    case Verb.Sales.RequestBook:
                     {
-                        Verb_Is_RequestInvoice(notification, sp);
+                        Verb_Is_RequestBook(notification);
                         break;
                     }
-                    case RequestPayment:
+                    case Verb.Sales.RequestKpi:
                     {
-                        Verb_Is_RequestPayment(notification, sp);
-                        break;
-                    }
-                    case RequestRefund:
-                    {
-                        Verb_Is_RequestRefund(notification, sp);
+                        Verb_Is_RequestKpi(notification);
                         break;
                     }
                     case RequestPage:
                     {
-                        Verb_Is_RequestPage(notification, sp);
+                        Verb_Is_RequestPage(notification);
+                        break;
+                    }
+
+                    case Verb.Sales.RequestStay:
+                    {
+                        Verb_Is_RequestStay(notification);
                         break;
                     }
 

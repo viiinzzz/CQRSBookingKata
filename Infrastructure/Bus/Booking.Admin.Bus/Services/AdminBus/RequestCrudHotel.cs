@@ -5,7 +5,7 @@ namespace BookingKata.Infrastructure.Bus.Admin;
 
 public partial class AdminBus
 {
-    private void Verb_Is_RequestDisableHotel(IClientNotification notification, IScopeProvider sp)
+    private void Verb_Is_RequestDisableHotel(IClientNotification notification)
     {
         var request = notification.MessageAs<IdDisable>();
 
@@ -20,7 +20,7 @@ public partial class AdminBus
         });
     }
 
-    private void Verb_Is_RequestModifyHotel(IClientNotification notification, IScopeProvider sp)
+    private void Verb_Is_RequestModifyHotel(IClientNotification notification)
     {
         var request = notification.MessageAs<IdData<UpdateHotel>>();
 
@@ -35,7 +35,7 @@ public partial class AdminBus
         });
     }
 
-    private void Verb_Is_RequestFetchHotel(IClientNotification notification, IScopeProvider sp)
+    private void Verb_Is_RequestFetchHotel(IClientNotification notification)
     {
         var request = notification.MessageAs<Id>();
 
@@ -50,7 +50,7 @@ public partial class AdminBus
         });
     }
     
-    private void Verb_Is_RequestFetchHotelGeoProxy(IClientNotification notification, IScopeProvider sp)
+    private void Verb_Is_RequestFetchHotelGeoProxy(IClientNotification notification)
     {
         var request = notification.MessageAs<Id>();
 
@@ -67,7 +67,7 @@ public partial class AdminBus
         });
     }
 
-    private void Verb_Is_RequestCreateHotel(IClientNotification notification, IScopeProvider sp)
+    private void Verb_Is_RequestCreateHotel(IClientNotification notification)
     {
         var request = notification.MessageAs<NewHotel>();
 

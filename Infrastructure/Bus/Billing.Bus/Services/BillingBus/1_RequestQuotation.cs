@@ -2,7 +2,7 @@
 
 public partial class BillingBus
 {
-    private void Verb_Is_RequestQuotation(IClientNotification notification, IScopeProvider sp)
+    private void Verb_Is_RequestQuotation(IClientNotification notification)
     {
         var request = notification.MessageAs<QuotationRequest>();
 

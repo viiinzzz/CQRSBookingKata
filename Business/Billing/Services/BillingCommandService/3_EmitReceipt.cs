@@ -1,6 +1,4 @@
-﻿using Common.Infrastructure.Network;
-using VinZ.MessageQueue;
-
+﻿
 namespace BookingKata.Billing;
 
 public partial class BillingCommandService
@@ -9,6 +7,7 @@ public partial class BillingCommandService
     (
         long debitCardNumber,
         DebitCardSecrets secrets,
+        VendorIdentifiers vendor,
         
         int invoiceId,
         long correlationId1,
@@ -35,9 +34,22 @@ public partial class BillingCommandService
 
         //
         //
-        var paid = bus.AskResult<PaymentRequestResponse>(
+        var paid = bus.AskResult<PaymentResponse>(
             originator, Common.Services.ThirdParty.Recipient, Common.Services.ThirdParty.Verb.RequestPayment,
-            new Common.Infrastructure.Network.PaymentOrder(debitCardNumber, secrets.ownerName, secrets.expire, secrets.CCV, invoiceId));
+            new PaymentOrder
+            {
+                amount = invoice.Amount,
+                currency = invoice.Currency,
+
+                debitCardNumber = debitCardNumber,
+                debitCardOwnerName = secrets.ownerName,
+                expire = secrets.expire,
+                CCV = secrets.CCV,
+
+                vendorId = vendor.vendorId,
+                terminalId = vendor.terminalId,
+                transactionId = invoiceId
+            });
         //
         //
 

@@ -2,7 +2,7 @@
 
 public interface IPaymentCommandService
 {
-    PaymentRequestResponse RequestReceipt
+    PaymentResponse RequestReceipt
     (
         double amount,
         string currency,

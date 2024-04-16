@@ -2,7 +2,7 @@
 
 public partial class SalesBus
 {
-    private void Verb_Is_RequestKpi(IClientNotification notification, IScopeProvider sp)
+    private void Verb_Is_RequestKpi(IClientNotification notification)
     {
         var id = notification.MessageAs<int>();
 

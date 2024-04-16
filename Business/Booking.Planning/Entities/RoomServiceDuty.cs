@@ -18,23 +18,23 @@ namespace BookingKata.Planning;
 
 public record RoomServiceDuty
 (
-    DateTime FreeTime, //previous customer departure
-    DateTime BusyTime, //next customer arrival
-    double FreeDayNum, //previous customer departure expressed in fractional day number
-    double BusyDayNum, //next customer arrival expressed in fractional day number
+    DateTime FreeTime = default, //previous customer departure
+    DateTime BusyTime = default, //next customer arrival
+    double FreeDayNum = default, //previous customer departure expressed in fractional day number
+    double BusyDayNum = default, //next customer arrival expressed in fractional day number
 
-    int RoomNum,
-    int FloorNum,
+    int RoomNum = default,
+    int FloorNum = default,
+    int HotelId = default,
+    double Latitude = default,
+    double Longitude = default,
 
-    bool TaskDone,
-
-    double Latitude,
-    double Longitude,
-
-    int HotelId,
-    int BookingId,
-    int? EmployeeId,
-    int DutyId
+    int BookingId = default,
+    int? EmployeeId = default,
+    bool TaskDone = default,
+    bool Cancelled = default,
+    DateTime? CancelledDate = default,
+    int DutyId = default
 )
     : RecordWithValidation, IHavePrimaryKeyAndPosition
 {

@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Infrastructure\Bus\Billing.Bus.Contract\Billing.Bus.Contract.csproj" />
     <ProjectReference Include="..\..\VinZ\MessageQueue.Contracts\VinZ.MessageQueue.Contract.csproj" />
     <ProjectReference Include="..\Booking.Shared\Booking.Shared.csproj" />
     <ProjectReference Include="..\Business.Common\Business.Common.csproj" />

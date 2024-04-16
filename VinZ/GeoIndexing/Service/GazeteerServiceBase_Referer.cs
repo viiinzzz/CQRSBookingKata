@@ -50,6 +50,13 @@ public abstract partial class GazetteerServiceBase
         }
     }
 
+    public void CopyToReferer<TReferer, TReferer2>(TReferer referer, TReferer2 referer2) 
+        where TReferer : IHavePosition, IHavePrimaryKey
+        where TReferer2 : IHavePrimaryKey
+    {
+        CopyIndexes(referer, referer2);
+    }
+
     public IGeoIndexCell? RefererGeoIndex<TReferer>(TReferer referer)
         where TReferer : IHavePrimaryKey
     {

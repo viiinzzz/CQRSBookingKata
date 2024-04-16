@@ -1,7 +1,4 @@
-﻿
-using VinZ.MessageQueue;
-
-namespace BookingKata.Billing;
+﻿namespace BookingKata.Billing;
 
 public partial class BillingCommandService
 (

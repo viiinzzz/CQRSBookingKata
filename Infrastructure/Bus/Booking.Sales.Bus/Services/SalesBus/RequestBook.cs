@@ -2,7 +2,7 @@
 
 public partial class SalesBus
 {
-    private void Verb_Is_RequestBook(IClientNotification notification, IScopeProvider sp)
+    private void Verb_Is_RequestBook(IClientNotification notification)
     {
         var request = notification.MessageAs<BookRequest>();
 

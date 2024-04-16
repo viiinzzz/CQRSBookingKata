@@ -2,7 +2,7 @@
 
 public partial class AdminBus
 {
-    private void Verb_Is_RequestRoomDetails(IClientNotification notification, IScopeProvider sp)
+    private void Verb_Is_RequestRoomDetails(IClientNotification notification)
     {
         using var scope = sp.GetScope<AdminQueryService>(out var adminQueryService);
 
@@ -16,14 +16,14 @@ public partial class AdminBus
         //
         //
 
-        Notify(new Notification(Omni, Verb.Admin.RespondRoomDetails)
+        Notify(new Notification(Omni, RespondRoomDetails)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = roomDetails
         });
     }
     
-    private void Verb_Is_RequestSingleRoomDetails(IClientNotification notification, IScopeProvider sp)
+    private void Verb_Is_RequestSingleRoomDetails(IClientNotification notification)
     {
         using var scope = sp.GetScope<AdminQueryService>(out var adminQueryService);
 
@@ -36,7 +36,7 @@ public partial class AdminBus
         //
         //
 
-        Notify(new Notification(Omni, Verb.Admin.RespondSingleRoomDetails)
+        Notify(new Notification(Omni, RespondSingleRoomDetails)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = roomDetails

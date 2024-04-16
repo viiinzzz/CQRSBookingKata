@@ -2,7 +2,7 @@
 
 public partial class AdminBus
 {
-    private void Verb_Is_RequestPage(IClientNotification notification, IScopeProvider sp, BookingConfiguration bconf)
+    private void Verb_Is_RequestPage(IClientNotification notification)
     {
         using var scope = sp.GetScope<IAdminRepository>(out var adminRepository);
         using var scope2 = sp.GetScope<IGazetteerService>(out var geo);

@@ -2,17 +2,18 @@
 
 public record Quotation
 (
-    double Price,
-    string Currency,
+    double Price = default,
+    string Currency = default,
 
-    DateTime? OptionStartsUtc,
-    DateTime? OptionEndsUtc,
+    DateTime? OptionStartsUtc = default,
+    DateTime? OptionEndsUtc = default,
 
-    string jsonMeta,
+    string jsonMeta = default,
 
-    int ReferenceId,
+    int ReferenceId = default,
+    int VersionNumber = default,
 
-    long CorrelationId1,
-    long CorrelationId2,
+    long CorrelationId1 = default,
+    long CorrelationId2 = default,
     int QuotationId = default
 );

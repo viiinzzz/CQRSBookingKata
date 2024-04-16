@@ -13,6 +13,7 @@
     <ProjectReference Include="..\..\Bus\Booking.Admin.Bus\Booking.Admin.Bus.csproj" />
     <ProjectReference Include="..\..\Bus\Booking.Planning.Bus\Booking.Planning.Bus.csproj" />
     <ProjectReference Include="..\..\Bus\Booking.Sales.Bus\Booking.Sales.bus.csproj" />
+    <ProjectReference Include="..\..\Bus\ThirdParty.Bus\ThirdParty.Bus.csproj" />
   </ItemGroup>
 
 </Project>

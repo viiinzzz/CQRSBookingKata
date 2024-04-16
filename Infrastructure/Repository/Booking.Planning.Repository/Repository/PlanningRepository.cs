@@ -50,7 +50,7 @@ public class PlanningRepository(IDbContextFactory factory, IServerContextService
         entity.State = EntityState.Detached;
     }
 
-    public void DoneCheck(int checkId, int employeeId, bool scoped)
+    public void DoneCheck(int checkId, int employeeId, DateTime doneDate)
     {
         var check = _planning.Checks
             .Find(checkId);
@@ -67,7 +67,7 @@ public class PlanningRepository(IDbContextFactory factory, IServerContextService
         entity.State = EntityState.Detached;
     }
 
-    public void CancelCheck(int checkId, DateTime cancelDate, bool scoped)
+    public void CancelCheck(int checkId, DateTime cancelDate)
     {
         var check = _planning.Checks.Find(checkId);
 
@@ -83,7 +83,7 @@ public class PlanningRepository(IDbContextFactory factory, IServerContextService
         entity.State = EntityState.Detached;
     }
 
-    public void DoneDuty(int dutyId, int employeeId, bool scoped)
+    public void DoneDuty(int dutyId, int employeeId, DateTime doneDate)
     {
         var duty = _planning.Duties.Find(dutyId);
 
@@ -95,6 +95,22 @@ public class PlanningRepository(IDbContextFactory factory, IServerContextService
         _planning.Entry(duty).State = EntityState.Detached;
 
         var entity = _planning.Duties.Update(duty with { TaskDone = true, EmployeeId = employeeId });
+        _planning.SaveChanges();
+        entity.State = EntityState.Detached;
+    }
+
+    public void CancelDuty(int dutyId, DateTime cancelDate)
+    {
+        var duty = _planning.Duties.Find(dutyId);
+
+        if (duty == default)
+        {
+            throw new InvalidOperationException("dutyId not found");
+        }
+
+        _planning.Entry(duty).State = EntityState.Detached;
+
+        var entity = _planning.Duties.Update(duty with { Cancelled = true, CancelledDate = cancelDate });
         _planning.SaveChanges();
         entity.State = EntityState.Detached;
     }
@@ -114,7 +130,7 @@ public class PlanningRepository(IDbContextFactory factory, IServerContextService
     }
 
 
-    public void SetServerContext(ServerContext serverContext, bool scoped)
+    public void SetServerContext(ServerContext serverContext)
     {
         //InsertOrUpdate
 

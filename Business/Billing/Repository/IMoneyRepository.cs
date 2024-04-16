@@ -4,6 +4,7 @@ public interface IMoneyRepository
 {
     IQueryable<Quotation> Quotations { get; }
     int AddQuotation(Quotation quotation);
+    void UpdateQuotation(int quotationId, Quotation quotationUpdate);
 
     IQueryable<Invoice> Invoices { get; }
     int AddInvoice(Invoice invoice);

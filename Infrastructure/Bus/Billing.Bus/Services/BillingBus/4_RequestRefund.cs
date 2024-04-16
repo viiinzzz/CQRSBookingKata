@@ -2,27 +2,24 @@
 
 public partial class BillingBus
 {
-    private void Verb_Is_RequestInvoice(IClientNotification notification, IScopeProvider sp)
+    private void Verb_Is_RequestRefund(IClientNotification notification)
     {
-        var request = notification.MessageAs<InvoiceRequest>();
+        var request = notification.MessageAs<RefundRequest>();
 
         using var scope = sp.GetScope<BillingCommandService>(out var billing);
 
         //
         //
-        var id = billing.EmitInvoice
+        var id = billing.EmitRefund
         (
-            request.amount,
-            request.currency,
-            request.customerId,
-            request.quotationId,
+            request.receiptId,
             notification.CorrelationId1,
             notification.CorrelationId2
         );
         //
         //
 
-        Notify(new Notification(Omni, QuotationEmitted)
+        Notify(new Notification(Omni, RefundEmitted)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = new { id }

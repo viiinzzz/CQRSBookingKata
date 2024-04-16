@@ -2,10 +2,13 @@
 
 public record PaymentRequest
 (
-    long debitCardNumber,
-    string ownerName,
-    int expire,
-    int CCV,
+    long debitCardNumber = default,
+    string debitCardOwnerName = default,
+    int debitCardExpire = default,
+    int debitCardCCV = default,
 
-    int invoiceId
+    int vendorId = default,
+    int terminalId = default,
+
+    int invoiceId = default
 );

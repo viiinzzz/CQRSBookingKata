@@ -1,30 +1,32 @@
-﻿namespace Common.Infrastructure.Bus.Billing;
+﻿namespace BookingKata.Infrastructure.Bus.Sales;
 
-public partial class BillingBus
+public partial class SalesBus
 {
-    private void Verb_Is_RequestPage(IClientNotification notification, IScopeProvider sp)
+    private void Verb_Is_RequestPage(IClientNotification notification)
     {
         var request = notification.MessageAs<PageRequest>();
 
         object? page;
 
-        using var scope2 = sp.GetScope<IMoneyRepository>(out var moneyRepository);
+        using var scope3 = sp.GetScope<ISalesRepository>(out var salesRepository);
+        using var scope4 = sp.GetScope<IGazetteerService>(out var geo);
 
         switch (request.Path)
         {
-            case "/money/payrolls":
+            case "/admin/vacancies":
             {
-                page = moneyRepository
-                    .Payrolls
-                    .Page(request.Path, request.Page, request.PageSize);
+                page = salesRepository
+                    .Vacancies
+                    .Page(request.Path, request.Page, request.PageSize)
+                    .IncludeGeoIndex(bconf.PrecisionMaxKm, geo);
 
                 break;
             }
 
-            case "/money/invoices":
+            case "/admin/bookings":
             {
-                page = moneyRepository
-                    .Invoices
+                page = salesRepository
+                    .Bookings
                     .Page(request.Path, request.Page, request.PageSize);
 
                 break;

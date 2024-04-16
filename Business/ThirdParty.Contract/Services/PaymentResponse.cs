@@ -1,6 +1,6 @@
 ﻿namespace BookingKata.ThirdParty;
 
-public record PaymentRequestResponse
+public record PaymentResponse
 (
     bool Accepted,
     string DateTime

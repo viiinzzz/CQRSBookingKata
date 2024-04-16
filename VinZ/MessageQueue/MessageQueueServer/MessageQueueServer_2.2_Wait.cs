@@ -13,6 +13,9 @@ public partial class MessageQueueServer
             throw new InvalidOperationException("concurrent wait not allowed");
         }
 
+        _waitedResponses[key] = ack;
+        //TODO problem!!!!!
+
         while (true)
         {
             cancellationToken.ThrowIfCancellationRequested();
