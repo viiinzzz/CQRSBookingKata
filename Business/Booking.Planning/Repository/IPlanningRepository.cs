@@ -10,9 +10,10 @@ public interface IPlanningRepository
     void Add(RoomServiceDuty duty);
 
     void DoneCheck(int CheckId, int employeeId, DateTime doneDate);
-    void CancelCheck(int CheckId, DateTime cancelDate);
+    ReceptionCheck CancelCheck(int CheckId, DateTime cancelDate);
     void DoneDuty(int dutyId, int employeeId, DateTime doneDate);
-    void CancelDuty(int dutyId, DateTime cancelDate);
+    RoomServiceDuty CancelDuty(int dutyId, DateTime cancelDate);
+    void SetDutyBusyTime(int dutyId, DateTime busyTime, double busyDayNum);
 
     ServerContext? GetServerContext();
     void SetServerContext(ServerContext serverContext);

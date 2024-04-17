@@ -1,5 +1,10 @@
 ﻿namespace BookingKata.Planning;
 
+//TODO
+//need an alert system to notify when serviceroom not done for imminent customer arrival
+//past a no return minimal delay if no assigned staff relocate customer to another ready room
+
+
 public class PlanningQueryService
 (
     IPlanningRepository planning,

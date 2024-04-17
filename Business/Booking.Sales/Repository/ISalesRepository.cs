@@ -22,4 +22,6 @@ public interface ISalesRepository
 
     IQueryable<Shared.Booking> Bookings { get; }
     int AddBooking(Shared.Booking booking);
+
+    Shared.Booking CancelBooking(int bookingId);
 }

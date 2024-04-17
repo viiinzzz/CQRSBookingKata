@@ -17,7 +17,16 @@ public static class OvernightStayHelper
                 hotelName, cityName, false, urid));
     }
 
-    public static long[] StayUntil(this OvernightStay firstNight,
+    public static int[] DayNumssUntil(this OvernightStay firstNight,
+        OvernightStay lastStay, int urid)
+    {
+        return firstNight.StayUntil(lastStay, 0,
+                0, 0,
+                string.Empty, string.Empty, urid)
+            .Select(vacancy => vacancy.DayNum)
+            .ToArray();
+    }
+    public static long[] VacancyIdsUntil(this OvernightStay firstNight,
         OvernightStay lastStay, int urid)
     {
         return firstNight.StayUntil(lastStay, 0,

@@ -8,8 +8,15 @@ public static class DayNumHelper
         YearStart, 1, 1,
         0, 0, 0);
 
+    private static readonly int FractionalDayNumEpsilonInverse = // minute epsilon
+        (int)Math.Round(1 / TimeSpan.FromMinutes(1).TotalDays);
+
     public static double FractionalDayNum(this DateTime date)
     {
-        return (date - BaseDate).TotalDays;
+        var value = (date - BaseDate).TotalDays;
+
+        value = Math.Round(value * FractionalDayNumEpsilonInverse) / FractionalDayNumEpsilonInverse;
+
+        return value;
     }
 }

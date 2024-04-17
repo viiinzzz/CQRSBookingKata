@@ -335,7 +335,7 @@ public class SalesQueryService
         var firstNight = OvernightStay.From(openingDate);
         var lastNight = OvernightStay.FromCheckOutDate(closingDate);
 
-        var vacancyIds = firstNight.StayUntil(lastNight, urid.Value);
+        var vacancyIds = firstNight.VacancyIdsUntil(lastNight, urid.Value);
 
         //
         //

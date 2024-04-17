@@ -71,6 +71,7 @@ public static class Verb
 
         public const string RequestBook = $"{nameof(RequestBook)}";
         public const string BookConfirmed = $"{nameof(BookConfirmed)}";
+        public const string BookCancelled = $"{nameof(BookCancelled)}";
 
         public const string RequestStay = $"{nameof(RequestStay)}";
         public const string StayFound = $"{nameof(StayFound)}";

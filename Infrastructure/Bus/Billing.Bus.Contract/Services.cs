@@ -16,6 +16,10 @@ public static class Billing
         public const string PaymentAccepted = $"{Recipient}:{nameof(PaymentAccepted)}";
         public const string PaymentRefused = $"{Recipient}:{nameof(PaymentRefused)}";
 
+        public const string RequestReceipt = $"{Recipient}:{nameof(RequestReceipt)}";
+        public const string ReceiptFound = $"{Recipient}:{nameof(ReceiptFound)}";
+        public const string ReceiptNotFound = $"{Recipient}:{nameof(ReceiptNotFound)}";
+
         public const string RequestRefund = $"{Recipient}:{nameof(RequestRefund)}";
         public const string RefundEmitted = $"{Recipient}:{nameof(RefundEmitted)}";
     }

@@ -27,6 +27,11 @@ public partial class BillingBus(IScopeProvider sp) : MessageBusClientBase
                         Verb_Is_RequestPayment(notification);
                         break;
                     }
+                    case RequestReceipt:
+                    {
+                        Verb_Is_RequestReceipt(notification);
+                        break;
+                    }
                     case RequestRefund:
                     {
                         Verb_Is_RequestRefund(notification);

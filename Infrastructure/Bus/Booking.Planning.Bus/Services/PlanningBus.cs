@@ -1,4 +1,6 @@
-﻿namespace BookingKata.Infrastructure.Network;
+﻿using Business.Common;
+
+namespace BookingKata.Infrastructure.Network;
 
 public class PlanningBus(IScopeProvider sp, BookingConfiguration bconf) : MessageBusClientBase
 {
@@ -6,6 +8,7 @@ public class PlanningBus(IScopeProvider sp, BookingConfiguration bconf) : Messag
     {
         Subscribe(Recipient.Planning);
         Subscribe(Recipient.Sales, Verb.Sales.BookConfirmed);
+        Subscribe(Recipient.Sales, Verb.Sales.BookCancelled);
 
         Notified += (sender, notification) =>
         {
@@ -26,70 +29,18 @@ public class PlanningBus(IScopeProvider sp, BookingConfiguration bconf) : Messag
 
                         var booking = notification.MessageAs<Booking>();
 
+                        planning.PlanForBooking(booking);
 
-                        var receptionCheckIn = new ReceptionCheck
-                        {
-                            EventDayNum = booking.ArrivalDayNum,
-                            EventTime = booking.ArrivalDate,
-                            EventType = ReceptionEventType.CheckIn,
+                        break;
+                    }
 
-                            RoomNum = booking.RoomNum,
-                            FloorNum = booking.FloorNum,
-                            HotelId = booking.HotelId,
-                            Latitude = booking.Latitude,
-                            Longitude = booking.Longitude,
+                    case Verb.Sales.BookCancelled:
+                    {
+                        using var scope = sp.GetScope<PlanningCommandService>(out var planning);
 
-                            CustomerLastName = booking.LastName,
-                            CustomerFirstName = booking.FirstName,
-                            BookingId = booking.BookingId,
-                        }; 
-                        
-                        var receptionCheckOut = new ReceptionCheck
-                        {
-                            EventDayNum = booking.DepartureDayNum,
-                            EventTime = booking.DepartureDate,
-                            EventType = ReceptionEventType.CheckOut,
+                        var bookingId = notification.MessageAs<Id>();
 
-                            RoomNum = booking.RoomNum,
-                            FloorNum = booking.FloorNum,
-                            HotelId = booking.HotelId,
-                            Latitude = booking.Latitude,
-                            Longitude = booking.Longitude,
-
-                            CustomerLastName = booking.LastName,
-                            CustomerFirstName = booking.FirstName,
-                            BookingId = booking.BookingId,
-                        };
-
-
-
-                        var departureFracDayNum = OvernightStay.From(booking.DepartureDate).DayNum;
-
-                        var duty = new RoomServiceDuty
-                        {
-                            DateTime FreeTime = ,
-                            DateTime BusyTime = ,
-                            FreeDayNum = ,//frac
-                            BusyDayNum = , //frac
-
-                            RoomNum = ,
-                            FloorNum = ,
-                            HotelId = ,
-                            Latitude = ,
-                            Longitude = ,
-
-                            BookingId = ,
-                            EmployeeId = 
-                            
-                        }(
-                            booking.DepartureDate, System.DateTime.MaxValue,
-                            booking.DepartureDate.FractionalDayNum(), System.DateTime.MaxValue.FractionalDayNum(),
-                            room.RoomNum, room.FloorNum, false, room.HotelId,
-                            booking.BookingId, default, 0);
-
-                        planning.Add(receptionCheckIn);
-                        planning.Add(receptionCheckOut);
-                        planning.Add(duty);
+                        planning.CancelPlanForBooking(bookingId.id);
 
                         break;
                     }

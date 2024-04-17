@@ -1,4 +1,5 @@
-﻿namespace BookingKata.Sales;
+﻿
+namespace BookingKata.Sales;
 
 public partial class BookingCommandService
 {
@@ -160,7 +161,7 @@ public partial class BookingCommandService
         //
 
 
-        var booked = firstNight.StayUntil(lastNight, booking.UniqueRoomId);
+        var booked = firstNight.VacancyIdsUntil(lastNight, booking.UniqueRoomId);
 
         sales.RemoveVacancies(booked);
 

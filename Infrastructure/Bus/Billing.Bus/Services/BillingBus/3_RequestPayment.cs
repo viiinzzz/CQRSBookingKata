@@ -1,5 +1,4 @@
-﻿using VinZ.Common;
-
+﻿
 namespace Common.Infrastructure.Bus.Billing;
 
 public partial class BillingBus

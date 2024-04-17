@@ -67,7 +67,7 @@ public class PlanningRepository(IDbContextFactory factory, IServerContextService
         entity.State = EntityState.Detached;
     }
 
-    public void CancelCheck(int checkId, DateTime cancelDate)
+    public ReceptionCheck CancelCheck(int checkId, DateTime cancelDate)
     {
         var check = _planning.Checks.Find(checkId);
 
@@ -78,9 +78,15 @@ public class PlanningRepository(IDbContextFactory factory, IServerContextService
 
         _planning.Entry(check).State = EntityState.Detached;
 
-        var entity = _planning.Checks.Update(check with { Cancelled = true, CancelledDate = cancelDate });
+        var entity = _planning.Checks.Update(check with
+        {
+            Cancelled = true, 
+            CancelledDate = cancelDate
+        });
         _planning.SaveChanges();
         entity.State = EntityState.Detached;
+
+        return entity.Entity;
     }
 
     public void DoneDuty(int dutyId, int employeeId, DateTime doneDate)
@@ -99,7 +105,7 @@ public class PlanningRepository(IDbContextFactory factory, IServerContextService
         entity.State = EntityState.Detached;
     }
 
-    public void CancelDuty(int dutyId, DateTime cancelDate)
+    public RoomServiceDuty CancelDuty(int dutyId, DateTime cancelDate)
     {
         var duty = _planning.Duties.Find(dutyId);
 
@@ -110,7 +116,29 @@ public class PlanningRepository(IDbContextFactory factory, IServerContextService
 
         _planning.Entry(duty).State = EntityState.Detached;
 
-        var entity = _planning.Duties.Update(duty with { Cancelled = true, CancelledDate = cancelDate });
+        var entity = _planning.Duties.Update(duty with
+        {
+            Cancelled = true, 
+            CancelledDate = cancelDate
+        });
+        _planning.SaveChanges();
+        entity.State = EntityState.Detached;
+
+        return entity.Entity;
+    }
+
+    public void SetDutyBusyTime(int dutyId, DateTime busyTime, double busyDayNum)
+    {
+        var duty = _planning.Duties.Find(dutyId);
+
+        if (duty == default)
+        {
+            throw new InvalidOperationException("dutyId not found");
+        }
+
+        _planning.Entry(duty).State = EntityState.Detached;
+
+        var entity = _planning.Duties.Update(duty with { BusyTime = busyTime, BusyDayNum = busyDayNum});
         _planning.SaveChanges();
         entity.State = EntityState.Detached;
     }

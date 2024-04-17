@@ -2,5 +2,5 @@
 
 public record RefundRequest
 (
-    int receiptId
+    int receiptId = default
 );

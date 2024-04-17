@@ -26,6 +26,7 @@ public record RoomServiceDuty
     int RoomNum = default,
     int FloorNum = default,
     int HotelId = default,
+    int UniqueRoomId = default,
     double Latitude = default,
     double Longitude = default,
 
