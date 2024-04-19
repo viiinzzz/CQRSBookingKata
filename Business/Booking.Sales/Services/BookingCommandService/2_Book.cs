@@ -1,14 +1,19 @@
 ﻿
+using VinZ.Common;
+
 namespace BookingKata.Sales;
 
 public partial class BookingCommandService
 {
     public int Book
     (
-        string lastName, string firstName,
+        string lastName,
+        string firstName,
+
         long debitCardNumber,
         DebitCardSecrets secrets,
         VendorIdentifiers vendor,
+
         int customerId,
         int stayPropositionId,
         long correlationId1,
@@ -52,13 +57,16 @@ public partial class BookingCommandService
         {
             personCount = stayProposition.PersonCount,
             nightCount = stayProposition.NightsCount,
-            arrivalDate = stayProposition.ArrivalDate,
-            departureDate = stayProposition.DepartureDate,
+            arrivalDate = stayProposition.ArrivalDateUtc.DeserializeUniversal_ThrowIfNull(nameof(stayProposition.ArrivalDateUtc)),
+            departureDate = stayProposition.DepartureDateUtc.DeserializeUniversal_ThrowIfNull(nameof(stayProposition.DepartureDateUtc)),
             hotelName = roomDetails.HotelName,
             hotelRank = roomDetails.HotelRank,
             cityName = roomDetails.NearestKnownCityName,
             latitude = roomDetails.Latitude,
-            longitude = roomDetails.Longitude
+            longitude = roomDetails.Longitude,
+
+            optionStart = stayProposition.OptionStartUtc.DeserializeUniversal(DateTime.UtcNow),
+            optionEnd = stayProposition.OptionEndUtc.DeserializeUniversal(System.DateTime.MaxValue),
         };
 
         var amount = stayProposition.Price;
@@ -71,8 +79,8 @@ public partial class BookingCommandService
                 price = amount,
                 currency = currency,
 
-                optionStartUtc = (stayProposition.OptionStartsUtc ?? DateTime.UtcNow).SerializeUniversal(),
-                optionEndUtc = (stayProposition.OptionEndsUtc ?? System.DateTime.MaxValue).SerializeUniversal(),
+                optionStartUtc = quotationSpec.optionStart.SerializeUniversal(),
+                optionEndUtc = quotationSpec.optionEnd.SerializeUniversal(),
 
                 jsonMeta = System.Text.Json.JsonSerializer.Serialize(quotationSpec),
 

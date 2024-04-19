@@ -5,7 +5,7 @@ public class BookingSalesContext : DbContext
     public DbSet<Vacancy> Vacancies { get; set; }
     public DbSet<Customer> Customers { get; set; }
     public DbSet<StayProposition> Propositions { get; set; }
-    public DbSet<Sales.Booking> Bookings { get; set; }
+    public DbSet<Shared.Booking> Bookings { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
@@ -36,7 +36,7 @@ public class BookingSalesContext : DbContext
             .Ignore(hotel => hotel.Cells);
 
         builder
-            .Entity<Sales.Booking>()
+            .Entity<Shared.Booking>()
             .Property(booking => booking.BookingId)
             .ValueGeneratedOnAdd();
     }

@@ -1,8 +1,74 @@
-﻿namespace BookingKata.Sales;
+﻿using System.Text.Json;
+
+namespace BookingKata.Sales;
 
 public partial class SalesQueryService
 {
     public IQueryable<StayMatch> FindStay(StayRequest request, int customerId)
+    {
+        if (
+            !request.ArrivalFlexBeforeDays.HasValue &&
+            !request.ArrivalFlexAfterDays.HasValue &&
+            !request.DepartureFlexBeforeDays.HasValue &&
+            !request.DepartureFlexAfterDays.HasValue &&
+            !request.NightsCountMin.HasValue &&
+            !request.NightsCountMax.HasValue
+        )
+        {
+            //fixed bounds
+
+            return FindStay2(request, customerId);
+        }
+
+        //flex bounds
+
+        var flexRequests = new List<StayRequest>();
+
+        for (int arrivalFlexDays = -request.ArrivalFlexBeforeDays ?? 0;
+             arrivalFlexDays <= (request.ArrivalFlexAfterDays ?? 0);
+             arrivalFlexDays++)
+        {
+            for (int departureFlexDays = -request.DepartureFlexBeforeDays ?? 0;
+                 departureFlexDays <= (request.DepartureFlexAfterDays ?? 0);
+                 departureFlexDays++)
+            {
+                try
+                {
+                    var flexRequest = request with
+                    {
+                        ArrivalFlexBeforeDays = null,
+                        ArrivalFlexAfterDays = null,
+                        DepartureFlexBeforeDays = null,
+                        DepartureFlexAfterDays = null,
+                        NightsCountMin = null,
+                        NightsCountMax = null,
+                        ArrivalDate = request.ArrivalDate.AddDays(arrivalFlexDays),
+                        DepartureDate = request.DepartureDate.AddDays(departureFlexDays)
+                    };
+                    //may not pass validation and throw
+
+                    flexRequests.Add(flexRequest);
+                }
+                catch (Exception ex)
+                {
+                    //invalid bounds dismissed
+                }
+            }
+        }
+
+        //lengthiest stays first
+        flexRequests.Sort((r1, r2) => (r1.Nights - r2.Nights));
+
+
+        var ret = flexRequests.Aggregate(
+            seed: Array.Empty<StayMatch>().AsQueryable(),
+            (accumulator, flexRequest) => accumulator.Union(FindStay2(flexRequest, customerId))
+            );
+
+        return ret;
+    }
+
+    private IQueryable<StayMatch> FindStay2(StayRequest request, int customerId)
     {
         var firstNight = OvernightStay.From(request.ArrivalDate);
         var lastNight = OvernightStay.FromCheckOutDate(request.DepartureDate);
@@ -112,29 +178,51 @@ public partial class SalesQueryService
 
 
         var stays = roomDetails
-            .Select(room =>
+            .Select(roomDetail =>
             {
-                var price = pricing.GetPrice(
-                    //room
-                    room.PersonMaxCount, room.FloorNum, room.FloorNumMax, room.HotelRank, room.Latitude, room.Longitude,
 
-                    //booking
-                    request.PersonCount, request.ArrivalDate, request.DepartureDate, request.Currency, customerProfile);
 
-                var match = new StayMatch(
+                var price = bus.AskResult<Price>(
+                    originator, Common.Services.ThirdParty.Recipient, Common.Services.ThirdParty.Verb.RequestPricing,
+                    new PricingRequest
+                    {
+                        //room
+                        personMaxCount = roomDetail.PersonMaxCount,
+                        floorNum = roomDetail.FloorNum,
+                        floorNumMax = roomDetail.FloorNumMax,
+                        hotelRank = roomDetail.HotelRank,
+                        latitude = roomDetail.Latitude,
+                        longitude = roomDetail.Longitude,
+
+                        //booking
+                        personCount = request.PersonCount,
+                        arrivalDateUtc = request.ArrivalDate.SerializeUniversal(),
+                        departureDateUtc = request.DepartureDate.SerializeUniversal(),
+                        currency = request.Currency,
+                        customerProfileJson = JsonSerializer.Serialize(customerProfile)
+                    });
+
+                var match = new StayMatch
+                (
                     request.PersonCount,
-                    request.ArrivalDate, request.DepartureDate,
-                    price.Amount, price.Currency,
-                    urid);
+                    price.Amount,
+                    price.Currency,
+                    request.ArrivalDate,
+                    request.DepartureDate,
+                    roomDetail.Urid
+                );
 
                 return match;
             })
             .Where(stay => //now filter with dynamic pricing
+
                 (!request.PriceMax.HasValue || stay.Price <= request.PriceMax) &&
+
                 (!request.PriceMin.HasValue || request.PriceMax.HasValue && request.PriceMax <= request.PriceMin ||
                  stay.Price >= request.PriceMin) &&
-                (request.Currency == null || string.Equals(stay.Currency, request.Currency,
-                    StringComparison.InvariantCultureIgnoreCase)))
+
+                (request.Currency == null || stay.Currency.EqualsIgnoreCase(request.Currency))
+            )
             .AsQueryable();
 
         if (request.PriceMax is > 0)

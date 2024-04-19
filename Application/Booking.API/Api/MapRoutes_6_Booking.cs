@@ -26,11 +26,20 @@ public static partial class ApiMethods
             )
                 =>
             {
-                var filter = new StayRequest(
-                    arrivalDate, departureDate, personCount,
-                    approximateNameMatch, hotelName, countryCode, cityName,
-                    latitude.Value, longitude.Value, maxKm.Value,
-                    priceMin.Value, priceMax.Value, currency);
+                var filter = new StayRequest(personCount, arrivalDate, departureDate) {
+                    ApproximateNameMatch = approximateNameMatch,
+                    HotelName = hotelName,
+                    CountryCode =  countryCode,
+                    CityName = cityName,
+
+                    Latitude = latitude.Value,
+                    Longitude = longitude.Value,
+                    MaxKm = maxKm.Value,
+
+                    PriceMin = priceMin.Value,
+                    PriceMax = priceMax.Value,
+                    Currency =  currency
+                };
 
                 return originator.ListMq<StayProposition>(
                     Recipient.Sales, Verb.Sales.RequestStay,

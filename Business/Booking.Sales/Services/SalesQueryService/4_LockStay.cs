@@ -1,4 +1,6 @@
-﻿namespace BookingKata.Sales;
+﻿using System.Text.Json;
+
+namespace BookingKata.Sales;
 
 public partial class SalesQueryService
 {
@@ -28,14 +30,12 @@ public partial class SalesQueryService
         var originator = GetType().FullName
                          ?? throw new Exception("invalid originator");
 
-        var roomDetails = bus.AskResult<RoomDetails>(
+        var roomDetail = bus.AskResult<RoomDetails>(
             originator, Recipient.Admin, Verb.Admin.RequestSingleRoomDetails,
             new RoomDetailsRequest
             {
-                onlyRoomNumbers = new[] { request.Urid }
+                onlyRoomNumbers = [request.Urid]
             });
-
-        var hotel = admin.GetHotel(uniqueRoomId.HotelId);
 
         //adjust arrival/departure to hotel time
         var requestCheckInHours = request.ArrivalDate.Hour + request.ArrivalDate.Minute / 60d;
@@ -44,21 +44,21 @@ public partial class SalesQueryService
 
         var arrivalDate = request.ArrivalDate;
 
-        if (requestCheckInHours < hotel.EarliestCheckInHours)
+        if (requestCheckInHours < roomDetail.EarliestCheckInHours)
         {
             arrivalDate = request.ArrivalDate
                 .DayStart()
-                .AddHours(hotel.EarliestCheckInHours)
+                .AddHours(roomDetail.EarliestCheckInHours)
                 .RoundToTheSecond();
         }
 
         var departureDate = request.DepartureDate;
 
-        if (requestCheckOutHours > hotel.LatestCheckOutHours)
+        if (requestCheckOutHours > roomDetail.LatestCheckOutHours)
         {
             departureDate = request.DepartureDate
                 .DayStart()
-                .AddHours(hotel.LatestCheckOutHours)
+                .AddHours(roomDetail.LatestCheckOutHours)
                 .RoundToTheSecond();
         }
 
@@ -70,21 +70,55 @@ public partial class SalesQueryService
             return default;
         }
 
-        var room = admin.GetRoomDetails(uniqueRoomId.HotelId, default);
-
         var customerProfile = GetCustomerProfile(customerId);
 
-        var price = pricing.GetPrice(
-            room.PersonMaxCount, room.FloorNum, room.FlootNumMax, room.HotelRank, room.Latitude, room.Longitude,
-            request.PersonCount, arrivalDate, departureDate, request.Currency, customerProfile);
 
-        var prop = new StayProposition(
-            request.PersonCount,
-            arrivalDate, departureDate,
-            price.Amount, price.Currency,
-            now,
-            now.AddMinutes(FreeLockMinutes),
-            request.Urid);
+        var price = bus.AskResult<Price>(
+            originator, Common.Services.ThirdParty.Recipient, Common.Services.ThirdParty.Verb.RequestPricing,
+            new PricingRequest
+            {
+                //room
+                personMaxCount = roomDetail.PersonMaxCount,
+                floorNum = roomDetail.FloorNum,
+                floorNumMax = roomDetail.FloorNumMax,
+                hotelRank = roomDetail.HotelRank,
+                latitude = roomDetail.Latitude,
+                longitude = roomDetail.Longitude,
+
+                //booking
+                personCount = request.PersonCount,
+                arrivalDateUtc = request.ArrivalDate.SerializeUniversal(),
+                departureDateUtc = request.DepartureDate.SerializeUniversal(),
+                currency = request.Currency,
+                customerProfileJson = JsonSerializer.Serialize(customerProfile)
+            });
+
+
+        var optionStart = now;
+        var optionEnd = now.AddMinutes(FreeLockMinutes);
+
+        var prop = new StayProposition
+        {
+            PersonCount = request.PersonCount,
+            NightsCount = nightsCount,
+
+            ArrivalDateUtc = arrivalDate.SerializeUniversal(),
+            ArrivalDayNum = OvernightStay.From(arrivalDate).DayNum,
+
+            DepartureDateUtc = departureDate.SerializeUniversal(),
+            DepartureDayNum = OvernightStay.From(departureDate).DayNum,
+
+            Price = price.Amount,
+            Currency = price.Currency,
+
+            OptionStartUtc = optionStart.SerializeUniversal(),
+            OptionStartDayNum = OvernightStay.From(optionStart).DayNum,
+            OptionEndUtc = optionEnd.SerializeUniversal(),
+            OptionEndDayNum = OvernightStay.From(optionEnd).DayNum,
+
+            Urid = request.Urid
+        };
+        
 
         sales.AddStayProposition(prop);
 

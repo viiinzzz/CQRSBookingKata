@@ -1,7 +1,11 @@
-﻿namespace BookingKata.Infrastructure.Storage;
+﻿using Business.Common;
+
+namespace BookingKata.Infrastructure.Storage;
 
 public partial class SalesRepository
 {
+   
+
     public IQueryable<StayProposition> Propositions
 
         => _sales.Propositions
@@ -15,21 +19,25 @@ public partial class SalesRepository
         entity.State = EntityState.Detached;
     }
 
-    public bool HasActiveProposition(DateTime now, int urid, DateTime arrival, DateTime departure)
+    public bool HasActiveProposition(DateTime now, int urid, DateTime arrivalDate, DateTime departureDate)
     {
+        var nowDayNum = OvernightStay.From(now).DayNum;
+        var arrivalDayNum = OvernightStay.From(arrivalDate).DayNum;
+        var departureDayNum = OvernightStay.From(departureDate).DayNum;
+
         return _sales.Propositions
             .AsNoTracking()
             .Any(prop =>
-                // prop.IsValid(now) &&
-                now >= prop.OptionStartsUtc && now < prop.OptionEndsUtc &&
-
                 prop.Urid == urid &&
 
+                nowDayNum >= prop.OptionStartDayNum &&
+                nowDayNum < prop.OptionEndDayNum &&
                 (
-                    (prop.ArrivalDate >= arrival && prop.DepartureDate <= departure) ||
-                    (prop.ArrivalDate <= arrival && prop.DepartureDate >= departure) ||
-                    (prop.ArrivalDate <= arrival && prop.DepartureDate >= arrival) ||
-                    (prop.ArrivalDate <= departure && prop.DepartureDate >= departure)
-                ));
+                    (prop.ArrivalDayNum >= arrivalDayNum && prop.DepartureDayNum <= departureDayNum) ||
+                    (prop.ArrivalDayNum <= arrivalDayNum && prop.DepartureDayNum >= departureDayNum) ||
+                    (prop.ArrivalDayNum <= arrivalDayNum && prop.DepartureDayNum >= arrivalDayNum) ||
+                    (prop.ArrivalDayNum <= departureDayNum && prop.DepartureDayNum >= departureDayNum)
+                )
+            );
     }
 }

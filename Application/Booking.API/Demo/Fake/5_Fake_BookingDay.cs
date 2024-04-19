@@ -15,21 +15,23 @@ public partial class DemoService
             Immediate = true
         });
 
-        var todayBookingCount = (int)RandomHelper.Rand(CustomerCount * 0.05);
+        var todayBookingCount = (int)(CustomerCount * 0.05).Rand();
 
         var errors = new List<Exception>();
+
+        var vendor = new VendorIdentifiers(7777_7777, 007);
 
         for (var b = 0; b < todayBookingCount; b++)
         {
             try
             {
-                var ci = RandomHelper.Rand(demo.FakeCustomerIds.Length);
+                var ci = demo.FakeCustomerIds.Length.Rand();
                 var cid = demo.FakeCustomerIds[ci];
                 var c = demo.FakeCustomers[cid];
 
-                var stayStartDays = 1 + RandomHelper.Rand(45);
-                var stayDurationDays = 1 + RandomHelper.Rand(5);
-                var personCount = 1 + RandomHelper.Rand(2);
+                var stayStartDays = 1 + 45.Rand();
+                var stayDurationDays = 1 + 5.Rand();
+                var personCount = 1 + 2.Rand();
 
                 var r = new StayRequest(
                     ArrivalDate: DateTime.UtcNow.AddDays(stayStartDays),
@@ -56,20 +58,28 @@ public partial class DemoService
 
                 foreach (var m in preferredStayMatches)
                 {
-                    var lockProposition = sales2.LockStay(m);
+                    var lockProposition = sales2.LockStay(m, cid);
 
                     if (lockProposition == null)
                     {
                         continue;
                     }
 
-                    var bookingId = booking.Book(
-                        c.LastName, c.FirstName,
-                        c.DebitCardNumber, c.DebitCardSecrets,
+                    var bookingId = booking.Book
+                    (
+                        c.LastName,
+                        c.FirstName,
+
+                        c.DebitCardNumber,
+                        c.DebitCardSecrets,
+                        vendor,
+
                         cid,
-                        lockProposition,
-                        correlationId1, correlationId2
-                        );
+                        
+                        lockProposition.StayPropositionId,
+
+                        RandomHelper.Long(), RandomHelper.Long()//correlationId1, correlationId2
+                    );
 
                     break;
                 }

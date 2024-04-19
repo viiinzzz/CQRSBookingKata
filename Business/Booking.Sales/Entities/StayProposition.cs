@@ -2,22 +2,33 @@
 
 public record StayProposition
 (
-    int PersonCount,
-    int NightsCount,
-    DateTime ArrivalDate,
-    DateTime DepartureDate,
 
-    double Price,
-    string Currency,
+    int PersonCount = default,
+    int NightsCount = default,
 
-    DateTime? OptionStartsUtc,
-    DateTime? OptionEndsUtc,
+    string ArrivalDateUtc = default,
+    int ArrivalDayNum = int.MaxValue,
+    string DepartureDateUtc = default,
+    int DepartureDayNum = int.MaxValue,
 
-    int Urid,
+    double Price = default,
+    string Currency = default,
+
+    string OptionStartUtc = default,
+    int OptionStartDayNum = int.MinValue,
+    string OptionEndUtc = default,
+    int OptionEndDayNum = int.MinValue,
+
+    int Urid = default,
     int StayPropositionId = default
 )
 {
     public bool IsValid(DateTime now)
-        
-        => now >= OptionStartsUtc && now < OptionEndsUtc;
+    {
+        var optionStartsUtc = OptionStartUtc.DeserializeUniversal_ThrowIfNull(nameof(OptionStartUtc));
+        var optionEndsUtc = OptionEndUtc.DeserializeUniversal_ThrowIfNull(nameof(OptionEndUtc));
+
+        return now >= optionStartsUtc &&
+               now < optionEndsUtc;
+    }
 }

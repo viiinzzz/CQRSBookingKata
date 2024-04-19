@@ -8,9 +8,12 @@ public partial class DemoService
         {
             using var scope = !scoped ? null : new TransactionScope();
 
+            var originator = GetType().FullName
+                             ?? throw new ArgumentException("invalid originator");
+
             foreach (var hotelId in demo.FakeHotelsIds)
             {
-                bus.Notify(new Notification(Recipient.Audit, Verb.Audit.Information)
+                bus.Notify(originator, new Notification(Recipient.Audit, InformationMessage)
                 {
                     Message = $"Demo: Seeding Vacancies for hotel#{hotelId}...",
                     Immediate = true
@@ -18,7 +21,7 @@ public partial class DemoService
 
                 booking.OpenHotelSeason(
                     hotelId, default,
-                    DateTime.UtcNow, DateTime.UtcNow.AddDays(SeasonDayNumbers), scoped: false);
+                    DateTime.UtcNow, DateTime.UtcNow.AddDays(SeasonDayNumbers));
             }
 
             scope?.Complete();

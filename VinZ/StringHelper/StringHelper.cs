@@ -17,6 +17,17 @@ public static class StringHelper
         return null;
     }
 
+    public static bool EqualsIgnoreCase(this string? source, string? test)
+    {
+        var ret = EqualsNull(source, test);
+        if (ret.HasValue) return ret.Value;
+
+        return 0 == string.Compare(
+            source.Trim(), test.Trim(),
+            CultureInfo.CurrentCulture,
+            CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace);
+    }
+
     public static bool EqualsIgnoreCaseAndAccents(this string? source, string? test)
     {
         var ret = EqualsNull(source, test);
@@ -37,4 +48,11 @@ public static class StringHelper
             SpaceRx.Replace(source.Trim(), ""), SpaceRx.Replace(test.Trim(), ""),
             CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreSymbols);
     }
+
+
+    public static bool lt(this string a, string b) => a.CompareTo(b) < 0;
+    public static bool le(this string a, string b) => a.CompareTo(b) <= 0;
+    public static bool eq(this string a, string b) => a.CompareTo(b) == 0;
+    public static bool ge(this string a, string b) => a.CompareTo(b) >= 0;
+    public static bool gt(this string a, string b) => a.CompareTo(b) > 0;
 }

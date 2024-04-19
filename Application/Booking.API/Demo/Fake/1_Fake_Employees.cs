@@ -9,7 +9,10 @@ public partial class DemoService
         {
             using var scope = !scoped ? null : new TransactionScope();
 
-            bus.Notify(new Notification(Recipient.Audit, Verb.InformationMessage)
+            var originator = GetType().FullName
+                             ?? throw new ArgumentException("invalid originator");
+
+            bus.Notify(originator, new Notification(Recipient.Audit, InformationMessage)
             {
                 Message = "Demo: Seeding Staff...",
                 Immediate = true
@@ -27,7 +30,7 @@ public partial class DemoService
                 })
                 .ToArray();
 
-            bus.Notify(new Notification(Recipient.Audit, Verb.Audit.Information)
+            bus.Notify(originator, new Notification(Recipient.Audit, InformationMessage)
             {
                 Message = "Demo: Seeding Managers...",
                 Immediate = true

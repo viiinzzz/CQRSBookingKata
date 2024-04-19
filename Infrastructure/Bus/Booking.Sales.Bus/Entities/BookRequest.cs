@@ -10,6 +10,9 @@ public record BookRequest
     int debitCardExpire,
     int debitCardCCV,
 
+    int vendorId,
+    int terminalId,
+
     int arrivalTime,
     int departureTime,
 

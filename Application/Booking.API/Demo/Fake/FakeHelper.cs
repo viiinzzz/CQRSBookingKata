@@ -90,15 +90,15 @@ public static class FakeHelper
 
             .Select(i =>
             {
-                var lastName = LastNames[random.Next(LastNames.Length)];
-                var firstName = FirstNames[random.Next(FirstNames.Length)];
-                var emailAddress = $"{norm(firstName)}.{norm(lastName)}{random.Next(1000)}@mail.box";
-                var debitCardNumber = random.NextInt64(1_0000_0000_0000_0000);
+                var lastName = LastNames[LastNames.Length.Rand()];
+                var firstName = FirstNames[FirstNames.Length.Rand()];
+                var emailAddress = $"{norm(firstName)}.{norm(lastName)}{1000.Rand()}@mail.box";
+                var debitCardNumber = 1_0000_0000_0000_0000.Rand();
                 var debitCardOwnerName = $"MX {lastName} {firstName}".ToUpper();
-                var expireMonth = random.Next(12) + 1;
-                var expireYear = (DateTime.UtcNow.Year + random.Next(5)) % 1_00;
+                var expireMonth = 12.Rand() + 1;
+                var expireYear = (DateTime.UtcNow.Year + 5.Rand()) % 1_00;
                 var expire = expireMonth * 1_00 + expireYear;
-                var ccv = random.Next(1_000);
+                var ccv = 1_000.Rand();
 
                 var secrets = new DebitCardSecrets(debitCardOwnerName, expire, ccv);
 
@@ -122,9 +122,9 @@ public static class FakeHelper
 
             .Select(i =>
             {
-                var lastName = LastNames[random.Next(LastNames.Length)];
-                var firstName = FirstNames[random.Next(FirstNames.Length)];
-                var socialSecurityNumber = random.NextInt64(1_0_00_00_00_000_000_00);
+                var lastName = LastNames[LastNames.Length.Rand()];
+                var firstName = FirstNames[FirstNames.Length.Rand()];
+                var socialSecurityNumber = 1_0_00_00_00_000_000_00.Rand();
 
                 return new FakeEmployee(lastName, firstName, socialSecurityNumber, 1800, "EUR");
             })
@@ -145,7 +145,7 @@ public static class FakeHelper
 
                 while (bag.Count > 0)
                 {
-                    var j = random.Next(bag.Count);
+                    var j = bag.Count.Rand();
                     hotel = bag[j];
                     bag.RemoveAt(j);
 

@@ -8,7 +8,10 @@ public partial class DemoService
         {
             using var scope = !scoped ? null : new TransactionScope();
 
-            bus.Notify(new Notification(Recipient.Audit, Verb.Audit.Information)
+            var originator = GetType().FullName
+                             ?? throw new ArgumentException("invalid originator");
+
+            bus.Notify(originator, new Notification(Recipient.Audit, InformationMessage)
             {
                 Message = "Demo: Seeding Hotels...",
                 Immediate = true
@@ -29,12 +32,12 @@ public partial class DemoService
                         Url = fake.Url,
                         Ranking = fake.ranking,
                         ManagerId = managerId,
-                    }, scoped: false);
+                    });
 
 
                     for (var floorNum = 0; floorNum < FloorPerHotel; floorNum++)
                     {
-                        admin.Create(new NewRooms(hotelId, floorNum, RoomPerFloor, PersonPerRoom), scoped: false);
+                        admin.Create(new NewRooms(hotelId, floorNum, RoomPerFloor, PersonPerRoom));
                     }
 
                     return hotelId;

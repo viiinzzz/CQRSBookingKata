@@ -1,7 +1,6 @@
 ﻿global using System.Text.RegularExpressions;
 global using System.Transactions;
 global using System.Text;
-global using Booking.API;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.AspNetCore.Mvc;
 global using Newtonsoft.Json.Linq;

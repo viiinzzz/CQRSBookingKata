@@ -4,27 +4,38 @@ namespace VinZ.Common;
 
 public static class DateTimeHelper
 {
-    public static DateTime? DeserializeUniversal_ThrowIfNull(this string? dateTimeU, string argumentName)
+    public static DateTime DeserializeUniversal_ThrowIfNull(this string? dateTimeU, string argumentName)
     {
-        if (dateTimeU == null)
+        if (string.IsNullOrEmpty(dateTimeU))
         {
             throw new ArgumentNullException(argumentName);
         }
 
-        return dateTimeU.DeserializeUniversal();
+        var ret = dateTimeU.DeserializeUniversal();
+
+        return (DateTime)ret!;
     }
 
-    public static DateTime? DeserializeUniversal(this string? dateTimeU)
+    public static DateTime? DeserializeUniversal(this string? dateTimeU, DateTime? defaultValue = null)
     {
         if (dateTimeU == null)
         {
-            return null;
+            return defaultValue;
         }
 
         return DateTime
             .ParseExact(dateTimeU, "u", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
     }
 
+    public static string? SerializeUniversal(this DateTime? dateTime)
+    {
+        if (!dateTime.HasValue)
+        {
+            return null;
+        }
+
+        return dateTime!.Value.SerializeUniversal();
+    }
     public static string SerializeUniversal(this DateTime dateTime)
     {
         return dateTime.ToString("u");

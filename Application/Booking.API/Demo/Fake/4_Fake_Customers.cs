@@ -9,7 +9,10 @@ public partial class DemoService
         {
             using var scope = !scoped ? null : new TransactionScope();
 
-            bus.Notify(new Notification(Recipient.Audit, Verb.Audit.Information)
+            var originator = GetType().FullName
+                             ?? throw new ArgumentException("invalid originator");
+
+            bus.Notify(originator, new Notification(Recipient.Audit, InformationMessage)
             {
                 Message = "Demo: Seeding Customers...",
                 Immediate = true
@@ -19,7 +22,7 @@ public partial class DemoService
                 .GenerateFakeCustomers(CustomerCount)
                 .Select(fake =>
                 {
-                    var customerId = sales.CreateCustomer(fake.EmailAddress, scoped: false);
+                    var customerId = sales.CreateCustomer(fake.EmailAddress);
 
                     demo.FakeCustomers[customerId] = fake;
 

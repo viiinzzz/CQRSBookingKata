@@ -4,13 +4,16 @@ namespace BookingKata.ThirdParty;
 
 //sales and marketing, event planning
 
-public class PricingQueryService(
-    ) : IPricingQueryService
+public class PricingQueryService
+(
+
+)
+    : IPricingQueryService
 {
 
     public Price GetPrice(
         //room
-        int personMaxCount, int floorNum, int floorNumMax, int hotelRank, int latitude, int longitude,
+        int personMaxCount, int floorNum, int floorNumMax, int hotelRank, double latitude, double longitude,
 
         //booking
         int personCount, DateTime arrivalDate, DateTime departureDate, string? currency, CustomerProfile? customerProfile
@@ -60,4 +63,5 @@ public class PricingQueryService(
 
         //todo dynamic pricing
     }
+
 }

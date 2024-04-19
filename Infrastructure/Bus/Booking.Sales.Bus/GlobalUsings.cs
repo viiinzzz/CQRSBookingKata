@@ -8,4 +8,3 @@ global using VinZ.Common;
 global using VinZ.GeoIndexing;
 global using VinZ.MessageQueue;
 global using static VinZ.MessageQueue.Const;
-global using static BookingKata.Infrastructure.Common.Const;

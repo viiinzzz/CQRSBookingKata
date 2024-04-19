@@ -11,7 +11,7 @@ public class ConsoleAuditBus
 {
     public override void Configure()
     {
-        Subscribe(AnyRecipient);
+        Subscribe(Omni);
 
         Notified += (sender, notification) =>
         {
@@ -23,7 +23,7 @@ public class ConsoleAuditBus
                 notification.Recipient,
                 notification.Verb ,
 
-                notification.Json
+                notification.Message
             );
         };
     }

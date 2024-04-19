@@ -3,17 +3,17 @@
 public record PricingRequest
 (
     //room
-    int personMaxCount,
-    int floorNum,
-    int floorNumMax,
-    int hotelRank,
-    int latitude,
-    int longitude,
+    int personMaxCount = default,
+    int floorNum = default,
+    int floorNumMax = default,
+    int hotelRank = default,
+    double latitude = default,
+    double longitude = default,
 
     //booking
-    int personCount,
-    string arrivalDateUtc,
-    string departureDateUtc,
-    string? currency,
-    string? customerProfileJson
+    int personCount = default,
+    string arrivalDateUtc = default,
+    string departureDateUtc = default,
+    string? currency = default,
+    string? customerProfileJson = default
 );

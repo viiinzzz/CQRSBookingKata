@@ -66,10 +66,7 @@ public partial class BookingCommandService
 
         var refundId = bus.AskResult<Id>(
             originator, Common.Services.Billing.Recipient, Common.Services.Billing.Verb.RequestRefund,
-            new RefundRequest
-            {
-                receiptId
-            });
+            new RefundRequest { receiptId = receiptId.id });
 
         if (refundId == null)
         {

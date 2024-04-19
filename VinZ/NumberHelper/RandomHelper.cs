@@ -4,9 +4,9 @@ public static class RandomHelper
 {
     private static readonly System.Random random = new();
 
-    public static int Rand(int max) => random.Next(max);
-    public static long Rand(long max) => random.NextInt64(max);
-    public static double Rand(double max) => random.NextDouble() * max;
+    public static int Rand(this int max) => random.Next(max);
+    public static long Rand(this long max) => random.NextInt64(max);
+    public static double Rand(this double max) => random.NextDouble() * max;
 
     public static int Int() => random.Next();
     public static long Long() => random.NextInt64();

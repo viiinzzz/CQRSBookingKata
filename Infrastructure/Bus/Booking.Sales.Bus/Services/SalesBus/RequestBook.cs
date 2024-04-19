@@ -6,8 +6,9 @@ public partial class SalesBus
     {
         var request = notification.MessageAs<BookRequest>();
 
-        var debitCardSecrets =
-            new DebitCardSecrets(request.debitCardOwner, request.debitCardExpire, request.debitCardCCV);
+        var debitCardSecrets = new DebitCardSecrets(request.debitCardOwner, request.debitCardExpire, request.debitCardCCV);
+
+        var vendor = new VendorIdentifiers(request.vendorId, request.terminalId);
 
         using var scope = sp.GetScope<BookingCommandService>(out var booking);
 
@@ -17,8 +18,11 @@ public partial class SalesBus
         (
             request.lastName,
             request.firstName,
+
             request.debitCardNumber,
             debitCardSecrets,
+            vendor,
+
             request.customerId,
             request.stayPropositionId,
             notification.CorrelationId1,
