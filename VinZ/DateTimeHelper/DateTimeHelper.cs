@@ -1,7 +1,37 @@
-﻿namespace VinZ.Common;
+﻿using System.Globalization;
+
+namespace VinZ.Common;
 
 public static class DateTimeHelper
 {
+    public static DateTime? DeserializeUniversal_ThrowIfNull(this string? dateTimeU, string argumentName)
+    {
+        if (dateTimeU == null)
+        {
+            throw new ArgumentNullException(argumentName);
+        }
+
+        return dateTimeU.DeserializeUniversal();
+    }
+
+    public static DateTime? DeserializeUniversal(this string? dateTimeU)
+    {
+        if (dateTimeU == null)
+        {
+            return null;
+        }
+
+        return DateTime
+            .ParseExact(dateTimeU, "u", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
+    }
+
+    public static string SerializeUniversal(this DateTime dateTime)
+    {
+        return dateTime.ToString("u");
+    }
+
+
+
     private static readonly long HalfSecondTicks = TimeSpan.TicksPerSecond / 2;
 
     public static DateTime RoundToTheSecond(this DateTime date)

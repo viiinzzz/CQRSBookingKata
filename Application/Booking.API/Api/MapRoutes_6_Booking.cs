@@ -32,7 +32,8 @@ public static partial class ApiMethods
                     latitude.Value, longitude.Value, maxKm.Value,
                     priceMin.Value, priceMax.Value, currency);
 
-                return (Recipient.Sales, Verb.Sales.RequestStay).ListMq<StayProposition>(
+                return originator.ListMq<StayProposition>(
+                    Recipient.Sales, Verb.Sales.RequestStay,
                     pattern, pattern, filter, responseTimeoutSeconds);
             }).WithOpenApi();
 

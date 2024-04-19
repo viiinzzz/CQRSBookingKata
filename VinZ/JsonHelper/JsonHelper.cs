@@ -66,7 +66,7 @@ public static class JsonHelper
                ?? throw new ArgumentNullException(nameof(retObj));
     }
 
-    public static ExpandoObject PatchRelax<TEntity, TEntity2>(this TEntity? current, TEntity2? merge)
+    public static ExpandoObject? PatchRelax<TEntity, TEntity2>(this TEntity? current, TEntity2? merge)
         where TEntity : class
         where TEntity2 : class
     {
@@ -81,8 +81,17 @@ public static class JsonHelper
 
         var retStr = retObj?.ToString();
 
-        return JsonConvert.DeserializeObject<ExpandoObject>(retStr,
-            new ExpandoObjectConverter());
+        return retStr.DeserializeToExpando();
     }
 
+
+    public static ExpandoObject? DeserializeToExpando(this string? json)
+    {
+        if (json == null)
+        {
+            return null;
+        }
+
+        return JsonConvert.DeserializeObject<ExpandoObject>(json, new ExpandoObjectConverter());
+    }
 }

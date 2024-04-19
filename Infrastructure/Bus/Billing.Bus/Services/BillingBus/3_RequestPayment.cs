@@ -18,10 +18,14 @@ public partial class BillingBus
             //
             var id = billing.EmitReceipt
             (
+                request.amount,
+                request.currency,
+
                 request.debitCardNumber,
                 secret,
                 vendor,
-                request.invoiceId,
+                request.referenceId,
+
                 notification.CorrelationId1,
                 notification.CorrelationId2
             );
@@ -31,7 +35,7 @@ public partial class BillingBus
             Notify(new Notification(Omni, PaymentAccepted)
             {
                 CorrelationGuid = notification.CorrelationGuid(),
-                Message = new { id, request.invoiceId }
+                Message = new { id, invoiceId = request.referenceId }
             });
         }
         catch (Exception e)
@@ -39,7 +43,7 @@ public partial class BillingBus
             Notify(new Notification(Omni, PaymentRefused)
             {
                 CorrelationGuid = notification.CorrelationGuid(),
-                Message = new { request.invoiceId }
+                Message = new { invoiceId = request.referenceId }
             });
         }
     }

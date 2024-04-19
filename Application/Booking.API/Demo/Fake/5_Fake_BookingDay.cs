@@ -37,7 +37,7 @@ public partial class DemoService
                     PersonCount: personCount
                     ) { CityName = "Paris", CountryCode = "FR" };
 
-                var preferredStayMatches = sales2.Find(r, cid)
+                var preferredStayMatches = sales2.FindStay(r, cid)
                     .Take(50)//let's say customer only examine 50 first matches (at max)
                     .AsRandomEnumerable()
                     .Take(10);//and finally validate only 10 (at max)
@@ -56,7 +56,7 @@ public partial class DemoService
 
                 foreach (var m in preferredStayMatches)
                 {
-                    var lockProposition = sales2.LockProposition(m);
+                    var lockProposition = sales2.LockStay(m);
 
                     if (lockProposition == null)
                     {

@@ -29,10 +29,10 @@ public interface IGazetteerService
     void RemoveReferer<TReferer>(TReferer referer)
         where TReferer : IHavePrimaryKeyAndPosition;
     void CopyToReferers<TReferer, TReferer2>(TReferer referer, IEnumerable<TReferer2> referers2)
-        where TReferer : IHavePosition, IHavePrimaryKey
+        where TReferer : IHavePrimaryKeyAndPosition
         where TReferer2 : IHavePrimaryKey; 
     void CopyToReferer<TReferer, TReferer2>(TReferer referer, TReferer2 referer2)
-        where TReferer : IHavePosition, IHavePrimaryKey
+        where TReferer : IHavePrimaryKeyAndPosition
         where TReferer2 : IHavePrimaryKey;
     IGeoIndexCell? RefererGeoIndex<TReferer>(TReferer referer)
         where TReferer : IHavePrimaryKey;

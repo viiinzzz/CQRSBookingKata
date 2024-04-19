@@ -6,15 +6,8 @@ public partial class BillingBus
     {
         var request = notification.MessageAs<QuotationRequest>();
 
-        var optionStartUtc = request.optionStartUtc == default
-            ? default
-            : DateTime.ParseExact(request.optionStartUtc, "s", CultureInfo.InvariantCulture,
-                DateTimeStyles.AssumeUniversal);
-
-        var optionEndUtc = request.optionEndUtc == default
-            ? default
-            : DateTime.ParseExact(request.optionEndUtc, "s", CultureInfo.InvariantCulture,
-                DateTimeStyles.AssumeUniversal);
+        var optionStartUtc = request.optionStartUtc.DeserializeUniversal_ThrowIfNull(nameof(request.optionStartUtc));
+        var optionEndUtc = request.optionEndUtc.DeserializeUniversal_ThrowIfNull(nameof(request.optionEndUtc));
 
         var jsonMeta = request.jsonMeta == default
             ? "{}"

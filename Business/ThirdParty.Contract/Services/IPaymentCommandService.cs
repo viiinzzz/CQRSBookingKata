@@ -2,8 +2,10 @@
 
 public interface IPaymentCommandService
 {
-    PaymentResponse RequestReceipt
+    PaymentResponse RequestPayment
     (
+        int referenceId,
+
         double amount,
         string currency,
         
@@ -13,7 +15,6 @@ public interface IPaymentCommandService
         int CCV,
 
         int vendorId,
-        int terminalId,
-        int transactionId
+        int terminalId
     );
 }

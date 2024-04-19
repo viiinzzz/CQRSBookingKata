@@ -13,21 +13,25 @@ public static partial class ApiMethods
 
 
 
-        reception.MapListMq<ReceptionCheck>("/planning/full/hotels/{hotelId}", "/reception/planning/full/hotels/{hotelId}",
+        reception.MapListMq<ReceptionCheck>("/planning/full/hotels/{hotelId}", "/reception/planning/full/hotels/{hotelId}", filter: null,
             //TODO parameterized string interpolation
-            Recipient.Planning, RequestPage, responseTimeoutSeconds
+            Recipient.Planning, RequestPage, originator,
+            responseTimeoutSeconds
         ).WithOpenApi();
 
-        reception.MapListMq<ReceptionCheck>("/planning/today/hotels/{hotelId}", "/reception/planning/today/hotels/{hotelId}",
-            Recipient.Planning, RequestPage, responseTimeoutSeconds
+        reception.MapListMq<ReceptionCheck>("/planning/today/hotels/{hotelId}", "/reception/planning/today/hotels/{hotelId}", filter: null,
+            Recipient.Planning, RequestPage, originator,
+            responseTimeoutSeconds
         ).WithOpenApi();
 
-        reception.MapListMq<ReceptionCheck>("/planning/week/hotels/{hotelId}", "/reception/planning/week/hotels/{hotelId}",
-            Recipient.Planning, RequestPage, responseTimeoutSeconds
+        reception.MapListMq<ReceptionCheck>("/planning/week/hotels/{hotelId}", "/reception/planning/week/hotels/{hotelId}", filter: null,
+            Recipient.Planning, RequestPage, originator,
+            responseTimeoutSeconds
         ).WithOpenApi();
 
-        reception.MapListMq<ReceptionCheck>("/planning/month/hotels/{hotelId}", "/reception/planning/month/hotels/{hotelId}",
-            Recipient.Planning, RequestPage, responseTimeoutSeconds
+        reception.MapListMq<ReceptionCheck>("/planning/month/hotels/{hotelId}", "/reception/planning/month/hotels/{hotelId}", filter: null,
+            Recipient.Planning, RequestPage, originator,
+            responseTimeoutSeconds
         ).WithOpenApi();
 
     }

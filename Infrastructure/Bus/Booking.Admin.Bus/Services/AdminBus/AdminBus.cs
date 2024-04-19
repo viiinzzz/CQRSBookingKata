@@ -76,7 +76,7 @@ public partial class AdminBus(IScopeProvider sp, BookingConfiguration bconf) : M
 
                     case RequestRoomDetails:
                         {
-                            Verb_Is_RequestRoomDetails(notification);
+                            Verb_Is_RequestHotelRoomDetails(notification);
                             break;
                         }
 

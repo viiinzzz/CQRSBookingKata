@@ -6,11 +6,8 @@ public partial class SalesBus
     {
         var request = notification.MessageAs<OpenHotelSeasonRequest>();
 
-        var openingDate = DateTime.ParseExact(request.openingDate,
-            "s", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
-
-        var closingDate = DateTime.ParseExact(request.closingDate,
-            "s", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
+        var openingDateUtc = request.openingDateUtc.DeserializeUniversal_ThrowIfNull(nameof(request.openingDateUtc));
+        var closingDateUtc = request.closingDateUtc.DeserializeUniversal_ThrowIfNull(nameof(request.closingDateUtc));
 
         using var scope = sp.GetScope<BookingCommandService>(out var booking);
 
@@ -19,8 +16,8 @@ public partial class SalesBus
         booking.OpenHotelSeason(
             request.hotelId,
             request.exceptRoomNumbers,
-            openingDate,
-            closingDate
+            openingDateUtc,
+            closingDateUtc
             //
             // notification.CorrelationId1,
             // notification.CorrelationId2
@@ -31,8 +28,8 @@ public partial class SalesBus
         var opening = new
         {
             request.hotelId,
-            openingDate,
-            closingDate
+            openingDate = openingDateUtc,
+            closingDate = closingDateUtc
         };
 
         Notify(new Notification(Omni, Verb.Sales.HotelSeasonOpening)

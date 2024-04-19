@@ -1,10 +1,51 @@
 ﻿namespace BookingKata.ThirdParty;
 
-public class PaymentCommandService : IPaymentCommandService
+public class PaymentCommandService
+(
+    ITimeService DateTime
+) 
+    : IPaymentCommandService
 {
-    public bool Pay(double amount, string currency, long debitCardNumber, string debitCardOwnerName, int expire,
-        int CCV)
+    public PaymentResponse RequestPayment
+    (
+        int referenceId,
+        
+        double amount, 
+        string currency,
+        
+        long debitCardNumber, 
+        string debitCardOwnerName, 
+        int expire,
+        int CCV,
+
+        int vendorId, 
+        int terminalId
+    )
     {
-        return true;
+        //TODO
+
+        Console.WriteLine("FAKE PAYMENT!!!");
+
+        var transactionTime = DateTime.UtcNow;
+
+        var transactionId =
+        (
+            referenceId,
+        
+            amount,
+            currency,
+
+            vendorId,
+            terminalId,
+
+            transactionTime
+        ).GetHashCode();
+
+        return new PaymentResponse
+        {
+            Accepted = true,
+            TransactionTimeUtc = transactionTime.SerializeUniversal(),
+            TransactionId = transactionId
+        };
     }
 }

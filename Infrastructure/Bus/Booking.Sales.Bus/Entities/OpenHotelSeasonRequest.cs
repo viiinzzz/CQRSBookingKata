@@ -1,8 +1,8 @@
 ﻿namespace BookingKata.Infrastructure.Bus.Sales;
 
 public record OpenHotelSeasonRequest(
-    string openingDate,
-    string closingDate,
+    string openingDateUtc,
+    string closingDateUtc,
 
     int[]? exceptRoomNumbers,
     int hotelId

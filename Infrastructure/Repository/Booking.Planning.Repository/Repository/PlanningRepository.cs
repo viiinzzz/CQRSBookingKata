@@ -12,7 +12,9 @@ public class PlanningRepository(IDbContextFactory factory, IServerContextService
         var utcNowDayNum = utcNow.FractionalDayNum();
         var serverContextId = serverContext.Id;
 
-        SetServerContext(new ServerContext(utcNow, utcNowDayNum, serverContextId), scoped: false);
+        var serverContext2 = new ServerContext(utcNow, utcNowDayNum, serverContextId);
+
+        SetServerContext(serverContext2);
 
         return context;
     }

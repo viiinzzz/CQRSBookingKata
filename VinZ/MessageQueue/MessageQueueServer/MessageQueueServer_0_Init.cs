@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-
-namespace VinZ.MessageQueue;
+﻿namespace VinZ.MessageQueue;
 
 public partial class MessageQueueServer 
     : Initializable, IMessageBus
@@ -13,7 +11,7 @@ public partial class MessageQueueServer
 
         DateTime.Notified += (sender, time) =>
         {
-            var message = $"{time.UtcNow:s} ({time.state})";
+            var message = $"{time.UtcNow.SerializeUniversal()} ({time.state})";
 
             var originator = GetType().Name;
 

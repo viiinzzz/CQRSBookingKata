@@ -5,8 +5,8 @@ public record Quotation
     double Price = default,
     string Currency = default,
 
-    DateTime? OptionStartsUtc = default,
-    DateTime? OptionEndsUtc = default,
+    DateTime OptionStartsUtc = default,
+    DateTime OptionEndsUtc = default,
 
     string jsonMeta = default,
 

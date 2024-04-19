@@ -61,15 +61,18 @@ public partial class BookingCommandService
             longitude = roomDetails.Longitude
         };
 
+        var amount = stayProposition.Price;
+        var currency = stayProposition.Currency;
+
         var quotationId = bus.AskResult<Id>(
             originator, Common.Services.Billing.Recipient, Common.Services.Billing.Verb.RequestQuotation,
             new QuotationRequest
             {
-                price = stayProposition.Price,
-                currency = stayProposition.Currency,
+                price = amount,
+                currency = currency,
 
-                optionStartUtc = (stayProposition.OptionStartsUtc ?? DateTime.UtcNow).ToString("u"),
-                optionEndUtc = (stayProposition.OptionEndsUtc ?? System.DateTime.MaxValue).ToString("u"),
+                optionStartUtc = (stayProposition.OptionStartsUtc ?? DateTime.UtcNow).SerializeUniversal(),
+                optionEndUtc = (stayProposition.OptionEndsUtc ?? System.DateTime.MaxValue).SerializeUniversal(),
 
                 jsonMeta = System.Text.Json.JsonSerializer.Serialize(quotationSpec),
 
@@ -85,8 +88,8 @@ public partial class BookingCommandService
             originator, Common.Services.Billing.Recipient, Common.Services.Billing.Verb.RequestInvoice,
             new InvoiceRequest
             {
-                amount = stayProposition.Price,
-                currency = stayProposition.Currency,
+                amount = amount,
+                currency = currency,
 
                 customerId = customerId,
                 quotationId = quotationId.id
@@ -102,14 +105,18 @@ public partial class BookingCommandService
             originator, Common.Services.Billing.Recipient, Common.Services.Billing.Verb.RequestPayment,
             new PaymentRequest
             {
+                referenceId = invoiceId.id,
+
+                amount = amount,
+                currency = currency,
+
                 debitCardNumber = debitCardNumber,
                 debitCardOwnerName = secrets.ownerName,
                 debitCardExpire = secrets.expire,
                 debitCardCCV = secrets.CCV,
 
                 vendorId = vendor.vendorId,
-                terminalId = vendor.terminalId,
-                invoiceId = invoiceId.id
+                terminalId = vendor.terminalId
             });
 
         if (receiptId == null)
@@ -143,8 +150,8 @@ public partial class BookingCommandService
 
             PersonCount = quotationSpec.personCount,
 
-            Price = stayProposition.Price,
-            Currency = stayProposition.Currency,
+            Price = amount,
+            Currency = currency,
 
             RoomNum = room.RoomNum,
             FloorNum = room.FloorNum,

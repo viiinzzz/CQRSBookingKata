@@ -14,7 +14,13 @@ public partial class ThirdPartyBus(IScopeProvider sp) : MessageBusClientBase
                 {
                     case RequestPayment:
                     {
-                        Verb_Is_RequestPayment(notification, sp);
+                        Verb_Is_RequestPayment(notification);
+                        break;
+                    }
+
+                    case RequestPricing:
+                    {
+                        Verb_Is_RequestPricing(notification);
                         break;
                     }
 

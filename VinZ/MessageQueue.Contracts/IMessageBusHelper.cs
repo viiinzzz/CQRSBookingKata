@@ -20,11 +20,10 @@ public static class IMessageBusHelper
 
     public const int ResponseTimeoutSeconds = 2 * 60;
 
-    public static async Task<TReturn?> Ask<TReturn>(
-        this IMessageBus mq,
-        string originator, string recipient, string requestVerb, object? message,
-        CancellationToken requestCancel, int responseTimeoutSeconds = ResponseTimeoutSeconds
-    )
+    public static async Task<TReturn?> Ask<TReturn>(this IMessageBus mq,
+        string recipient, string requestVerb,
+        string originator, object? message,
+        CancellationToken requestCancel, int responseTimeoutSeconds = ResponseTimeoutSeconds)
     {
         var ret = await Ask(mq, originator,  recipient, requestVerb, message, requestCancel, responseTimeoutSeconds);
 

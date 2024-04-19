@@ -1,5 +1,5 @@
 ﻿
-global using Booking.Sales.Entities;
+
 global using Booking.Sales.Services;
 global using BookingKata.ThirdParty;
 global using BookingKata.Services;

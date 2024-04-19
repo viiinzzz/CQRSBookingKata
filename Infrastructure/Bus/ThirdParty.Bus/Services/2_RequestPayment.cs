@@ -1,20 +1,21 @@
-﻿using BookingKata.ThirdParty;
-
-namespace Common.Infrastructure.Bus.ThirdParty;
+﻿namespace Common.Infrastructure.Bus.ThirdParty;
 
 public partial class ThirdPartyBus
 {
-    private void Verb_Is_RequestPayment(IClientNotification notification, IScopeProvider sp)
+    private void Verb_Is_RequestPayment(IClientNotification notification)
     {
         var request = notification.MessageAs<PaymentRequest>();
 
 
         using var scope = sp.GetScope<IPaymentCommandService>(out var payment);
 
+
         //
         //
-        var response = payment.RequestReceipt
+        var response = payment.RequestPayment
         (
+            request.referenceId,
+
             request.amount,
             request.currency,
 
@@ -24,8 +25,7 @@ public partial class ThirdPartyBus
             request.debitCardCCV,
 
             request.vendorId,
-            request.terminalId,
-            request.transactionId
+            request.terminalId
         );
         //
         //

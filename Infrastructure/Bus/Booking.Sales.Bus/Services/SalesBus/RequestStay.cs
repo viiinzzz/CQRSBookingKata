@@ -20,7 +20,7 @@ public partial class SalesBus
         //
         //
         var page = sales
-            .Find(stayRequest, currentCustomerId)
+            .FindStay(stayRequest, currentCustomerId)
             .Page($"/booking", pageRequest.Page, pageRequest.PageSize);
         //
         //

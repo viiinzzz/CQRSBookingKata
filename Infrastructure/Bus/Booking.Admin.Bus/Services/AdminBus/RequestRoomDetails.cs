@@ -2,16 +2,21 @@
 
 public partial class AdminBus
 {
-    private void Verb_Is_RequestRoomDetails(IClientNotification notification)
+    private void Verb_Is_RequestHotelRoomDetails(IClientNotification notification)
     {
         using var scope = sp.GetScope<AdminQueryService>(out var adminQueryService);
 
         var request = notification.MessageAs<RoomDetailsRequest>();
 
+        if (request.hotelId == null)
+        {
+            throw new ArgumentException(ReferenceInvalid, nameof(request.hotelId));
+        }
+
         //
         //
         var roomDetails = adminQueryService
-            .GetRoomDetails(request.hotelId, request.exceptRoomNumbers)
+            .GetHotelRoomDetails(request.hotelId.Value, request.exceptRoomNumbers, request.onlyRoomNumbers)
             .ToArray();
         //
         //
@@ -33,6 +38,42 @@ public partial class AdminBus
         //
         var roomDetails = adminQueryService
             .GetSingleRoomDetails(request.id);
+        //
+        //
+
+        Notify(new Notification(Omni, RespondSingleRoomDetails)
+        {
+            CorrelationGuid = notification.CorrelationGuid(),
+            Message = roomDetails
+        });
+    } 
+    
+    
+    private void Verb_Is_RequestManyRoomDetails(IClientNotification notification)
+    {
+        using var scope = sp.GetScope<AdminQueryService>(out var adminQueryService);
+
+        var request = notification.MessageAs<RoomDetailsRequest>();
+
+        if (request.hotelId != null)
+        {
+            throw new ArgumentException(ReferenceUnexpected, nameof(request.hotelId));
+        }
+
+        if (request.exceptRoomNumbers != null)
+        {
+            throw new ArgumentException(ReferenceUnexpected, nameof(request.exceptRoomNumbers));
+        }
+
+        if (request.onlyRoomNumbers == null)
+        {
+            throw new ArgumentException(ReferenceInvalid, nameof(request.onlyRoomNumbers));
+        }
+
+        //
+        //
+        var roomDetails = adminQueryService
+            .GetManyRoomDetails(request.onlyRoomNumbers);
         //
         //
 

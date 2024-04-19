@@ -6,8 +6,8 @@ public partial class BillingCommandService
     (
         double price,
         string currency,
-        DateTime? optionStartUtc,
-        DateTime? optionEndUtc,
+        DateTime optionStartUtc,
+        DateTime optionEndUtc,
         string jsonMeta,
 
         int referenceId,

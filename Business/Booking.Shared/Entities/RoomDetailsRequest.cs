@@ -2,6 +2,7 @@
 
 public record RoomDetailsRequest
 (
-    int hotelId,
-    int[]? exceptRoomNumbers
+    int? hotelId = default,
+    int[]? exceptRoomNumbers = default,
+    int[]? onlyRoomNumbers = default
 );

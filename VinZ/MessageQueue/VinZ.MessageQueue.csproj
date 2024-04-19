@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DateTimeHelper\VinZ.Common.DateTimeHelper.csproj" />
     <ProjectReference Include="..\FakeTime.Contracts\VinZ.Common.FakeTime.Contract.csproj" />
     <ProjectReference Include="..\MessageQueue.Contracts\VinZ.MessageQueue.Contract.csproj" />
     <ProjectReference Include="..\ToolBox\VinZ.Common.ToolBox.csproj" />

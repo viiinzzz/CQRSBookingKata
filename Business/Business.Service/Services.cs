@@ -21,6 +21,7 @@ public static class Verb
         private const string HotelGeoProxy = $"{nameof(Hotel)}{nameof(GeoProxy)}";
         private const string RoomDetails = nameof(RoomDetails);
         private const string SingleRoomDetails = nameof(SingleRoomDetails);
+        private const string ManyRoomDetails = nameof(ManyRoomDetails);
 
 
         public const string RequestCreateEmployee = $"{RequestCreate}{Employee}";
@@ -52,8 +53,10 @@ public static class Verb
 
         public const string RequestRoomDetails = $"{Request}{RoomDetails}";
         public const string RequestSingleRoomDetails = $"{Request}{SingleRoomDetails}";
+        public const string RequestManyRoomDetails = $"{Request}{ManyRoomDetails}";
         public const string RespondRoomDetails = $"{Request}{RoomDetails}";
         public const string RespondSingleRoomDetails = $"{Request}{SingleRoomDetails}";
+        public const string RespondManyRoomDetails = $"{Request}{ManyRoomDetails}";
     } 
     
     public static class Planning

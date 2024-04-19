@@ -2,6 +2,7 @@
 
 public record PaymentResponse
 (
-    bool Accepted,
-    string DateTime
+    bool Accepted = default,
+    string TransactionTimeUtc = default,
+    int TransactionId = default
 );

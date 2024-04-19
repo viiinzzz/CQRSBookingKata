@@ -3,13 +3,13 @@
 public static class GazeteerServiceHelper
 {
     public static IEnumerable<TReferer> IncludeGeoIndex<TReferer>(this IEnumerable<TReferer> referers, double precisionMaxKm, IGazetteerService geo)
-        where TReferer : IHavePosition, IHavePrimaryKey
+        where TReferer : IHavePrimaryKeyAndPosition
     {
         return geo.IncludeGeoIndex(referers, precisionMaxKm);
     }
 
     public static IHaveCollection<TReferer> IncludeGeoIndex<TReferer>(this IHaveCollection<TReferer> haveReferers, double precisionMaxKm, IGazetteerService geo)
-        where TReferer : IHavePosition, IHavePrimaryKey
+        where TReferer : IHavePrimaryKeyAndPosition
     {
         haveReferers.Collection = geo.IncludeGeoIndex(haveReferers.Collection, precisionMaxKm);
 

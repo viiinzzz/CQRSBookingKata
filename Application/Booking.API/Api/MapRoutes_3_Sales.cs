@@ -1,5 +1,3 @@
-using BookingKata.Billing;
-
 namespace BookingKata.API;
 
 public static partial class ApiMethods
@@ -13,8 +11,9 @@ public static partial class ApiMethods
         ).WithOpenApi();
 
 
-        customers.MapListMq<Customer>("/", "/sales/customers",
-            Recipient.Sales, RequestPage, responseTimeoutSeconds
+        customers.MapListMq<Customer>("/", "/sales/customers", filter: null,
+            Recipient.Sales, RequestPage, originator,
+            responseTimeoutSeconds
         ).WithOpenApi();
 
     }

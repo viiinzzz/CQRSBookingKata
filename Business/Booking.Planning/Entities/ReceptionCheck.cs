@@ -12,7 +12,7 @@ public record ReceptionCheck
     int RoomNum = default,
     int FloorNum = default,
     int HotelId = default,
-    int UniqueRoomId = defaut,
+    int UniqueRoomId = default,
     double Latitude = default,
     double Longitude = default,
 

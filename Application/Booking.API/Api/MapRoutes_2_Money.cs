@@ -14,12 +14,14 @@ public static partial class ApiMethods
             ).WithOpenApi();
 
 
-        payrolls.MapListMq<Payroll>("/", "/money/payrolls",
-            Recipient.Admin, RequestPage, responseTimeoutSeconds
+        payrolls.MapListMq<Payroll>("/", "/money/payrolls", filter: null,
+            Recipient.Admin, RequestPage, originator,
+            responseTimeoutSeconds
         ).WithOpenApi();
 
-        invoices.MapListMq<Invoice>("/", "/money/invoices",
-            Recipient.Admin, RequestPage, responseTimeoutSeconds
+        invoices.MapListMq<Invoice>("/", "/money/invoices", filter: null,
+            Recipient.Admin, RequestPage, originator,
+            responseTimeoutSeconds
         ).WithOpenApi();
 
     }

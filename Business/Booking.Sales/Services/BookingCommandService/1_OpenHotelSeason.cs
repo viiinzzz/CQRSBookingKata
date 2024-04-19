@@ -19,7 +19,7 @@ public partial class BookingCommandService
 
         var roomDetails = bus.AskResult<RoomDetails[]>(
             originator, Recipient.Admin, Verb.Admin.RequestRoomDetails,
-            new RoomDetailsRequest(hotelId, exceptRoomNumbers));
+            new HotelRoomDetailsRequest(hotelId, exceptRoomNumbers));
 
         if (roomDetails is null or { Length: 0 })
         {

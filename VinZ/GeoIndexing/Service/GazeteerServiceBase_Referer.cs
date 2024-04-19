@@ -3,7 +3,7 @@
 public abstract partial class GazetteerServiceBase
 {
     public TReferer IncludeGeoIndex<TReferer>(TReferer referer, byte maxLevel)
-        where TReferer : IHavePosition, IHavePrimaryKey
+        where TReferer : IHavePrimaryKeyAndPosition
     {
         //
         //
@@ -18,7 +18,7 @@ public abstract partial class GazetteerServiceBase
     }
 
     public IEnumerable<TReferer> IncludeGeoIndex<TReferer>(IEnumerable<TReferer> referers, double precisionMaxKm)
-        where TReferer : IHavePosition, IHavePrimaryKey
+        where TReferer : IHavePrimaryKeyAndPosition
     {
         var (_, maxLevel) = S2GeometryHelper.S2MinMaxLevelForKm(precisionMaxKm, default);
 
@@ -26,7 +26,7 @@ public abstract partial class GazetteerServiceBase
     }
 
     public void AddReferer<TReferer>(TReferer referer, double? minKm, double? maxKm)
-        where TReferer : IHavePosition, IHavePrimaryKey
+        where TReferer : IHavePrimaryKeyAndPosition
 
     {
         var indexes = S2GeometryHelper.GetGeoIndexes(referer, minKm, maxKm);
@@ -35,13 +35,13 @@ public abstract partial class GazetteerServiceBase
     }
 
     public void RemoveReferer<TReferer>(TReferer referer)
-        where TReferer : IHavePosition, IHavePrimaryKey
+        where TReferer : IHavePrimaryKeyAndPosition
     {
         RemoveIndexes(referer);
     }
 
     public void CopyToReferers<TReferer, TReferer2>(TReferer referer, IEnumerable<TReferer2> referers2) 
-        where TReferer : IHavePosition, IHavePrimaryKey
+        where TReferer : IHavePrimaryKeyAndPosition
         where TReferer2 : IHavePrimaryKey
     {
         foreach(var referer2 in referers2)
@@ -51,7 +51,7 @@ public abstract partial class GazetteerServiceBase
     }
 
     public void CopyToReferer<TReferer, TReferer2>(TReferer referer, TReferer2 referer2) 
-        where TReferer : IHavePosition, IHavePrimaryKey
+        where TReferer : IHavePrimaryKeyAndPosition
         where TReferer2 : IHavePrimaryKey
     {
         CopyIndexes(referer, referer2);

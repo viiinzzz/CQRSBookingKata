@@ -11,6 +11,9 @@ public record RoomDetails
     int HotelRank,
     string? NearestKnownCityName,
 
+    double EarliestCheckInHours,
+    double LatestCheckOutHours,
+
     int FloorNum,
     int FloorNumMax,
 

@@ -5,6 +5,9 @@ public partial class BillingCommandService
 {
     public int EmitReceipt
     (
+        double amount,
+        string currency,
+
         long debitCardNumber,
         DebitCardSecrets secrets,
         VendorIdentifiers vendor,
