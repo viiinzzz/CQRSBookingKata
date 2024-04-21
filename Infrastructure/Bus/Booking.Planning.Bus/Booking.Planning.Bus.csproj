@@ -10,7 +10,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Business\Booking.Planning\Booking.Planning.csproj" />
-    <ProjectReference Include="..\..\Infrastructure.Network.Common\BookingKata.Infrastructure.Common.csproj" />
   </ItemGroup>
 
 </Project>

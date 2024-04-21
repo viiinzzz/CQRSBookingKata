@@ -27,7 +27,6 @@ global using Infrastructure.Storage;
 global using static BookingKata.API.ApiMethods;
 global using BookingKata.API.Demo;
 global using BookingKata.API.Infrastructure;
-global using BookingKata.Infrastructure.Common;
 global using BookingKata.Services;
 global using BookingKata.Shared;
 global using static VinZ.MessageQueue.Const;

@@ -24,6 +24,12 @@ public partial class ThirdPartyBus(IScopeProvider sp) : MessageBusClientBase
                         break;
                     }
 
+                    case RequestPage:
+                    {
+                        Verb_Is_RequestPage(notification);
+                        break;
+                    }
+
                     default:
                     {
                         throw new VerbInvalidException(notification.Verb);

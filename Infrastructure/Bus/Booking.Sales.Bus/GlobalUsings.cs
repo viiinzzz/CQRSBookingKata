@@ -1,5 +1,4 @@
-﻿global using System.Globalization;
-global using BookingKata.Infrastructure.Common;
+﻿
 global using BookingKata.Sales;
 global using BookingKata.Services;
 global using BookingKata.Shared;

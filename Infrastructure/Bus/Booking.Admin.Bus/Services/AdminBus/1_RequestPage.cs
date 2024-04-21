@@ -1,12 +1,11 @@
-﻿namespace BookingKata.Infrastructure.Bus.Admin;
+﻿using System;
+
+namespace BookingKata.Infrastructure.Bus.Admin;
 
 public partial class AdminBus
 {
     private void Verb_Is_RequestPage(IClientNotification notification)
     {
-        using var scope = sp.GetScope<IAdminRepository>(out var adminRepository);
-        using var scope2 = sp.GetScope<IGazetteerService>(out var geo);
-
         var request = notification.MessageAs<PageRequest>();
 
         object? page;
@@ -15,28 +14,23 @@ public partial class AdminBus
         {
             case "/admin/hotels":
             {
-                page = adminRepository
-                    .Hotels
-                    .Page(request.Path, request.Page, request.PageSize)
-                    .IncludeGeoIndex(bconf.PrecisionMaxKm, geo);
-
+                RequestHotelsPage(request, out page);
                 break;
             }
 
             case "/admin/employees":
             {
-                page = adminRepository
-                    .Employees
-                    .Page(request.Path, request.Page, request.PageSize);
-
+                RequestEmployeesPage(request, out page);
                 break;
             }
 
             case "/admin/geo/indexes":
             {
-                page = ((GazetteerService)geo)
-                    .Indexes
-                    .Page(request.Path, request.Page, request.PageSize);
+                var originator = GetType().FullName
+                                 ?? throw new ArgumentException("invalid originator");
+
+                //pass request to third-party
+                page = AskResult<PageRequest>(originator, Common.Services.ThirdParty.Recipient, RequestPage, request);
 
                 break;
             }

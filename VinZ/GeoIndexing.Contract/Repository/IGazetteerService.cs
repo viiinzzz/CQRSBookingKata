@@ -2,6 +2,8 @@
 
 public interface IGazetteerService
 {
+    IQueryable<IGeoIndex> Indexes { get; }
+
     TReferer IncludeGeoIndex<TReferer>(TReferer referer, byte maxLevel)
         where TReferer : IHavePrimaryKeyAndPosition;
 

@@ -72,4 +72,13 @@ public class MessageBusClientBase : IMessageBusClient
         Notified?.Invoke(this, notification);
     }
 
+    public T? AskResult<T>(string originator, string recipient, string verb, object? message)
+    {
+        CheckBus();
+
+        var ret = _bus!.AskResult<T>(originator, recipient, verb, message);
+
+        return ret;
+    }
+
 }

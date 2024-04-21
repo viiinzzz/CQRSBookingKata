@@ -10,8 +10,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Business\Booking.Admin\Booking.Admin.csproj" />
-    <ProjectReference Include="..\..\Infrastructure.Network.Common\BookingKata.Infrastructure.Common.csproj" />
-    <ProjectReference Include="..\..\Repository\GeoIndexing.Repository\GeoIndexing.Repository.csproj" />
   </ItemGroup>
 
   <ItemGroup>

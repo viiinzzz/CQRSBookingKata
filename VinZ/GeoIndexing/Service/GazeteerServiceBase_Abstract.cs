@@ -2,7 +2,7 @@
 
 public abstract partial class GazetteerServiceBase : IGazetteerService
 {
-    public abstract IQueryable<GeoIndex> Indexes { get; }
+    public abstract IQueryable<IGeoIndex> Indexes { get; }
     public abstract void AddIndexes(IEnumerable<GeoIndex> indexes);
     public abstract void RemoveIndexes<TReferer>(TReferer referer) 
         where TReferer : IHavePrimaryKey;

@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Infrastructure\Infrastructure.Network.Common\BookingKata.Infrastructure.Common.csproj" />
     <ProjectReference Include="..\MessageQueue\VinZ.MessageQueue.csproj" />
   </ItemGroup>
 
