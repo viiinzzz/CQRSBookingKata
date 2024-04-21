@@ -183,7 +183,7 @@ public partial class SalesQueryService
 
 
                 var price = bus.AskResult<Price>(
-                    originator, Common.Services.ThirdParty.Recipient, Common.Services.ThirdParty.Verb.RequestPricing,
+                    originator, Support.Services.ThirdParty.Recipient, Support.Services.ThirdParty.Verb.RequestPricing,
                     new PricingRequest
                     {
                         //room

@@ -1,4 +1,4 @@
-﻿namespace Common.Infrastructure.Network;
+﻿namespace Support.Infrastructure.Network;
 
 public record QuotationRequest
 (

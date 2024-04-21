@@ -1,4 +1,4 @@
-﻿namespace Common.Infrastructure.Bus.ThirdParty;
+﻿namespace Support.Infrastructure.Bus.ThirdParty;
 
 public partial class ThirdPartyBus(IScopeProvider sp) : MessageBusClientBase
 {

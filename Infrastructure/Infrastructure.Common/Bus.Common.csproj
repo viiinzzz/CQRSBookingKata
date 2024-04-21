@@ -8,4 +8,9 @@
     <RootNamespace>Infrastructure.Common</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\VinZ\Paging\VinZ.Common.Paging.csproj" />
+    <ProjectReference Include="..\..\VinZ\GeoIndexing\VinZ.GeoIndexing.csproj" />
+  </ItemGroup>
+
 </Project>

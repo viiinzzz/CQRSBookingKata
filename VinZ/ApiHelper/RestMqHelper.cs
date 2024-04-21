@@ -64,7 +64,7 @@ public static class RestMqHelper
     }
 
 
-    public static Func<int?, int?, IMessageBus, CancellationToken, Task<PageResult<TEntity>>?>
+    public static Func<int?, int?, IMessageBus, CancellationToken, Task<IPageResult<TEntity>>?>
         ListMq<TEntity>
         (
             this string originator, string recipient, string verb,
@@ -79,7 +79,7 @@ public static class RestMqHelper
             )
             =>
         {
-            var ret = await mq.Ask<PageResult<TEntity>>(recipient, verb,
+            var ret = await mq.Ask<IPageResult<TEntity>>(recipient, verb,
                 originator,
                 new PageRequest(uri, page, pageSize, filter), requestCancel, responseTimeoutSeconds);
 

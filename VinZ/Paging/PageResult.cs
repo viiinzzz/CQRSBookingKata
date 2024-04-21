@@ -7,15 +7,16 @@ public record PageResult<TEntity>
 
     bool error, string? reason,
     int pageCount, int itemCount,
-    PageLinks[] links
+    IPageLinks[] links
 )
-    : IHaveCollection<TEntity>
+    : IPageResult<TEntity>
 {
     private TEntity[]? items { get; set; }
 
     public IEnumerable<TEntity> Collection
     {
-        get => items == default ? Enumerable.Empty<TEntity>() : items.AsEnumerable();
+        get => items?.AsEnumerable()
+               ?? Enumerable.Empty<TEntity>();
 
         set
         {

@@ -73,7 +73,7 @@ public partial class BookingCommandService
         var currency = stayProposition.Currency;
 
         var quotationId = bus.AskResult<Id>(
-            originator, Common.Services.Billing.Recipient, Common.Services.Billing.Verb.RequestQuotation,
+            originator, Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestQuotation,
             new QuotationRequest
             {
                 price = amount,
@@ -93,7 +93,7 @@ public partial class BookingCommandService
         }
 
         var invoiceId = bus.AskResult<Id>(
-            originator, Common.Services.Billing.Recipient, Common.Services.Billing.Verb.RequestInvoice,
+            originator, Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestInvoice,
             new InvoiceRequest
             {
                 amount = amount,
@@ -110,7 +110,7 @@ public partial class BookingCommandService
 
 
         var receiptId = bus.AskResult<Id>(
-            originator, Common.Services.Billing.Recipient, Common.Services.Billing.Verb.RequestPayment,
+            originator, Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestPayment,
             new PaymentRequest
             {
                 referenceId = invoiceId.id,

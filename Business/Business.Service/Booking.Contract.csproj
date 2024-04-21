@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\VinZ\MessageQueue.Contracts\VinZ.MessageQueue.Contract.csproj" />
-    <ProjectReference Include="..\Booking.Shared\Booking.Shared.csproj" />
+    <ProjectReference Include="..\Booking.Shared\Booking.Shared.Contract.csproj" />
     <ProjectReference Include="..\Business.Common\Business.Common.csproj" />
     <ProjectReference Include="..\ThirdParty.Contract\ThirdParty.Contract.csproj" />
   </ItemGroup>

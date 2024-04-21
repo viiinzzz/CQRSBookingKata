@@ -38,7 +38,7 @@ public partial class BillingCommandService
         //
         //
         var paid = bus.AskResult<PaymentResponse>(
-            originator, Common.Services.ThirdParty.Recipient, Common.Services.ThirdParty.Verb.RequestPayment,
+            originator, Support.Services.ThirdParty.Recipient, Support.Services.ThirdParty.Verb.RequestPayment,
             new PaymentOrder
             {
                 amount = invoice.Amount,

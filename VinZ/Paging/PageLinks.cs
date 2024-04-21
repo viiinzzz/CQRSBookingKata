@@ -1,6 +1,6 @@
 namespace VinZ.Common;
 
-public class PageLinks
+public class PageLinks : IPageLinks
 {
     public PageLinks(string baseUrl, int page, int pageSize, int pageCount)
     {

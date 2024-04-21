@@ -1,4 +1,4 @@
-﻿namespace Common.Infrastructure.Bus.Billing;
+﻿namespace Support.Infrastructure.Bus.Billing;
 
 public partial class BillingBus
 {

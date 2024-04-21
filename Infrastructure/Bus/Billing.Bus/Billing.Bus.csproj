@@ -11,6 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Business\Billing\Billing.csproj" />
     <ProjectReference Include="..\..\..\VinZ\MessageQueue.Contracts\VinZ.MessageQueue.Contract.csproj" />
+    <ProjectReference Include="..\..\Infrastructure.Common\Bus.Common.csproj" />
     <ProjectReference Include="..\Billing.Bus.Contract\Billing.Bus.Contract.csproj" />
     <ProjectReference Include="..\ThirdParty.Bus.Contract\ThirdParty.Bus.Contract.csproj" />
   </ItemGroup>

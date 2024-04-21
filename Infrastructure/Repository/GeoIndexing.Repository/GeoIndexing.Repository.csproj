@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\VinZ\GeoIndexing\VinZ.GeoIndexing.csproj" />
-    <ProjectReference Include="..\Infrastructure.Repository.Common\Infrastructure.Storage.Repository.csproj" />
+    <ProjectReference Include="..\Infrastructure.Repository.Common\Infrastructure.Storage.Common.csproj" />
   </ItemGroup>
 
 </Project>

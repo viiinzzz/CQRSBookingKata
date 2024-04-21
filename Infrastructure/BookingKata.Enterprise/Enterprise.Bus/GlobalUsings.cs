@@ -1,5 +1,5 @@
 ﻿global using BookingKata.Infrastructure.Bus.Admin;
 global using BookingKata.Infrastructure.Bus.Sales;
 global using BookingKata.Infrastructure.Network;
-global using Common.Infrastructure.Bus.Billing;
-global using Common.Infrastructure.Bus.ThirdParty;
+global using Support.Infrastructure.Bus.Billing;
+global using Support.Infrastructure.Bus.ThirdParty;

@@ -1,4 +1,6 @@
-﻿namespace Common.Infrastructure.Bus.ThirdParty;
+﻿using Support.Infrastructure.Network;
+
+namespace Support.Infrastructure.Bus.ThirdParty;
 
 public partial class ThirdPartyBus
 {

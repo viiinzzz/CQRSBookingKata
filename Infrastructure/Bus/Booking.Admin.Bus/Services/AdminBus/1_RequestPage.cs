@@ -30,7 +30,7 @@ public partial class AdminBus
                                  ?? throw new ArgumentException("invalid originator");
 
                 //pass request to third-party
-                page = AskResult<PageRequest>(originator, Common.Services.ThirdParty.Recipient, RequestPage, request);
+                page = AskResult<PageRequest>(originator, Support.Services.ThirdParty.Recipient, RequestPage, request);
 
                 break;
             }

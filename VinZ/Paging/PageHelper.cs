@@ -4,7 +4,7 @@ public static class PageHelper
 {
     private static readonly int DefaultPageSize = 50;
 
-    public static PageResult<TEntity> Page<TEntity>
+    public static IPageResult<TEntity> Page<TEntity>
     (
         this IQueryable<TEntity> query,
         string baseUrl,

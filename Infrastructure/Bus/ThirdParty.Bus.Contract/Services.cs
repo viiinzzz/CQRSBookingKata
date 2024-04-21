@@ -1,4 +1,4 @@
-﻿namespace Common.Services;
+﻿namespace Support.Services;
 
 public static class ThirdParty
 {

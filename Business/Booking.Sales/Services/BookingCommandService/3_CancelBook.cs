@@ -43,7 +43,7 @@ public partial class BookingCommandService
                          ?? throw new Exception("invalid originator");
 
         var receiptId = bus.AskResult<Id>(
-            originator, Common.Services.Billing.Recipient, Common.Services.Billing.Verb.RequestReceipt,
+            originator, Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestReceipt,
             new ReceiptRequest
             {
                 referenceId = bookingId
@@ -65,7 +65,7 @@ public partial class BookingCommandService
         }
 
         var refundId = bus.AskResult<Id>(
-            originator, Common.Services.Billing.Recipient, Common.Services.Billing.Verb.RequestRefund,
+            originator, Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestRefund,
             new RefundRequest { receiptId = receiptId.id });
 
         if (refundId == null)
