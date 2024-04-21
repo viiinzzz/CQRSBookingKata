@@ -51,7 +51,7 @@ public partial class BillingBus(IScopeProvider sp) : MessageBusClientBase
             }
             catch (Exception ex)
             {
-                Notify(new Notification(notification.Originator, ErrorProcessingRequest)
+                Notify(new ResponseNotification(notification.Originator, ErrorProcessingRequest)
                 {
                     CorrelationGuid = notification.CorrelationGuid(),
                     Message = new

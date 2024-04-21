@@ -94,7 +94,7 @@ public partial class BookingCommandService
 
         sales.AddVacancies(unbooked);
 
-        bus.Notify(originator, new Notification(Omni, BookCancelled)
+        bus.Notify(originator, new ResponseNotification(Omni, BookCancelled)
         {
             Message = new Id(bookingId)
         });

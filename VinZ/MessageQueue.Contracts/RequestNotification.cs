@@ -1,8 +1,7 @@
 ﻿namespace VinZ.MessageQueue;
 
-public record Notificationx
+public record RequestNotification
 (
-    NotificationType Type,
     string? Recipient,
     string? Verb,
 
@@ -20,4 +19,12 @@ public record Notificationx
     long? CorrelationId1 = default,
     long? CorrelationId2 = default
 )
-    : INotification;
+    : Notificationx
+    (
+        NotificationType.Request,
+
+        Recipient, Verb, Message,
+        EarliestDelivery, LatestDelivery, RepeatDelay,
+        CorrelationGuid, RepeatCount, Aggregate, Immediate,
+        CorrelationId1, CorrelationId2
+    );

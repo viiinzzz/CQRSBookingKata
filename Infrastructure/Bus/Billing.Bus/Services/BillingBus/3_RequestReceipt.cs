@@ -23,7 +23,7 @@ public partial class BillingBus
             ).FirstOrDefault();
 
 
-            Notify(new Notification(Omni, ReceiptFound)
+            Notify(new ResponseNotification(Omni, ReceiptFound)
             {
                 CorrelationGuid = notification.CorrelationGuid(),
                 Message = new { id = receiptId }
@@ -31,7 +31,7 @@ public partial class BillingBus
         }
         catch (Exception e)
         {
-            Notify(new Notification(Omni, ReceiptNotFound)
+            Notify(new ResponseNotification(Omni, ReceiptNotFound)
             {
                 CorrelationGuid = notification.CorrelationGuid(),
                 Message = new { bookingId }

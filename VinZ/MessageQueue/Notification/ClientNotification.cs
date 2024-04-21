@@ -1,9 +1,8 @@
-﻿using System.Globalization;
-
-namespace VinZ.MessageQueue;
+﻿namespace VinZ.MessageQueue;
 
 public record ClientNotification
 (
+    NotificationType Type = NotificationType.Request,
     string? Message = default,
     string? MessageType = default,
     string? Verb = default,
@@ -26,7 +25,7 @@ public record ClientNotification
             throw new ArgumentNullException(nameof(MessageType));
         }
 
-        var messageType = Type.GetType(MessageType);
+        var messageType = System.Type.GetType(MessageType);
 
         if (messageType != typeof(TMessage))
         {

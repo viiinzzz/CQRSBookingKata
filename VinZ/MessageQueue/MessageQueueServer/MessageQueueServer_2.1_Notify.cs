@@ -27,6 +27,7 @@ public partial class MessageQueueServer
 
         var notification = new ServerNotification
         {
+            Type = n.Type,
             Message = n.Message == default ? "{}" : JsonConvert.SerializeObject(n.Message),
             MessageType = n.Message == default ? string.Empty : n.Message.GetType().Name,
 
@@ -50,6 +51,12 @@ public partial class MessageQueueServer
             Valid = true,
             CorrelationId = correlationId
         };
+
+        //
+        //
+        RespondAwaited(notification);
+        //
+        //
 
         if (immediate)
         {

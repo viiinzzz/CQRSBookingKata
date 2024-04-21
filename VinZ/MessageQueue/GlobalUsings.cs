@@ -1,6 +1,7 @@
 // Global using directives
 
 global using System.Collections.Concurrent;
+global using System.Globalization;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging;

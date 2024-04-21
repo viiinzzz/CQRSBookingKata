@@ -1,9 +1,9 @@
-﻿using System.Globalization;
-
-namespace VinZ.MessageQueue;
+﻿namespace VinZ.MessageQueue;
 
 public record ServerNotification
 (
+    NotificationType Type = NotificationType.Request,
+
     string? Message = default,
     string? MessageType = default,
     string? Verb = default,
@@ -38,7 +38,7 @@ public record ServerNotification
             throw new ArgumentNullException(nameof(MessageType));
         }
 
-        var messageType = Type.GetType(MessageType);
+        var messageType = System.Type.GetType(MessageType);
 
         if (messageType != typeof(TMessage))
         {

@@ -36,7 +36,7 @@ public partial class ThirdPartyBus
         {
             case true:
             {
-                Notify(new Notification(Omni, PaymentAccepted)
+                Notify(new ResponseNotification(Omni, PaymentAccepted)
                 {
                     CorrelationGuid = notification.CorrelationGuid(),
                     Message = response
@@ -47,7 +47,7 @@ public partial class ThirdPartyBus
 
             case false:
             {
-                Notify(new Notification(Omni, PaymentRefused)
+                Notify(new ResponseNotification(Omni, PaymentRefused)
                 {
                     CorrelationGuid = notification.CorrelationGuid(),
                     Message = response

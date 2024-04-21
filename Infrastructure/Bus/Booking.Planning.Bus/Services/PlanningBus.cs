@@ -53,7 +53,7 @@ public class PlanningBus(IScopeProvider sp, BookingConfiguration bconf) : Messag
             }
             catch (Exception ex)
             {
-                Notify(new Notification(notification.Originator, ErrorProcessingRequest)
+                Notify(new ResponseNotification(notification.Originator, ErrorProcessingRequest)
                 {
                     CorrelationGuid = notification.CorrelationGuid(),
                     Message = new
@@ -146,7 +146,7 @@ public class PlanningBus(IScopeProvider sp, BookingConfiguration bconf) : Messag
             }
         }
 
-        Notify(new Notification(notification.Originator, Respond)
+        Notify(new ResponseNotification(notification.Originator, Respond)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = page

@@ -180,7 +180,7 @@ public partial class BookingCommandService
 
         sales.RemoveVacancies(booked);
 
-        bus.Notify(originator, new Notification(Omni, BookConfirmed)
+        bus.Notify(originator, new ResponseNotification(Omni, BookConfirmed)
         {
             Message = booking
         });

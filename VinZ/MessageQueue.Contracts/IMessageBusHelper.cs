@@ -40,7 +40,7 @@ public static class IMessageBusHelper
 
         var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(responseWait, requestCancel).Token;
 
-        var requestAck = mq.Notify(Application, new Notification(recipient, requestVerb)
+        var requestAck = mq.Notify(Application, new RequestNotification(recipient, requestVerb)
             {
                 Message = message
             }

@@ -47,7 +47,7 @@ public partial class SalesBus(IScopeProvider sp, BookingConfiguration bconf) : M
             }
             catch (Exception ex)
             {
-                Notify(new Notification(notification.Originator, ErrorProcessingRequest)
+                Notify(new ResponseNotification(notification.Originator, ErrorProcessingRequest)
                 {
                     CorrelationGuid = notification.CorrelationGuid(),
                     Message = new

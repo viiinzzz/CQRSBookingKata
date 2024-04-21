@@ -31,7 +31,7 @@ public partial class BillingBus
             //
             //
 
-            Notify(new Notification(Omni, PaymentAccepted)
+            Notify(new ResponseNotification(Omni, PaymentAccepted)
             {
                 CorrelationGuid = notification.CorrelationGuid(),
                 Message = new { id, invoiceId = request.referenceId }
@@ -39,7 +39,7 @@ public partial class BillingBus
         }
         catch (Exception e)
         {
-            Notify(new Notification(Omni, PaymentRefused)
+            Notify(new ResponseNotification(Omni, PaymentRefused)
             {
                 CorrelationGuid = notification.CorrelationGuid(),
                 Message = new { invoiceId = request.referenceId }

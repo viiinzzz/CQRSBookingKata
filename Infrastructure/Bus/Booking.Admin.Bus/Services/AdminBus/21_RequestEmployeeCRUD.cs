@@ -10,7 +10,7 @@ public partial class AdminBus
 
         repo.DisableEmployee(request.id, request.disable);
 
-        Notify(new Notification(notification.Originator, EmployeeDisabled)
+        Notify(new ResponseNotification(notification.Originator, EmployeeDisabled)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = request
@@ -25,7 +25,7 @@ public partial class AdminBus
 
         var ret = repo.Update(request.id, request.data);
 
-        Notify(new Notification(notification.Originator, EmployeeModified)
+        Notify(new ResponseNotification(notification.Originator, EmployeeModified)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = ret
@@ -40,7 +40,7 @@ public partial class AdminBus
 
         var ret = repo.GetEmployee(request.id);
 
-        Notify(new Notification(notification.Originator, EmployeeFetched)
+        Notify(new ResponseNotification(notification.Originator, EmployeeFetched)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = ret
@@ -55,7 +55,7 @@ public partial class AdminBus
 
         var ret = repo.Create(request);
 
-        Notify(new Notification(notification.Originator, EmployeeCreated)
+        Notify(new ResponseNotification(notification.Originator, EmployeeCreated)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = ret

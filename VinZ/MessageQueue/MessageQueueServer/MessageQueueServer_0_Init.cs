@@ -15,7 +15,7 @@ public partial class MessageQueueServer
 
             var originator = GetType().Name;
 
-            Notify(originator, new Notification(default, time.verb)
+            Notify(originator, new ResponseNotification(default, time.verb)
             {
                 Message = message,
                 Immediate = true

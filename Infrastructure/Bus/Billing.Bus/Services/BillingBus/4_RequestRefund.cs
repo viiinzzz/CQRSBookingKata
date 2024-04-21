@@ -19,7 +19,7 @@ public partial class BillingBus
         //
         //
 
-        Notify(new Notification(Omni, RefundEmitted)
+        Notify(new ResponseNotification(Omni, RefundEmitted)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = new { id }

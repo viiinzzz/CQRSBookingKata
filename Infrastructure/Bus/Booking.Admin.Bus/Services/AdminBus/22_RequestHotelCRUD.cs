@@ -1,7 +1,4 @@
-﻿using BookingKata.Admin;
-using static BookingKata.Services.Verb;
-
-namespace BookingKata.Infrastructure.Bus.Admin;
+﻿namespace BookingKata.Infrastructure.Bus.Admin;
 
 public partial class AdminBus
 {
@@ -13,7 +10,7 @@ public partial class AdminBus
 
         repo.DisableHotel(request.id, request.disable);
 
-        Notify(new Notification(notification.Originator, HotelDisabled)
+        Notify(new ResponseNotification(notification.Originator, HotelDisabled)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = request
@@ -28,7 +25,7 @@ public partial class AdminBus
 
         var ret = repo.Update(request.id, request.data);
 
-        Notify(new Notification(notification.Originator, HotelModified)
+        Notify(new ResponseNotification(notification.Originator, HotelModified)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = ret
@@ -43,7 +40,7 @@ public partial class AdminBus
 
         var ret = repo.GetHotel(request.id);
 
-        Notify(new Notification(notification.Originator, HotelFetched)
+        Notify(new ResponseNotification(notification.Originator, HotelFetched)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = ret
@@ -60,7 +57,7 @@ public partial class AdminBus
 
         var geoProxy = ret?.GetGeoProxy();
         
-        Notify(new Notification(notification.Originator, HotelFetched)
+        Notify(new ResponseNotification(notification.Originator, HotelFetched)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = geoProxy
@@ -75,7 +72,7 @@ public partial class AdminBus
 
         var ret = repo.Create(request);
 
-        Notify(new Notification(notification.Originator, HotelCreated)
+        Notify(new ResponseNotification(notification.Originator, HotelCreated)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = ret

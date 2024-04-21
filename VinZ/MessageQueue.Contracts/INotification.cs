@@ -1,7 +1,16 @@
 ﻿namespace VinZ.MessageQueue;
 
+public enum NotificationType
+{
+    Request,
+    Response,
+    Broadcast
+}
+
 public interface INotification
 {
+    NotificationType Type { get; }
+
     string? Recipient { get; }
     string? Verb { get; }
     object? Message { get; }

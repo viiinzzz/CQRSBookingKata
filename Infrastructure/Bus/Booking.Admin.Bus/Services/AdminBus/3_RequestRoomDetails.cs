@@ -21,7 +21,7 @@ public partial class AdminBus
         //
         //
 
-        Notify(new Notification(Omni, RespondHotelRoomDetails)
+        Notify(new ResponseNotification(Omni, RespondHotelRoomDetails)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = roomDetails
@@ -41,7 +41,7 @@ public partial class AdminBus
         //
         //
 
-        Notify(new Notification(Omni, RespondSingleRoomDetails)
+        Notify(new ResponseNotification(Omni, RespondSingleRoomDetails)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = roomDetails
@@ -77,7 +77,7 @@ public partial class AdminBus
         //
         //
 
-        Notify(new Notification(Omni, RespondSingleRoomDetails)
+        Notify(new ResponseNotification(Omni, RespondSingleRoomDetails)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = roomDetails

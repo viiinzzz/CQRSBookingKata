@@ -31,7 +31,7 @@ public partial class BillingBus
         //
         //
 
-        Notify(new Notification(Omni, QuotationEmitted)
+        Notify(new ResponseNotification(Omni, QuotationEmitted)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = new { id }

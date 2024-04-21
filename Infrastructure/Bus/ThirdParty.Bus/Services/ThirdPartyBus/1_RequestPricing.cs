@@ -33,7 +33,7 @@ public partial class ThirdPartyBus
             customerProfile
         );
 
-        Notify(new Notification(Omni, RespondPricing)
+        Notify(new ResponseNotification(Omni, RespondPricing)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = price

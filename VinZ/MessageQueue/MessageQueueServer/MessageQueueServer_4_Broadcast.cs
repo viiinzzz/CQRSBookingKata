@@ -76,6 +76,7 @@ public partial class MessageQueueServer
 
         var clientMessage = new ClientNotification
         {
+            Type = notification.Type,
             Message = notification.Message,
             Recipient = notification.Recipient,
             Verb = notification.Verb,
