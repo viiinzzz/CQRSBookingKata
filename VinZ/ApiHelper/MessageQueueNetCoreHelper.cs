@@ -1,7 +1,26 @@
 namespace VinZ.Common;
 
-public static class RestMqHelper
+public static class MessageQueueNetCoreHelper
 {
+    public static IServiceCollection AddMessageQueue(this IServiceCollection services, Type[] busTypes)
+    {
+        foreach (var busType in busTypes)
+        {
+            services.AddSingleton(busType);
+        }
+
+        services.AddSingleton(_ => new MqServerConfig
+        {
+            DomainBusTypes = busTypes
+        });
+
+        services.AddSingleton<MqServer>();
+        services.AddSingleton<IMessageBus>(sp => sp.GetRequiredService<MqServer>());
+        services.AddHostedService(sp => sp.GetRequiredService<MqServer>());
+
+        return services;
+    }
+
     public static RouteHandlerBuilder MapListMq<TEntity>
     (this RouteGroupBuilder builder,
         string pattern, string uri, object filter,

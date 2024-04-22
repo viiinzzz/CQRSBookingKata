@@ -1,9 +1,11 @@
-﻿namespace VinZ.MessageQueue;
+﻿using System.Net;
 
-public record RequestNotification
+namespace VinZ.MessageQueue;
+
+public record ResponseNotification
 (
     string? Recipient,
-    string? Verb,
+    string? Verb = Respond,
 
     object? Message = default,
 
@@ -21,9 +23,9 @@ public record RequestNotification
 )
     : Notificationx
     (
-        NotificationType.Request,
+        NotificationType.Response,
 
-        Recipient, Verb, Message,
+        Recipient, Verb, Message, (int)HttpStatusCode.OK,
         EarliestDelivery, LatestDelivery, RepeatDelay,
         CorrelationGuid, RepeatCount, Aggregate, Immediate,
         CorrelationId1, CorrelationId2

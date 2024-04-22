@@ -1,11 +1,11 @@
 ﻿namespace VinZ.MessageQueue;
 
-public partial class MessageQueueServer
+public partial class MqServer
 (
     IScopeProvider scp,
-    MessageQueueServerConfig config,
+    MqServerConfig config,
     ITimeService DateTime,
-    ILogger<MessageQueueServer> log
+    ILogger<MqServer> log
 )
     : IHostedLifecycleService
 {

@@ -1,29 +1,35 @@
 ﻿
 namespace VinZ.MessageQueue;
 
-public partial class MessageQueueServer
+public partial class MqServer
 {
-    private readonly ConcurrentDictionary<string, AwaitedResponse> _awaitedResponses = new();
+    private readonly ConcurrentDictionary<string, AwaitedResponse> _awaiters = new();
 
     private void Track(AwaitedResponse awaitedResponse)
     {
-        if (_awaitedResponses.ContainsKey(awaitedResponse.Key))
+        if (_awaiters.ContainsKey(awaitedResponse.Key))
         {
             throw new InvalidOperationException("concurrent wait not allowed");
         }
 
-        _awaitedResponses[awaitedResponse.Key] = awaitedResponse;
+        _awaiters[awaitedResponse.Key] = awaitedResponse;
+
+        //
+        //
+        log.LogInformation($"...Track... Correlation={awaitedResponse.Key}");
+        //
+        //
     }
 
     private void Untrack(AwaitedResponse awaitedResponse)
     {
         //
         //
-        Console.WriteLine($"Correlation={awaitedResponse.Key}, ElapsedSeconds={awaitedResponse.ElapsedSeconds}, Responded={awaitedResponse.Responded}, Cancelled={awaitedResponse.Cancelled}");
+        log.LogInformation($"        ...Untrack... Correlation={awaitedResponse.Key}, ElapsedSeconds={awaitedResponse.ElapsedSeconds}, Responded={awaitedResponse.Responded}, Cancelled={awaitedResponse.Cancelled}");
         //
         //
 
-        if (!_awaitedResponses.Remove(awaitedResponse.Key, out _))
+        if (!_awaiters.Remove(awaitedResponse.Key, out _))
         {
             throw new InvalidOperationException("invalid wait state");
         }
@@ -129,21 +135,79 @@ public partial class MessageQueueServer
         return awaitedResponse.Result;
 
     }
+    //
+    // private void RespondAwaited(ServerNotification notification)
+    // {
+    //     if (notification.Type != NotificationType.Response)
+    //     {
+    //         return;
+    //     }
+    //
+    //     var awaiters = _awaiters.Values
+    //         .Where(awaitedResponse => awaitedResponse.IsCorrelatedTo(notification))
+    //         .ToArray();
+    //
+    //     var awaiterCount = awaiters.Length;
+    //
+    //     var correlationId = new CorrelationId(notification.CorrelationId1, notification.CorrelationId2);
+    //     //
+    //     //
+    //     log.LogInformation($"...Awaiters... Count={awaiterCount}, CorrelationId={correlationId.Guid}, Recipient={notification.Recipient}, Verb={notification.Verb}");
+    //     //
+    //     //
+    //
+    //     foreach (var awaitedResponse in awaiters)
+    //     {
+    //         awaitedResponse.Respond(notification);
+    //     }
+    // }
 
-    private void RespondAwaited(ServerNotification notification)
+    private IMessageBusClient? GetAwaitedBus(ServerNotification notification)
     {
         if (notification.Type != NotificationType.Response)
         {
-            return;
+            return null;
         }
 
-        var correlatedWaitedResponses = _awaitedResponses.Values
+        var awaiters = _awaiters.Values
             .Where(awaitedResponse => awaitedResponse.IsCorrelatedTo(notification))
             .ToArray();
 
-        foreach (var awaitedResponse in correlatedWaitedResponses)
+        var awaiterCount = awaiters.Length;
+
+        var correlationId = new CorrelationId(notification.CorrelationId1, notification.CorrelationId2);
+        //
+        //
+        log.LogInformation($"...Awaiters... Count={awaiterCount}, CorrelationId={correlationId.Guid}, Recipient={notification.Recipient}, Verb={notification.Verb}");
+        //
+        //
+
+        if (awaiterCount == 0)
         {
-            awaitedResponse.Respond(notification);
+            return null;
         }
+
+        return new AwaitedBus(awaiters);
+    }
+
+    private class AwaitedBus(AwaitedResponse[] awaitedResponses) : IMessageBusClient
+    {
+        public IMessageBusClient ConnectToBus(IMessageBus bus) { return this; }
+        public bool Disconnect() { return true; }
+        public void Configure() { }
+        public void Subscribe(string? recipient, string? verb) { }
+        public bool Unsubscribe(string? recipient, string? verb) { return true; }
+
+        public void Notify(INotification message) { }
+
+        public void OnNotified(IClientNotification notification)
+        {
+            foreach (var awaitedResponse in awaitedResponses)
+            {
+                awaitedResponse.Respond(notification);
+            }
+        }
+
+        public event EventHandler<IClientNotification>? Notified;
     }
 }

@@ -12,7 +12,7 @@ public partial class DemoService
             var originator = GetType().FullName
                              ?? throw new ArgumentException("invalid originator");
 
-            bus.Notify(originator, new Notification(Recipient.Audit, InformationMessage)
+            bus.Notify(originator, new AdvertisementNotification(Recipient.Audit)
             {
                 Message = "Demo: Seeding Staff...",
                 Immediate = true
@@ -30,7 +30,7 @@ public partial class DemoService
                 })
                 .ToArray();
 
-            bus.Notify(originator, new Notification(Recipient.Audit, InformationMessage)
+            bus.Notify(originator, new AdvertisementNotification(Recipient.Audit)
             {
                 Message = "Demo: Seeding Managers...",
                 Immediate = true

@@ -1,10 +1,10 @@
 ﻿namespace VinZ.MessageQueue;
 
-public partial class MessageQueueServer
+public partial class MqServer
 {
     private async Task<DeliveryCount> ProcessQueue(CancellationToken cancel)
     {
-        // log.LogInformation($"[{nameof(MessageQueueServer)}] Processing message queue...");
+        // log.LogInformation($"Processing message queue...");
 
         using var scope = scp.GetScope<IMessageQueueRepository>(out var queue);
 
@@ -65,13 +65,13 @@ public partial class MessageQueueServer
                 if (duplicateCount > 0) counts.Add($"duplicateCount: {duplicateCount}");
                 if (holdCount > 0) counts.Add($"holdCount: {holdCount}");
 
-                log.LogInformation($"[{nameof(MessageQueueServer)}] Message queue purged. {{{string.Join(", ", counts)}}}");
+                log.LogInformation($"Message queue purged. {{{string.Join(", ", counts)}}}");
             }
         }
         catch (Exception ex)
         {
             log.LogError(@$"
-[{nameof(MessageQueueServer)}] purge failure: {ex.Message}
+Message purge failure: {ex.Message}
 {ex.StackTrace}
 ");
         }
@@ -118,7 +118,7 @@ public partial class MessageQueueServer
         catch (Exception ex)
         {
             log.LogError(@$"
-[{nameof(MessageQueueServer)}] broadcast failure: {ex.Message}
+Broadcast failure: {ex.Message}
 {ex.StackTrace}
 ");
         }

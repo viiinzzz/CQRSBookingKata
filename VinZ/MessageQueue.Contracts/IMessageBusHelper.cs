@@ -36,7 +36,10 @@ public static class IMessageBusHelper
         CancellationToken requestCancel, int responseTimeoutSeconds = ResponseTimeoutSeconds
     )
     {
-        var responseWait = new CancellationTokenSource(responseTimeoutSeconds * 1000).Token;
+        var responseTimeoutMilliSeconds = responseTimeoutSeconds * 1000;
+        // var responseTimeoutMilliSeconds = 5000; //TODO test override -- remove
+
+        var responseWait = new CancellationTokenSource(responseTimeoutMilliSeconds).Token;
 
         var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(responseWait, requestCancel).Token;
 

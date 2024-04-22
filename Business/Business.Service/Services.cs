@@ -43,6 +43,7 @@ public static class Verb
         public const string RequestFetchHotel = $"{RequestFetch}{Hotel}";
         public const string RequestFetchHotelGeoProxy = $"{RequestFetch}{HotelGeoProxy}";
         public const string HotelFetched = $"{Hotel}{Fetched}";
+        public const string HotelGeoProxyFetched = $"{HotelGeoProxy}{Fetched}";
         
         public const string RequestModifyHotel = $"{RequestModify}{Hotel}";
         public const string HotelModified = $"{Hotel}{Modified}";

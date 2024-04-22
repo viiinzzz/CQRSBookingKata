@@ -1,6 +1,6 @@
 ﻿namespace VinZ.MessageQueue;
 
-public partial class MessageQueueServer
+public partial class MqServer
 {
     private readonly ConcurrentDictionary<int, IMessageBusClient> _subscribers_0 = new(); //recipient* verb*
     private readonly ConcurrentDictionary<int, HashSet<IMessageBusClient>> _subscribers_R = new(); //recipient verb*
@@ -16,7 +16,7 @@ public partial class MessageQueueServer
             _subscribers_0[hash0] = client;
 
             log.LogInformation(
-                $"[{nameof(MessageQueueServer)}] NEW client {hash0:x8} subscription, recipient=Any, verb=Any, 0+{hash0:x8}");
+                $"<<<{client.GetType().Name}:{hash0.xby4()}>>> Subscribe recipient={nameof(Omni)}, verb=Any (0+{hash0.xby4()})");
 
             // hash = hash0;
             return;
@@ -35,7 +35,7 @@ public partial class MessageQueueServer
                 });
 
             log.LogInformation(
-                $"[{nameof(MessageQueueServer)}] NEW client {hash0:x8} subscription, recipient={recipient}, verb=Any, R+{hash1:x8}");
+                $"<<<{client.GetType().Name}:{hash0.xby4()}>>> Subscribe recipient={recipient}, verb=Any (R+{hash1.xby4()})");
 
             // hash = hash1;
             return;
@@ -54,7 +54,7 @@ public partial class MessageQueueServer
                 });
 
             log.LogInformation(
-                $"[{nameof(MessageQueueServer)}] NEW client {hash0:x8} subscription, recipient=Any, verb={verb}, V+{hash1:x8}");
+                $"<<<{client.GetType().Name}:{hash0.xby4()}>>> Subscribe recipient={nameof(Omni)}, verb={verb} (V+{hash1.xby4()})");
 
             // hash = hash1;
             return;
@@ -71,7 +71,7 @@ public partial class MessageQueueServer
             });
 
         log.LogInformation(
-            $"[{nameof(MessageQueueServer)}] ++client {hash0:x8} subscribed, recipient={recipient}, verb={verb}, RV+{hash2:x8}");
+            $"<<<{client.GetType().Name}:{hash0.xby4()}>>> Subscribe recipient={recipient}, verb={verb} (RV+{hash2.xby4()})");
 
         // hash = hash2;
         return;
@@ -82,7 +82,7 @@ public partial class MessageQueueServer
         var hash0 = client.GetHashCode();
 
         log.LogInformation(
-            $"[{nameof(MessageQueueServer)}] --client {hash0:x8} unsubscribed, recipient=Any, verb=Any, 0+{hash0:x8}");
+            $"<<<{client.GetType().Name}:{hash0.xby4()}>>> Unsubscribe recipient=Any, verb=Any (0+{hash0.xby4()})");
 
         if (recipient == Omni && verb == AnyVerb)
         {

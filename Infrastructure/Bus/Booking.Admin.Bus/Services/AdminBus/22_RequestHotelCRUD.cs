@@ -57,7 +57,7 @@ public partial class AdminBus
 
         var geoProxy = ret?.GetGeoProxy();
         
-        Notify(new ResponseNotification(notification.Originator, HotelFetched)
+        Notify(new ResponseNotification(notification.Originator, HotelGeoProxyFetched)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = geoProxy

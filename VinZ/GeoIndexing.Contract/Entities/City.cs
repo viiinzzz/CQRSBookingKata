@@ -1,4 +1,5 @@
-﻿namespace VinZ.GeoIndexing;
+﻿
+namespace VinZ.GeoIndexing;
 
 public record City
 (

@@ -12,7 +12,9 @@ public abstract partial class GazetteerServiceBase
             .ToList();
         //
         //
-        referer.geoIndex = referer.GetGeoIndexString();
+
+        referer.geoIndex = string.Join(" ", referer.Cells.Select(c =>
+            $"{c.S2CellIdSigned:x16}".Substring(0, 8)));
 
         return referer;
     }

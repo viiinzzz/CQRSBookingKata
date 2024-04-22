@@ -1,4 +1,6 @@
-﻿namespace BookingKata.Shared;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace BookingKata.Shared;
 
 public record Booking
 (
@@ -45,11 +47,13 @@ public record Booking
 
     [System.Text.Json.Serialization.JsonIgnore]
     // [Newtonsoft.Json.JsonIgnore]
+    [NotMapped]
     public Position? Position { get; private set; }
 
 
     [System.Text.Json.Serialization.JsonIgnore]
     // [Newtonsoft.Json.JsonIgnore]
+    [NotMapped]
     public IList<IGeoIndexCell> Cells { get; set; }
     public string geoIndex { get; set; }
 

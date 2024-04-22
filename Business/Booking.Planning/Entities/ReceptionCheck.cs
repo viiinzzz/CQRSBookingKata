@@ -1,4 +1,6 @@
-﻿namespace BookingKata.Planning;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace BookingKata.Planning;
 
 public record ReceptionCheck
 (
@@ -40,11 +42,13 @@ public record ReceptionCheck
 
     [System.Text.Json.Serialization.JsonIgnore]
     [Newtonsoft.Json.JsonIgnore]
+    [NotMapped]
     public Position? Position { get; private set; }
 
 
     [System.Text.Json.Serialization.JsonIgnore]
     [Newtonsoft.Json.JsonIgnore]
+    [NotMapped]
     public IList<IGeoIndexCell> Cells { get; set; }
     public string geoIndex { get; set; }
 }

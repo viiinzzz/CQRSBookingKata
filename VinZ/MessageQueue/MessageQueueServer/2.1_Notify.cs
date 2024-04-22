@@ -1,6 +1,6 @@
 ﻿namespace VinZ.MessageQueue;
 
-public partial class MessageQueueServer
+public partial class MqServer
 {
     public INotifyAck Notify(string originator, INotification notification)
     {
@@ -52,12 +52,6 @@ public partial class MessageQueueServer
             CorrelationId = correlationId
         };
 
-        //
-        //
-        RespondAwaited(notification);
-        //
-        //
-
         if (immediate)
         {
             //
@@ -77,7 +71,7 @@ public partial class MessageQueueServer
             var queuing = immediate ? "                     <<<Relaying<<< immediate" : "                      <<<Queuing<<< scheduled";
 
             log.LogInformation(
-                @$"{queuing} message{(immediate ? "" : "Id:" + notification.MessageId)}...
+                @$"{queuing} message{correlationId.Guid} ...
 {{recipient:{notification.Recipient}, verb:{notification.Verb}, message:{notification.Message.Replace("\"", "")}}}");
 
             //

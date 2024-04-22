@@ -4,7 +4,7 @@ public enum NotificationType
 {
     Request,
     Response,
-    Broadcast
+    Advertisement
 }
 
 public interface INotification

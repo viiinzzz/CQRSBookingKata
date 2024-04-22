@@ -13,6 +13,7 @@ global using VinZ.GeoIndexing;
 
 
 global using BookingKata.Admin;
+global using BookingKata.API;
 global using BookingKata.Billing;
 global using BookingKata.Planning;
 global using BookingKata.Sales;
@@ -27,6 +28,10 @@ global using Infrastructure.Storage;
 global using static BookingKata.API.ApiMethods;
 global using BookingKata.API.Demo;
 global using BookingKata.API.Infrastructure;
+global using BookingKata.Infrastructure.Bus.Admin;
+global using BookingKata.Infrastructure.Bus.Sales;
 global using BookingKata.Services;
 global using BookingKata.Shared;
+global using Support.Infrastructure.Bus.Billing;
+global using Support.Infrastructure.Bus.ThirdParty;
 global using static VinZ.MessageQueue.Const;

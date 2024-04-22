@@ -1,4 +1,6 @@
-﻿namespace BookingKata.Sales;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace BookingKata.Sales;
 
 public record StayRequest
 (
@@ -132,11 +134,13 @@ public record StayRequest
 
     [System.Text.Json.Serialization.JsonIgnore]
     [Newtonsoft.Json.JsonIgnore]
+    [NotMapped]
     public Position? Position { get; private set; }
 
 
     [System.Text.Json.Serialization.JsonIgnore]
     [Newtonsoft.Json.JsonIgnore]
+    [NotMapped]
     public IList<IGeoIndexCell> Cells { get; set; }
     public string geoIndex { get; set; }
 

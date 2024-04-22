@@ -1,6 +1,6 @@
 ﻿namespace VinZ.MessageQueue;
 
-public partial class MessageQueueServer 
+public partial class MqServer 
     : Initializable, IMessageBus
 {
     private Dictionary<IServiceScope, IMessageBusClient> _domainBuses = new();
@@ -22,16 +22,16 @@ public partial class MessageQueueServer
             });
         };
 
-        if (config.DomainBusType == default)
+        if (config.DomainBusTypes == default)
         {
             return;
         }
 
-        foreach (var type in config.DomainBusType)
+        foreach (var type in config.DomainBusTypes)
         {
             if (typeof(IMessageBus).IsAssignableFrom(type))
             {
-                throw new ArgumentException($"Must implement {nameof(IMessageBus)}", nameof(config.DomainBusType));
+                throw new ArgumentException($"Must implement {nameof(IMessageBus)}", nameof(config.DomainBusTypes));
             }
 
             var scope = scp.GetScope(type, out var domainBus);
@@ -44,7 +44,7 @@ public partial class MessageQueueServer
             client.Configure();
 
 
-            log.LogInformation($"{nameof(MessageQueueServer)}: {type.Name} got connected to main bus.");
+            log.LogInformation($"<<<{type.Name}:{client.GetHashCode().xby4()}>>> Connected.");
 
             _domainBuses[scope] = client;
         }

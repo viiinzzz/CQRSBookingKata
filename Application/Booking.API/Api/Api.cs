@@ -105,11 +105,14 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
     var services = builder.Services;
 
     //infra
+    services.AddExceptionHandler<GlobalExceptionHandler>();
     services.AddRazorPages();
     services.AddSingleton<IScopeProvider, ScopeProvider>();
-    var serverContext = new ServerContextService();
-    services.AddSingleton<IServerContextService>(sp => serverContext);
-    Console.WriteLine($"{nameof(ServerContext)}: Id={serverContext.Id}");
+
+    services.AddEndpointsApiExplorer();
+    services.AddSwaggerGen();
+
+    services.AddSingleton<IServerContextService, ServerContextService>();
     services.AddSingleton<ITimeService, TimeService>();
     services.AddSingleton<IRandomService, RandomService>();
     services.AddAntiforgery();
@@ -118,15 +121,7 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
     // https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/security?view=aspnetcore-8.0
 
     //bus
-    services.AddSingleton<PlanningBus>();
-    services.AddSingleton<ConsoleAuditBus>();
-    services.AddSingleton(_ => new MessageQueueServerConfig
-    {
-        DomainBusType = TypeHelper.Types<PlanningBus, ConsoleAuditBus>()
-    });
-    services.AddSingleton<MessageQueueServer>();
-    services.AddSingleton<IMessageBus>(sp => sp.GetRequiredService<MessageQueueServer>());
-    services.AddHostedService(sp => sp.GetRequiredService<MessageQueueServer>());
+    services.AddMessageQueue(Types.From<AdminBus, SalesBus, PlanningBus, BillingBus, ThirdPartyBus, ConsoleAuditBus>());
 
     //repo
     services.AddScoped<IAdminRepository, AdminRepository>();
@@ -185,7 +180,7 @@ if (isDevelopment)
 {
     api.UseSwagger();
     api.UseSwaggerUI();
-    api.UseExceptionHandler();
+    // api.UseExceptionHandler();
 }
 
 EnsureAllDatabasesCreated(api);

@@ -8,6 +8,8 @@ public record Notificationx
 
     object? Message = default,
 
+    int Status = default,
+
     TimeSpan? EarliestDelivery = default,
     TimeSpan? LatestDelivery = default,
     TimeSpan? RepeatDelay = default,

@@ -19,7 +19,7 @@ public class ConsoleAuditBus
                 DateTime.UtcNow.ToString("O"),
                 new CorrelationId(notification.CorrelationId1, notification.CorrelationId2).Guid,
 
-                sender == null ? null : $"{sender.GetType().Name}:{server.Id:x16}",
+                sender == null ? null : $"{sender.GetType().Name}:{server.Id.xby4()}",
                 notification.Recipient,
                 notification.Verb ,
 

@@ -25,7 +25,7 @@ public partial class SalesBus
         //
         //
 
-        Notify(new Notification(Omni, Verb.Sales.StayFound)
+        Notify(new ResponseNotification(Omni, Verb.Sales.StayFound)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = page

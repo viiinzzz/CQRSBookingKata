@@ -1,9 +1,11 @@
-﻿namespace VinZ.MessageQueue;
+﻿using System.Net;
 
-public record ResponseNotification
+namespace VinZ.MessageQueue;
+
+public record NegativeResponseNotification
 (
     string? Recipient,
-    string? Verb = Respond,
+    string? Verb = ErrorProcessingRequest,
 
     object? Message = default,
 
@@ -23,7 +25,7 @@ public record ResponseNotification
     (
         NotificationType.Response,
 
-        Recipient, Verb, Message,
+        Recipient, Verb, Message, (int)HttpStatusCode.InternalServerError,
         EarliestDelivery, LatestDelivery, RepeatDelay,
         CorrelationGuid, RepeatCount, Aggregate, Immediate,
         CorrelationId1, CorrelationId2

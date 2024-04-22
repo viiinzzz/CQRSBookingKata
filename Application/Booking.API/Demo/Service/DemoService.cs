@@ -58,7 +58,7 @@ Demo Seed aborted!
 ERROR: {ex}";
 
             // Console.Error.WriteLine(message);
-            bus.Notify(originator, new Notification(Recipient.Audit, ErrorProcessingRequest)
+            bus.Notify(originator, new AdvertisementNotification(Recipient.Audit)
             {
                 Message = message,
                 Immediate = true
@@ -104,7 +104,7 @@ Demo Forward aborted!
 ERROR: {ex}";
 
             // Console.Error.WriteLine(message);
-            bus.Notify(originator, new Notification(Recipient.Audit, ErrorProcessingRequest)
+            bus.Notify(originator, new AdvertisementNotification(Recipient.Audit)
             {
                 Message = message,
                 Immediate = true

@@ -17,7 +17,7 @@ public partial class SalesBus
         //
         //
 
-        Notify(new Notification(notification.Originator, Verb.Sales.RespondKpi)
+        Notify(new ResponseNotification(notification.Originator, Verb.Sales.RespondKpi)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = indicators

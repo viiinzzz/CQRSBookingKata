@@ -38,7 +38,7 @@ public partial class SalesBus
             }
         }
 
-        Notify(new Notification(notification.Originator, Respond)
+        Notify(new ResponseNotification(notification.Originator)
         {
             CorrelationGuid = notification.CorrelationGuid(),
             Message = page

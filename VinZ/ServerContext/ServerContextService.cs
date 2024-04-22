@@ -1,10 +1,19 @@
-﻿namespace VinZ.Common;
+﻿using Microsoft.Extensions.Logging;
 
-public class ServerContextService : IServerContextService
+namespace VinZ.Common;
+
+public class ServerContextService
+    : IServerContextService
 {
-    public ServerContextService()
+    private readonly ILogger<IServerContextService> _logger;
+
+    public ServerContextService(ILogger<IServerContextService> logger)
     {
+        _logger = logger;
         Id = UuidHelper.GetUuidInt64();
+
+        logger.LogInformation($"<<<{Id.xby4()}>>>");
+
     }
 
     public long Id { get; }

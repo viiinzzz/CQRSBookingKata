@@ -13,7 +13,7 @@ public partial class DemoService
 
             foreach (var hotelId in demo.FakeHotelsIds)
             {
-                bus.Notify(originator, new Notification(Recipient.Audit, InformationMessage)
+                bus.Notify(originator, new AdvertisementNotification(Recipient.Audit)
                 {
                     Message = $"Demo: Seeding Vacancies for hotel#{hotelId}...",
                     Immediate = true
