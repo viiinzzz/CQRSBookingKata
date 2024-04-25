@@ -2,7 +2,7 @@
 
 public partial class BillingCommandService
 {
-    public int EmitQuotation
+    public Id EmitQuotation
     (
         double price,
         string currency,
@@ -33,18 +33,18 @@ public partial class BillingCommandService
 
         if (previousQuotation == null)
         {
-            return money.AddQuotation(quotation);
+            return new Id(money.AddQuotation(quotation));
         }
 
         var quotationId = previousQuotation.QuotationId;
 
         if (previousQuotation with { VersionNumber = 0 } == quotation with { VersionNumber = 0 })
         {
-            return quotationId;
+            return new Id(quotationId);
         }
 
         money.UpdateQuotation(quotationId, quotation);
 
-        return quotationId;
+        return new Id(quotationId);
     }
 }

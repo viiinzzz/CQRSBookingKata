@@ -40,11 +40,12 @@ public partial class ThirdPartyBus(IScopeProvider sp) : MessageBusClientBase
             {
                 Notify(new ResponseNotification(notification.Originator, ErrorProcessingRequest)
                 {
-                    CorrelationGuid = notification.CorrelationGuid(),
-                    Message = new
+                    CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2,
+                    MessageObj = new
                     {
-                        message = notification.Message,
-                        messageType = notification.MessageType,
+                        Message = notification.Message,
+                        MessageType = notification.MessageType,
+
                         error = ex.Message,
                         stackTrace = ex.StackTrace
                     }

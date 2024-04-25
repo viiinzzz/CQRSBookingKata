@@ -2,7 +2,7 @@
 
 public partial class AdminBus
 {
-    private void Verb_Is_RequestHotelRoomDetails(IClientNotification notification)
+    private void Verb_Is_RequestHotelRoomDetails(IClientNotificationSerialized notification)
     {
         using var scope = sp.GetScope<AdminQueryService>(out var adminQueryService);
 
@@ -21,14 +21,13 @@ public partial class AdminBus
         //
         //
 
-        Notify(new ResponseNotification(Omni, RespondHotelRoomDetails)
+        Notify(new ResponseNotification(Omni, RespondHotelRoomDetails, roomDetails)
         {
-            CorrelationGuid = notification.CorrelationGuid(),
-            Message = roomDetails
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });
     }
     
-    private void Verb_Is_RequestSingleRoomDetails(IClientNotification notification)
+    private void Verb_Is_RequestSingleRoomDetails(IClientNotificationSerialized notification)
     {
         using var scope = sp.GetScope<AdminQueryService>(out var adminQueryService);
 
@@ -41,15 +40,14 @@ public partial class AdminBus
         //
         //
 
-        Notify(new ResponseNotification(Omni, RespondSingleRoomDetails)
+        Notify(new ResponseNotification(Omni, RespondSingleRoomDetails, roomDetails)
         {
-            CorrelationGuid = notification.CorrelationGuid(),
-            Message = roomDetails
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });
     } 
     
     
-    private void Verb_Is_RequestManyRoomDetails(IClientNotification notification)
+    private void Verb_Is_RequestManyRoomDetails(IClientNotificationSerialized notification)
     {
         using var scope = sp.GetScope<AdminQueryService>(out var adminQueryService);
 
@@ -77,10 +75,9 @@ public partial class AdminBus
         //
         //
 
-        Notify(new ResponseNotification(Omni, RespondSingleRoomDetails)
+        Notify(new ResponseNotification(Omni, RespondSingleRoomDetails, roomDetails)
         {
-            CorrelationGuid = notification.CorrelationGuid(),
-            Message = roomDetails
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });
     }
 }

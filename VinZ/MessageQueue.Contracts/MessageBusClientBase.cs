@@ -56,27 +56,26 @@ public class MessageBusClientBase : IMessageBusClient
     }
 
 
-    public void Notify(INotification message)
+    public void Notify(IClientNotificationSerialized notification)
     {
         CheckBus();
 
-        var originator = this.GetType().Name;
-
-        _bus!.Notify(originator, message);
+        _bus!.Notify(notification);
     }
 
-    public event EventHandler<IClientNotification>? Notified;
+    public event EventHandler<IClientNotificationSerialized>? Notified;
 
-    public virtual void OnNotified(IClientNotification notification)
+    public virtual void OnNotified(IClientNotificationSerialized notification)
     {
         Notified?.Invoke(this, notification);
     }
 
-    public T? AskResult<T>(string originator, string recipient, string verb, object? message)
+    public TReturn? AskResult<TReturn>(string originator, string recipient, string verb, object? message)
+    where TReturn : class
     {
         CheckBus();
 
-        var ret = _bus!.AskResult<T>(originator, recipient, verb, message);
+        var ret = _bus!.AskResult<TReturn>(recipient, verb, message, originator);
 
         return ret;
     }

@@ -17,11 +17,11 @@ public class MessageQueueContext : DbContext
     {
         builder
             .Entity<ServerNotification>()
-            .HasKey(message => message.MessageId);
+            .HasKey(message => message.NotificationId);
 
         builder
             .Entity<ServerNotification>()
-            .Property(message => message.MessageId)
+            .Property(message => message.NotificationId)
             .ValueGeneratedOnAdd();
     }
 }

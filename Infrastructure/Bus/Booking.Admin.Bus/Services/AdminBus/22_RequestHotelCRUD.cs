@@ -2,52 +2,49 @@
 
 public partial class AdminBus
 {
-    private void Verb_Is_RequestDisableHotel(IClientNotification notification)
+    private void Verb_Is_RequestDisableHotel(IClientNotificationSerialized notification)
     {
         var request = notification.MessageAs<IdDisable>();
 
         using var scope = sp.GetScope<IAdminRepository>(out var repo);
 
-        repo.DisableHotel(request.id, request.disable);
+        var hotel = repo.DisableHotel(request.id, request.disable);
 
-        Notify(new ResponseNotification(notification.Originator, HotelDisabled)
+        Notify(new ResponseNotification(notification.Originator, HotelDisabled, hotel)
         {
-            CorrelationGuid = notification.CorrelationGuid(),
-            Message = request
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });
     }
 
-    private void Verb_Is_RequestModifyHotel(IClientNotification notification)
+    private void Verb_Is_RequestModifyHotel(IClientNotificationSerialized notification)
     {
         var request = notification.MessageAs<IdData<UpdateHotel>>();
 
         using var scope = sp.GetScope<IAdminRepository>(out var repo);
 
-        var ret = repo.Update(request.id, request.data);
+        var hotel = repo.Update(request.id, request.data);
 
-        Notify(new ResponseNotification(notification.Originator, HotelModified)
+        Notify(new ResponseNotification(notification.Originator, HotelModified, hotel)
         {
-            CorrelationGuid = notification.CorrelationGuid(),
-            Message = ret
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });
     }
 
-    private void Verb_Is_RequestFetchHotel(IClientNotification notification)
+    private void Verb_Is_RequestFetchHotel(IClientNotificationSerialized notification)
     {
         var request = notification.MessageAs<Id>();
 
         using var scope = sp.GetScope<IAdminRepository>(out var repo);
 
-        var ret = repo.GetHotel(request.id);
+        var hotel = repo.GetHotel(request.id);
 
-        Notify(new ResponseNotification(notification.Originator, HotelFetched)
+        Notify(new ResponseNotification(notification.Originator, HotelFetched, hotel)
         {
-            CorrelationGuid = notification.CorrelationGuid(),
-            Message = ret
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });
     }
     
-    private void Verb_Is_RequestFetchHotelGeoProxy(IClientNotification notification)
+    private void Verb_Is_RequestFetchHotelGeoProxy(IClientNotificationSerialized notification)
     {
         var request = notification.MessageAs<Id>();
 
@@ -57,25 +54,25 @@ public partial class AdminBus
 
         var geoProxy = ret?.GetGeoProxy();
         
-        Notify(new ResponseNotification(notification.Originator, HotelGeoProxyFetched)
+        Notify(new ResponseNotification(notification.Originator, HotelGeoProxyFetched, geoProxy)
         {
-            CorrelationGuid = notification.CorrelationGuid(),
-            Message = geoProxy
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });
     }
 
-    private void Verb_Is_RequestCreateHotel(IClientNotification notification)
+    private void Verb_Is_RequestCreateHotel(IClientNotificationSerialized notification)
     {
         var request = notification.MessageAs<NewHotel>();
 
         using var scope = sp.GetScope<IAdminRepository>(out var repo);
 
-        var ret = repo.Create(request);
+        var hotelId = repo.Create(request);
 
-        Notify(new ResponseNotification(notification.Originator, HotelCreated)
+        var id = new Id(hotelId);
+
+        Notify(new ResponseNotification(notification.Originator, HotelCreated, id)
         {
-            CorrelationGuid = notification.CorrelationGuid(),
-            Message = ret
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });
     }
 }

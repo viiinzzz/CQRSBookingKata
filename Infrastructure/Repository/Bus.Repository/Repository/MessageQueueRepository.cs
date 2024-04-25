@@ -50,7 +50,7 @@ public class MessageQueueRepository
         foreach (var notification in notifications)
         {
             var notification2 = _queue.Notifications
-                .Find(notification.MessageId);
+                .Find(notification.NotificationId);
 
             if (notification2 == default)
             {

@@ -9,11 +9,17 @@ public partial class DemoService
             throw new Exception("FakeCustomer not ready yet.");
         }
 
-        bus.Notify(originator, new AdvertisementNotification(Recipient.Audit)
         {
-            Message = $"Demo: Seeding Bookings {demo.SimulationDay}...",
-            Immediate = true
-        });
+            var message = "Demo: Seeding Bookings {0}...";
+
+            var args = new object[] { demo.SimulationDay };
+
+            bus.Notify(new AdvertisementNotification(message, args)
+            {
+                Originator = originator,
+                Immediate = true
+            });
+        }
 
         var todayBookingCount = (int)(CustomerCount * 0.05).Rand();
 
@@ -46,9 +52,11 @@ public partial class DemoService
 
                 if (preferredStayMatches.Count() == 0)
                 {
-                    bus.Notify(originator, new NegativeResponseNotification(Recipient.Audit)
+                    var message = "Demo: Booking skipped because no stay were found matching the customer's request!";
+
+                    bus.Notify(new NegativeResponseNotification(Omni, InformationMessage, message)
                     {
-                        Message = "Demo: Booking skipped because no stay were found matching the customer's request!",
+                        Originator = originator,
                         Immediate = true
                     });
 

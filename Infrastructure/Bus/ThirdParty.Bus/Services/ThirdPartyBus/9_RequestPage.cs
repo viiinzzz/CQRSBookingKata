@@ -2,10 +2,9 @@
 
 public partial class ThirdPartyBus
 {
-    private void Verb_Is_RequestPage(IClientNotification notification)
+    private void Verb_Is_RequestPage(IClientNotificationSerialized notification)
     {
         using var scope2 = sp.GetScope<IGazetteerService>(out var geo);
-
         var request = notification.MessageAs<PageRequest>();
 
         object? page;
@@ -27,10 +26,10 @@ public partial class ThirdPartyBus
             }
         }
 
-        Notify(new ResponseNotification(notification.Originator)
+        Notify(new ResponseNotification(page)
         {
-            CorrelationGuid = notification.CorrelationGuid(),
-            Message = page
+            Originator = notification.Originator,
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });
     }
 }

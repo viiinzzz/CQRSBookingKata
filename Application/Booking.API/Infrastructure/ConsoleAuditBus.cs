@@ -11,7 +11,7 @@ public class ConsoleAuditBus
 {
     public override void Configure()
     {
-        Subscribe(Omni);
+        Subscribe(Omni, InformationMessage);
 
         Notified += (sender, notification) =>
         {

@@ -2,13 +2,15 @@
 
 public partial class BillingBus
 {
-    private void Verb_Is_RequestReceipt(IClientNotification notification)
+    private void Verb_Is_RequestReceipt(IClientNotificationSerialized notification)
     {
         var request = notification.MessageAs<ReceiptRequest>();
 
         var bookingId = request.referenceId;
 
         using var scope = sp.GetScope<IMoneyRepository> (out var money);
+
+        var referenceId = new { bookingId };
 
         try
         {
@@ -22,19 +24,18 @@ public partial class BillingBus
                 select receipt.ReceiptId
             ).FirstOrDefault();
 
+            var id = new Id(receiptId);
 
-            Notify(new ResponseNotification(Omni, ReceiptFound)
+            Notify(new ResponseNotification(Omni, ReceiptFound, id)
             {
-                CorrelationGuid = notification.CorrelationGuid(),
-                Message = new { id = receiptId }
+                CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
             });
         }
         catch (Exception e)
         {
-            Notify(new ResponseNotification(Omni, ReceiptNotFound)
+            Notify(new ResponseNotification(Omni, ReceiptNotFound, referenceId)
             {
-                CorrelationGuid = notification.CorrelationGuid(),
-                Message = new { bookingId }
+                CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
             });
         }
     }

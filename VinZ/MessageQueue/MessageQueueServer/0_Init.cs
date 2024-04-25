@@ -15,9 +15,9 @@ public partial class MqServer
 
             var originator = GetType().Name;
 
-            Notify(originator, new ResponseNotification(default, time.verb)
+            Notify(new ResponseNotification(default, time.verb, message)
             {
-                Message = message,
+                Originator = originator,
                 Immediate = true
             });
         };

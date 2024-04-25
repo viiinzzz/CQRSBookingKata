@@ -30,12 +30,11 @@ public partial class SalesQueryService
         var originator = GetType().FullName
                          ?? throw new Exception("invalid originator");
 
-        var roomDetail = bus.AskResult<RoomDetails>(
-            originator, Recipient.Admin, Verb.Admin.RequestSingleRoomDetails,
+        var roomDetail = bus.AskResult<RoomDetails>(Recipient.Admin, Verb.Admin.RequestSingleRoomDetails,
             new RoomDetailsRequest
             {
                 onlyRoomNumbers = [request.Urid]
-            });
+            }, originator);
 
         //adjust arrival/departure to hotel time
         var requestCheckInHours = request.ArrivalDate.Hour + request.ArrivalDate.Minute / 60d;
@@ -73,8 +72,7 @@ public partial class SalesQueryService
         var customerProfile = GetCustomerProfile(customerId);
 
 
-        var price = bus.AskResult<Price>(
-            originator, Support.Services.ThirdParty.Recipient, Support.Services.ThirdParty.Verb.RequestPricing,
+        var price = bus.AskResult<Price>(Support.Services.ThirdParty.Recipient, Support.Services.ThirdParty.Verb.RequestPricing,
             new PricingRequest
             {
                 //room
@@ -91,7 +89,7 @@ public partial class SalesQueryService
                 departureDateUtc = request.DepartureDate.SerializeUniversal(),
                 currency = request.Currency,
                 customerProfileJson = JsonSerializer.Serialize(customerProfile)
-            });
+            }, originator);
 
 
         var optionStart = now;

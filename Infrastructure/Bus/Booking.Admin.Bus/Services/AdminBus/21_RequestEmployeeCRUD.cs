@@ -2,63 +2,61 @@
 
 public partial class AdminBus
 {
-    private void Verb_Is_RequestDisableEmployee(IClientNotification notification)
+    private void Verb_Is_RequestDisableEmployee(IClientNotificationSerialized notification)
     {
         var request = notification.MessageAs<IdDisable>();
 
         using var scope = sp.GetScope<IAdminRepository>(out var repo);
 
-        repo.DisableEmployee(request.id, request.disable);
+        var employee = repo.DisableEmployee(request.id, request.disable);
 
-        Notify(new ResponseNotification(notification.Originator, EmployeeDisabled)
+        Notify(new ResponseNotification(notification.Originator, EmployeeDisabled, employee)
         {
-            CorrelationGuid = notification.CorrelationGuid(),
-            Message = request
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });
     }
 
-    private void Verb_Is_RequestModifyEmployee(IClientNotification notification)
+    private void Verb_Is_RequestModifyEmployee(IClientNotificationSerialized notification)
     {
         var request = notification.MessageAs<IdData<UpdateEmployee>>();
 
         using var scope = sp.GetScope<IAdminRepository>(out var repo);
 
-        var ret = repo.Update(request.id, request.data);
+        var employee = repo.Update(request.id, request.data);
 
-        Notify(new ResponseNotification(notification.Originator, EmployeeModified)
+        Notify(new ResponseNotification(notification.Originator, EmployeeModified, employee)
         {
-            CorrelationGuid = notification.CorrelationGuid(),
-            Message = ret
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });
     }
 
-    private void Verb_Is_RequestFetchEmployee(IClientNotification notification)
+    private void Verb_Is_RequestFetchEmployee(IClientNotificationSerialized notification)
     {
         var request = notification.MessageAs<Id>();
 
         using var scope = sp.GetScope<IAdminRepository>(out var repo);
 
-        var ret = repo.GetEmployee(request.id);
+        var employee = repo.GetEmployee(request.id);
 
-        Notify(new ResponseNotification(notification.Originator, EmployeeFetched)
+        Notify(new ResponseNotification(notification.Originator, EmployeeFetched, employee)
         {
-            CorrelationGuid = notification.CorrelationGuid(),
-            Message = ret
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });
     }
 
-    private void Verb_Is_RequestCreateEmployee(IClientNotification notification)
+    private void Verb_Is_RequestCreateEmployee(IClientNotificationSerialized notification)
     {
         var request = notification.MessageAs<NewEmployee>();
 
         using var scope = sp.GetScope<IAdminRepository>(out var repo);
 
-        var ret = repo.Create(request);
+        var employeeId = repo.Create(request);
 
-        Notify(new ResponseNotification(notification.Originator, EmployeeCreated)
+        var id = new Id(employeeId);
+
+        Notify(new ResponseNotification(notification.Originator, EmployeeCreated, id)
         {
-            CorrelationGuid = notification.CorrelationGuid(),
-            Message = ret
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });
     }
 }

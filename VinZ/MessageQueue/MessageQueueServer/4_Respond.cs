@@ -1,8 +1,10 @@
-﻿namespace VinZ.MessageQueue;
+﻿using System.Net;
+
+namespace VinZ.MessageQueue;
 
 public partial class MqServer
 {
-    private (DeliveryCount, List<(ServerNotification[], ServerNotificationUpdate)>) Broadcast(ServerNotification notification, bool immediate,
+    private (DeliveryCount, List<(ServerNotification[], ServerNotificationUpdate)>) Respond(ServerNotification serverNotification, bool immediate,
         CancellationToken cancel)
     {
         var updates = new List<(ServerNotification[], ServerNotificationUpdate)>();
@@ -30,9 +32,9 @@ public partial class MqServer
                 unmatchedHash.Add($"0+");
             }
         }
-        /*else*/ if (notification.Recipient != default)// && notification.Verb == default)
+        /*else*/ if (serverNotification.Recipient != default)// && notification.Verb == default)
         {
-            var hash_R = notification.Recipient.GetHashCode();
+            var hash_R = serverNotification.Recipient.GetHashCode();
 
             if (_subscribers_R.TryGetValue(hash_R, out var moreSubscribers))
             {
@@ -48,9 +50,9 @@ public partial class MqServer
                 unmatchedHash.Add($"R+{hash_R.xby4()}");
             }
         }
-        /*else*/ if (/*notification.Recipient == default && */notification.Verb != default)
+        /*else*/ if (/*notification.Recipient == default && */serverNotification.Verb != default)
         {
-            var hash_V = notification.Verb.GetHashCode();
+            var hash_V = serverNotification.Verb.GetHashCode();
 
             if (_subscribers_V.TryGetValue(hash_V, out var moreSubscribers))
             {
@@ -66,9 +68,9 @@ public partial class MqServer
                 unmatchedHash.Add($"V+{hash_V.xby4()}");
             }
         }
-        /*else*/ if (notification.Recipient != default && notification.Verb != default)
+        /*else*/ if (serverNotification.Recipient != default && serverNotification.Verb != default)
         {
-            var hash_RV = (notification.Recipient, notification.Verb).GetHashCode();
+            var hash_RV = (serverNotification.Recipient, serverNotification.Verb).GetHashCode();
 
             if (_subscribers_RV.TryGetValue(hash_RV,
                     out var moreSubscribers))
@@ -86,26 +88,28 @@ public partial class MqServer
             }
         }
 
-        var correlationId = new CorrelationId(notification.CorrelationId1, notification.CorrelationId2);
+        var correlationId = new CorrelationId(serverNotification.CorrelationId1, serverNotification.CorrelationId2);
+        var notificationLabel = $"Notification{correlationId}{(immediate ? "" : $" (Id:{serverNotification.NotificationId})")}";
+        var dequeuing = immediate ? "            >>>Relaying>>>          Immediate" : ">>>Dequeuing>>>                     scheduled";
+        var subscribersCount = $"{subscribers.Count} subscriber{(subscribers.Count > 1 ? "s" : "")}";
+        var rvm = @$"
+  {{recipient: ""{serverNotification.Recipient}"", verb: ""{serverNotification.Verb}"", message: {serverNotification.Message}}}";
+        var logLevel = serverNotification.IsErrorStatus() ? LogLevel.Error : LogLevel.Information;
 
-        var dequeuing = immediate ? "            >>>Relaying>>>          immediate" : ">>>Dequeuing>>>                     scheduled";
-
-        log.LogInformation(@$"{dequeuing} message{correlationId} to {subscribers.Count} subscriber{(subscribers.Count > 1 ? "s" : "")}...
-  {{recipient:{notification.Recipient}, verb:{notification.Verb
-        }, message:{notification.Message.Replace("\"", "")}}}");
+        log.Log(logLevel, @$"{dequeuing} {notificationLabel} to {subscribersCount} ...{rvm}");
 
         var updateMessage = () =>
         {
-            if (notification is { RepeatDelay: { Ticks: > 0 }, RepeatCount: > 1 })
+            if (serverNotification is { RepeatDelay: { Ticks: > 0 }, RepeatCount: > 1 })
             {
-                updates.Add((new[] { notification }, new ServerNotificationUpdate
+                updates.Add((new[] { serverNotification }, new ServerNotificationUpdate
                 {
-                    RepeatCount = notification.RepeatCount - 1
+                    RepeatCount = serverNotification.RepeatCount - 1
                 }));
             }
             else
             {
-                updates.Add((new[] { notification }, new ServerNotificationUpdate
+                updates.Add((new[] { serverNotification }, new ServerNotificationUpdate
                 {
                     Done = true,
                     DoneTime = DateTime.UtcNow
@@ -116,7 +120,7 @@ public partial class MqServer
 
         //
         //
-        var awaitedBus = GetAwaitedBus(notification);
+        var awaitedBus = GetAwaitedBus(serverNotification);
 
         if (awaitedBus != null)
         {
@@ -132,23 +136,41 @@ public partial class MqServer
         {
             if (!immediate) updateMessage();
 
-            log.LogWarning(@$"            >>>Undeliverable!       message{correlationId} ...
-  {{recipient:{notification.Recipient}, verb:{notification.Verb}, message:{notification.Message.Replace("\"", "")}}}
+            log.LogError(@$"            >>>Undeliverable!       {notificationLabel} ...{rvm}
   (matched {string.Join(" ", matchedHash)} unmatched {string.Join(" ", unmatchedHash)})");
+
+            if (serverNotification.IsErrorStatus())
+            {
+                //if a liable message (not an error report),
+                //inform originator message got lost 424 (unavailable fringe bus?)
+
+                var nack = new NegativeResponseNotification(serverNotification.Originator)
+                {
+                    MessageObj = new
+                    {
+                        reason = "Undeliverable"
+                    },
+
+                    Status = (int)HttpStatusCode.FailedDependency,
+
+                    CorrelationId1 = serverNotification.CorrelationId1,
+                    CorrelationId2 = serverNotification.CorrelationId2,
+                };
+
+            }
 
             return (count, updates);
         }
 
-        var clientMessage = new ClientNotification
+        var clientNotification = new ClientNotification
+        (
+            serverNotification.Type, 
+            serverNotification.Recipient, serverNotification.Verb, 
+            serverNotification.MessageAsObject())
         {
-            Type = notification.Type,
-            Message = notification.Message,
-            MessageType = notification.MessageType,
-            Recipient = notification.Recipient,
-            Verb = notification.Verb,
-            Originator = notification.Originator,
-            CorrelationId1 = notification.CorrelationId1,
-            CorrelationId2 = notification.CorrelationId2,
+            // Originator = serverNotification.Originator,
+            CorrelationId1 = serverNotification.CorrelationId1,
+            CorrelationId2 = serverNotification.CorrelationId2,
         };
 
         var delivering = "            >>>Delivering>>>        scheduled";
@@ -162,17 +184,17 @@ public partial class MqServer
             {
                 try
                 {
-                    client.OnNotified(clientMessage);
+                    client.OnNotified(clientNotification);
 
                     log.LogInformation(
-                        $"{delivering} messageId:{notification.MessageId} to subscriber# {client.GetHashCode().xby4()}...");
+                        $"{delivering} {notificationLabel} to subscriber# {client.GetHashCode().xby4()}...");
 
                     return new DeliveryCount(1, 0);
                 }
                 catch (Exception ex)
                 {
                     log.LogError(
-                        @$"{delivering} messageId:{notification.MessageId} to subscriber# {client.GetHashCode().xby4()}...
+                        @$"{delivering} {notificationLabel} to subscriber# {client.GetHashCode().xby4()}...
 failure: {ex.Message}
 {ex.StackTrace}
 ");
@@ -187,8 +209,7 @@ failure: {ex.Message}
         var delivered = "                         >>>Done>>> scheduled";
 
         log.LogInformation(
-            @$"{delivered} message{(immediate ? "" : "Id:" + notification.MessageId)} to {subscribers.Count} subscriber{(subscribers.Count > 1 ? "s" : "")}...
-  {{recipient:{notification.Recipient}, verb:{notification.Verb}, message:{notification.Message.Replace("\"", "")}}}");
+            @$"{delivered} {notificationLabel} to {subscribersCount}...{rvm}");
 
         return (count, updates);
     }

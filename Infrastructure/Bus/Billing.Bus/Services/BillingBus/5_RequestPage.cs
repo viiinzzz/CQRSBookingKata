@@ -2,7 +2,7 @@
 
 public partial class BillingBus
 {
-    private void Verb_Is_RequestPage(IClientNotification notification)
+    private void Verb_Is_RequestPage(IClientNotificationSerialized notification)
     {
         var request = notification.MessageAs<PageRequest>();
 
@@ -36,10 +36,10 @@ public partial class BillingBus
             }
         }
 
-        Notify(new ResponseNotification(notification.Originator)
+        Notify(new ResponseNotification(page)
         {
-            CorrelationGuid = notification.CorrelationGuid(),
-            Message = page
+            Originator = notification.Originator,
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });
     }
 }

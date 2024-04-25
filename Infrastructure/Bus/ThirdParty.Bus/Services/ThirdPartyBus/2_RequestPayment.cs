@@ -1,10 +1,8 @@
-﻿using Support.Infrastructure.Network;
-
-namespace Support.Infrastructure.Bus.ThirdParty;
+﻿namespace Support.Infrastructure.Bus.ThirdParty;
 
 public partial class ThirdPartyBus
 {
-    private void Verb_Is_RequestPayment(IClientNotification notification)
+    private void Verb_Is_RequestPayment(IClientNotificationSerialized notification)
     {
         var request = notification.MessageAs<PaymentRequest>();
 
@@ -32,29 +30,11 @@ public partial class ThirdPartyBus
         //
         //
 
-        switch (response.Accepted)
+        var responseVerb = response.Accepted ? PaymentAccepted : PaymentRefused;
+
+        Notify(new ResponseNotification(Omni, responseVerb, response)
         {
-            case true:
-            {
-                Notify(new ResponseNotification(Omni, PaymentAccepted)
-                {
-                    CorrelationGuid = notification.CorrelationGuid(),
-                    Message = response
-                });
-
-                break;
-            }
-
-            case false:
-            {
-                Notify(new ResponseNotification(Omni, PaymentRefused)
-                {
-                    CorrelationGuid = notification.CorrelationGuid(),
-                    Message = response
-                });
-
-                break;
-            }
-        }
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2,
+        });
     }
 }

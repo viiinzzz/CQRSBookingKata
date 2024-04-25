@@ -2,6 +2,8 @@ namespace BookingKata.API;
 
 public static partial class ApiMethods
 {
+    private const string DemoTag = "Demo";
+
     private static void MapRoutes_0_Demo(WebApplication app)
     {
         var demo = app.MapGroup("/demo");
@@ -22,6 +24,6 @@ public static partial class ApiMethods
 
                 return await forward.WithStackTrace();
             }
-        ).WithOpenApi();
+        ).WithOpenApi().WithTags(new[] { DemoTag });
     }
 }

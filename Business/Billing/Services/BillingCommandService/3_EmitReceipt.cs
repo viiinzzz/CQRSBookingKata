@@ -3,7 +3,7 @@ namespace BookingKata.Billing;
 
 public partial class BillingCommandService
 {
-    public int EmitReceipt
+    public Id EmitReceipt
     (
         double amount,
         string currency,
@@ -37,8 +37,7 @@ public partial class BillingCommandService
 
         //
         //
-        var paid = bus.AskResult<PaymentResponse>(
-            originator, Support.Services.ThirdParty.Recipient, Support.Services.ThirdParty.Verb.RequestPayment,
+        var paid = bus.AskResult<PaymentResponse>(Support.Services.ThirdParty.Recipient, Support.Services.ThirdParty.Verb.RequestPayment,
             new PaymentOrder
             {
                 amount = invoice.Amount,
@@ -52,7 +51,7 @@ public partial class BillingCommandService
                 vendorId = vendor.vendorId,
                 terminalId = vendor.terminalId,
                 transactionId = invoiceId
-            });
+            }, originator);
         //
         //
 
@@ -74,6 +73,6 @@ public partial class BillingCommandService
         
         var receiptId = money.AddReceipt(receipt);
 
-        return receiptId;
+        return new Id(receiptId);
     }
 }

@@ -98,7 +98,7 @@ Message purge failure: {ex.Message}
                 .AsParallel()
                 .WithCancellation(cancel)
 
-                .Select(notification => Broadcast(notification, immediate: false, cancel))
+                .Select(notification => Respond(notification, immediate: false, cancel))
 
                 .Aggregate((a, b) =>
                 {

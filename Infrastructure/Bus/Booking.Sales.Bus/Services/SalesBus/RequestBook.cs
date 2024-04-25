@@ -2,7 +2,7 @@
 
 public partial class SalesBus
 {
-    private void Verb_Is_RequestBook(IClientNotification notification)
+    private void Verb_Is_RequestBook(IClientNotificationSerialized notification)
     {
         var request = notification.MessageAs<BookRequest>();
 
@@ -14,7 +14,7 @@ public partial class SalesBus
 
         //
         //
-        var id = booking.Book
+        var bookingId = booking.Book
         (
             request.lastName,
             request.firstName,
@@ -31,13 +31,11 @@ public partial class SalesBus
         //
         //
 
-        Notify(new ResponseNotification(Omni, Verb.Sales.BookConfirmed)
+        var id = new Id(bookingId);
+
+        Notify(new ResponseNotification(Omni, Verb.Sales.BookConfirmed, id)
         {
-            CorrelationGuid = notification.CorrelationGuid(),
-            Message = new
-            {
-                id
-            }
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });
     }
 }

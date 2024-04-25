@@ -18,7 +18,7 @@ public partial class DemoService
 {
     private const int StaffPerHotel = 3;
     private const int ManagerPerHotel = 1;
-    private const int HotelCount = 1;//3
+    private const int HotelCount = 3;
     private const int FloorPerHotel = 2;
     private const int RoomPerFloor = 3;
     private const int PersonPerRoom = 2;
@@ -57,10 +57,9 @@ Demo Seed aborted!
 
 ERROR: {ex}";
 
-            // Console.Error.WriteLine(message);
-            bus.Notify(originator, new AdvertisementNotification(Recipient.Audit)
+            bus.Notify(new AdvertisementNotification(message, [])
             {
-                Message = message,
+                Originator = originator,
                 Immediate = true
             });
         }
@@ -98,15 +97,16 @@ ERROR: {ex}";
         }
         catch (Exception ex)
         {
-            var message = @$"
+            var message = @"
 Demo Forward aborted!
 
 ERROR: {ex}";
 
-            // Console.Error.WriteLine(message);
-            bus.Notify(originator, new AdvertisementNotification(Recipient.Audit)
+            var args = new object[] { ex.ToString() };
+
+            bus.Notify(new AdvertisementNotification(message, args)
             {
-                Message = message,
+                Originator = originator,
                 Immediate = true
             });
         }

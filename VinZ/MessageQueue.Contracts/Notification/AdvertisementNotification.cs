@@ -1,32 +1,65 @@
-﻿using System.Net;
-
-namespace VinZ.MessageQueue;
+﻿namespace VinZ.MessageQueue;
 
 public record AdvertisementNotification
 (
     string? Recipient,
-    string? Verb = InformationMessage,
 
-    object? Message = default,
+    object? MessageObj = default,
+    
+    string? Originator = default,
 
     TimeSpan? EarliestDelivery = default,
     TimeSpan? LatestDelivery = default,
     TimeSpan? RepeatDelay = default,
 
-    string? CorrelationGuid = default,
     int? RepeatCount = default,
     bool? Aggregate = default,
     bool? Immediate = default,
 
-    long? CorrelationId1 = default,
-    long? CorrelationId2 = default
+    long CorrelationId1 = default,
+    long CorrelationId2 = default
 )
-    : Notificationx
+    : ClientNotification
     (
         NotificationType.Advertisement,
 
-        Recipient, Verb, Message, (int)HttpStatusCode.Continue,
+        Recipient,
+        InformationMessage, MessageObj, 
+        (int)HttpStatusCode.Continue, Originator,
+
         EarliestDelivery, LatestDelivery, RepeatDelay,
-        CorrelationGuid, RepeatCount, Aggregate, Immediate,
+        RepeatCount, Aggregate, Immediate,
         CorrelationId1, CorrelationId2
-    );
+    )
+{
+    public AdvertisementNotification
+    (
+        string MessageText,
+        object?[]? args = default,
+
+        string? Originator = default,
+
+        TimeSpan? EarliestDelivery = default,
+        TimeSpan? LatestDelivery = default,
+        TimeSpan? RepeatDelay = default,
+
+        int? RepeatCount = default,
+        bool? Aggregate = default,
+        bool? Immediate = default,
+
+        long CorrelationId1 = default,
+        long CorrelationId2 = default
+    )
+        : this
+        (
+            Omni,
+            MessageObj: string.Format(MessageText, args ?? []),
+
+            Originator,
+
+            EarliestDelivery, LatestDelivery, RepeatDelay,
+            RepeatCount, Aggregate, Immediate,
+            CorrelationId1, CorrelationId2
+        )
+    { }
+}

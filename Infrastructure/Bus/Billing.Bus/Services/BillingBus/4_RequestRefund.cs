@@ -2,7 +2,7 @@
 
 public partial class BillingBus
 {
-    private void Verb_Is_RequestRefund(IClientNotification notification)
+    private void Verb_Is_RequestRefund(IClientNotificationSerialized notification)
     {
         var request = notification.MessageAs<RefundRequest>();
 
@@ -10,7 +10,7 @@ public partial class BillingBus
 
         //
         //
-        var id = billing.EmitRefund
+        var refundId = billing.EmitRefund
         (
             request.receiptId,
             notification.CorrelationId1,
@@ -19,10 +19,11 @@ public partial class BillingBus
         //
         //
 
-        Notify(new ResponseNotification(Omni, RefundEmitted)
+        var id = new Id(refundId);
+
+        Notify(new ResponseNotification(Omni, RefundEmitted, refundId)
         {
-            CorrelationGuid = notification.CorrelationGuid(),
-            Message = new { id }
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });
     }
 }

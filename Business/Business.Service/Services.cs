@@ -2,7 +2,6 @@
 
 public static class Recipient
 {
-    public const string Audit = nameof(Audit);
     public const string Time = nameof(Time);
 
     public const string Admin = nameof(Admin);

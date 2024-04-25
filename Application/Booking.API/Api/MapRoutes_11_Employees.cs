@@ -4,35 +4,37 @@ namespace BookingKata.API;
 
 public static partial class ApiMethods
 {
+    private const string EmployeesTag = "Employees";
+
     private static void MapRoutes_11_Employees(RouteGroupBuilder admin)
     {
         var employees = admin.MapGroup("/employees"
-            ).WithOpenApi();
+            ).WithOpenApi().WithTags(new [] { RestrictedTag, AdminTag });
 
         employees.MapListMq<Employee>("/", "/admin/employees", filter: null,
             Recipient.Admin, RequestPage, originator, 
             responseTimeoutSeconds
-            ).WithOpenApi();
+            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, EmployeesTag });
 
         employees.MapPostMq<NewEmployee>("/",
             Recipient.Admin, RequestCreateEmployee, originator, 
             responseTimeoutSeconds
-            ).WithOpenApi();
+            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, EmployeesTag });
 
         employees.MapGetMq<Employee>("/{id}",
             Recipient.Admin, RequestFetchEmployee, originator,
             responseTimeoutSeconds
-            ).WithOpenApi();
+            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, EmployeesTag });
 
         employees.MapPatchMq<UpdateEmployee>("/{id}",
             Recipient.Admin, RequestModifyEmployee, originator, 
             responseTimeoutSeconds
-            ).WithOpenApi();
+            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, EmployeesTag });
 
         employees.MapDisableMq<Employee>("/{id}",
             Recipient.Admin, RequestDisableEmployee, originator,
             responseTimeoutSeconds
-            ).WithOpenApi();
+            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, EmployeesTag });
     }
 
 }

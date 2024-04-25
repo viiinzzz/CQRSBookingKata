@@ -2,7 +2,7 @@
 
 public class MessageBus(IMessageBus server) : IMessageBus
 {
-    public Task<object?> Wait(INotifyAck ack, CancellationToken cancellationToken)
+    public Task<IClientNotificationSerialized?> Wait(INotifyAck ack, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
@@ -17,13 +17,8 @@ public class MessageBus(IMessageBus server) : IMessageBus
         return server.Unsubscribe(client, recipient, verb);
     }
 
-    public INotifyAck Notify(string originator, INotification notification)
+    public INotifyAck Notify(IClientNotificationSerialized notification)
     {
-        return server.Notify(GetType().Name, notification);
-    }
-
-    public INotifyAck Notify(INotification notification)
-    {
-        return server.Notify(GetType().Name, notification);
+        return server.Notify(notification);
     }
 }

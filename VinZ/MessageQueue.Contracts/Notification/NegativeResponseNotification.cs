@@ -1,32 +1,65 @@
-﻿using System.Net;
-
-namespace VinZ.MessageQueue;
+﻿namespace VinZ.MessageQueue;
 
 public record NegativeResponseNotification
 (
     string? Recipient,
-    string? Verb = ErrorProcessingRequest,
 
-    object? Message = default,
+    string? Verb = ErrorProcessingRequest,
+    object? MessageObj = default,
+
+    string? Originator = default,
 
     TimeSpan? EarliestDelivery = default,
     TimeSpan? LatestDelivery = default,
     TimeSpan? RepeatDelay = default,
 
-    string? CorrelationGuid = default,
     int? RepeatCount = default,
     bool? Aggregate = default,
     bool? Immediate = default,
 
-    long? CorrelationId1 = default,
-    long? CorrelationId2 = default
+    long CorrelationId1 = default,
+    long CorrelationId2 = default
 )
-    : Notificationx
+    : ClientNotification
     (
         NotificationType.Response,
 
-        Recipient, Verb, Message, (int)HttpStatusCode.InternalServerError,
+        Recipient, 
+        Verb, MessageObj, 
+        (int)HttpStatusCode.InternalServerError, Originator,
+
         EarliestDelivery, LatestDelivery, RepeatDelay,
-        CorrelationGuid, RepeatCount, Aggregate, Immediate,
+        RepeatCount, Aggregate, Immediate,
         CorrelationId1, CorrelationId2
-    );
+    )
+{
+    public NegativeResponseNotification
+    (
+        object? MessageObj,
+
+        string? Originator = default,
+
+        TimeSpan? EarliestDelivery = default,
+        TimeSpan? LatestDelivery = default,
+        TimeSpan? RepeatDelay = default,
+
+        int? RepeatCount = default,
+        bool? Aggregate = default,
+        bool? Immediate = default,
+
+        long CorrelationId1 = default,
+        long CorrelationId2 = default
+    )
+        : this
+        (
+            Omni, ErrorProcessingRequest,
+            MessageObj,
+
+            Originator,
+
+            EarliestDelivery, LatestDelivery, RepeatDelay,
+            RepeatCount, Aggregate, Immediate,
+            CorrelationId1, CorrelationId2
+        )
+    { }
+}

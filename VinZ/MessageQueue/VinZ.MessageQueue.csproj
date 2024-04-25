@@ -20,8 +20,4 @@
     <ProjectReference Include="..\ToolBox\VinZ.Common.ToolBox.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Notification\" />
-  </ItemGroup>
-
 </Project>

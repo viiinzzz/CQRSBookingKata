@@ -7,9 +7,8 @@ public partial class BookingCommandService
         var originator = this.GetType().FullName;
 
 
-        var hotelGeoProxy = bus.AskResult<GeoProxy>(
-            originator, Recipient.Admin, Verb.Admin.RequestFetchHotelGeoProxy,
-            new Id(hotelId));
+        var hotelGeoProxy = bus.AskResult<GeoProxy>(Recipient.Admin, Verb.Admin.RequestFetchHotelGeoProxy,
+            new Id(hotelId), originator);
 
         if (hotelGeoProxy == null)
         {
@@ -17,9 +16,8 @@ public partial class BookingCommandService
         }
 
 
-        var roomDetails = bus.AskResult<RoomDetails[]>(
-            originator, Recipient.Admin, Verb.Admin.RequestHotelRoomDetails,
-            new RoomDetailsRequest(hotelId, exceptRoomNumbers));
+        var roomDetails = bus.AskResult<RoomDetails[]>(Recipient.Admin, Verb.Admin.RequestHotelRoomDetails,
+            new RoomDetailsRequest(hotelId, exceptRoomNumbers), originator);
 
         if (roomDetails is null or { Length: 0 })
         {

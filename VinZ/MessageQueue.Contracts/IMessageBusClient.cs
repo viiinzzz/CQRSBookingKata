@@ -1,7 +1,5 @@
 ﻿namespace VinZ.MessageQueue;
 
-
-
 public interface IMessageBusClient
 {
     IMessageBusClient ConnectToBus(IMessageBus bus);
@@ -12,8 +10,8 @@ public interface IMessageBusClient
     void Subscribe(string? recipient, string? verb);
     bool Unsubscribe(string? recipient, string? verb);
 
-    void Notify(INotification message);
-    void OnNotified(IClientNotification notification);
+    void Notify(IClientNotificationSerialized notification);
+    void OnNotified(IClientNotificationSerialized notification);
 
-    event EventHandler<IClientNotification>? Notified;
+    event EventHandler<IClientNotificationSerialized>? Notified;
 }

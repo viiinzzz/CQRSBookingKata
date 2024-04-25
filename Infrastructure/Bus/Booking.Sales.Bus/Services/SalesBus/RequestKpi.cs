@@ -2,7 +2,7 @@
 
 public partial class SalesBus
 {
-    private void Verb_Is_RequestKpi(IClientNotification notification)
+    private void Verb_Is_RequestKpi(IClientNotificationSerialized notification)
     {
         var id = notification.MessageAs<int>();
 
@@ -17,10 +17,9 @@ public partial class SalesBus
         //
         //
 
-        Notify(new ResponseNotification(notification.Originator, Verb.Sales.RespondKpi)
+        Notify(new ResponseNotification(notification.Originator, Verb.Sales.RespondKpi, indicators)
         {
-            CorrelationGuid = notification.CorrelationGuid(),
-            Message = indicators
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });
     }
 }

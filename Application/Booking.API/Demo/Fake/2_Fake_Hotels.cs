@@ -11,11 +11,15 @@ public partial class DemoService
             var originator = GetType().FullName
                              ?? throw new ArgumentException("invalid originator");
 
-            bus.Notify(originator, new AdvertisementNotification(Recipient.Audit)
             {
-                Message = "Demo: Seeding Hotels...",
-                Immediate = true
-            });
+                var message = "Demo: Seeding Hotels...";
+
+                bus.Notify(new AdvertisementNotification(message, [])
+                {
+                    Originator = originator,
+                    Immediate = true
+                });
+            }
 
             demo.FakeHotelsIds = FakeHelper
                 .GenerateFakeHotels(HotelCount)

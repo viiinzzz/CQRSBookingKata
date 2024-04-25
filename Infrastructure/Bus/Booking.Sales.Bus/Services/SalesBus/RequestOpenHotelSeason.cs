@@ -2,7 +2,7 @@
 
 public partial class SalesBus
 {
-    private void Verb_Is_RequestOpenHotelSeason(IClientNotification notification)
+    private void Verb_Is_RequestOpenHotelSeason(IClientNotificationSerialized notification)
     {
         var request = notification.MessageAs<OpenHotelSeasonRequest>();
 
@@ -32,10 +32,9 @@ public partial class SalesBus
             closingDate = closingDateUtc
         };
 
-        Notify(new ResponseNotification(Omni, Verb.Sales.HotelSeasonOpening)
+        Notify(new ResponseNotification(Omni, Verb.Sales.HotelSeasonOpening, opening)
         {
-            CorrelationGuid = notification.CorrelationGuid(),
-            Message = opening
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });
     }
 }

@@ -23,5 +23,7 @@ public static partial class ApiMethods
         MapRoutes_5_Service(app);
         
         MapRoutes_6_Booking(app);
+
+        MapRoutes_9_Swagger(app);
     }
 }

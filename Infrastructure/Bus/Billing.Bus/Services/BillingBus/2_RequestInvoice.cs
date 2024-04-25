@@ -2,7 +2,7 @@
 
 public partial class BillingBus
 {
-    private void Verb_Is_RequestInvoice(IClientNotification notification)
+    private void Verb_Is_RequestInvoice(IClientNotificationSerialized notification)
     {
         var request = notification.MessageAs<InvoiceRequest>();
 
@@ -22,10 +22,9 @@ public partial class BillingBus
         //
         //
 
-        Notify(new ResponseNotification(Omni, InvoiceEmitted)
+        Notify(new ResponseNotification(Omni, InvoiceEmitted, id)
         {
-            CorrelationGuid = notification.CorrelationGuid(),
-            Message = new { id }
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });
     }
 }

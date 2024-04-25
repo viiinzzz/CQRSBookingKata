@@ -2,27 +2,29 @@ namespace BookingKata.API;
 
 public static partial class ApiMethods
 {
+    private const string MoneyTag = "Money";
+
     private static void MapRoutes_2_Money(WebApplication app)
     {
         var money = app.MapGroup("/money"
-            ).WithOpenApi();
+            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag });
 
         var payrolls = money.MapGroup("/payrolls"
-            ).WithOpenApi();
+            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, MoneyTag });
 
         var invoices = money.MapGroup("/invoices"
-            ).WithOpenApi();
+            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, MoneyTag });
 
 
         payrolls.MapListMq<Payroll>("/", "/money/payrolls", filter: null,
             Recipient.Admin, RequestPage, originator,
             responseTimeoutSeconds
-        ).WithOpenApi();
+            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, MoneyTag });
 
         invoices.MapListMq<Invoice>("/", "/money/invoices", filter: null,
             Recipient.Admin, RequestPage, originator,
             responseTimeoutSeconds
-        ).WithOpenApi();
+            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, MoneyTag });
 
     }
 }

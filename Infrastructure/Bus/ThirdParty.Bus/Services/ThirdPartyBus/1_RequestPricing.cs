@@ -1,10 +1,8 @@
-﻿using Support.Infrastructure.Network;
-
-namespace Support.Infrastructure.Bus.ThirdParty;
+﻿namespace Support.Infrastructure.Bus.ThirdParty;
 
 public partial class ThirdPartyBus
 {
-    private void Verb_Is_RequestPricing(IClientNotification notification)
+    private void Verb_Is_RequestPricing(IClientNotificationSerialized notification)
     {
         var request = notification.MessageAs<PricingRequest>();
 
@@ -33,10 +31,9 @@ public partial class ThirdPartyBus
             customerProfile
         );
 
-        Notify(new ResponseNotification(Omni, RespondPricing)
+        Notify(new ResponseNotification(Omni, RespondPricing, price)
         {
-            CorrelationGuid = notification.CorrelationGuid(),
-            Message = price
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2,
         });
     }
 }

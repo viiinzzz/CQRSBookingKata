@@ -2,7 +2,7 @@
 
 public partial class BillingBus
 {
-    private void Verb_Is_RequestPayment(IClientNotification notification)
+    private void Verb_Is_RequestPayment(IClientNotificationSerialized notification)
     {
         var request = notification.MessageAs<PaymentRequest>();
 
@@ -10,6 +10,11 @@ public partial class BillingBus
         var vendor = new VendorIdentifiers(request.vendorId, request.terminalId);
 
         using var scope = sp.GetScope<BillingCommandService>(out var billing);
+
+        var referenceId = new
+        {
+            invoiceId = request.referenceId
+        };
 
         try
         {
@@ -31,18 +36,18 @@ public partial class BillingBus
             //
             //
 
-            Notify(new ResponseNotification(Omni, PaymentAccepted)
+            var idAndReferenceId = referenceId.PatchRelax(id);
+
+            Notify(new ResponseNotification(Omni, PaymentAccepted, idAndReferenceId)
             {
-                CorrelationGuid = notification.CorrelationGuid(),
-                Message = new { id, invoiceId = request.referenceId }
+                CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
             });
         }
         catch (Exception e)
         {
-            Notify(new ResponseNotification(Omni, PaymentRefused)
+            Notify(new ResponseNotification(Omni, PaymentRefused, referenceId)
             {
-                CorrelationGuid = notification.CorrelationGuid(),
-                Message = new { invoiceId = request.referenceId }
+                CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
             });
         }
     }

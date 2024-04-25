@@ -2,7 +2,7 @@
 
 public partial class BillingCommandService
 {
-    public int EmitInvoice
+    public Id EmitInvoice
     (
         double amount,
         string currency,
@@ -58,6 +58,6 @@ public partial class BillingCommandService
 
         var invoiceId = money.AddInvoice(invoice);
 
-        return invoiceId;
+        return new Id(invoiceId);
     }
 }

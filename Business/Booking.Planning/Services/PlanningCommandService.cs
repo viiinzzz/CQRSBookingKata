@@ -120,9 +120,8 @@ public class PlanningCommandService
 
         var originator = this.GetType().FullName;
 
-        var hotelGeoProxy = bus.AskResult<GeoProxy>(
-            originator, Recipient.Admin, Verb.Admin.RequestFetchHotelGeoProxy,
-            new Id(check.HotelId));
+        var hotelGeoProxy = bus.AskResult<GeoProxy>(Recipient.Admin, Verb.Admin.RequestFetchHotelGeoProxy,
+            new Id(check.HotelId), originator);
 
         if (hotelGeoProxy == null)
         {
@@ -149,9 +148,8 @@ public class PlanningCommandService
 
         var originator = this.GetType().FullName;
 
-        var hotelGeoProxy = bus.AskResult<GeoProxy>(
-            originator, Recipient.Admin, Verb.Admin.RequestFetchHotelGeoProxy,
-            new Id(duty.HotelId));
+        var hotelGeoProxy = bus.AskResult<GeoProxy>(Recipient.Admin, Verb.Admin.RequestFetchHotelGeoProxy,
+            new Id(duty.HotelId), originator);
 
         if (hotelGeoProxy == null)
         {

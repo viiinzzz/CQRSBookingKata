@@ -47,16 +47,17 @@ public partial class SalesBus(IScopeProvider sp, BookingConfiguration bconf) : M
             }
             catch (Exception ex)
             {
-                Notify(new ResponseNotification(notification.Originator, ErrorProcessingRequest)
+                var error = new
                 {
-                    CorrelationGuid = notification.CorrelationGuid(),
-                    Message = new
-                    {
-                        message = notification.Message,
-                        messageType = notification.MessageType,
-                        error = ex.Message,
-                        stackTrace = ex.StackTrace
-                    }
+                    message = notification.Message,
+                    messageType = notification.MessageType,
+                    error = ex.Message,
+                    stackTrace = ex.StackTrace
+                };
+
+                Notify(new ResponseNotification(notification.Originator, ErrorProcessingRequest, error)
+                {
+                    CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
                 });
             }
         };

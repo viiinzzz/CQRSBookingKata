@@ -2,7 +2,7 @@
 
 public partial class SalesBus
 {
-    private void Verb_Is_RequestStay(IClientNotification notification)
+    private void Verb_Is_RequestStay(IClientNotificationSerialized notification)
     {
         var pageRequest = notification.MessageAs<PageRequest>();
         var stayRequest = pageRequest.Filter as StayRequest;
@@ -25,10 +25,9 @@ public partial class SalesBus
         //
         //
 
-        Notify(new ResponseNotification(Omni, Verb.Sales.StayFound)
+        Notify(new ResponseNotification(Omni, Verb.Sales.StayFound, page)
         {
-            CorrelationGuid = notification.CorrelationGuid(),
-            Message = page
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });
     }
 }

@@ -2,6 +2,9 @@ namespace BookingKata.API;
 
 public static partial class ApiMethods
 {
+    private const string PublicTag = "Public";
+    private const string BookingTag = "Booking";
+    
     private static void MapRoutes_6_Booking(WebApplication app)
     {
         var pattern = "/booking";
@@ -44,7 +47,7 @@ public static partial class ApiMethods
                 return originator.ListMq<StayProposition>(
                     Recipient.Sales, Verb.Sales.RequestStay,
                     pattern, pattern, filter, responseTimeoutSeconds);
-            }).WithOpenApi();
+            }).WithOpenApi().WithTags(new[] { PublicTag, BookingTag });
 
     }
 }

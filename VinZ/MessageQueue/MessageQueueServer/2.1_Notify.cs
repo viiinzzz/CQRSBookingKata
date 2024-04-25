@@ -2,12 +2,12 @@
 
 public partial class MqServer
 {
-    public INotifyAck Notify(string originator, INotification notification)
+    public INotifyAck Notify(IClientNotificationSerialized notification)
     {
-        return Notify(originator, notification, CancellationToken.None);
+        return Notify(notification, CancellationToken.None);
     }
 
-    public INotifyAck Notify(string originator, INotification clientNotification, CancellationToken cancel)
+    public INotifyAck Notify(IClientNotificationSerialized clientNotification, CancellationToken cancel)
     {
         var now = DateTime.UtcNow;
 
@@ -20,19 +20,21 @@ public partial class MqServer
         var now2 = immediate && selectRepeat ? now + n.RepeatDelay.Value : now;
 
         var correlationId = 
-            !n.CorrelationId1.HasValue ||
-            !n.CorrelationId2.HasValue
+            n is { CorrelationId1: 0, CorrelationId2: 0 }
                 ? CorrelationId.New()
-                : new CorrelationId(n.CorrelationId1.Value, n.CorrelationId2.Value);
+                : new CorrelationId(n.CorrelationId1, n.CorrelationId2);
+
+        var originator = clientNotification.Originator;
 
         var notification = new ServerNotification
         {
             Type = n.Type,
-            Message = n.Message == default ? "{}" : JsonConvert.SerializeObject(n.Message),
-            MessageType = n.Message == default ? string.Empty : n.Message.GetType().Name,
+            Message = n.Message,
+            MessageType = n.MessageType,
 
             Verb = n.Verb,
             Recipient = n.Recipient,
+            Status = n.Status,
 
             Originator = originator,
             CorrelationId1 = correlationId.Id1,
@@ -56,7 +58,7 @@ public partial class MqServer
         {
             //
             //
-            Broadcast(notification, immediate: true, cancel);
+            Respond(notification, immediate: true, cancel);
             //
             //
 
@@ -68,11 +70,13 @@ public partial class MqServer
             using var scope = scp.GetScope<IMessageQueueRepository>(out var queue);
 
 
-            var queuing = immediate ? "                     <<<Relaying<<< immediate" : "                      <<<Queuing<<< scheduled";
+            var queuing = immediate ? "                     <<<Relaying<<< Immediate" : "                      <<<Queuing<<< Scheduled";
+            var notificationLabel = $"Notification{correlationId.Guid}{(immediate ? "" : $" (Id:?)")}";
+            var rvm = @$"
+  {{recipient: ""{notification.Recipient}"", verb: ""{notification.Verb}"", message: {notification.Message}}}";
+            var logLevel = notification.IsErrorStatus() ? LogLevel.Error : LogLevel.Information;
 
-            log.LogInformation(
-                @$"{queuing} message{correlationId.Guid} ...
-{{recipient:{notification.Recipient}, verb:{notification.Verb}, message:{notification.Message.Replace("\"", "")}}}");
+            log.Log(logLevel, @$"{queuing} {notificationLabel} ... {rvm}");
 
             //
             //

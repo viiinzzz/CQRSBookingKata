@@ -1,5 +1,4 @@
-﻿
-namespace VinZ.MessageQueue;
+﻿namespace VinZ.MessageQueue;
 
 public partial class MqServer
 {
@@ -55,9 +54,9 @@ public partial class MqServer
         public int ElapsedSeconds { get; private set; } = 0;
         public bool Responded { get; private set; }
         public bool Cancelled => cancellationToken.IsCancellationRequested;
-        public object? Response { get; private set; }
+        public IClientNotificationSerialized? ResponseNotification { get; private set; }
 
-        public void Respond(object? result)
+        public void Respond(IClientNotificationSerialized notification)
         {
             if (Responded || Cancelled)
             {
@@ -65,12 +64,12 @@ public partial class MqServer
             }
 
             Responded = true;
-            Response = result;
+            ResponseNotification = notification;
         }
 
         private bool resultAlreadyCalled;
 
-        public object? Result
+        public IClientNotificationSerialized? ResultNotification
         {
             get
             {
@@ -84,16 +83,16 @@ public partial class MqServer
 
                 track(this);
 
-                var result = WaitAsync().Result;
+                var notification = WaitResponseNotificationAsync().Result;
 
                 untrack(this);
 
-                return result;
+                return notification;
 
             }
         }
 
-        private async Task<object?> WaitAsync()
+        private async Task<IClientNotificationSerialized?> WaitResponseNotificationAsync()
         {
             while (true)
             {
@@ -114,14 +113,14 @@ public partial class MqServer
                 return null;
             }
 
-            return Responded;
+            return ResponseNotification;
         }
     }
 
 
 
 
-    public async Task<object?> Wait(INotifyAck ack, CancellationToken cancellationToken)
+    public async Task<IClientNotificationSerialized?> Wait(INotifyAck ack, CancellationToken cancellationToken)
     {
         var correlationId = ack.CorrelationId;
 
@@ -132,35 +131,8 @@ public partial class MqServer
 
         var awaitedResponse = new AwaitedResponse(correlationId, DateTime, cancellationToken, Track, Untrack);
 
-        return awaitedResponse.Result;
-
+        return awaitedResponse?.ResultNotification;
     }
-    //
-    // private void RespondAwaited(ServerNotification notification)
-    // {
-    //     if (notification.Type != NotificationType.Response)
-    //     {
-    //         return;
-    //     }
-    //
-    //     var awaiters = _awaiters.Values
-    //         .Where(awaitedResponse => awaitedResponse.IsCorrelatedTo(notification))
-    //         .ToArray();
-    //
-    //     var awaiterCount = awaiters.Length;
-    //
-    //     var correlationId = new CorrelationId(notification.CorrelationId1, notification.CorrelationId2);
-    //     //
-    //     //
-    //     log.LogInformation($"...Awaiters... Count={awaiterCount}, CorrelationId={correlationId.Guid}, Recipient={notification.Recipient}, Verb={notification.Verb}");
-    //     //
-    //     //
-    //
-    //     foreach (var awaitedResponse in awaiters)
-    //     {
-    //         awaitedResponse.Respond(notification);
-    //     }
-    // }
 
     private IMessageBusClient? GetAwaitedBus(ServerNotification notification)
     {
@@ -198,9 +170,9 @@ public partial class MqServer
         public void Subscribe(string? recipient, string? verb) { }
         public bool Unsubscribe(string? recipient, string? verb) { return true; }
 
-        public void Notify(INotification message) { }
+        public void Notify(IClientNotificationSerialized message) { }
 
-        public void OnNotified(IClientNotification notification)
+        public void OnNotified(IClientNotificationSerialized notification)
         {
             foreach (var awaitedResponse in awaitedResponses)
             {
@@ -208,6 +180,6 @@ public partial class MqServer
             }
         }
 
-        public event EventHandler<IClientNotification>? Notified;
+        public event EventHandler<IClientNotificationSerialized>? Notified;
     }
 }

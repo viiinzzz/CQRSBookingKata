@@ -53,22 +53,24 @@ public class PlanningBus(IScopeProvider sp, BookingConfiguration bconf) : Messag
             }
             catch (Exception ex)
             {
-                Notify(new ResponseNotification(notification.Originator, ErrorProcessingRequest)
+                var error = new
                 {
-                    CorrelationGuid = notification.CorrelationGuid(),
-                    Message = new
-                    {
-                        message = notification.Message,
-                        messageType = notification.MessageType,
-                        error = ex.Message,
-                        stackTrace = ex.StackTrace
-                    }
+                    message = notification.Message,
+                    messageType = notification.MessageType,
+                    error = ex.Message,
+                    stackTrace = ex.StackTrace
+                };
+
+                Notify(new NegativeResponseNotification(error)
+                {
+                    Originator = notification.Originator,
+                    CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
                 });
             }
         };
     }
 
-    private void Verb_Is_RequestPage(IClientNotification notification)
+    private void Verb_Is_RequestPage(IClientNotificationSerialized notification)
     {
         using var scope = sp.GetScope<PlanningQueryService>(out var planning);
         using var scope2 = sp.GetScope<IGazetteerService>(out var geo);
@@ -146,10 +148,9 @@ public class PlanningBus(IScopeProvider sp, BookingConfiguration bconf) : Messag
             }
         }
 
-        Notify(new ResponseNotification(notification.Originator, Respond)
+        Notify(new ResponseNotification(notification.Originator, Respond, page)
         {
-            CorrelationGuid = notification.CorrelationGuid(),
-            Message = page
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });
     }
 }

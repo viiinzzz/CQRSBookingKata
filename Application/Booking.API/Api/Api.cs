@@ -131,16 +131,19 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
     services.AddScoped<IMessageQueueRepository, MessageQueueRepository>();
     services.AddScoped<IMoneyRepository, MoneyRepository>();
 
-    //third-party
-    services.AddScoped<IGazetteerService, GazetteerService>();
-    services.AddScoped<IPaymentCommandService, PaymentCommandService>();
-    services.AddScoped<PricingQueryService>();
-
     //business
+    services.AddScoped<AdminQueryService>();
     services.AddScoped<SalesQueryService>();
     services.AddScoped<BookingCommandService>();
     services.AddScoped<PlanningQueryService>();
+    services.AddScoped<PlanningCommandService>();
     services.AddScoped<KpiQueryService>();
+
+    //support/third-party
+    services.AddScoped<BillingCommandService>();
+    services.AddScoped<IGazetteerService, GazetteerService>();
+    services.AddScoped<IPaymentCommandService, PaymentCommandService>();
+    services.AddScoped<PricingQueryService>();
 
     var bconf = new BookingConfiguration
     {
