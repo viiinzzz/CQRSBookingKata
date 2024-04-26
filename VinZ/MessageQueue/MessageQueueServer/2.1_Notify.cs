@@ -58,9 +58,14 @@ public partial class MqServer
         {
             //
             //
-            Respond(notification, immediate: true, cancel);
+            var (count, updates) = Respond(notification, immediate: true, cancel);
             //
             //
+
+            if (count.Delivered > 0)
+            {
+                RefreshFastest();
+            }
 
             return ack;
         }

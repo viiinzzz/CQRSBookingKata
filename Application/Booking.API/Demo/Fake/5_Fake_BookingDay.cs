@@ -100,7 +100,7 @@ public partial class DemoService
 
         if (errors.Count > 0)
         {
-            throw new AggregateException($"Booking failures: {errors.Count}", errors);
+            throw new AggregateException($"Booking failures: {errors.Count}{Environment.NewLine}{Environment.NewLine}", errors);
 
         }
     }

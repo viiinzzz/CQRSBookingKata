@@ -151,7 +151,12 @@ Subject: {serverNotification.Verb}
 
             var matchedUnmatched = $"(matched {string.Join(" ", matchedHash)} unmatched {string.Join(" ", unmatchedHash)})";
 
-            log.LogError(@$"            >>>Undeliverable!       {notificationLabel}...{Environment.NewLine}{matchedUnmatched}{Environment.NewLine}{rvm}");
+            var logLevel = 
+                serverNotification.Verb == ErrorProcessingRequest ? LogLevel.Debug 
+                : LogLevel.Error;
+
+            log.Log(logLevel,
+                @$"            >>>Undeliverable!       {notificationLabel}...{Environment.NewLine}{matchedUnmatched}{Environment.NewLine}{rvm}");
 
             if (serverNotification.IsErrorStatus())
             {
@@ -220,7 +225,7 @@ failure: {ex.Message}
 
         updateMessage();
 
-        var delivered = "                         >>>Sent>>> scheduled";
+        var sent = "                         >>>Sent>>> scheduled";
 
         {
             var logLevel =
@@ -229,7 +234,7 @@ failure: {ex.Message}
                 : LogLevel.Information;
 
             log.Log(logLevel,
-                @$"{delivered} {notificationLabel} to {subscribersCount}...{Environment.NewLine}{rvm}");
+                @$"{sent} {notificationLabel} to {subscribersCount}...{Environment.NewLine}{rvm}");
         }
 
         return (count, updates);

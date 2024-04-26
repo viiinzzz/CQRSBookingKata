@@ -1,14 +1,12 @@
 ﻿namespace Infrastructure.Storage;
 
-public class GazeteerContext : DbContext
+public class GazeteerContext : MyDbContext
 {
     public DbSet<GeoIndex> Indexes { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {
-        builder.ConfigureMyWay<GazeteerContext>();
-
-        builder.EnableSensitiveDataLogging();
+        builder.ConfigureMyWay<GazeteerContext>(IsDebug, IsTrace);
     }
 
 

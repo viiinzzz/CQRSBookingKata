@@ -1,6 +1,6 @@
 ﻿namespace BookingKata.Infrastructure.Storage;
 
-public class BookingSalesContext : DbContext
+public class BookingSalesContext : MyDbContext
 {
     public DbSet<Vacancy> Vacancies { get; set; }
     public DbSet<Customer> Customers { get; set; }
@@ -10,9 +10,7 @@ public class BookingSalesContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {
-        builder.ConfigureMyWay<BookingSalesContext>();
-
-        builder.EnableSensitiveDataLogging();
+        builder.ConfigureMyWay<BookingSalesContext>(IsDebug, IsTrace);
     }
 
 

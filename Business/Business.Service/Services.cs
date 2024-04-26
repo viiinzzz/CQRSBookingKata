@@ -54,9 +54,9 @@ public static class Verb
         public const string RequestHotelRoomDetails = $"{Request}{HotelRoomDetails}";
         public const string RequestSingleRoomDetails = $"{Request}{SingleRoomDetails}";
         public const string RequestManyRoomDetails = $"{Request}{ManyRoomDetails}";
-        public const string RespondHotelRoomDetails = $"{Request}{HotelRoomDetails}";
-        public const string RespondSingleRoomDetails = $"{Request}{SingleRoomDetails}";
-        public const string RespondManyRoomDetails = $"{Request}{ManyRoomDetails}";
+        public const string RespondHotelRoomDetails = $"{Respond}{HotelRoomDetails}";
+        public const string RespondSingleRoomDetails = $"{Respond}{SingleRoomDetails}";
+        public const string RespondManyRoomDetails = $"{Respond}{ManyRoomDetails}";
     } 
     
     public static class Planning

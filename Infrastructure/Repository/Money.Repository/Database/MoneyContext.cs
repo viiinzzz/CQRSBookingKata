@@ -1,6 +1,6 @@
 ﻿namespace Infrastructure.Storage;
 
-public class MoneyContext : DbContext
+public class MoneyContext : MyDbContext
 {
     public DbSet<Quotation> Quotations { get; set; }
     public DbSet<Invoice> Invoices { get; set; }
@@ -10,8 +10,9 @@ public class MoneyContext : DbContext
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
-
-        => builder.ConfigureMyWay<MoneyContext>();
+    {
+        builder.ConfigureMyWay<MoneyContext>(IsDebug, IsTrace);
+    }
 
 
     protected override void OnModelCreating(ModelBuilder builder)

@@ -1,15 +1,13 @@
 ﻿namespace Infrastructure.Storage;
 
-public class MessageQueueContext : DbContext
+public class MessageQueueContext : MyDbContext
 {
     public DbSet<ServerNotification> Notifications { get; set; }
     public DbSet<ServerNotification> ArchivedNotifications { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {
-        builder.ConfigureMyWay<MessageQueueContext>();
-
-        builder.EnableSensitiveDataLogging();
+        builder.ConfigureMyWay<MessageQueueContext>(IsDebug, IsTrace);
     }
 
 

@@ -161,7 +161,10 @@ public static class MessageHelper
 
         if (string.IsNullOrEmpty(n.Message) || n.Message == EmptySerialized)
         {
-            throw new ArgumentNullException(nameof(n.Message));
+            if (tMessage != null)
+            {
+                throw new ArgumentNullException(nameof(n.Message));
+            }
         }
 
         var nMessageType = n.MessageType;

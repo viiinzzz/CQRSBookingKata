@@ -53,11 +53,7 @@ public class PlanningBus(IScopeProvider sp, BookingConfiguration bconf) : Messag
             }
             catch (Exception ex)
             {
-                Notify(new NegativeResponseNotification(notification, ex)
-                {
-                    Originator = notification.Originator,
-                    CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-                });
+                Notify(new NegativeResponseNotification(notification, ex));
             }
         };
     }

@@ -156,6 +156,12 @@ public partial class SalesQueryService
             orderby stay.personMaxCount
             select stay.urid;
 
+        var ids = urids.ToArray(); //fetch into db only good room size, geo-localization and availability timing
+
+        if (ids.Length == 0)
+        {
+            throw new StayNotFoundException();
+        }
 
         var originator = GetType().FullName
                          ?? throw new Exception("invalid originator");
@@ -163,8 +169,7 @@ public partial class SalesQueryService
         var roomDetails = bus.AskResult<RoomDetails[]>(Recipient.Admin, Verb.Admin.RequestManyRoomDetails,
             new RoomDetailsRequest
             {
-                onlyRoomNumbers =
-                    urids.ToArray() //fetch into db only good room size, geo-localization and availability timing
+                onlyRoomNumbers = ids
             }, originator);
 
         if (roomDetails is null or { Length: 0 })

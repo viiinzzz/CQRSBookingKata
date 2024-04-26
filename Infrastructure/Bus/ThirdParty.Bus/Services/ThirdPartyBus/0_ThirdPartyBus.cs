@@ -38,18 +38,7 @@ public partial class ThirdPartyBus(IScopeProvider sp) : MessageBusClientBase
             }
             catch (Exception ex)
             {
-                Notify(new ResponseNotification(notification.Originator, ErrorProcessingRequest)
-                {
-                    CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2,
-                    MessageObj = new
-                    {
-                        Message = notification.Message,
-                        MessageType = notification.MessageType,
-
-                        error = ex.Message,
-                        stackTrace = ex.StackTrace
-                    }
-                });
+                Notify(new NegativeResponseNotification(notification.Originator, notification, ex));
             }
         };
     }

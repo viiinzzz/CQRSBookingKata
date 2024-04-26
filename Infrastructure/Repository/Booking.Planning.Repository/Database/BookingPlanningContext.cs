@@ -1,6 +1,6 @@
 ﻿namespace BookingKata.Infrastructure.Storage;
 
-public class BookingPlanningContext : DbContext
+public class BookingPlanningContext : MyDbContext
 {
     public DbSet<ReceptionCheck> Checks { get; set; }
     public DbSet<RoomServiceDuty> Duties { get; set; }
@@ -9,9 +9,7 @@ public class BookingPlanningContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {
-        builder.ConfigureMyWay<BookingPlanningContext>();
-
-        builder.EnableSensitiveDataLogging();
+        builder.ConfigureMyWay<BookingPlanningContext>(IsDebug, IsTrace);
     }
 
 

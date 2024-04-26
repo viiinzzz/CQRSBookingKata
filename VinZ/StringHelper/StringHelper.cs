@@ -91,4 +91,5 @@ public static class StringHelper
     {
         return $"{n.ToString("x16").SplitEvery(4, '-')}";
     }
+
 }

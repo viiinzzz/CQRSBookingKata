@@ -43,7 +43,7 @@ public class OvernightStay
 
         var dayNum = (int)(morning - BaseCheckInDate).TotalDays;
 
-        return new OvernightStay(dayNum - 1);
+        return new OvernightStay(dayNum);
     }
 
     public int To(OvernightStay lastNight)

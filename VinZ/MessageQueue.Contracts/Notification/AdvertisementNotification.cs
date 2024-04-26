@@ -53,7 +53,7 @@ public record AdvertisementNotification
         : this
         (
             Omni,
-            MessageObj: string.Format(MessageText, args ?? []),
+            MessageObj: Format(MessageText, args),
 
             Originator,
 
@@ -62,4 +62,16 @@ public record AdvertisementNotification
             CorrelationId1, CorrelationId2
         )
     { }
+
+    private static string Format(string messageText, object?[]? args)
+    {
+        try
+        {
+            return string.Format(messageText, args ?? []);
+        }
+        catch
+        {
+            return $"{messageText} {JsonConvert.SerializeObject(args)}";
+        }
+    } 
 }

@@ -5,7 +5,7 @@ public static class DbContextHelper
     private static readonly Regex contextRx = new("^(.*)Context$", RegexOptions.IgnoreCase);
     private static readonly Regex connectionStringRx = new(@"\(\$Context\)", RegexOptions.IgnoreCase);
 
-    public static void ConfigureMyWay<TContext>(this DbContextOptionsBuilder builder)
+    public static void ConfigureMyWay<TContext>(this DbContextOptionsBuilder builder, bool isDebug, bool isTrace)
         where TContext : DbContext
     {
         if (builder.IsConfigured)
@@ -30,7 +30,14 @@ public static class DbContextHelper
             configuration.GetConnectionString(buildConfigurationName),
             contextName);
 
-        builder.UseSqlite(connectionString);
+        builder.UseSqlite(connectionString)
+            .EnableDetailedErrors(isDebug)
+            .EnableSensitiveDataLogging(isDebug);
+
+        if (isTrace)
+        {
+            builder.LogTo(Console.WriteLine);
+        }
     }
 
 

@@ -93,7 +93,7 @@ Message purge failure: {ex.Message}
 
         try
         {
-            var updates = messages
+            var (count2, updates) = messages
 
                 .AsParallel()
                 .WithCancellation(cancel)
@@ -106,8 +106,13 @@ Message purge failure: {ex.Message}
                     var updates2 = a.Item2.Concat(b.Item2).ToList();
 
                     return (count, updates2);
-                })
-                .Item2;
+                });
+
+
+            if (count.Delivered > 0)
+            {
+                RefreshFastest();
+            }
 
             foreach (var (notifications, update) in updates)
             {

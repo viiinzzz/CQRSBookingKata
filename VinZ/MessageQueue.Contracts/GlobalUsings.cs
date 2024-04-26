@@ -5,5 +5,6 @@ global using System.Reflection;
 global using System.Runtime.CompilerServices;
 global using Microsoft.Extensions.DependencyInjection;
 global using Newtonsoft.Json;
+global using VinZ.Common;
 global using static VinZ.MessageQueue.Const;
 global using static VinZ.MessageQueue.MessageHelper;

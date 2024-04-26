@@ -26,12 +26,12 @@ public partial class SalesRepository
 
         _sales.Vacancies.AddRange(toBeAdded);
 
+        _sales.SaveChanges();
+
         foreach (var vacancy in toBeAdded)
         {
             _sales.Entry(vacancy).State = EntityState.Detached;
         }
-
-        _sales.SaveChanges();
     }
 
     public void RemoveVacancies(IEnumerable<long> vacancyIds)
@@ -49,11 +49,11 @@ public partial class SalesRepository
 
         _sales.Vacancies.RemoveRange(toBeRemoved);
 
+        _sales.SaveChanges();
+        
         foreach (var vacancy in toBeRemoved)
         {
             _sales.Entry(vacancy).State = EntityState.Detached;
         }
-
-        _sales.SaveChanges();
     }
 }

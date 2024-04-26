@@ -34,35 +34,36 @@ public partial class DemoService
         {
             DateTime.Freeze();
 
-            var context = new TransactionContext() * admin * money * sales * geo;
-
-            //admin setup
-            context.Execute(() => Fake_Employees(false));
-            context.Execute(() => Fake_Hotels(false));
-            context.Execute(() => Fake_Vacancies(false));
-
-            //sales setup
-            context.Execute(() => Fake_Customers(false));
-
-
-            // DateTime.Unfreeze();
-
+            Seed();
 
             cancel.ThrowIfCancellationRequested();
         }
         catch (Exception ex)
         {
-            var message = @$"
-Demo Seed aborted!
+            var childNotification = new RequestNotification(nameof(Demo), nameof(Seed));
 
-ERROR: {ex}";
-
-            bus.Notify(new AdvertisementNotification(message, [])
+            bus.Notify(new NegativeResponseNotification(childNotification, ex, "aborted!")
             {
                 Originator = originator,
                 Immediate = true
             });
         }
+    }
+
+    private void Seed()
+    {
+        var context = new TransactionContext() * admin * money * sales * geo;
+
+        //admin setup
+        context.Execute(() => Fake_Employees(false));
+        context.Execute(() => Fake_Hotels(false));
+        context.Execute(() => Fake_Vacancies(false));
+
+        //sales setup
+        context.Execute(() => Fake_Customers(false));
+
+
+        // DateTime.Unfreeze();
     }
 
     public int SimulationDay => demo.SimulationDay;
@@ -97,14 +98,9 @@ ERROR: {ex}";
         }
         catch (Exception ex)
         {
-            var message = @"
-Demo Forward aborted!
+            var childNotification = new RequestNotification(nameof(Demo), nameof(Forward));
 
-ERROR: {ex}";
-
-            var args = new object[] { ex.ToString() };
-
-            bus.Notify(new AdvertisementNotification(message, args)
+            bus.Notify(new NegativeResponseNotification(childNotification,  ex, "aborted!")
             {
                 Originator = originator,
                 Immediate = true

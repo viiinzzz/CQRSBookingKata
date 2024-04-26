@@ -27,7 +27,7 @@ public class ConsoleAuditBus
         var now = DateTime.UtcNow.ToString("O");
 
         var messageString = notification.Message.Replace("\\r", "").Replace("\\n", Environment.NewLine);
-        messageString = unquote.Replace(messageString, "$1");
+        messageString = unquote.Replace(Regex.Unescape(messageString), "$1");
 
         log.Log(LogLevel.Warning, @$"{serverLabel} {senderLabel} Notification{correlation.Guid}
 ===

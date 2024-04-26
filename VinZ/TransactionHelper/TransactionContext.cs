@@ -54,7 +54,7 @@ public class TransactionContext
         {
             _failed = true;
 
-            throw new TransactionException("transaction failed", ex);
+            throw new TransactionException($"transaction failed: {ex.Message}", ex);
         }
         finally
         {

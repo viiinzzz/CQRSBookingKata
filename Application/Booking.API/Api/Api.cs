@@ -19,6 +19,8 @@ var isDebug = false;
     isDebug = pif.IsDebug;
 }
 
+var traceEF = false;//isDebug;
+
 var isRelease = !isDebug;
 
 /*╭-----------------------------------------------------------------------------
@@ -73,17 +75,31 @@ void EnsureAllDatabasesCreated(WebApplication app)
     EnsureDatabaseCreated<GazeteerContext>(app);
 }
 
+void RegisterDbContext<TContext>(RegisteredDbContextFactory dbContextFactory, bool isDebug) where TContext : MyDbContext, new()
+{
+    dbContextFactory.RegisterDbContextType(() =>
+    {
+        var dbContext = new TContext
+        {
+            IsDebug = isDebug,
+            IsTrace = traceEF
+        };
+
+        return dbContext;
+    });
+}
+
 void RegisterDbContexts(WebApplicationBuilder webApplicationBuilder)
 {
     var dbContextFactory = new RegisteredDbContextFactory();
+    
+    RegisterDbContext<BookingAdminContext>(dbContextFactory, isDebug);
+    RegisterDbContext<BookingSalesContext>(dbContextFactory, isDebug);
+    RegisterDbContext<BookingPlanningContext>(dbContextFactory, isDebug);
 
-    dbContextFactory.RegisterDbContextType(() => new BookingAdminContext());
-    dbContextFactory.RegisterDbContextType(() => new BookingSalesContext());
-    dbContextFactory.RegisterDbContextType(() => new BookingPlanningContext());
-
-    dbContextFactory.RegisterDbContextType(() => new MessageQueueContext());
-    dbContextFactory.RegisterDbContextType(() => new MoneyContext());
-    dbContextFactory.RegisterDbContextType(() => new GazeteerContext());
+    RegisterDbContext<MessageQueueContext>(dbContextFactory, isDebug);
+    RegisterDbContext<MoneyContext>(dbContextFactory, isDebug);
+    RegisterDbContext<GazeteerContext>(dbContextFactory, isDebug);
 
     webApplicationBuilder.Services.AddSingleton<IDbContextFactory>(dbContextFactory);
 }
