@@ -8,14 +8,14 @@ public partial class MqServer
     {
         if (_awaiters.ContainsKey(awaitedResponse.Key))
         {
-            throw new InvalidOperationException("concurrent wait not allowed");
+            throw new InvalidOperationException("Concurrent wait not allowed");
         }
 
         _awaiters[awaitedResponse.Key] = awaitedResponse;
 
         //
         //
-        log.LogInformation($"...Track... Correlation={awaitedResponse.Key}");
+        log.LogDebug($"...Track... Correlation={awaitedResponse.Key}");
         //
         //
     }
@@ -24,13 +24,13 @@ public partial class MqServer
     {
         //
         //
-        log.LogInformation($"        ...Untrack... Correlation={awaitedResponse.Key}, ElapsedSeconds={awaitedResponse.ElapsedSeconds}, Responded={awaitedResponse.Responded}, Cancelled={awaitedResponse.Cancelled}");
+        log.LogDebug($"        ...Untrack... Correlation={awaitedResponse.Key}, ElapsedSeconds={awaitedResponse.ElapsedSeconds}, Responded={awaitedResponse.Responded}, Cancelled={awaitedResponse.Cancelled}");
         //
         //
 
         if (!_awaiters.Remove(awaitedResponse.Key, out _))
         {
-            throw new InvalidOperationException("invalid wait state");
+            throw new InvalidOperationException("Invalid wait state");
         }
     }
 
@@ -126,7 +126,7 @@ public partial class MqServer
 
         if (correlationId == null)
         {
-            throw new InvalidOperationException("uncorrelated wait not allowed");
+            throw new InvalidOperationException("Uncorrelated wait not allowed");
         }
 
         var awaitedResponse = new AwaitedResponse(correlationId, DateTime, cancellationToken, Track, Untrack);
@@ -150,7 +150,7 @@ public partial class MqServer
         var correlationId = new CorrelationId(notification.CorrelationId1, notification.CorrelationId2);
         //
         //
-        log.LogInformation($"...Awaiters... Count={awaiterCount}, CorrelationId={correlationId.Guid}, Recipient={notification.Recipient}, Verb={notification.Verb}");
+        log.LogDebug($"...Awaiters... Count={awaiterCount}, CorrelationId={correlationId.Guid}, Recipient={notification.Recipient}, Verb={notification.Verb}");
         //
         //
 

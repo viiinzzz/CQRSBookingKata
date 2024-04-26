@@ -54,7 +54,7 @@ public partial class DemoService
                 {
                     var message = "Demo: Booking skipped because no stay were found matching the customer's request!";
 
-                    bus.Notify(new NegativeResponseNotification(Omni, InformationMessage, message)
+                    bus.Notify(new NegativeResponseNotification(Omni, AuditMessage, message)
                     {
                         Originator = originator,
                         Immediate = true

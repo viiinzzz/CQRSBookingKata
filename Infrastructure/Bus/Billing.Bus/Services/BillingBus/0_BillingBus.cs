@@ -51,16 +51,7 @@ public partial class BillingBus(IScopeProvider sp) : MessageBusClientBase
             }
             catch (Exception ex)
             {
-                var error = new
-                {
-                    message = notification.Message,
-                    messageType = notification.MessageType,
-
-                    error = ex.Message,
-                    stackTrace = ex.StackTrace
-                };
-
-                Notify(new NegativeResponseNotification(error)
+                Notify(new NegativeResponseNotification(notification, ex)
                 {
                     Originator = notification.Originator,
                     CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2,

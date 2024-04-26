@@ -71,12 +71,20 @@ public partial class MqServer
 
 
             var queuing = immediate ? "                     <<<Relaying<<< Immediate" : "                      <<<Queuing<<< Scheduled";
-            var notificationLabel = $"Notification{correlationId.Guid}{(immediate ? "" : $" (Id:?)")}";
-            var rvm = @$"
-  {{recipient: ""{notification.Recipient}"", verb: ""{notification.Verb}"", message: {notification.Message}}}";
-            var logLevel = notification.IsErrorStatus() ? LogLevel.Error : LogLevel.Information;
+            var notificationLabel = $"Notification{correlationId.Guid}";
+            var messageObj = notification.MessageAsObject();
+            var messageObjString = JsonConvert.SerializeObject(messageObj, Formatting.Indented).Replace("\\r", "").Replace("\\n", Environment.NewLine);
+            var rvm = @$"---
+To: {notification.Recipient}
+Subject: {notification.Verb}
+{messageObjString}
+---";
+            var logLevel = 
+                notification.IsErrorStatus() ? LogLevel.Error
+                // : notification.Verb == AuditMessage ? LogLevel.Debug
+                : LogLevel.Debug;
 
-            log.Log(logLevel, @$"{queuing} {notificationLabel} ... {rvm}");
+            log.Log(logLevel, @$"{queuing} {notificationLabel}...{Environment.NewLine}{rvm}");
 
             //
             //

@@ -12,8 +12,8 @@ public class ServerContextService
         _logger = logger;
         Id = UuidHelper.GetUuidInt64();
 
-        logger.LogInformation($"<<<{Id.xby4()}>>>");
-
+        logger.Log(LogLevel.Debug, 
+            $"<<<Server:{Id.xby4()}>>>");
     }
 
     public long Id { get; }

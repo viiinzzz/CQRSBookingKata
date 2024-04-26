@@ -4,6 +4,6 @@ public record MqServerConfig
 (
     Type[]? DomainBusTypes = default,
 
-    int BusRefreshMinMilliseconds = 100,
-    int BusRefreshMaxMilliseconds = 200//15000
+    int BusRefreshMinMilliseconds = 50,
+    int BusRefreshMaxMilliseconds = 15_000
 );

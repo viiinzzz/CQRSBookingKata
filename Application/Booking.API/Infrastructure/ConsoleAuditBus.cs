@@ -11,38 +11,28 @@ public class ConsoleAuditBus
 {
     public override void Configure()
     {
-        Subscribe(Omni, InformationMessage);
+        Subscribe(Omni, AuditMessage);
 
-        Notified += (sender, notification) =>
-        {
-            Log(
-                DateTime.UtcNow.ToString("O"),
-                new CorrelationId(notification.CorrelationId1, notification.CorrelationId2).Guid,
-
-                sender == null ? null : $"{sender.GetType().Name}:{server.Id.xby4()}",
-                notification.Recipient,
-                notification.Verb ,
-
-                notification.Message
-            );
-        };
+        Notified += Audit;
     }
 
-    public void Log
-    (
-        string correlationId,
-        string time,
-        
-        string? sender,
-        string? recipient,
-        string? verb,
-        
-        string? message
-    )
+    private static Regex unquote = new Regex(@"^""(.*)""$");
+
+    public void Audit(object? sender, IClientNotificationSerialized notification)
     {
-        log.LogInformation(@$"{{sender:{sender},verb:{verb},recipient:{recipient},correlationId:{correlationId}}}
-  message:{message}
-");
+        var serverLabel = sender == null ? "" : $"<<<Server:{server.Id.xby4()}>>>";
+        var senderLabel = sender == null ? "" : $"<<<{sender.GetType().Name}:{sender.GetHashCode().xby4()}>>>";
+
+        var correlation = new CorrelationId(notification.CorrelationId1, notification.CorrelationId2);
+        var now = DateTime.UtcNow.ToString("O");
+
+        var messageString = notification.Message.Replace("\\r", "").Replace("\\n", Environment.NewLine);
+        messageString = unquote.Replace(messageString, "$1");
+
+        log.Log(LogLevel.Warning, @$"{serverLabel} {senderLabel} Notification{correlation.Guid}
+===
+{messageString}
+===");
     }
 
 }

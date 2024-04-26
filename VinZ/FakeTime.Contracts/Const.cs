@@ -2,7 +2,7 @@
 
 public static  class TimeServiceConst
 {
-    private const string Time = nameof(Time);
+    public const string Time = nameof(Time);
 
     public static class Verb
     {

@@ -164,12 +164,12 @@ public class PlanningRepository(IDbContextFactory factory, IServerContextService
     {
         //InsertOrUpdate
 
-        var update = _planning.ServerContext
+        var already = _planning.ServerContext
             .Any(serverContext2 => serverContext2.ServerContextId == serverContext.ServerContextId);
 
         var entity = _planning.Entry(serverContext);
 
-        entity.State = update
+        entity.State = already
             ? EntityState.Modified
             : EntityState.Added;
 

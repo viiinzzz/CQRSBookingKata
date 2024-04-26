@@ -1,4 +1,8 @@
-﻿namespace VinZ.MessageQueue;
+﻿using Newtonsoft.Json.Linq;
+using VinZ.Common;
+
+namespace VinZ.MessageQueue;
+
 
 public record NegativeResponseNotification
 (
@@ -35,7 +39,8 @@ public record NegativeResponseNotification
 {
     public NegativeResponseNotification
     (
-        object? MessageObj,
+        IClientNotificationSerialized childNotification,
+        Exception ex,
 
         string? Originator = default,
 
@@ -53,7 +58,13 @@ public record NegativeResponseNotification
         : this
         (
             Omni, ErrorProcessingRequest,
-            MessageObj,
+
+            childNotification
+                .MessageAsObject()
+                .PatchRelax(new {
+                    error = ex.Message,
+                    stackTrace = ex.StackTrace
+                }),
 
             Originator,
 

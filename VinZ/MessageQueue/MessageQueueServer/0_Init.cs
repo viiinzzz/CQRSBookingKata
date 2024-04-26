@@ -11,11 +11,18 @@ public partial class MqServer
 
         DateTime.Notified += (sender, time) =>
         {
-            var message = $"{time.UtcNow.SerializeUniversal()} ({time.state})";
-
             var originator = GetType().Name;
 
-            Notify(new ResponseNotification(default, time.verb, message)
+            // var message = new
+            // {
+            //     // action = time.verb,
+            //     time.state,
+            //     time = $"{time.UtcNow.SerializeUniversal()}"
+            // };
+
+            var message = $"Time {time.UtcNow.SerializeUniversal()} ({time.state})";
+
+            Notify(new ResponseNotification(default, AuditMessage, message)
             {
                 Originator = originator,
                 Immediate = true
@@ -44,7 +51,8 @@ public partial class MqServer
             client.Configure();
 
 
-            log.LogInformation($"<<<{type.Name}:{client.GetHashCode().xby4()}>>> Connected.");
+            log.Log(LogLevel.Debug,
+                $"<<<{type.Name}:{client.GetHashCode().xby4()}>>> Connected.");
 
             _domainBuses[scope] = client;
         }

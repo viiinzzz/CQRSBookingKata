@@ -16,10 +16,10 @@ public partial class DemoService
 )
     : MessageBusClientBase
 {
-    private const int StaffPerHotel = 3;
+    private const int StaffPerHotel = 1;//3;
     private const int ManagerPerHotel = 1;
-    private const int HotelCount = 3;
-    private const int FloorPerHotel = 2;
+    private const int HotelCount = 1;//3;
+    private const int FloorPerHotel = 1;//2;
     private const int RoomPerFloor = 3;
     private const int PersonPerRoom = 2;
 

@@ -37,5 +37,5 @@ public static class Const
 
 
     public const string ImportantMessage = $"{nameof(ImportantMessage)}";
-    public const string InformationMessage = $"{nameof(InformationMessage)}";
+    public const string AuditMessage = $"{nameof(AuditMessage)}";
 }

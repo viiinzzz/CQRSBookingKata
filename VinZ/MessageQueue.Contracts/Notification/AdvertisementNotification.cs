@@ -24,7 +24,7 @@ public record AdvertisementNotification
         NotificationType.Advertisement,
 
         Recipient,
-        InformationMessage, MessageObj, 
+        AuditMessage, MessageObj, 
         (int)HttpStatusCode.Continue, Originator,
 
         EarliestDelivery, LatestDelivery, RepeatDelay,

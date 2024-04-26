@@ -92,11 +92,22 @@ public partial class MqServer
         var notificationLabel = $"Notification{correlationId}{(immediate ? "" : $" (Id:{serverNotification.NotificationId})")}";
         var dequeuing = immediate ? "            >>>Relaying>>>          Immediate" : ">>>Dequeuing>>>                     scheduled";
         var subscribersCount = $"{subscribers.Count} subscriber{(subscribers.Count > 1 ? "s" : "")}";
-        var rvm = @$"
-  {{recipient: ""{serverNotification.Recipient}"", verb: ""{serverNotification.Verb}"", message: {serverNotification.Message}}}";
-        var logLevel = serverNotification.IsErrorStatus() ? LogLevel.Error : LogLevel.Information;
+        var messageObj = serverNotification.MessageAsObject();
+        var messageObjString = JsonConvert.SerializeObject(messageObj, Formatting.Indented).Replace("\\r", "").Replace("\\n", Environment.NewLine);
+        var rvm = @$"---
+To: {serverNotification.Recipient}
+Subject: {serverNotification.Verb}
+{messageObjString}
+---";
+        {
+            var logLevel =
+                serverNotification.IsErrorStatus() ? LogLevel.Error
+                // : serverNotification.Verb == AuditMessage ? LogLevel.Debug
+                : LogLevel.Debug;
 
-        log.Log(logLevel, @$"{dequeuing} {notificationLabel} to {subscribersCount} ...{rvm}");
+            log.Log(logLevel,
+                @$"{dequeuing} {notificationLabel} to {subscribersCount}...{Environment.NewLine}{rvm}");
+        }
 
         var updateMessage = () =>
         {
@@ -124,6 +135,8 @@ public partial class MqServer
 
         if (awaitedBus != null)
         {
+            RefreshFastest();
+
             subscribers.Add(awaitedBus);
         }
         //
@@ -136,8 +149,9 @@ public partial class MqServer
         {
             if (!immediate) updateMessage();
 
-            log.LogError(@$"            >>>Undeliverable!       {notificationLabel} ...{rvm}
-  (matched {string.Join(" ", matchedHash)} unmatched {string.Join(" ", unmatchedHash)})");
+            var matchedUnmatched = $"(matched {string.Join(" ", matchedHash)} unmatched {string.Join(" ", unmatchedHash)})";
+
+            log.LogError(@$"            >>>Undeliverable!       {notificationLabel}...{Environment.NewLine}{matchedUnmatched}{Environment.NewLine}{rvm}");
 
             if (serverNotification.IsErrorStatus())
             {
@@ -186,15 +200,15 @@ public partial class MqServer
                 {
                     client.OnNotified(clientNotification);
 
-                    log.LogInformation(
-                        $"{delivering} {notificationLabel} to subscriber# {client.GetHashCode().xby4()}...");
+                    log.Log(LogLevel.Debug,
+                        $"{delivering} {notificationLabel} to <<<Subscriber:{client.GetHashCode().xby4()}>>>...");
 
                     return new DeliveryCount(1, 0);
                 }
                 catch (Exception ex)
                 {
                     log.LogError(
-                        @$"{delivering} {notificationLabel} to subscriber# {client.GetHashCode().xby4()}...
+                        @$"{delivering} {notificationLabel} to <<<Subscriber:{client.GetHashCode().xby4()}>>>...
 failure: {ex.Message}
 {ex.StackTrace}
 ");
@@ -206,10 +220,17 @@ failure: {ex.Message}
 
         updateMessage();
 
-        var delivered = "                         >>>Done>>> scheduled";
+        var delivered = "                         >>>Sent>>> scheduled";
 
-        log.LogInformation(
-            @$"{delivered} {notificationLabel} to {subscribersCount}...{rvm}");
+        {
+            var logLevel =
+                clientNotification.IsErrorStatus() ? LogLevel.Error
+                : clientNotification.Verb == AuditMessage ? LogLevel.Debug
+                : LogLevel.Information;
+
+            log.Log(logLevel,
+                @$"{delivered} {notificationLabel} to {subscribersCount}...{Environment.NewLine}{rvm}");
+        }
 
         return (count, updates);
     }

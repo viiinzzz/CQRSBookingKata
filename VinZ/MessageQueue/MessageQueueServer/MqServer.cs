@@ -30,11 +30,9 @@ public partial class MqServer
         //executing
     }
 
+
     private async Task Execute(CancellationToken cancel)
     {
-        var refresh = config.BusRefreshMinMilliseconds;
-        var logRefresh = () => log.LogInformation($"Throttling refresh rate @{refresh}ms");
-
         while (!cancel.IsCancellationRequested)
         {
             var t0 = DateTime.UtcNow;
@@ -49,29 +47,21 @@ public partial class MqServer
 
             var dt = (int)Math.Ceiling((t1 - t0).TotalMilliseconds);
 
-            if (dt >= refresh)
+            if (dt >= _refresh)
             {
-                if (refresh / 2 >= config.BusRefreshMinMilliseconds)
-                {
-                    refresh /= 2;
-                    logRefresh();
-                }
+                RefreshFaster();
 
                 continue;
             }
 
-            var delay = refresh - dt;
+            var delay = _refresh - dt;
 
-            if (delay < refresh)
+            if (delay < _refresh)
             {
-                delay = refresh;
+                delay = _refresh;
             }
 
-            if (refresh * 2 <= config.BusRefreshMaxMilliseconds)
-            {
-                refresh *= 2;
-                logRefresh();
-            }
+            RefreshSlower();
 
             await Task.Delay(delay, cancel);
         }
