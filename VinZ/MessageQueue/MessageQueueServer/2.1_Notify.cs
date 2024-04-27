@@ -79,9 +79,14 @@ public partial class MqServer
             var notificationLabel = $"Notification{correlationId.Guid}";
             var messageObj = notification.MessageAsObject();
             var messageObjString = JsonConvert.SerializeObject(messageObj, Formatting.Indented).Replace("\\r", "").Replace("\\n", Environment.NewLine);
+            var messageType = 
+                notification.Type == NotificationType.Response ? "Re: " 
+                : notification.Type == NotificationType.Advertisement ? "Ad: " 
+                : "";
             var rvm = @$"---
 To: {notification.Recipient}
-Subject: {notification.Verb}
+From: {notification.Originator}
+Subject: {messageType}{notification.Verb}
 {messageObjString}
 ---";
             var logLevel = 
@@ -90,6 +95,8 @@ Subject: {notification.Verb}
                 : LogLevel.Debug;
 
             log.Log(logLevel, @$"{queuing} {notificationLabel}...{Environment.NewLine}{rvm}");
+
+            Check(logLevel);
 
             //
             //

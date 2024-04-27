@@ -12,6 +12,24 @@ public partial class MqServer
     private Task _executingTask = Task.CompletedTask;
     private CancellationTokenSource _executeCancel = new();
 
+    private readonly bool _pauseOnError = config.PauseOnError;
+
+    private void Check(LogLevel logLevel)
+    {
+        if (logLevel != LogLevel.Error || !_pauseOnError)
+        {
+            return;
+        }
+
+        Console.WriteLine(@"
+
+
+Press a key to continue . . .
+
+
+");
+        Console.ReadKey();
+    }
 
     public async Task StartingAsync(CancellationToken cancellationToken)
     {

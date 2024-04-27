@@ -31,10 +31,7 @@ public partial class SalesQueryService
                          ?? throw new Exception("invalid originator");
 
         var roomDetail = bus.AskResult<RoomDetails>(Recipient.Admin, Verb.Admin.RequestSingleRoomDetails,
-            new RoomDetailsRequest
-            {
-                onlyRoomNumbers = [request.Urid]
-            }, originator);
+            new Id(request.Urid), originator);
 
         //adjust arrival/departure to hotel time
         var requestCheckInHours = request.ArrivalDate.Hour + request.ArrivalDate.Minute / 60d;

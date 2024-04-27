@@ -94,9 +94,14 @@ public partial class MqServer
         var subscribersCount = $"{subscribers.Count} subscriber{(subscribers.Count > 1 ? "s" : "")}";
         var messageObj = serverNotification.MessageAsObject();
         var messageObjString = JsonConvert.SerializeObject(messageObj, Formatting.Indented).Replace("\\r", "").Replace("\\n", Environment.NewLine);
+        var messageType =
+            serverNotification.Type == NotificationType.Response ? "Re: "
+            : serverNotification.Type == NotificationType.Advertisement ? "Ad: "
+            : "";
         var rvm = @$"---
 To: {serverNotification.Recipient}
-Subject: {serverNotification.Verb}
+From: {serverNotification.Originator}
+Subject: {messageType}{serverNotification.Verb}
 {messageObjString}
 ---";
         {
@@ -107,6 +112,8 @@ Subject: {serverNotification.Verb}
 
             log.Log(logLevel,
                 @$"{dequeuing} {notificationLabel} to {subscribersCount}...{Environment.NewLine}{rvm}");
+
+            Check(logLevel);
         }
 
         var updateMessage = () =>
@@ -149,14 +156,19 @@ Subject: {serverNotification.Verb}
         {
             if (!immediate) updateMessage();
 
-            var matchedUnmatched = $"(matched {string.Join(" ", matchedHash)} unmatched {string.Join(" ", unmatchedHash)})";
+            var matchedUnmatched =
+                $"(matched {string.Join(" ", matchedHash)} unmatched {string.Join(" ", unmatchedHash)})";
+            {
+                var logLevel =
+                    serverNotification.Verb == ErrorProcessingRequest
+                        ? LogLevel.Debug
+                        : LogLevel.Error;
 
-            var logLevel = 
-                serverNotification.Verb == ErrorProcessingRequest ? LogLevel.Debug 
-                : LogLevel.Error;
+                log.Log(logLevel,
+                    @$"            >>>Undeliverable!       {notificationLabel}...{Environment.NewLine}{matchedUnmatched}{Environment.NewLine}{rvm}");
 
-            log.Log(logLevel,
-                @$"            >>>Undeliverable!       {notificationLabel}...{Environment.NewLine}{matchedUnmatched}{Environment.NewLine}{rvm}");
+                Check(logLevel);
+            }
 
             if (serverNotification.IsErrorStatus())
             {
@@ -235,6 +247,8 @@ failure: {ex.Message}
 
             log.Log(logLevel,
                 @$"{sent} {notificationLabel} to {subscribersCount}...{Environment.NewLine}{rvm}");
+
+            Check(logLevel);
         }
 
         return (count, updates);

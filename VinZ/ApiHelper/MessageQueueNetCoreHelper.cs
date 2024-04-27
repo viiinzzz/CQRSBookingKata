@@ -6,7 +6,9 @@ public static class MessageQueueNetCoreHelper
     (
         this IServiceCollection services, 
         
-        Type[] busTypes
+        Type[] busTypes,
+
+        bool pauseOnError
     )
     {
         foreach (var busType in busTypes)
@@ -16,7 +18,8 @@ public static class MessageQueueNetCoreHelper
 
         services.AddSingleton(_ => new MqServerConfig
         {
-            DomainBusTypes = busTypes
+            DomainBusTypes = busTypes,
+            PauseOnError = pauseOnError
         });
 
         services.AddSingleton<MqServer>();

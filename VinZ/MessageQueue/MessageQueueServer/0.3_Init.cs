@@ -1,5 +1,6 @@
 ﻿namespace VinZ.MessageQueue;
 
+
 public partial class MqServer 
     : Initializable, IMessageBus
 {

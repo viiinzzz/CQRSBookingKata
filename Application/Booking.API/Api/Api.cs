@@ -137,7 +137,10 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
     // https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/security?view=aspnetcore-8.0
 
     //bus
-    services.AddMessageQueue(Types.From<AdminBus, SalesBus, PlanningBus, BillingBus, ThirdPartyBus, ConsoleAuditBus>());
+    services.AddMessageQueue(
+        Types.From<AdminBus, SalesBus, PlanningBus, BillingBus, ThirdPartyBus, ConsoleAuditBus>(),
+        pauseOnError: isDebug
+    );
 
     //repo
     services.AddScoped<IAdminRepository, AdminRepository>();
@@ -159,7 +162,7 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
     services.AddScoped<BillingCommandService>();
     services.AddScoped<IGazetteerService, GazetteerService>();
     services.AddScoped<IPaymentCommandService, PaymentCommandService>();
-    services.AddScoped<PricingQueryService>();
+    services.AddScoped<IPricingQueryService, PricingQueryService>();
 
     var bconf = new BookingConfiguration
     {

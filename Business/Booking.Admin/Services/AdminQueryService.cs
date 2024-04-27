@@ -7,8 +7,25 @@ public class AdminQueryService
     IGazetteerService geo
 )
 {
-    public IQueryable<RoomDetails> GetHotelRoomDetails(int hotelId, int[]? exceptRoomNumbers, int[]? onlyRoomNumbers)
+    public IQueryable<RoomDetails> GetHotelRoomDetails(int hotelId, int[]? exceptUridsOrRoomNums, int[]? onlyUridsOrRoomNums)
     {
+        var exceptUrids = !(exceptUridsOrRoomNums is not { Length: > 0 } || exceptUridsOrRoomNums.Any(x => x < 1_0000)); 
+        var exceptRoomNums = !(exceptUridsOrRoomNums is not { Length: > 0 } || exceptUridsOrRoomNums.Any(x => x >= 1_0000)); 
+
+        var onlyUrids = !(onlyUridsOrRoomNums is not { Length: > 0 } || onlyUridsOrRoomNums.Any(x => x < 1_0000)); 
+        var onlyRoomNums = !(onlyUridsOrRoomNums is not { Length: > 0 } || onlyUridsOrRoomNums.Any(x => x >= 1_0000));
+
+
+        if (exceptUridsOrRoomNums is { Length: > 0 } && !exceptUrids && !exceptRoomNums)
+        {
+            throw new ArgumentException("invalid mix of urid, roomNum", nameof(exceptUridsOrRoomNums));
+        }
+
+        if (onlyUridsOrRoomNums is { Length: > 0 } && !onlyUrids && !onlyRoomNums)
+        {
+            throw new ArgumentException("invalid mix of urid, roomNum", nameof(onlyUridsOrRoomNums));
+        }
+
         var hotel = admin.GetHotel(hotelId);
 
         if (hotel == default)
@@ -38,16 +55,24 @@ public class AdminQueryService
 
         var floorNumMax = new UniqueRoomId(rooms.Max(room => room.Urid)).FloorNum;
 
-        if (exceptRoomNumbers != default)
-        {
+        if (exceptUrids) {
             rooms = rooms
-                .Where(room => !exceptRoomNumbers.Contains(room.RoomNum));
+                .Where(room => !exceptUridsOrRoomNums.Contains(room.Urid));
+        }
+        if (exceptRoomNums) {
+            rooms = rooms
+                .Where(room => !exceptUridsOrRoomNums.Contains(room.RoomNum));
         }
 
-        if (onlyRoomNumbers != default)
+        if (onlyUrids)
         {
             rooms = rooms
-                .Where(room => onlyRoomNumbers.Contains(room.RoomNum));
+                .Where(room => onlyUridsOrRoomNums.Contains(room.Urid));
+        }
+        if (onlyRoomNums)
+        {
+            rooms = rooms
+                .Where(room => onlyUridsOrRoomNums.Contains(room.RoomNum));
         }
 
         var roomDetails = rooms
