@@ -19,9 +19,12 @@ var isDebug = false;
     isDebug = pif.IsDebug;
 }
 
-var traceEF = false;//isDebug;
-
 var isRelease = !isDebug;
+
+
+var traceEF = false;//isDebug;
+var pauseOnError = false; //isDebug;
+var demoMode = true; //isDebug;
 
 /*╭-----------------------------------------------------------------------------
   ╎ Storage methods
@@ -136,10 +139,19 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
     services.AddAuthentication().AddJwtBearer();
     // https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/security?view=aspnetcore-8.0
 
+
+    var urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS").Split(";");
+    var url = $"{urls.First()}/bus/";
+
     //bus
     services.AddMessageQueue(
+        new BusConfiguration
+        {
+            LocalUrl = url,
+            RemoteUrl = url
+        },
         Types.From<AdminBus, SalesBus, PlanningBus, BillingBus, ThirdPartyBus, ConsoleAuditBus>(),
-        pauseOnError: isDebug
+        pauseOnError
     );
 
     //repo
@@ -159,7 +171,7 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
     services.AddScoped<KpiQueryService>();
 
     //support/third-party
-    services.AddScoped<BillingCommandService>();
+    services.AddScoped<IBillingCommandService, BillingCommandService>();
     services.AddScoped<IGazetteerService, GazetteerService>();
     services.AddScoped<IPaymentCommandService, PaymentCommandService>();
     services.AddScoped<IPricingQueryService, PricingQueryService>();
@@ -172,13 +184,16 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
 
     //demo
     services.AddSingleton<BookingDemoContext>();
-    services.AddScoped<DemoService>();
-    services.AddHostedService<DemoHostService>();
-    services.Configure<HostOptions>(options =>
+    if (demoMode)
     {
-        options.ServicesStartConcurrently = true;
-        options.ServicesStopConcurrently = true;
-    });
+        services.AddScoped<DemoService>();
+        services.AddHostedService<DemoHostService>();
+        services.Configure<HostOptions>(options =>
+        {
+            options.ServicesStartConcurrently = true;
+            options.ServicesStopConcurrently = true;
+        });
+    }
 }
 /*
                                                                              ╎

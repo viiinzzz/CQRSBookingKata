@@ -32,6 +32,9 @@ public partial class DemoService
     {
         try
         {
+            await Task.Delay(30000);
+
+
             DateTime.Freeze();
 
             Seed();
@@ -56,11 +59,11 @@ public partial class DemoService
 
         //admin setup
         context.Execute(() => Fake_Employees(false));
-        context.Execute(() => Fake_Hotels(false));
-        context.Execute(() => Fake_Vacancies(false));
+        // context.Execute(() => Fake_Hotels(false));
+        // context.Execute(() => Fake_Vacancies(false));
 
         //sales setup
-        context.Execute(() => Fake_Customers(false));
+        // context.Execute(() => Fake_Customers(false));
 
 
         // DateTime.Unfreeze();

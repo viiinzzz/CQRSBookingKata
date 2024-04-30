@@ -8,6 +8,16 @@ public class ScopeProvider(IServiceProvider sp) : IScopeProvider
 
         t = scope.ServiceProvider.GetRequiredService<T>();
 
+#if DEBUG
+        Console.WriteLine(@$"
+
+********
+GetScope {typeof(T).FullName}
+********
+
+");
+#endif
+
         return scope;
     }
 
@@ -16,6 +26,16 @@ public class ScopeProvider(IServiceProvider sp) : IScopeProvider
         var scope = sp.CreateScope();
 
         t = scope.ServiceProvider.GetRequiredService(serviceType);
+
+#if DEBUG
+        Console.WriteLine(@$"
+
+********
+GetScope {serviceType.FullName}
+********
+
+");
+#endif
 
         return scope;
     }

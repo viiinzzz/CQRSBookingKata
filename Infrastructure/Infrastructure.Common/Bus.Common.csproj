@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\VinZ\MessageQueue.Client\VinZ.MessageQueue.Client.csproj" />
     <ProjectReference Include="..\..\VinZ\Paging\VinZ.Common.Paging.csproj" />
     <ProjectReference Include="..\..\VinZ\GeoIndexing\VinZ.GeoIndexing.csproj" />
   </ItemGroup>

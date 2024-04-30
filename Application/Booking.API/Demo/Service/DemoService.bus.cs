@@ -2,7 +2,7 @@ namespace BookingKata.API.Demo;
 
 public partial class DemoService
 {
-    public override void Configure()
+    public override async Task Configure()
     {
 
     }

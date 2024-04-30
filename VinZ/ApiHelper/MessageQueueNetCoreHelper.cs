@@ -4,13 +4,16 @@ public static class MessageQueueNetCoreHelper
 {
     public static IServiceCollection AddMessageQueue
     (
-        this IServiceCollection services, 
+        this IServiceCollection services,
         
+        BusConfiguration busConfig,
         Type[] busTypes,
 
         bool pauseOnError
     )
     {
+        services.AddSingleton(busConfig);
+
         foreach (var busType in busTypes)
         {
             services.AddSingleton(busType);
@@ -214,13 +217,13 @@ public static class MessageQueueNetCoreHelper
     ) 
         where TEntity : class
     {
-        return async (
+        return async
+            (
                 int id,
                 bool? disable,
                 [FromServices] IMessageBus mq,
                 CancellationToken requestCancel
-            )
-            =>
+            ) => 
         {
             var ret = await mq.Ask<TEntity>(
                 originator, recipient, verb, new IdDisable(id, disable ?? true), 

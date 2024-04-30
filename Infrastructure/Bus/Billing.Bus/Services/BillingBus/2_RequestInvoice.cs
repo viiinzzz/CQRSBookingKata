@@ -6,7 +6,7 @@ public partial class BillingBus
     {
         var request = notification.MessageAs<InvoiceRequest>();
 
-        using var scope = sp.GetScope<BillingCommandService>(out var billing);
+        using var scope = sp.GetScope<IBillingCommandService>(out var billing);
 
         //
         //

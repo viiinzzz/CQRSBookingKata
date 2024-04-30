@@ -4,7 +4,7 @@ namespace BookingKata.Infrastructure.Network;
 
 public class PlanningBus(IScopeProvider sp, BookingConfiguration bconf) : MessageBusClientBase
 {
-    public override void Configure()
+    public override async Task Configure()
     {
         Subscribe(Recipient.Planning);
         Subscribe(Recipient.Sales, Verb.Sales.BookConfirmed);

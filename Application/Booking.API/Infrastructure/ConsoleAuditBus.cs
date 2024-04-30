@@ -9,7 +9,7 @@ public class ConsoleAuditBus
 )
     : MessageBusClientBase, IAuditBus
 {
-    public override void Configure()
+    public override async Task Configure()
     {
         Subscribe(Omni, AuditMessage);
 

@@ -2,9 +2,9 @@
 
 public partial class AdminBus(IScopeProvider sp, BookingConfiguration bconf) : MessageBusClientBase
 {
-    public override void Configure()
+    public override async Task Configure()
     {
-        Subscribe(Recipient.Admin);
+        await Subscribe(Recipient.Admin);
 
         Notified += (sender, notification) =>
         {
@@ -104,5 +104,6 @@ public partial class AdminBus(IScopeProvider sp, BookingConfiguration bconf) : M
                 Notify(new NegativeResponseNotification(notification.Originator, notification, ex));
             }
         };
+
     }
 }

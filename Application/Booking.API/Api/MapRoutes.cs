@@ -6,7 +6,7 @@ public static partial class ApiMethods
 
     public static void MapRoutes(WebApplication app)
     {
-        MapRoutes_0_Demo(app);
+        MapRoutes_0_Bus(app);
 
         MapRoutes_1_Admin(app, out var admin);
         {
@@ -23,6 +23,8 @@ public static partial class ApiMethods
         MapRoutes_5_Service(app);
         
         MapRoutes_6_Booking(app);
+
+        MapRoutes_8_Demo(app);
 
         MapRoutes_9_Swagger(app);
     }

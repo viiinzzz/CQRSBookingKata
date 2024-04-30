@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PositionHelper\VinZ.Common.PositionHelper.csproj" />
-    <ProjectReference Include="..\RecordHelper\Vinz.Common.RecordHelper.csproj" />
+    <ProjectReference Include="..\RecordHelper\VinZ.Common.RecordHelper.csproj" />
   </ItemGroup>
 
 </Project>

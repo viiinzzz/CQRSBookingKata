@@ -1,10 +1,9 @@
 ﻿namespace VinZ.MessageQueue;
 
 
-public partial class MqServer 
-    : Initializable, IMessageBus
+public partial class MqServer : Initializable, IMessageBus
 {
-    private Dictionary<IServiceScope, IMessageBusClient> _domainBuses = new();
+    private ConcurrentDictionary<IServiceScope, IMessageBusClient> _domainBuses = new();
 
     public override void Init()
     {
@@ -27,7 +26,7 @@ public partial class MqServer
             {
                 Originator = originator,
                 Immediate = true
-            });
+            }, 0);
         };
 
         if (config.DomainBusTypes == default)
@@ -35,7 +34,8 @@ public partial class MqServer
             return;
         }
 
-        foreach (var type in config.DomainBusTypes)
+
+        var addClient = async (Type type) =>
         {
             if (typeof(IMessageBus).IsAssignableFrom(type))
             {
@@ -46,16 +46,29 @@ public partial class MqServer
 
             var client = (IMessageBusClient)domainBus;
 
-            
-            client.ConnectToBus(this);
+            // client.ConnectToBus(this);
+            client.ConnectToBus(scp);
 
-            client.Configure();
+            await client.Configure();
 
 
             log.Log(LogLevel.Debug,
                 $"<<<{type.Name}:{client.GetHashCode().xby4()}>>> Connected.");
 
             _domainBuses[scope] = client;
-        }
+        };
+
+        var allAdded = Task
+            .WhenAll(config.DomainBusTypes.Select(type => addClient(type)))
+            .ContinueWith(prev =>
+            {
+                if (prev.IsCompletedSuccessfully)
+                {
+                    log.Log(LogLevel.Debug,
+                        $"<<<{nameof(MqServer)}:{GetHashCode().xby4()}>>> Initialized.");
+                }
+             });
+
+
     }
 }

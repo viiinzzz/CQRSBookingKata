@@ -2,7 +2,7 @@
 
 public partial class SalesBus(IScopeProvider sp, BookingConfiguration bconf) : MessageBusClientBase
 {
-    public override void Configure()
+    public override async Task Configure()
     {
         Subscribe(Recipient.Sales);
 

@@ -1,4 +1,6 @@
-﻿namespace VinZ.MessageQueue;
+﻿using System.Dynamic;
+
+namespace VinZ.MessageQueue;
 
 
 public record NegativeResponseNotification
@@ -53,12 +55,8 @@ public record NegativeResponseNotification
         (
             Omni, ErrorProcessingRequest,
 
-            childNotification
-                .MessageAsObject()
-                .PatchRelax(new {
-                    error = ex.Message,
-                    stackTrace = $"{Environment.NewLine}{ex.StackTrace}"
-                }),
+            
+            childNotification.MessageAsObject().IncludeError(ex),
 
             childNotification.Originator,
 
@@ -67,6 +65,7 @@ public record NegativeResponseNotification
             childNotification.CorrelationId1, childNotification.CorrelationId2
         )
     { }
+
 
     public NegativeResponseNotification
     (
@@ -88,12 +87,7 @@ public record NegativeResponseNotification
         (
             recipient, ErrorProcessingRequest,
 
-            childNotification
-                .MessageAsObject()
-                .PatchRelax(new {
-                    error = ex.Message,
-                    stackTrace = $"{Environment.NewLine}{ex.StackTrace}"
-                }),
+            childNotification.MessageAsObject().IncludeError(ex),
 
             childNotification.Originator,
 
@@ -102,4 +96,28 @@ public record NegativeResponseNotification
             childNotification.CorrelationId1, childNotification.CorrelationId2
         )
     { }
+}
+
+
+public static class NegativeResponseNotificationHelper
+{
+
+    public static ExpandoObject? IncludeError(this object obj, Exception ex)
+    {
+        var ret = obj.PatchRelax(new
+        {
+            error = ex.Message,
+            stackTrace = $"{Environment.NewLine}{ex.StackTrace}"
+        });
+
+        if (ex.InnerException != null)
+        {
+            ret = ret.PatchRelax(new
+            {
+                errorInner = IncludeError(null, ex.InnerException)
+            });
+        }
+
+        return ret;
+    }
 }

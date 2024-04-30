@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace BookingKata.Infrastructure.Bus.Admin;
+﻿namespace BookingKata.Infrastructure.Bus.Admin;
 
 public partial class AdminBus
 {

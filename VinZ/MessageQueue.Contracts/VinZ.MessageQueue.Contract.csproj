@@ -15,4 +15,8 @@
     <ProjectReference Include="..\JsonHelper\VinZ.Common.JsonHelper.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Entities\" />
+  </ItemGroup>
+
 </Project>

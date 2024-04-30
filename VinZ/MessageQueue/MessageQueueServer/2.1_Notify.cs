@@ -2,8 +2,13 @@
 
 public partial class MqServer
 {
-    public INotifyAck Notify(IClientNotificationSerialized notification)
+    public INotifyAck Notify(IClientNotificationSerialized notification, int busId)
     {
+        if (busId != 0)
+        {
+            throw new ArgumentException("Only value 0 allowed", nameof(busId));
+        }
+
         return Notify(notification, CancellationToken.None);
     }
 

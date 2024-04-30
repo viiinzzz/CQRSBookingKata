@@ -2,7 +2,7 @@
 
 public partial class BillingBus(IScopeProvider sp) : MessageBusClientBase
 {
-    public override void Configure()
+    public override async Task Configure()
     {
         Subscribe(Recipient);
 

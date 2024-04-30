@@ -9,7 +9,7 @@ public partial class BillingBus
         var secret = new DebitCardSecrets(request.debitCardOwnerName, request.debitCardExpire, request.debitCardCCV);
         var vendor = new VendorIdentifiers(request.vendorId, request.terminalId);
 
-        using var scope = sp.GetScope<BillingCommandService>(out var billing);
+        using var scope = sp.GetScope<IBillingCommandService>(out var billing);
 
         var referenceId = new
         {
