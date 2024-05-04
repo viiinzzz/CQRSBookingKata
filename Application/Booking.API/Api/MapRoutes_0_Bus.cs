@@ -7,43 +7,43 @@ public static partial class ApiMethods
         var busGroup = app.MapGroup("/bus"
         ).ExcludeFromDescription();
 
-        busGroup.MapPost("{busId}/notify",
-            (int busId, [FromBody]IClientNotificationSerialized notification, [FromServices]IMessageBus bus) =>
+        busGroup.MapPost("/{busId}/notify",
+            (ParsableHexInt busId, [FromBody]ClientNotification2 notification, [FromServices]IMessageBus bus) =>
             {
-                return bus.Notify(notification, busId);
+                return bus.Notify(notification, busId.Value);
             }
         ).ExcludeFromDescription();
 
-        busGroup.MapPost("{busId}/subscribe",
-            (int busId, [FromBody]SubscriptionRequest sub, [FromServices]IMessageBus bus) =>
-            {
-                bus.Subscribe(sub, busId);
-            }
-        ).ExcludeFromDescription();
-
-        busGroup.MapPost("{busId}/unsubscribe",
-            (int busId, [FromBody] SubscriptionRequest sub, [FromServices]IMessageBus bus) =>
-            {
-                bus.Unsubscribe(sub, busId);
-            }
-        ).ExcludeFromDescription();
+        // busGroup.MapPost("/{busId}/subscribe",
+        //     (ParsableHexInt busId, [FromBody]SubscriptionRequest sub, [FromServices]IMessageBus bus) =>
+        //     {
+        //         bus.Subscribe(sub, busId.Value);
+        //     }
+        // ).ExcludeFromDescription();
+        //
+        // busGroup.MapPost("/{busId}/unsubscribe",
+        //     (ParsableHexInt busId, [FromBody] SubscriptionRequest sub, [FromServices]IMessageBus bus) =>
+        //     {
+        //         bus.Unsubscribe(sub, busId.Value);
+        //     }
+        // ).ExcludeFromDescription();
 
 
         busGroup.MapPost("/notify",
-            ([FromBody]IClientNotificationSerialized notification, [FromServices]IMessageBus bus) =>
+            ([FromBody] ClientNotification2 notification, [FromServices]IMessageBus bus) =>
             {
                 return bus.Notify(notification, 0);
             }
         ).ExcludeFromDescription();
 
-        busGroup.MapPost("subscribe",
+        busGroup.MapPost("/subscribe",
             ([FromBody]SubscriptionRequest sub, [FromServices]IMessageBus bus) =>
             {
                 bus.Subscribe(sub, 0);
             }
         ).ExcludeFromDescription();
 
-        busGroup.MapPost("unsubscribe",
+        busGroup.MapPost("/unsubscribe",
             ([FromBody] SubscriptionRequest sub, [FromServices]IMessageBus bus) =>
             {
                 bus.Unsubscribe(sub, 0);

@@ -1,6 +1,6 @@
 ﻿namespace VinZ.MessageQueue;
 
-public record struct CorrelationId(long Id1, long Id2) : ICorrelationId
+public record struct CorrelationId(long Id1, long Id2)// : ICorrelationId_
 {
     public static CorrelationId New()
     {

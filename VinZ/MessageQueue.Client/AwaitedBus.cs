@@ -7,6 +7,8 @@ public class AwaitedBus(AwaitedResponse[] awaitedResponses) : IMessageBusClient
     //     return this;
     // }
 
+    public ILogger<IMessageBus>? Log { get; set; }
+
     public IMessageBusClient ConnectToBus(IScopeProvider scp)
     {
         return this;
@@ -32,9 +34,15 @@ public class AwaitedBus(AwaitedResponse[] awaitedResponses) : IMessageBusClient
         return Task.FromResult(true);
     }
 
-    public Task Notify(IClientNotificationSerialized message)
+    public Task<NotifyAck> Notify(IClientNotificationSerialized notification)
     {
-        return Task.CompletedTask;
+        return Task.FromResult(new NotifyAck
+        {
+            Valid = true,
+            Status = 0,
+            data = default,
+            CorrelationId = notification.CorrelationId()
+        });
     }
 
     public void OnNotified(IClientNotificationSerialized notification)

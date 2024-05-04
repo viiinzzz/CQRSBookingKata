@@ -48,8 +48,13 @@ public static class MessageHelper
                ?? throw new NullReferenceException("GetType().FullName");
     }
 
-    public static Type GetTypeFromSerializedName(this string typeString)
+    public static Type? GetTypeFromSerializedName(this string? typeString)
     {
+        if (typeString == null)
+        {
+            return null;
+        }
+
         if (typeString == AnonymousType ||
             typeString.StartsWith("<>f__AnonymousType0"))
         {
@@ -152,35 +157,47 @@ public static class MessageHelper
         return type;
     }
 
-    public static object MessageAs(this IHaveSerializedMessage n, Type? tMessage)
+    public static object MessageAs(this IHaveSerializedMessage notification, Type? tMessage)
     {
-        if (n == null)
+        if (notification == null)
         {
             return null;
         }
 
-        if (string.IsNullOrEmpty(n.Message) || n.Message == EmptySerialized)
+        if (string.IsNullOrEmpty(notification.Message) || notification.Message == EmptySerialized)
         {
             if (tMessage != null)
             {
-                throw new ArgumentNullException(nameof(n.Message));
+                throw new ArgumentNullException(nameof(notification.Message));
             }
         }
 
-        var nMessageType = n.MessageType;
+        var nMessageType = notification.MessageType;
 
         var messageType = nMessageType.GetTypeFromSerializedName();
 
-        if (tMessage != null && messageType != tMessage)
+        if (messageType?.IsInterface ?? false)
+        {
+            throw new ArgumentException($"invalid type {messageType.FullName} : must be concrete", nameof(notification));
+        }
+
+        if ((tMessage != null && messageType != tMessage) || 
+            (messageType == null && notification.Message != null)
+            )
         {
             throw new InvalidOperationException($"type mismatch {messageType.FullName} != {tMessage.FullName}");
+        }
+
+        if (messageType == null)
+        {
+            return null;
         }
 
         object? messageObj;
 
         if (messageType.IsClass)
         {
-            messageObj = JsonConvert.DeserializeObject(n.Message, messageType);
+            messageObj = JsonConvert.DeserializeObject(notification.Message, messageType);
 
             if (messageObj == null)
             {
@@ -189,7 +206,7 @@ public static class MessageHelper
         }
         else
         {
-            messageObj = Convert.ChangeType(n.Message, messageType, CultureInfo.InvariantCulture);
+            messageObj = Convert.ChangeType(notification.Message, messageType, CultureInfo.InvariantCulture);
         }
 
         return messageObj;

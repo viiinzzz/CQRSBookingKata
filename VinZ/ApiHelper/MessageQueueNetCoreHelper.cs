@@ -17,6 +17,14 @@ public static class MessageQueueNetCoreHelper
         foreach (var busType in busTypes)
         {
             services.AddSingleton(busType);
+
+            // var logBusType = typeof(ILogger<>).MakeGenericType(busType);
+            // services.AddTransient(logBusType);
+            // services.AddSingleton(sp =>
+            // {
+            //     var logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger(busType);
+            //     return logger;
+            // });
         }
 
         services.AddSingleton(_ => new MqServerConfig

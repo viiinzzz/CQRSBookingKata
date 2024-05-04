@@ -2,17 +2,19 @@
 
 public partial class MqServer
 {
-    public INotifyAck Notify(IClientNotificationSerialized notification, int busId)
+    public NotifyAck Notify(IClientNotificationSerialized notification, int busId)
     {
-        if (busId != 0)
+        var bus = _domainBuses.Values.FirstOrDefault(bus => bus.GetHashCode() == busId);
+
+        if (bus != null)
         {
-            throw new ArgumentException("Only value 0 allowed", nameof(busId));
+            return bus.Notify(notification).Result;
         }
 
         return Notify(notification, CancellationToken.None);
     }
 
-    public INotifyAck Notify(IClientNotificationSerialized clientNotification, CancellationToken cancel)
+    public NotifyAck Notify(IClientNotificationSerialized clientNotification, CancellationToken cancel)
     {
         var now = DateTime.UtcNow;
 

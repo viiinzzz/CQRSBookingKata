@@ -5,10 +5,13 @@ public class ConsoleAuditBus
 (
     ITimeService DateTime,
     IServerContextService server,
-    ILogger<ConsoleAuditBus> log
+    // ILogger<ConsoleAuditBus> log
+    ILoggerFactory logFactory
 )
     : MessageBusClientBase, IAuditBus
 {
+    ILogger<ConsoleAuditBus> log = logFactory.CreateLogger<ConsoleAuditBus>();
+
     public override async Task Configure()
     {
         Subscribe(Omni, AuditMessage);

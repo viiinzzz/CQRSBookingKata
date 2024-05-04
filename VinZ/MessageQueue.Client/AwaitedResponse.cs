@@ -2,7 +2,7 @@
 
 public class AwaitedResponse
 (
-    ICorrelationId correlationId, ITimeService DateTime, CancellationToken cancellationToken,
+    CorrelationId correlationId, ITimeService DateTime, CancellationToken cancellationToken,
     Action<AwaitedResponse> track, Action<AwaitedResponse> untrack
 )
 {

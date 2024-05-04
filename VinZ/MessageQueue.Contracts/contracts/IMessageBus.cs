@@ -7,14 +7,15 @@ public interface IMessageBus
     void Subscribe(SubscriptionRequest sub, int busId = 0);
     bool Unsubscribe(SubscriptionRequest sub, int busId = 0);
 
-    INotifyAck Notify(IClientNotificationSerialized notification, int busId = 0);
+    NotifyAck Notify(IClientNotificationSerialized notification, int busId = 0);
 
-    Task<IClientNotificationSerialized?> Wait(INotifyAck ack, CancellationToken cancellationToken);
+    Task<IClientNotificationSerialized?> Wait(NotifyAck ack, CancellationToken cancellationToken);
 }
 
 
 public record SubscriptionRequest
 (
+    string _type = default,
     string name = default,
     string url = default,
     string? recipient = default,

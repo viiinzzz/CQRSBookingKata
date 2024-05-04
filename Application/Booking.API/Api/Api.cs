@@ -150,7 +150,14 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
             LocalUrl = url,
             RemoteUrl = url
         },
-        Types.From<AdminBus, SalesBus, PlanningBus, BillingBus, ThirdPartyBus, ConsoleAuditBus>(),
+        Types.From<
+            AdminBus,
+            SalesBus, 
+            PlanningBus,
+            BillingBus,
+            ThirdPartyBus, 
+            ConsoleAuditBus
+        >(),
         pauseOnError
     );
 
@@ -213,8 +220,12 @@ var isStaging = api.Environment.IsStaging();
 var isProduction = api.Environment.IsProduction();
 
 
+api.UseMiddleware<OperationCanceledMiddleware>();
+
+
 if (isDevelopment)
 {
+
     api.UseSwagger();
     api.UseSwaggerUI();
     // api.UseExceptionHandler();
@@ -223,7 +234,6 @@ if (isDevelopment)
 EnsureAllDatabasesCreated(api);
 
 api.UseStaticFiles();
-api.UseMiddleware<OperationCanceledMiddleware>();
 
 MapRoutes(api);
 

@@ -20,7 +20,12 @@ public partial class MqServer : Initializable, IMessageBus
             //     time = $"{time.UtcNow.SerializeUniversal()}"
             // };
 
-            var message = $"Time {time.UtcNow.SerializeUniversal()} ({time.state})";
+            // var message = $"Time {time.UtcNow.SerializeUniversal()} ({time.state})";
+            var message = new
+            {
+                time = $"{time.UtcNow.SerializeUniversal()}",
+                state = $"{time.state}"
+            };
 
             Notify(new ResponseNotification(default, AuditMessage, message)
             {
@@ -51,6 +56,7 @@ public partial class MqServer : Initializable, IMessageBus
 
             await client.Configure();
 
+            client.Log = log;
 
             log.Log(LogLevel.Debug,
                 $"<<<{type.Name}:{client.GetHashCode().xby4()}>>> Connected.");
@@ -58,16 +64,27 @@ public partial class MqServer : Initializable, IMessageBus
             _domainBuses[scope] = client;
         };
 
+
         var allAdded = Task
             .WhenAll(config.DomainBusTypes.Select(type => addClient(type)))
             .ContinueWith(prev =>
             {
                 if (prev.IsCompletedSuccessfully)
                 {
-                    log.Log(LogLevel.Debug,
-                        $"<<<{nameof(MqServer)}:{GetHashCode().xby4()}>>> Initialized.");
+                    var master = $"<<<{nameof(MqServer)}:{GetHashCode().xby4()}>>>";
+                    var clients = (string prepend) => string.Join(Environment.NewLine + prepend, _domainBuses.Values
+                        .Select(client => $"<<<{client.GetType().Name}:{client.GetHashCode().xby4()}>>>"));
+
+                    Console.WriteLine(@$"+----------------------------------------
+| Bus definition:
+| {master}
+| {clients("| ")}
++----------------------------------------");
+                    log.Log(LogLevel.Debug, @$"Bus definition:
+{master}
+{clients("")}");
                 }
-             });
+            });
 
 
     }

@@ -1,7 +1,9 @@
 ﻿namespace VinZ.MessageQueue;
-
+/*
 public interface INotifyAck
 {
-    ICorrelationId? CorrelationId { get; }
+    bool Valid { get; }
     string? data { get; }
+    CorrelationId? CorrelationId { get; }
 }
+*/

@@ -10,6 +10,8 @@ public class MessageBusHttp : IMessageBus
     private readonly ITimeService DateTime;
     private readonly ILogger<IMessageBus> log;
 
+    private static int RequestId = 900000;
+
     public MessageBusHttp
     (
         string myUrl, 
@@ -45,6 +47,9 @@ public class MessageBusHttp : IMessageBus
         }
 
         var uri = nameof(Subscribe).ToLower();
+        var url = _remote.BaseAddress + uri;
+
+        int rid = RequestId++;
 
         try
         {
@@ -54,9 +59,22 @@ public class MessageBusHttp : IMessageBus
 
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
+            Console.WriteLine(@$"
+<<<.....................................................{rid:000000}
+| HTTP POST {url} (0)
++.............................................................
+| {json}
+");
+            
             var post = _remote.PostAsync(uri, content, cancel.Token);
 
             post.Wait(cancel.Token);
+
+            Console.WriteLine(@$"
+                        +...................................................{rid:000000}
+                        | HTTP POST {url} ({(int)post.Result.StatusCode})
+                        +......................................................>>>
+");
 
             var res = post.Result;
 
@@ -69,7 +87,21 @@ public class MessageBusHttp : IMessageBus
         }
         catch (Exception ex)
         {
-            throw new Exception($"{nameof(Subscribe)} failure: {_remote.BaseAddress + uri} {ex.Message}", ex);
+            if (ex.InnerException != null)
+            {
+                ex = ex.InnerException;
+            }
+
+            Console.WriteLine(@$"
+                        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!{rid:000000}
+                        | HTTP POST {url} ({(int)HttpStatusCode.InternalServerError})
+                        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!XXX
+
+--- sensitive
+{ ex.Message}
+{ ex.StackTrace}");
+
+            throw new Exception($"{nameof(Subscribe)} failure: {url} {ex.Message}", ex);
         }
     }
 
@@ -81,6 +113,9 @@ public class MessageBusHttp : IMessageBus
         }
 
         var uri = nameof(Unsubscribe).ToLower();
+        var url = _remote.BaseAddress + uri;
+
+        int rid = RequestId++;
 
         try
         {
@@ -90,9 +125,22 @@ public class MessageBusHttp : IMessageBus
 
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
+            Console.WriteLine(@$"
+<<<.....................................................{rid:000000}
+| HTTP POST {url} (0)
++.............................................................
+| {json}
+");
+
             var post = _remote.PostAsync(uri, content, cancel.Token);
 
             post.Wait(cancel.Token);
+
+            Console.WriteLine(@$"
+                        +...................................................{rid:000000}
+                        | HTTP POST {url} ({(int)post.Result.StatusCode})
+                        +......................................................>>>
+");
 
             var res = post.Result;
 
@@ -112,29 +160,60 @@ public class MessageBusHttp : IMessageBus
         }
         catch (Exception ex)
         {
-            throw new Exception($"{nameof(Unsubscribe)} failure: {_remote.BaseAddress + uri} {ex.Message}", ex);
+            if (ex.InnerException != null)
+            {
+                ex = ex.InnerException;
+            }
+
+            Console.WriteLine(@$"
+                        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!{rid:000000}
+                        | HTTP POST {url} ({(int)HttpStatusCode.InternalServerError})
+                        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!XXX
+
+--- sensitive
+{ex.Message}
+{ex.StackTrace}");
+
+            throw new Exception($"{nameof(Unsubscribe)} failure: {url} {ex.Message}", ex);
         }
     }
 
-    public INotifyAck Notify(IClientNotificationSerialized notification, int busId)
+    public NotifyAck Notify(IClientNotificationSerialized notification, int busId)
     {
         if (busId != 0)
         {
             throw new ArgumentException("Only value 0 allowed", nameof(busId));
         }
 
+        var uri = nameof(Notify).ToLower();
+        var url = _remote.BaseAddress + uri;
+
+        int rid = RequestId++;
+
         try
         {
             var cancel = new CancellationTokenSource();
 
-            var uri = nameof(Notify).ToLower();
             var json = JsonConvert.SerializeObject(notification);
 
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
+            Console.WriteLine(@$"
+<<<.....................................................{rid:000000}
+| HTTP POST {url} (0)
++.............................................................
+| {json}
+");
+
             var post = _remote.PostAsync(uri, content, cancel.Token);
 
             post.Wait(cancel.Token);
+
+            Console.WriteLine(@$"
+                        +...................................................{rid:000000}
+                        | HTTP POST {url} ({(int)post.Result.StatusCode})
+                        +......................................................>>>
+");
 
             var res = post.Result;
 
@@ -165,6 +244,22 @@ public class MessageBusHttp : IMessageBus
         }
         catch (Exception ex)
         {
+            if (ex.InnerException != null)
+            {
+                ex = ex.InnerException;
+            }
+
+            Console.WriteLine(@$"
+                        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!{rid:000000}
+                        | HTTP POST {url} ({(int)HttpStatusCode.InternalServerError})
+                        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!XXX
+
+--- sensitive
+{ex.Message}
+{ex.StackTrace}");
+
+            throw new Exception($"{nameof(Unsubscribe)} failure: {url} {ex.Message}", ex);
+
             return new NotifyAck
             {
                 Valid = false,
@@ -177,7 +272,7 @@ public class MessageBusHttp : IMessageBus
 
 
 
-    public Task<IClientNotificationSerialized?> Wait(INotifyAck ack, CancellationToken cancellationToken)
+    public Task<IClientNotificationSerialized?> Wait(NotifyAck ack, CancellationToken cancellationToken)
     {
         var correlationId = ack.CorrelationId;
 
@@ -186,7 +281,7 @@ public class MessageBusHttp : IMessageBus
             throw new InvalidOperationException("Uncorrelated wait not allowed");
         }
 
-        var awaitedResponse = new AwaitedResponse(correlationId, DateTime, cancellationToken, Track, Untrack);
+        var awaitedResponse = new AwaitedResponse(correlationId.Value, DateTime, cancellationToken, Track, Untrack);
 
         var ret = awaitedResponse?.ResultNotification;
 

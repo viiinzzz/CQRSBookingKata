@@ -1,10 +1,13 @@
 ﻿using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace VinZ.MessageQueue;
 
 public partial class MqServer
 {
+    private static Regex busIdRx = new(@"^/bus/([^/]+)/$");
+
     private (DeliveryCount, List<(ServerNotification[], ServerNotificationUpdate)>) Respond(ServerNotification serverNotification, bool immediate,
         CancellationToken cancel)
     {
@@ -230,16 +233,47 @@ failure: {ex.Message}
             }
         }
 
-        count += subscriberUrls
+        if (subscriberUrls.Any()) count += subscriberUrls
             .AsParallel()
             .WithCancellation(_executeCancel.Token)
             .Select(clientUrl =>
             {
                 try
                 {
-                    // client.OnNotified(clientNotification);
+                   
+                    NotifyAck? ack;
 
-                    var ack = send(clientUrl, clientNotification);
+                    var url = new Uri(clientUrl);
+                    var busIdMatch = busIdRx.Match(url.PathAndQuery);
+                    var busIdStr = !busIdMatch.Success ? string.Empty : busIdMatch.Groups[1].Value;
+
+                    var busIdParsed = ParsableHexInt.TryParse(busIdStr, null, out var busId);
+
+                    if (url.IsLoopback && busIdParsed)
+                    {
+                        if (!busIdParsed)
+                        {
+                            return new DeliveryCount(0, 1);
+                        }
+
+                        var clientHashCode = busId.Value;
+
+                        var client = _domainBuses.Values
+                            .FirstOrDefault(client => client.GetHashCode() == clientHashCode);
+
+                        if (client == null)
+                        {
+                            return new DeliveryCount(0, 1);
+                        }
+
+                        client.OnNotified(clientNotification);
+
+                        ack = new (HttpStatusCode.Accepted, true, null, correlationId);
+                    }
+                    else
+                    {
+                        ack = send(clientUrl, clientNotification);
+                    }
 
                     log.Log(LogLevel.Debug,
                         $"{delivering} {notificationLabel} to <<<Subscriber:{clientUrl.GetHashCode().xby4()}>>>...");
@@ -288,6 +322,7 @@ failure: {ex.Message}
     {
         var baseAddress = new Uri(clientUrl);
         var uri = nameof(Notify).ToLower();
+        var url = baseAddress + uri;
 
         try
         {
@@ -302,9 +337,23 @@ failure: {ex.Message}
                 BaseAddress = baseAddress
             };
 
+
+            Console.WriteLine(@$"
+<<<...........................................................
+| HTTP POST {url} (0)
++.............................................................
+| {json}
+");
+
             var post = http.PostAsync(uri, content, cancel.Token);
 
             post.Wait(cancel.Token);
+
+            Console.WriteLine(@$"
+                        +.........................................................
+                        | HTTP POST {url} ({(int)post.Result.StatusCode})
+                        +......................................................>>>
+");
 
             var res = post.Result;
 
@@ -316,7 +365,8 @@ failure: {ex.Message}
                 {
                     Valid = false,
                     Status = res.StatusCode,
-                    data = res.ReasonPhrase
+                    data = @$"failed to reach {url}
+{res.ReasonPhrase}"
                 };
             }
 
@@ -335,11 +385,42 @@ failure: {ex.Message}
         }
         catch (Exception ex)
         {
+            if (ex.InnerException != null)
+            {
+                ex = ex.InnerException;
+            }
+
+            if (ex is TaskCanceledException cancelEx)
+            {
+                Console.WriteLine(@$"
+                        +.........................................................
+                        | HTTP POST {url} ({(int)HttpStatusCode.RequestTimeout})
+                        +......................................................>>>
+");
+
+                return new NotifyAck
+                {
+                    Valid = false,
+                    Status = HttpStatusCode.RequestTimeout,
+                    data = @$"failed to reach {url}"
+                };
+            }
+
+            Console.WriteLine(@$"
+                        +.........................................................
+                        | HTTP POST {url} ({(int)HttpStatusCode.InternalServerError})
+                        +......................................................>>>
+");
+
             return new NotifyAck
             {
                 Valid = false,
                 Status = HttpStatusCode.InternalServerError,
-                data = $"failed to reach {baseAddress + uri} {ex.Message}"
+                data = @$"failed to reach {url}
+
+---sensitive
+{ex.Message}
+{ex.StackTrace}"
             };
         }
 

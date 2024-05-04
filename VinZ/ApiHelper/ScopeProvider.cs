@@ -11,10 +11,7 @@ public class ScopeProvider(IServiceProvider sp) : IScopeProvider
 #if DEBUG
         Console.WriteLine(@$"
 
-********
-GetScope {typeof(T).FullName}
-********
-
+                                      ...GetScope {typeof(T).FullName}...
 ");
 #endif
 
@@ -30,11 +27,7 @@ GetScope {typeof(T).FullName}
 #if DEBUG
         Console.WriteLine(@$"
 
-********
-GetScope {serviceType.FullName}
-********
-
-");
+                                      ...GetScope {serviceType.FullName}...");
 #endif
 
         return scope;

@@ -9,6 +9,7 @@ public record BusConfiguration
 public class MessageBusClientBase : IMessageBusClient, IDisposable
 {
     private MessageBusHttp? _bus;
+    public ILogger<IMessageBus>? log { get; set; }
 
     private Func<Task>? pingOrThrow;
 
@@ -16,12 +17,15 @@ public class MessageBusClientBase : IMessageBusClient, IDisposable
     public int DisposeDelaySeconds { get; set; } = 120;
     public int RetryDelaySeconds { get; set; } = 5;
     public int RetryMaxCount { get; set; } = 10;
+    public int SubscribeWarmupMilliseconds { get; set; } = 1000;
 
 
     // public IMessageBusClient ConnectToBus(IMessageBus bus)
     // {
     //     throw new NotImplementedException();
     // }
+
+    public ILogger<IMessageBus>? Log { get; set; }
 
     public IMessageBusClient ConnectToBus(IScopeProvider scp)
     {
@@ -30,7 +34,7 @@ public class MessageBusClientBase : IMessageBusClient, IDisposable
         var scope3 = scp.GetScope<ILogger<IMessageBus>>(out var log);
 
         var id = GetHashCode();
-        var localUrl = $"{(busConfig.LocalUrl.EndsWith('/') ? busConfig.LocalUrl : busConfig.LocalUrl + '/')}{id}";
+        var localUrl = $"{(busConfig.LocalUrl.EndsWith('/') ? busConfig.LocalUrl : busConfig.LocalUrl + '/')}{id.xby4()}";
         var remoteUrl = busConfig.RemoteUrl;
 
         _bus = new MessageBusHttp(localUrl, remoteUrl, dateTime, log);
@@ -77,9 +81,23 @@ public class MessageBusClientBase : IMessageBusClient, IDisposable
 
     }
 
-    private async Task<T> Retry<T>(Func<T> action)
+    public record RetryOptions
+    (
+        int WarmupDelayMilliseconds = default
+    );
+
+    private async Task<T> Retry<T>(Func<T> action, RetryOptions? options = default)
     {
         var retryCount = 0;
+
+        var t0 = DateTime.Now;
+
+        if (options is { WarmupDelayMilliseconds: > 0 })
+        {
+            var dt = options.WarmupDelayMilliseconds;
+
+            await Task.Delay(dt);
+        }
 
         while (true)
         {
@@ -87,7 +105,9 @@ public class MessageBusClientBase : IMessageBusClient, IDisposable
 
             try
             {
-                await Task.Delay(RetryDelaySeconds * 1000);
+                var dt = RetryDelaySeconds * 1000;
+
+                await Task.Delay(dt);
 
                 await CheckBus();
 
@@ -97,14 +117,18 @@ public class MessageBusClientBase : IMessageBusClient, IDisposable
             }
             catch (Exception ex)
             {
+                var elapsedSeconds = (DateTime.Now - t0).TotalSeconds;
+
                 if (retryCount >= RetryMaxCount)
                 {
+                    log?.LogError($"[{DateTime.Now:O}] Bus error: max retry reached: {ex.Message}");
                     Console.Error.WriteLine($"[{DateTime.Now:O}] Bus error: max retry reached: {ex.Message}");
 
                     throw new Exception($"Max retry reached ({retryCount})", ex);
                 }
 
-                Console.Error.WriteLine($"[{DateTime.Now:O}] waiting bus... ({retryCount}/{RetryMaxCount})");
+                log?.LogInformation($"      --> waiting bus... {elapsedSeconds:0.0}s ({retryCount}/{RetryMaxCount})");
+                Console.Error.WriteLine($"      --> waiting bus... {elapsedSeconds:0.0}s ({retryCount}/{RetryMaxCount})");
             }
         }
     }
@@ -147,6 +171,7 @@ public class MessageBusClientBase : IMessageBusClient, IDisposable
         {
             _bus!.Subscribe(new SubscriptionRequest
             {
+                _type = $"{nameof(Subscribe)}",
                 name = GetType().Name,
                 url = _bus.Url.ToString(),
                 recipient = recipient,
@@ -154,6 +179,9 @@ public class MessageBusClientBase : IMessageBusClient, IDisposable
             }, 0);
 
             return true;
+        }, new RetryOptions
+        {
+            WarmupDelayMilliseconds = SubscribeWarmupMilliseconds
         });
     }
 
@@ -163,6 +191,7 @@ public class MessageBusClientBase : IMessageBusClient, IDisposable
         {
             var done = _bus!.Unsubscribe(new SubscriptionRequest
             {
+                _type = $"{nameof(Unsubscribe)}",
                 name = GetType().Name,
                 url = _bus.Url.ToString(),
                 recipient = recipient,
@@ -174,13 +203,13 @@ public class MessageBusClientBase : IMessageBusClient, IDisposable
     }
 
 
-    public async Task Notify(IClientNotificationSerialized notification)
+    public async Task<NotifyAck> Notify(IClientNotificationSerialized notification)
     {
-        await Retry(() =>
+        return await Retry(() =>
         {
-            _bus!.Notify(notification, 0);
+            var ack = _bus!.Notify(notification, 0);
 
-            return true;
+            return ack;
         });
     }
 

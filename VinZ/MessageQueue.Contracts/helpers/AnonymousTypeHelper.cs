@@ -4,6 +4,13 @@ public static class AnonymousTypeHelper
 {
     public static bool IsAnonymous(this Type type)
     {
+        var runtimeType = typeof(Type).GetType();
+
+        if (type == runtimeType)
+        {
+            return true;
+        }
+
         if (!type.IsGenericType)
         {
             return false;

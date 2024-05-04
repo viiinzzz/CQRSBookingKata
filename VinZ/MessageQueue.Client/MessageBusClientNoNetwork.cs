@@ -25,6 +25,8 @@ public class MessageBusClientNoNetwork : IMessageBusClient //ancien MessageBusCl
     //     return this;
     // }
 
+    public ILogger<IMessageBus>? Log { get; set; }
+
     public IMessageBusClient ConnectToBus(IScopeProvider scp)
     {
         if (_bus != null)
@@ -64,6 +66,7 @@ public class MessageBusClientNoNetwork : IMessageBusClient //ancien MessageBusCl
 
         _bus!.Subscribe(new SubscriptionRequest
         {
+            _type = $"{nameof(Subscribe)}",
             name = null,
             url = null,
             recipient = recipient,
@@ -79,6 +82,7 @@ public class MessageBusClientNoNetwork : IMessageBusClient //ancien MessageBusCl
 
         var done = _bus!.Unsubscribe(new SubscriptionRequest
         {
+            _type = $"{nameof(Unsubscribe)}",
             name = null,
             url = null,
             recipient = recipient,
@@ -89,13 +93,19 @@ public class MessageBusClientNoNetwork : IMessageBusClient //ancien MessageBusCl
     }
 
 
-    public Task Notify(IClientNotificationSerialized notification)
+    public Task<NotifyAck> Notify(IClientNotificationSerialized notification)
     {
         CheckBus();
 
         _bus!.Notify(notification);
 
-        return Task.CompletedTask;
+        return Task.FromResult(new NotifyAck
+        {
+            Valid = true,
+            Status = 0,
+            data = default,
+            CorrelationId = notification.CorrelationId()
+        });
     }
 
     public event EventHandler<IClientNotificationSerialized>? Notified;

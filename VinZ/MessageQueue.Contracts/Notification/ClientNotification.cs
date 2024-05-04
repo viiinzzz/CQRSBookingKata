@@ -1,5 +1,7 @@
 ﻿namespace VinZ.MessageQueue;
 
+public record ClientNotification2() : ClientNotification(NotificationType.Request, default, default);
+
 public record ClientNotification
 (
     NotificationType Type,
@@ -62,6 +64,11 @@ public record ClientNotification
     )
     {
         MessageType = messageObj.GetTypeSerializedName();
+
+        if (messageObj?.GetType()?.IsInterface ?? false)
+        {
+            throw new ArgumentException($"invalid type {messageObj.GetType().FullName} : must be concrete", nameof(messageObj));
+        }
 
         Message = messageObj == null ? EmptySerialized : System.Text.Json.JsonSerializer.Serialize(messageObj);
     }

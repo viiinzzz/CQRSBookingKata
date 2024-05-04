@@ -9,7 +9,7 @@
     <RootNamespace>Booking.API</RootNamespace>
     <AssemblyName>Booking.API</AssemblyName>
     <ApplicationIcon>viiinzzz-round.ico</ApplicationIcon>
-    <FileVersion>1.24.3.29</FileVersion>
+    <FileVersion>1.24.5.4</FileVersion>
     <Authors>VinZ</Authors>
     <PackageIcon>viiinzzz-round.png</PackageIcon>
   </PropertyGroup>
