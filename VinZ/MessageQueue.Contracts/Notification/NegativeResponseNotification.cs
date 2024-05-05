@@ -8,6 +8,7 @@ public record NegativeResponseNotification
     string? Recipient,
 
     string? Verb = ErrorProcessingRequest,
+    
     object? MessageObj = default,
 
     string? Originator = default,
@@ -34,7 +35,8 @@ public record NegativeResponseNotification
         EarliestDelivery, LatestDelivery, RepeatDelay,
         RepeatCount, Aggregate, Immediate,
         CorrelationId1, CorrelationId2
-    )
+    ),
+        IHaveMessageObj
 {
     public NegativeResponseNotification
     (

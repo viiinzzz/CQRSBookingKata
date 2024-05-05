@@ -2,11 +2,11 @@
 
 public static class AnonymousTypeHelper
 {
-    public static bool IsAnonymous(this Type type)
-    {
-        var runtimeType = typeof(Type).GetType();
+    private static readonly Type RuntimeType = typeof(Type).GetType();
 
-        if (type == runtimeType)
+    public static bool IsAnonymousType(this Type type)
+    {
+        if (type == RuntimeType)
         {
             return true;
         }
@@ -35,8 +35,15 @@ public static class AnonymousTypeHelper
         return true;
     }
 
-    public static bool IsAnonymousType<T>(this T instance)
+    public static bool IsAnonymous(this object? instance)
     {
-        return IsAnonymous(instance.GetType());
+        if (instance == null)
+        {
+            return false;
+        }
+
+        var type = instance.GetType();
+
+        return IsAnonymousType(type);
     }
 }

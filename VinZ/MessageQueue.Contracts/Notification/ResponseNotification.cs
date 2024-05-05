@@ -31,7 +31,8 @@ public record ResponseNotification
         EarliestDelivery, LatestDelivery, RepeatDelay,
         RepeatCount, Aggregate, Immediate,
         CorrelationId1, CorrelationId2
-    )
+    ),
+        IHaveMessageObj
 {
     public ResponseNotification
     (

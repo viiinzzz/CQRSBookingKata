@@ -39,7 +39,7 @@ public static class MessageHelper
             return EmptyType;
         }
 
-        if (messageObj.GetType().IsAnonymousType())
+        if (messageObj.IsAnonymous())
         {
             return AnonymousType;
         }

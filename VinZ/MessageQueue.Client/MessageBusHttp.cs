@@ -55,15 +55,15 @@ public class MessageBusHttp : IMessageBus
         {
             var cancel = new CancellationTokenSource();
 
-            var json = JsonConvert.SerializeObject(sub);
+            var json = sub.ToJson();
 
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             Console.WriteLine(@$"
-<<<.....................................................{rid:000000}
+<<<( Subscribe )....................................../{rid:000000}/
 | HTTP POST {url} (0)
-+.............................................................
-| {json}
++................................................({0:000})......
+| {sub.ToJson(true)}
 ");
             
             var post = _remote.PostAsync(uri, content, cancel.Token);
@@ -71,9 +71,9 @@ public class MessageBusHttp : IMessageBus
             post.Wait(cancel.Token);
 
             Console.WriteLine(@$"
-                        +...................................................{rid:000000}
-                        | HTTP POST {url} ({(int)post.Result.StatusCode})
-                        +......................................................>>>
+                        +..( Subscribe )................................../{rid:000000}/
+                        | HTTP POST {url}
+                        +............................................( {(int)post.Result.StatusCode:000} )...>>>
 ");
 
             var res = post.Result;
@@ -93,7 +93,7 @@ public class MessageBusHttp : IMessageBus
             }
 
             Console.WriteLine(@$"
-                        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!{rid:000000}
+                        !--( Subscribe )----------------------------------/{rid:000000}/
                         | HTTP POST {url} ({(int)HttpStatusCode.InternalServerError})
                         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!XXX
 
@@ -121,15 +121,15 @@ public class MessageBusHttp : IMessageBus
         {
             var cancel = new CancellationTokenSource();
 
-            var json = JsonConvert.SerializeObject(sub);
+            var json = sub.ToJson();
 
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             Console.WriteLine(@$"
-<<<.....................................................{rid:000000}
+<<<( Unsubscribe )..................................../{rid:000000}/
 | HTTP POST {url} (0)
 +.............................................................
-| {json}
+| {sub.ToJson(true)}
 ");
 
             var post = _remote.PostAsync(uri, content, cancel.Token);
@@ -137,9 +137,9 @@ public class MessageBusHttp : IMessageBus
             post.Wait(cancel.Token);
 
             Console.WriteLine(@$"
-                        +...................................................{rid:000000}
+                        +..( Unsubscribe )................................/{rid:000000}/
                         | HTTP POST {url} ({(int)post.Result.StatusCode})
-                        +......................................................>>>
+                        +............................................( {(int)post.Result.StatusCode:000} )...>>>
 ");
 
             var res = post.Result;
@@ -166,7 +166,7 @@ public class MessageBusHttp : IMessageBus
             }
 
             Console.WriteLine(@$"
-                        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!{rid:000000}
+                        !--( Unsubscribe )--------------------------------/{rid:000000}/
                         | HTTP POST {url} ({(int)HttpStatusCode.InternalServerError})
                         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!XXX
 
@@ -194,15 +194,15 @@ public class MessageBusHttp : IMessageBus
         {
             var cancel = new CancellationTokenSource();
 
-            var json = JsonConvert.SerializeObject(notification);
+            var json = notification.ToJsonIgnoring([ nameof(IHaveMessageObj.MessageObj) ]);
 
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             Console.WriteLine(@$"
-<<<.....................................................{rid:000000}
+<<<( Notify )........................................./{rid:000000}/
 | HTTP POST {url} (0)
 +.............................................................
-| {json}
+| {notification.ToJson(true)}
 ");
 
             var post = _remote.PostAsync(uri, content, cancel.Token);
@@ -210,9 +210,9 @@ public class MessageBusHttp : IMessageBus
             post.Wait(cancel.Token);
 
             Console.WriteLine(@$"
-                        +...................................................{rid:000000}
-                        | HTTP POST {url} ({(int)post.Result.StatusCode})
-                        +......................................................>>>
+                        +..( Notify )...................................../{rid:000000}/
+                        | HTTP POST {url}
+                        +............................................( {(int)post.Result.StatusCode:000} )...>>>
 ");
 
             var res = post.Result;
@@ -250,7 +250,7 @@ public class MessageBusHttp : IMessageBus
             }
 
             Console.WriteLine(@$"
-                        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!{rid:000000}
+                        !--( Notify )-------------------------------------/{rid:000000}/
                         | HTTP POST {url} ({(int)HttpStatusCode.InternalServerError})
                         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!XXX
 
@@ -268,7 +268,6 @@ public class MessageBusHttp : IMessageBus
             };
         }
     }
-
 
 
 

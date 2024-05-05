@@ -73,7 +73,7 @@ public record ClientNotification
         Message = messageObj == null ? EmptySerialized : System.Text.Json.JsonSerializer.Serialize(messageObj);
     }
 
-
+    public string _type { get; } = "ClientNotification";
     public string? MessageType { get; }
     public string? Message { get; }
 

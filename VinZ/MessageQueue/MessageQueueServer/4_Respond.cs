@@ -96,7 +96,9 @@ public partial class MqServer
         var dequeuing = immediate ? "            >>>Relaying>>>          Immediate" : ">>>Dequeuing>>>                     scheduled";
         var subscribersCount = $"{subscriberUrls.Count} subscriber{(subscriberUrls.Count > 1 ? "s" : "")}";
         var messageObj = serverNotification.MessageAsObject();
-        var messageObjString = JsonConvert.SerializeObject(messageObj, Formatting.Indented).Replace("\\r", "").Replace("\\n", Environment.NewLine);
+        var messageJson = messageObj.ToJson(true)
+            .Replace("\\r", "")
+            .Replace("\\n", Environment.NewLine);
         var messageType =
             serverNotification.Type == NotificationType.Response ? "Re: "
             : serverNotification.Type == NotificationType.Advertisement ? "Ad: "
@@ -105,7 +107,7 @@ public partial class MqServer
 To: {serverNotification.Recipient}
 From: {serverNotification.Originator}
 Subject: {messageType}{serverNotification.Verb}
-{messageObjString}
+{messageJson}
 ---";
         {
             var logLevel =
@@ -214,8 +216,13 @@ Subject: {messageType}{serverNotification.Verb}
 
             try
             {
-                awaitedBus.Notify(clientNotification).Wait(_executeCancel.Token);
+                var awaitedAck = awaitedBus.Notify(clientNotification);
+                    
+                awaitedAck.Wait(_executeCancel.Token);
 
+
+                // awaitedBus.OnNotified(clientNotification);
+                
                 log.Log(LogLevel.Debug,
                     $"{delivering} {notificationLabel} to <<<awaitedBus>>>...");
 
@@ -328,7 +335,7 @@ failure: {ex.Message}
         {
             var cancel = new CancellationTokenSource();
 
-            var json = JsonConvert.SerializeObject(notification);
+            var json = notification.ToJson();
 
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -342,7 +349,7 @@ failure: {ex.Message}
 <<<...........................................................
 | HTTP POST {url} (0)
 +.............................................................
-| {json}
+| {notification.ToJson(true)}
 ");
 
             var post = http.PostAsync(uri, content, cancel.Token);
@@ -351,8 +358,8 @@ failure: {ex.Message}
 
             Console.WriteLine(@$"
                         +.........................................................
-                        | HTTP POST {url} ({(int)post.Result.StatusCode})
-                        +......................................................>>>
+                        | HTTP POST {url}
+                        +............................................( {(int)post.Result.StatusCode:000} )...>>>
 ");
 
             var res = post.Result;

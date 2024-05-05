@@ -85,7 +85,9 @@ public partial class MqServer
             var queuing = immediate ? "                     <<<Relaying<<< Immediate" : "                      <<<Queuing<<< Scheduled";
             var notificationLabel = $"Notification{correlationId.Guid}";
             var messageObj = notification.MessageAsObject();
-            var messageObjString = JsonConvert.SerializeObject(messageObj, Formatting.Indented).Replace("\\r", "").Replace("\\n", Environment.NewLine);
+            var messageJson = messageObj.ToJson(true)
+                .Replace("\\r", "")
+                .Replace("\\n", Environment.NewLine);
             var messageType = 
                 notification.Type == NotificationType.Response ? "Re: " 
                 : notification.Type == NotificationType.Advertisement ? "Ad: " 
@@ -94,7 +96,7 @@ public partial class MqServer
 To: {notification.Recipient}
 From: {notification.Originator}
 Subject: {messageType}{notification.Verb}
-{messageObjString}
+{messageJson}
 ---";
             var logLevel = 
                 notification.IsErrorStatus() ? LogLevel.Error

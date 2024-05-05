@@ -48,7 +48,9 @@ public partial class MqServer
 
         var awaitedResponse = new AwaitedResponse(correlationId.Value, DateTime, cancellationToken, Track, Untrack);
 
-        return awaitedResponse?.ResultNotification;
+        var notification = awaitedResponse?.ResultNotification;
+
+        return notification;
     }
 
     private IMessageBusClient? GetAwaitedBus(ServerNotification notification)
