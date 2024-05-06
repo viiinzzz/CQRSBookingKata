@@ -245,7 +245,6 @@ failure: {ex.Message}
             {
                 try
                 {
-                   
                     NotifyAck? ack;
 
                     var url = new Uri(clientUrl);
@@ -292,6 +291,7 @@ failure: {ex.Message}
                         throw new InvalidOperationException($"send failure: ({(int)ack.Status}) {ack.data}");
                     }
 
+                    RefreshFastest();
                     return new DeliveryCount(1, 0);
                 }
                 catch (Exception ex)
@@ -302,6 +302,7 @@ failure: {ex.Message}
 {ex.StackTrace}
 ");
 
+                    RefreshFastest();
                     return new DeliveryCount(0, 1);
                 }
             })

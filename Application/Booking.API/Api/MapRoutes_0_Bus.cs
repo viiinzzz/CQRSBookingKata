@@ -1,4 +1,3 @@
-using System.Dynamic;
 using Newtonsoft.Json;
 
 namespace BookingKata.API;

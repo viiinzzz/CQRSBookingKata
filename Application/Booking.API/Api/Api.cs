@@ -4,6 +4,9 @@
   ╎                                                                            ╎
   ╰----------------------------------------------------------------------------╯*/
 
+using System.Net.NetworkInformation;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
 {
     //for type dependency diagram, establish dependency
     _ = nameof(BookingKata.Infrastructure.EnterpriseStorage);
@@ -112,12 +115,29 @@ void RegisterDbContexts(WebApplicationBuilder webApplicationBuilder)
 -----------------------------------------------------------------------------╯*/
 
 
+Uri GetAppUrl()
+{
+    var urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS").Split(";");
+    var url1 = urls.First();
+    url1 = url1.Replace("//*", "//localhost");
+    var url = new Uri($"{url1}/bus/");
+    if (url.IsLoopback)
+    {
+        var host = Dns.GetHostEntry("").HostName;
+        url = new Uri($"{url.Scheme}://{host}:{url.Port}{url.PathAndQuery}");
+    }
+
+    return url;
+}
+
+var url = GetAppUrl();
 
 /*╭-----------------------------------------------------------------------------
   ╎ DI methods
   */
 
 //adding components to the magic wiring box, aka. DI Container to achieve IoC
+
 
 void ConfigureDependencyInjection(WebApplicationBuilder builder)
 {
@@ -140,15 +160,6 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
     // https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/security?view=aspnetcore-8.0
 
 
-    var urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS").Split(";");
-    var url1 = urls.First();
-    url1 = url1.Replace("//*", "//localhost");
-    var url = new Uri($"{url1}/bus/");
-    if (url.IsLoopback)
-    {
-        var host = System.Net.Dns.GetHostEntry("").HostName;
-        url = new Uri($"{url.Scheme}://{host}:{url.Port}{url.PathAndQuery}");
-    }
 
     //bus
     services.AddMessageQueue(
@@ -196,6 +207,28 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
     };
     services.AddSingleton(bconf);
 
+    //metrics
+    services.AddOpenTelemetry().WithMetrics(builder =>
+    {
+        builder.AddPrometheusExporter();
+
+        builder.AddMeter(
+            "Microsoft.AspNetCore.Hosting",
+            "Microsoft.AspNetCore.Server.Kestrel"
+            );
+
+        builder.AddView(
+            "http-server-request-duration",
+            new ExplicitBucketHistogramConfiguration
+            {
+                Boundaries =
+                [
+                    0, 0.005, 0.01, 0.025, 0.05,
+                    0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10
+                ]
+            });
+    });
+
     //demo
     services.AddSingleton<BookingDemoContext>();
     if (demoMode)
@@ -227,7 +260,7 @@ var isStaging = api.Environment.IsStaging();
 var isProduction = api.Environment.IsProduction();
 
 
-api.UseMiddleware<OperationCanceledMiddleware>();
+api.UseMiddleware<MyDebugMiddleware>();
 
 
 if (isDevelopment)
@@ -246,5 +279,26 @@ MapRoutes(api);
 
 api.MapRazorPages();
 api.UseAntiforgery();
+
+
+api.MapPrometheusScrapingEndpoint(); // path=/metrics
+
+var myIps = Dns.GetHostByName(Dns.GetHostName()).AddressList
+    .Select(a => a.MapToIPv4()).Distinct().OrderBy(a => BitConverter.ToString(a.GetAddressBytes()))
+    .AsParallel().Where(a =>
+    {
+        try
+        {
+            return new Ping().Send(a).Status == IPStatus.Success;
+        }
+        catch (Exception ex)
+        {
+            return false;
+        }
+    });
+Console.WriteLine($@"
+{string.Join(Environment.NewLine, myIps.Select(ip => $"http://{ip}:{url.Port}"))}
+");
+
 
 api.Run();

@@ -1,13 +1,9 @@
-﻿
-using System.Dynamic;
-using System.Net;
+﻿namespace BookingKata.API.Infrastructure;
 
-namespace BookingKata.API.Infrastructure;
-
-public class OperationCanceledMiddleware
+public class MyDebugMiddleware
 (
     RequestDelegate next,
-    ILogger<OperationCanceledMiddleware> logger)
+    ILogger<MyDebugMiddleware> logger)
 {
 
     private static int RequestId = 0;
@@ -17,8 +13,7 @@ public class OperationCanceledMiddleware
         var rid = RequestId;
         var tid = context.Request.HttpContext.TraceIdentifier;
         RequestId++;
-
-      
+        var t0 = DateTime.Now;
         try
         {
             ExpandoObject? requestBodyObj = null;
@@ -66,8 +61,10 @@ public class OperationCanceledMiddleware
                 responseBodyObj = responseBody.FromJsonToExpando();
             }
 
+            var dt = (DateTime.Now - t0).TotalMilliseconds;
+
             Console.WriteLine(@$"
-                +--( Response )-------------------------------/{rid:000000}/
+                +--( Response {$"{dt,6:#####0}"}ms)-----------------------/{rid:000000}/
                 | {context.Request.Scheme.ToUpper()} {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
                 | ORIGIN {context.Request.Host}
                 +---/{tid}/--------------( {context.Response.StatusCode:000} )--->>
@@ -77,8 +74,10 @@ public class OperationCanceledMiddleware
         }
         catch (OperationCanceledException ex)
         {
+            var dt = (DateTime.Now - t0).TotalMilliseconds;
+
             Console.Error.WriteLine(@$"
-                !--( Canceled )-------------------------------/{rid:000000}/
+                !--( Canceled {dt,6:#####0}ms)-----------------------/{rid:000000}/
                 | {context.Request.Scheme.ToUpper()} {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
                 | ORIGIN {context.Request.Host}
                 !!!!!{tid}!!!!!!!!!!!!!!( {context.Response.StatusCode:000} )!!!!!X
@@ -93,8 +92,10 @@ Failure cause by {ex.GetType().Name}:
         }
         catch (Exception ex)
         {
+            var dt = (DateTime.Now - t0).TotalMilliseconds;
+
             Console.Error.WriteLine(@$"
-                !--( Aborted )--------------------------------/{rid:000000}/
+                !--( Aborted {dt,6:#####0}ms)------------------------/{rid:000000}/
                 | {context.Request.Scheme.ToUpper()} {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
                 | ORIGIN {context.Request.Host} 
                 !!!!!{tid}!!!!!!!!!!!!!!( {context.Response.StatusCode:000} )!!!!!X

@@ -1,4 +1,6 @@
-﻿global using System.Text.RegularExpressions;
+﻿global using System.Dynamic;
+global using System.Net;
+global using System.Text.RegularExpressions;
 global using System.Transactions;
 global using System.Text;
 global using Microsoft.EntityFrameworkCore;
@@ -32,6 +34,7 @@ global using BookingKata.Infrastructure.Bus.Admin;
 global using BookingKata.Infrastructure.Bus.Sales;
 global using BookingKata.Services;
 global using BookingKata.Shared;
+global using OpenTelemetry.Metrics;
 global using Support.Infrastructure.Bus.Billing;
 global using Support.Infrastructure.Bus.ThirdParty;
 global using static VinZ.MessageQueue.Const;
