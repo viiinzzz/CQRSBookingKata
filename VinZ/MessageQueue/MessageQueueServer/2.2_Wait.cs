@@ -53,7 +53,7 @@ public partial class MqServer
         return notification;
     }
 
-    private IMessageBusClient? GetAwaitedBus(ServerNotification notification)
+    private AwaitersBus? GetAwaitersBus(ServerNotification notification)
     {
         if (notification.Type != NotificationType.Response)
         {
@@ -78,7 +78,7 @@ public partial class MqServer
             return null;
         }
 
-        return new AwaitedBus(awaiters);
+        return new AwaitersBus(awaiters);
     }
 
    

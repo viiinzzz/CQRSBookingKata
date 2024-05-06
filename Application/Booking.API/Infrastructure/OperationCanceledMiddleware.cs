@@ -39,13 +39,13 @@ public class OperationCanceledMiddleware
             }
 
             Console.WriteLine(@$"
-        <<<{tid}---------------------/{rid:000000}/
-        | HTTP {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
-        |          from={context.Request.Host}
-        +--( Request )----------------------------( {context.Response.StatusCode:000} )-----
-        | {ToJsonDebug(requestBodyObj)}
-            ");
-
+        <<-( Request )--------------------------------/{rid:000000}/
+        | {context.Request.Scheme.ToUpper()} {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
+        | ORIGIN {context.Request.Host}
+        +---/{tid}/--------------------------
+{ToJsonDebug(requestBodyObj)}
+---");
+          
             await next(context);
 
             requestBodyMemoryStream?.Dispose();
@@ -67,24 +67,25 @@ public class OperationCanceledMiddleware
             }
 
             Console.WriteLine(@$"
-                +--{tid}---------------------/{rid:000000}/
-                | HTTP {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
-                |          from={context.Request.Host}
-                +--( Response )---------------------------( {context.Response.StatusCode:000} )-->>>
-                | {ToJsonDebug(responseBodyObj)}
-            ");
+                +--( Response )-------------------------------/{rid:000000}/
+                | {context.Request.Scheme.ToUpper()} {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
+                | ORIGIN {context.Request.Host}
+                +---/{tid}/--------------( {context.Response.StatusCode:000} )--->>
+{ToJsonDebug(responseBodyObj)}
+---");
 
         }
         catch (OperationCanceledException ex)
         {
             Console.Error.WriteLine(@$"
-                !--{tid}---------------------/{rid:000000}/
-                | HTTP {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
-                |          from={context.Request.Host}
-                !!!( Canceled )!!!!!!!!!!!!!!!!!!!!!!!!!!( {context.Response.StatusCode:000} )!!!XXX
+                !--( Canceled )-------------------------------/{rid:000000}/
+                | {context.Request.Scheme.ToUpper()} {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
+                | ORIGIN {context.Request.Host}
+                !!!!!{tid}!!!!!!!!!!!!!!( {context.Response.StatusCode:000} )!!!!!X
 Failure cause by {ex.GetType().Name}:
 {ex.Message}
-{ex.StackTrace}");
+{ex.StackTrace}
+---");
 
             logger.LogError("Request was cancelled");
 
@@ -93,13 +94,14 @@ Failure cause by {ex.GetType().Name}:
         catch (Exception ex)
         {
             Console.Error.WriteLine(@$"
-                !--{tid}---------------------/{rid:000000}/
-                | HTTP {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
-                |          from={context.Request.Host} 
-                !!!( Aborted )!!!!!!!!!!!!!!!!!!!!!!!!!!!( {context.Response.StatusCode:000} )!!!XXX
+                !--( Aborted )--------------------------------/{rid:000000}/
+                | {context.Request.Scheme.ToUpper()} {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
+                | ORIGIN {context.Request.Host} 
+                !!!!!{tid}!!!!!!!!!!!!!!( {context.Response.StatusCode:000} )!!!!!X
 Failure cause by {ex.GetType().Name}:
 {ex.Message}
-{ex.StackTrace}");
+{ex.StackTrace}
+---");
 
             logger.LogError(@$"Request was aborted
 Failure cause by {ex.GetType().Name}:

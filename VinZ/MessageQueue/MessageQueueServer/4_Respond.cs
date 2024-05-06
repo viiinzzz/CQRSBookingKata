@@ -1,15 +1,17 @@
-﻿using System.Net;
-using System.Text;
-using System.Text.RegularExpressions;
-
-namespace VinZ.MessageQueue;
+﻿namespace VinZ.MessageQueue;
 
 public partial class MqServer
 {
-    private static Regex busIdRx = new(@"^/bus/([^/]+)/$");
+    private static readonly Regex BusIdRx = new(@"^/bus/([^/]+)/$");
 
-    private (DeliveryCount, List<(ServerNotification[], ServerNotificationUpdate)>) Respond(ServerNotification serverNotification, bool immediate,
-        CancellationToken cancel)
+    private readonly IPAddress[] _myIps= Dns.GetHostEntry(Dns.GetHostEntry("").HostName).AddressList;
+
+    private (DeliveryCount, List<(ServerNotification[], ServerNotificationUpdate)>) Respond
+    (
+        ServerNotification serverNotification, 
+        bool immediate,
+        CancellationToken cancel
+    )
     {
         var updates = new List<(ServerNotification[], ServerNotificationUpdate)>();
 
@@ -91,6 +93,13 @@ public partial class MqServer
             }
         }
 
+        //
+        //
+        var awaitersBus = GetAwaitersBus(serverNotification);
+        //
+        //
+
+
         var correlationId = new CorrelationId(serverNotification.CorrelationId1, serverNotification.CorrelationId2);
         var notificationLabel = $"Notification{correlationId}{(immediate ? "" : $" (Id:{serverNotification.NotificationId})")}";
         var dequeuing = immediate ? "            >>>Relaying>>>          Immediate" : ">>>Dequeuing>>>                     scheduled";
@@ -116,10 +125,13 @@ Subject: {messageType}{serverNotification.Verb}
                 : LogLevel.Debug;
 
             log.Log(logLevel,
-                @$"{dequeuing} {notificationLabel} to {subscribersCount}...{Environment.NewLine}{rvm}");
+                @$"{dequeuing} {notificationLabel} to {subscribersCount + (awaitersBus?.SubscribersCount??0)}...{Environment.NewLine}{rvm}");
 
             Check(logLevel);
         }
+
+
+
 
         var updateMessage = () =>
         {
@@ -141,22 +153,9 @@ Subject: {messageType}{serverNotification.Verb}
         };
 
 
-        //
-        //
-        var awaitedBus = GetAwaitedBus(serverNotification);
-        //
-        // if (awaitedBus != null)
-        // {
-        //     RefreshFastest();
-        //
-        //     subscriberUrls.Add(awaitedBus);
-        // }
-        //
-        //
-
         DeliveryCount count = default;
 
-        if (subscriberUrls.Count == 0 && awaitedBus == null)
+        if (subscriberUrls.Count == 0 && awaitersBus == null)
         {
             if (!immediate) updateMessage();
 
@@ -210,18 +209,17 @@ Subject: {messageType}{serverNotification.Verb}
 
         var delivering = "            >>>Delivering>>>        scheduled";
 
-        if (awaitedBus != null)
+        if (awaitersBus != null)
         {
             RefreshFastest();
 
             try
             {
-                var awaitedAck = awaitedBus.Notify(clientNotification);
-                    
-                awaitedAck.Wait(_executeCancel.Token);
+                var awaitedAckTask = awaitersBus.Notify(clientNotification);
+                awaitedAckTask.Wait(_executeCancel.Token);
+                var awaitedAck = awaitedAckTask.Result;
 
-
-                // awaitedBus.OnNotified(clientNotification);
+                awaitersBus.OnNotified(clientNotification);
                 
                 log.Log(LogLevel.Debug,
                     $"{delivering} {notificationLabel} to <<<awaitedBus>>>...");
@@ -251,12 +249,16 @@ failure: {ex.Message}
                     NotifyAck? ack;
 
                     var url = new Uri(clientUrl);
-                    var busIdMatch = busIdRx.Match(url.PathAndQuery);
+                    var busIdMatch = BusIdRx.Match(url.PathAndQuery);
                     var busIdStr = !busIdMatch.Success ? string.Empty : busIdMatch.Groups[1].Value;
 
                     var busIdParsed = ParsableHexInt.TryParse(busIdStr, null, out var busId);
 
-                    if (url.IsLoopback && busIdParsed)
+                    // var isLoopback = url.IsLoopback
+                    var isLoopback = Dns.GetHostEntry(url.Host).AddressList
+                        .Any(a => _myIps.Contains(a));
+
+                    if (isLoopback && busIdParsed)
                     {
                         if (!busIdParsed)
                         {
@@ -316,7 +318,7 @@ failure: {ex.Message}
                 : LogLevel.Information;
 
             log.Log(logLevel,
-                @$"{sent} {notificationLabel} to {subscribersCount}...{Environment.NewLine}{rvm}");
+                @$"{sent} {notificationLabel} to {subscribersCount + (awaitersBus?.SubscribersCount ?? 0)}...{Environment.NewLine}{rvm}");
 
             Check(logLevel);
         }
@@ -346,7 +348,7 @@ failure: {ex.Message}
 
 
             Console.WriteLine(@$"
-<<<...........................................................
+<<............................................................
 | HTTP POST {url} (0)
 +.............................................................
 | {notification.ToJson(true)}

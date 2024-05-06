@@ -141,14 +141,21 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
 
 
     var urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS").Split(";");
-    var url = $"{urls.First()}/bus/";
+    var url1 = urls.First();
+    url1 = url1.Replace("//*", "//localhost");
+    var url = new Uri($"{url1}/bus/");
+    if (url.IsLoopback)
+    {
+        var host = System.Net.Dns.GetHostEntry("").HostName;
+        url = new Uri($"{url.Scheme}://{host}:{url.Port}{url.PathAndQuery}");
+    }
 
     //bus
     services.AddMessageQueue(
         new BusConfiguration
         {
-            LocalUrl = url,
-            RemoteUrl = url
+            LocalUrl = url.ToString(),
+            RemoteUrl = url.ToString()
         },
         Types.From<
             AdminBus,

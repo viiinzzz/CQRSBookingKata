@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace VinZ.MessageQueue;
+﻿namespace VinZ.MessageQueue;
 
 public class MessageBusHttp : IMessageBus
 {
@@ -10,7 +8,7 @@ public class MessageBusHttp : IMessageBus
     private readonly ITimeService DateTime;
     private readonly ILogger<IMessageBus> log;
 
-    private static int RequestId = 900000;
+    private static int RequestId = 500000;
 
     public MessageBusHttp
     (
@@ -60,20 +58,20 @@ public class MessageBusHttp : IMessageBus
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             Console.WriteLine(@$"
-<<<( Subscribe )....................................../{rid:000000}/
-| HTTP POST {url} (0)
-+................................................({0:000})......
-| {sub.ToJson(true)}
-");
+<<-( Subscribe )............................../{rid:000000}/
+| HTTP POST {url}
++.....................................................
+{sub.ToJson(true)}
+...");
             
             var post = _remote.PostAsync(uri, content, cancel.Token);
 
             post.Wait(cancel.Token);
 
             Console.WriteLine(@$"
-                        +..( Subscribe )................................../{rid:000000}/
+                        +..( Subscribe )............................../{rid:000000}/
                         | HTTP POST {url}
-                        +............................................( {(int)post.Result.StatusCode:000} )...>>>
+                        +........................................( {(int)post.Result.StatusCode:000} )....>>
 ");
 
             var res = post.Result;
@@ -93,13 +91,14 @@ public class MessageBusHttp : IMessageBus
             }
 
             Console.WriteLine(@$"
-                        !--( Subscribe )----------------------------------/{rid:000000}/
-                        | HTTP POST {url} ({(int)HttpStatusCode.InternalServerError})
-                        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!XXX
+                        !..( Subscribe )............................../{rid:000000}/
+                        | HTTP POST {url}
+                        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!( {(int)HttpStatusCode.InternalServerError:000} )!!!!!X
 
---- sensitive
+!!! sensitive
 { ex.Message}
-{ ex.StackTrace}");
+{ ex.StackTrace}
+!!!");
 
             throw new Exception($"{nameof(Subscribe)} failure: {url} {ex.Message}", ex);
         }
@@ -126,20 +125,20 @@ public class MessageBusHttp : IMessageBus
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             Console.WriteLine(@$"
-<<<( Unsubscribe )..................................../{rid:000000}/
-| HTTP POST {url} (0)
-+.............................................................
-| {sub.ToJson(true)}
-");
+<<-( Unsubscribe )............................/{rid:000000}/
+| HTTP POST {url}
++.....................................................
+{sub.ToJson(true)}
+...");
 
             var post = _remote.PostAsync(uri, content, cancel.Token);
 
             post.Wait(cancel.Token);
 
             Console.WriteLine(@$"
-                        +..( Unsubscribe )................................/{rid:000000}/
+                        +..( Unsubscribe )............................/{rid:000000}/
                         | HTTP POST {url} ({(int)post.Result.StatusCode})
-                        +............................................( {(int)post.Result.StatusCode:000} )...>>>
+                        +........................................( {(int)post.Result.StatusCode:000} )....>>
 ");
 
             var res = post.Result;
@@ -166,13 +165,14 @@ public class MessageBusHttp : IMessageBus
             }
 
             Console.WriteLine(@$"
-                        !--( Unsubscribe )--------------------------------/{rid:000000}/
-                        | HTTP POST {url} ({(int)HttpStatusCode.InternalServerError})
-                        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!XXX
+                        !..( Unsubscribe )............................/{rid:000000}/
+                        | HTTP POST {url}
+                        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!( {(int)HttpStatusCode.InternalServerError:000} )!!!!!X
 
---- sensitive
+!!! sensitive
 {ex.Message}
-{ex.StackTrace}");
+{ex.StackTrace}
+!!!");
 
             throw new Exception($"{nameof(Unsubscribe)} failure: {url} {ex.Message}", ex);
         }
@@ -187,8 +187,10 @@ public class MessageBusHttp : IMessageBus
 
         var uri = nameof(Notify).ToLower();
         var url = _remote.BaseAddress + uri;
-
+        
         int rid = RequestId++;
+
+        var toFromSubject = $"To: {notification.Recipient ?? nameof(Omni)} From: {notification.Originator ?? ""} Subject: ({notification.Type}) {notification.Verb ?? nameof(AnyVerb)} ({notification.Status:000})";
 
         try
         {
@@ -199,11 +201,12 @@ public class MessageBusHttp : IMessageBus
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             Console.WriteLine(@$"
-<<<( Notify )........................................./{rid:000000}/
-| HTTP POST {url} (0)
-+.............................................................
-| {notification.ToJson(true)}
-");
+<<-( Notify )........................................./{rid:000000}/
+| HTTP POST {url}
+| {toFromSubject}
++....{notification.CorrelationGuid()}...................
+{notification.ToJson(true)}
+...");
 
             var post = _remote.PostAsync(uri, content, cancel.Token);
 
@@ -212,7 +215,8 @@ public class MessageBusHttp : IMessageBus
             Console.WriteLine(@$"
                         +..( Notify )...................................../{rid:000000}/
                         | HTTP POST {url}
-                        +............................................( {(int)post.Result.StatusCode:000} )...>>>
+                        | {toFromSubject}
+                        +....{notification.CorrelationGuid()}..( {(int)post.Result.StatusCode:000} )....>>
 ");
 
             var res = post.Result;
@@ -251,12 +255,14 @@ public class MessageBusHttp : IMessageBus
 
             Console.WriteLine(@$"
                         !--( Notify )-------------------------------------/{rid:000000}/
-                        | HTTP POST {url} ({(int)HttpStatusCode.InternalServerError})
-                        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!XXX
+                        | HTTP POST {url}
+                        | {toFromSubject}
+                        !!!!!{notification.CorrelationGuid()}!!!( {(int)HttpStatusCode.InternalServerError:000} )!!!!!X
 
---- sensitive
+!!! sensitive
 {ex.Message}
-{ex.StackTrace}");
+{ex.StackTrace}
+!!!");
 
             throw new Exception($"{nameof(Unsubscribe)} failure: {url} {ex.Message}", ex);
 
@@ -356,7 +362,7 @@ public class MessageBusHttp : IMessageBus
             return null;
         }
 
-        return new AwaitedBus(awaiters);
+        return new AwaitersBus(awaiters);
     }
 
    

@@ -1,3 +1,6 @@
+using System.Dynamic;
+using Newtonsoft.Json;
+
 namespace BookingKata.API;
 
 public static partial class ApiMethods
@@ -8,7 +11,7 @@ public static partial class ApiMethods
         ).ExcludeFromDescription();
 
         busGroup.MapPost("/{busId}/notify",
-            (ParsableHexInt busId, [FromBody]ClientNotification2 notification, [FromServices]IMessageBus bus) =>
+            (ParsableHexInt busId, [FromBody]ClientRequestNotification notification, [FromServices]IMessageBus bus) =>
             {
                 return bus.Notify(notification, busId.Value);
             }
@@ -30,8 +33,11 @@ public static partial class ApiMethods
 
 
         busGroup.MapPost("/notify",
-            ([FromBody] ClientNotification2 notification, [FromServices]IMessageBus bus) =>
+            ([FromBody] ClientRequestNotification notification, [FromServices]IMessageBus bus) =>
+            // ([FromBody] dynamic notification, [FromServices]IMessageBus bus) =>
             {
+                // var notification_ = JsonConvert.DeserializeObject<ClientNotification2>(notification.ToString());
+                // var notificationDict =(IDictionary<string, object>)JsonConvert.DeserializeObject<ExpandoObject>(notification.ToString());
                 return bus.Notify(notification, 0);
             }
         ).ExcludeFromDescription();

@@ -1,7 +1,9 @@
 ﻿namespace VinZ.MessageQueue;
 
-public class AwaitedBus(AwaitedResponse[] awaitedResponses) : IMessageBusClient
+public class AwaitersBus(AwaitedResponse[] awaitedResponses) : IMessageBusClient
 {
+    public int SubscribersCount = awaitedResponses.Length;
+
     // public IMessageBusClient ConnectToBus(IMessageBus bus)
     // {
     //     return this;

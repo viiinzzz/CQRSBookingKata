@@ -1,7 +1,5 @@
 ﻿namespace VinZ.MessageQueue;
 
-public record ClientNotification2() : ClientNotification(NotificationType.Request, default, default);
-
 public record ClientNotification
 (
     NotificationType Type,
@@ -74,8 +72,7 @@ public record ClientNotification
     }
 
     public string _type { get; } = "ClientNotification";
-    public string? MessageType { get; }
-    public string? Message { get; }
-
+    public string? MessageType { get; set;  }
+    public string? Message { get; set;  }
 
 }

@@ -1,16 +1,25 @@
+using System.Runtime.CompilerServices;
+
 namespace VinZ.Common;
 
 public record PageResult<TEntity>
 (
-    string type, string elementType,
-    int page, int pageSize,
+    int page,
+    int pageSize,
 
-    bool error, string? reason,
-    int pageCount, int itemCount,
+    bool error,
+    string? reason,
+
+    int pageCount,
+    int itemCount,
+
     PageLinks[] links
 )
     : IHaveCollection<TEntity>
 {
+    public string? _type { get; } = typeof(PageResult<TEntity>).FullName;
+    public string? _itemType { get; } = typeof(TEntity).Name;
+
     public TEntity[]? items { get; set; }
 
     [Newtonsoft.Json.JsonIgnore]
