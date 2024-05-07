@@ -38,6 +38,14 @@ var demoMode = true; //isDebug;
 var url = ApiHelper.GetAppUrl();
 
 
+var myIps = ApiHelper.GetMyIps();
+
+Console.WriteLine($@"
+Network:
+{string.Join(Environment.NewLine, myIps.Select(ip => $"http://{ip}:{url.Port}"))}
+");
+
+
 const int DbContextKeepAliveMilliseconds = 30_000;
 
 var dbContextTypes = Types.From
@@ -225,11 +233,6 @@ api.UseAntiforgery();
 
 api.MapPrometheusScrapingEndpoint(); // path=/metrics
 
-var myIps = ApiHelper.GetMyIps();
-
-Console.WriteLine($@"Listening...
-{string.Join(Environment.NewLine, myIps.Select(ip => $"http://{ip}:{url.Port}"))}
-");
 
 
 api.Run();

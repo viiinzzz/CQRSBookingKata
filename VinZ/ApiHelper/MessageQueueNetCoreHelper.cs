@@ -30,7 +30,8 @@ public static class MessageQueueNetCoreHelper
         services.AddSingleton(_ => new MqServerConfig
         {
             DomainBusTypes = busTypes,
-            PauseOnError = pauseOnError
+            PauseOnError = pauseOnError,
+            IsTrace = busConfig.IsTrace
         });
 
         services.AddSingleton<MqServer>();

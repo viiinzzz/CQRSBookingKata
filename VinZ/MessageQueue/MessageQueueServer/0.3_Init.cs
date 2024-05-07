@@ -58,7 +58,7 @@ public partial class MqServer : Initializable, IMessageBus
 
             client.Log = log;
 
-            log.Log(LogLevel.Debug,
+            if (_isTrace) log.LogInformation(
                 $"<<<{type.Name}:{client.GetHashCode().xby4()}>>> Connected.");
 
             _domainBuses[scope] = client;

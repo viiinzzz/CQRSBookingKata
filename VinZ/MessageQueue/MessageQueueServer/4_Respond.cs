@@ -103,7 +103,7 @@ public partial class MqServer
         var correlationId = new CorrelationId(serverNotification.CorrelationId1, serverNotification.CorrelationId2);
         var notificationLabel = $"Notification{correlationId}{(immediate ? "" : $" (Id:{serverNotification.NotificationId})")}";
         var dequeuing = immediate ? "            >>>Relaying>>>          Immediate" : ">>>Dequeuing>>>                     scheduled";
-        var subscribersCount = $"{subscriberUrls.Count} subscriber{(subscriberUrls.Count > 1 ? "s" : "")}";
+        var subscribersCount = $"{subscriberUrls.Count + (awaitersBus?.SubscribersCount ?? 0)} subscriber{(subscriberUrls.Count + (awaitersBus?.SubscribersCount ?? 0) > 1 ? "s" : "")}";
         var messageObj = serverNotification.MessageAsObject();
         var messageJson = messageObj.ToJson(true)
             .Replace("\\r", "")
@@ -119,21 +119,26 @@ Subject: {messageType}{serverNotification.Verb}
 {messageJson}
 ---";
         {
-            var logLevel =
+            var message =
+                @$"{dequeuing} {notificationLabel} to {subscribersCount}...{Environment.NewLine}{rvm}";
+
+            LogLevel? logLevel =
                 serverNotification.IsErrorStatus() ? LogLevel.Error
-                // : serverNotification.Verb == AuditMessage ? LogLevel.Debug
-                : LogLevel.Debug;
+                : _isTrace ? LogLevel.Information
+                : null;
 
-            log.Log(logLevel,
-                @$"{dequeuing} {notificationLabel} to {subscribersCount + (awaitersBus?.SubscribersCount??0)}...{Environment.NewLine}{rvm}");
+            if (logLevel.HasValue)
+            {
+                log.Log(logLevel.Value, message);
+            }
 
-            Check(logLevel);
+            Check(logLevel ?? LogLevel.Debug);
         }
 
 
 
 
-        var updateMessage = () =>
+        var updateRepeatMessage = () =>
         {
             if (serverNotification is { RepeatDelay: { Ticks: > 0 }, RepeatCount: > 1 })
             {
@@ -157,20 +162,26 @@ Subject: {messageType}{serverNotification.Verb}
 
         if (subscriberUrls.Count == 0 && awaitersBus == null)
         {
-            if (!immediate) updateMessage();
+            if (!immediate) updateRepeatMessage();
 
-            var matchedUnmatched =
-                $"(matched {string.Join(" ", matchedHash)} unmatched {string.Join(" ", unmatchedHash)})";
             {
-                var logLevel =
-                    serverNotification.Verb == ErrorProcessingRequest
-                        ? LogLevel.Debug
-                        : LogLevel.Error;
+                var matchedUnmatched =
+                    $"(matched {string.Join(" ", matchedHash)} unmatched {string.Join(" ", unmatchedHash)})";
 
-                log.Log(logLevel,
-                    @$"            >>>Undeliverable!       {notificationLabel}...{Environment.NewLine}{matchedUnmatched}{Environment.NewLine}{rvm}");
+                var message =
+                    @$"            >>>Undeliverable!       {notificationLabel}...{Environment.NewLine}{matchedUnmatched}{Environment.NewLine}{rvm}";
 
-                Check(logLevel);
+                LogLevel? logLevel =
+                    serverNotification.Verb != ErrorProcessingRequest ? LogLevel.Error
+                    : _isTrace ? LogLevel.Information
+                    : null;
+
+                if (logLevel.HasValue)
+                {
+                    log.Log(logLevel.Value, message);
+                }
+
+                Check(logLevel ?? LogLevel.Debug);
             }
 
             if (serverNotification.IsErrorStatus())
@@ -220,8 +231,8 @@ Subject: {messageType}{serverNotification.Verb}
                 var awaitedAck = awaitedAckTask.Result;
 
                 awaitersBus.OnNotified(clientNotification);
-                
-                log.Log(LogLevel.Debug,
+
+                if (_isTrace) log.LogInformation(
                     $"{delivering} {notificationLabel} to <<<awaitedBus>>>...");
 
                 count += new DeliveryCount(1, 0);
@@ -251,16 +262,20 @@ failure: {ex.Message}
                     var busIdMatch = BusIdRx.Match(url.PathAndQuery);
                     var busIdStr = !busIdMatch.Success ? string.Empty : busIdMatch.Groups[1].Value;
 
-                    var busIdParsed = ParsableHexInt.TryParse(busIdStr, null, out var busId);
+                    var busIdParsed = ParsableHexInt.TryParse(busIdStr, null, out var busId)
+                        && busId.Value != 0;
 
                     // var isLoopback = url.IsLoopback
                     var isLoopback = Dns.GetHostEntry(url.Host).AddressList
                         .Any(a => _myIps.Contains(a));
 
-                    if (isLoopback && busIdParsed)
+                    if (isLoopback)
                     {
                         if (!busIdParsed)
                         {
+                            log.LogWarning(
+                                $"Invalid busId {0:0} in client url {clientUrl}");
+
                             return new DeliveryCount(0, 1);
                         }
 
@@ -271,6 +286,9 @@ failure: {ex.Message}
 
                         if (client == null)
                         {
+                            log.LogWarning(
+                                $"Invalid busId {clientHashCode.xby4()} in client url {clientUrl}");
+
                             return new DeliveryCount(0, 1);
                         }
 
@@ -280,10 +298,10 @@ failure: {ex.Message}
                     }
                     else
                     {
-                        ack = send(clientUrl, clientNotification);
+                        ack = HttpSend(clientUrl, clientNotification);
                     }
 
-                    log.Log(LogLevel.Debug,
+                    if (_isTrace) log.LogInformation(
                         $"{delivering} {notificationLabel} to <<<Subscriber:{clientUrl.GetHashCode().xby4()}>>>...");
 
                     if (!ack.Valid)
@@ -308,131 +326,27 @@ failure: {ex.Message}
             })
             .Aggregate((a, b) => a + b);
 
-        updateMessage();
-
-        var sent = "                         >>>Sent>>> scheduled";
+        updateRepeatMessage();
 
         {
-            var logLevel =
-                clientNotification.IsErrorStatus() ? LogLevel.Error
-                : clientNotification.Verb == AuditMessage ? LogLevel.Debug
-                : LogLevel.Information;
+            LogLevel? logLevel =
+                clientNotification.IsErrorStatus() || 
+                count.Delivered == 0 || count.Failed > 0 ? LogLevel.Error
+                : clientNotification.Verb == AuditMessage || _isTrace ? LogLevel.Information
+                : null;
 
-            if (_isTrace) log.Log(logLevel,
-                @$"{sent} {notificationLabel} to {subscribersCount + (awaitersBus?.SubscribersCount ?? 0)}...{Environment.NewLine}{rvm}");
+            if (logLevel.HasValue)
+            {
+                var sent = "                         >>>Sent>>> scheduled";
+                var delivered = $"{count.Delivered} delivered, {count.Failed} undelivered";
+                var message = @$"{sent} {notificationLabel} to {subscribersCount + (awaitersBus?.SubscribersCount ?? 0)}, {delivered}...{Environment.NewLine}{rvm}";
+             
+                log.Log(logLevel.Value, message);
+            }
 
-            Check(logLevel);
+            Check(logLevel ?? LogLevel.Debug);
         }
 
         return (count, updates);
-    }
-
-
-    private NotifyAck send(string clientUrl, ClientNotification notification)
-    {
-        var baseAddress = new Uri(clientUrl);
-        var uri = nameof(Notify).ToLower();
-        var url = baseAddress + uri;
-
-        try
-        {
-            var cancel = new CancellationTokenSource();
-
-            var json = notification.ToJson();
-
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var http = new HttpClient
-            {
-                BaseAddress = baseAddress
-            };
-
-
-            if (_isTrace) log.LogInformation(@$"
-<<............................................................
-| HTTP POST {url} (0)
-+.............................................................
-| {notification.ToJson(true)}
-");
-
-            var post = http.PostAsync(uri, content, cancel.Token);
-
-            post.Wait(cancel.Token);
-
-            if (_isTrace) log.LogInformation(@$"
-                        +.........................................................
-                        | HTTP POST {url}
-                        +............................................( {(int)post.Result.StatusCode:000} )...>>>
-");
-
-            var res = post.Result;
-
-            var statusCode = (int)res.StatusCode;
-
-            if (statusCode is < 200 or > 299)
-            {
-                return new NotifyAck
-                {
-                    Valid = false,
-                    Status = res.StatusCode,
-                    data = @$"failed to reach {url}
-{res.ReasonPhrase}"
-                };
-            }
-
-            var read = res.Content.ReadAsStringAsync(cancel.Token);
-
-            read.Wait(cancel.Token);
-
-            var ack = JsonConvert.DeserializeObject<NotifyAck>(read.Result);
-
-            if (ack == null)
-            {
-                throw new NullReferenceException(nameof(ack));
-            }
-
-            return ack;
-        }
-        catch (Exception ex)
-        {
-            if (ex.InnerException != null)
-            {
-                ex = ex.InnerException;
-            }
-
-            if (ex is TaskCanceledException cancelEx)
-            {
-                if (_isTrace) log.LogInformation(@$"
-                        +.........................................................
-                        | HTTP POST {url} ({(int)HttpStatusCode.RequestTimeout})
-                        +......................................................>>>
-");
-
-                return new NotifyAck
-                {
-                    Valid = false,
-                    Status = HttpStatusCode.RequestTimeout,
-                    data = @$"failed to reach {url}"
-                };
-            }
-
-            if (_isTrace) log.LogInformation(@$"
-                        +.........................................................
-                        | HTTP POST {url} ({(int)HttpStatusCode.InternalServerError})
-                        +......................................................>>>
-");
-
-            return new NotifyAck
-            {
-                Valid = false,
-                Status = HttpStatusCode.InternalServerError,
-                data = @$"failed to reach {url}
-
----sensitive
-{ex.Message}
-{ex.StackTrace}"
-            };
-        }
-
     }
 }

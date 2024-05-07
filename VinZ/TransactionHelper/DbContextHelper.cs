@@ -16,6 +16,9 @@ public static class DbContextHelper
                 BindingFlags.NonPublic | BindingFlags.Static) ?? throw new MissingMethodException(
             nameof(DbContextHelper), nameof(EnsureDatabaseCreatedPrivate));
 
+        Console.Write(@"Storage:
+");
+
         foreach (var contextType in contextTypes)
         {
             if (!contextType.IsAssignableTo(typeof(DbContext)))
@@ -36,6 +39,9 @@ public static class DbContextHelper
     )
         where TContext : DbContext
     {
+        Console.Write(@"Storage:
+");
+
         EnsureDatabaseCreatedPrivate<TContext>(app, keepAliveMilliseconds);
     }
 
@@ -55,8 +61,7 @@ public static class DbContextHelper
 
         var created = database.EnsureCreated();
 
-        Console.WriteLine(@$"
-{typeof(TContext).Name}: {(created ? "Created" : "Not created")}. {database.GetConnectionString()}");
+        Console.WriteLine(@$"{database.GetConnectionString()} {(created ? "created" : "already exists")} for {typeof(TContext).Name}");
 
 
         if (keepAliveMilliseconds.HasValue)

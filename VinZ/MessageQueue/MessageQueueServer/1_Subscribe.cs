@@ -25,7 +25,7 @@ public partial class MqServer
         {
             _subscribers_0[hash0] = url;
 
-            log.Log(LogLevel.Debug,
+            if (_isTrace) log.LogInformation(
                 $"<<<{name}:{hash0.xby4()}>>> Subscribe recipient={nameof(Omni)}, verb=Any (0+{hash0.xby4()})");
 
             // hash = hash0;
@@ -44,7 +44,7 @@ public partial class MqServer
                     return subscribers;
                 });
 
-            log.Log(LogLevel.Debug,
+            if (_isTrace) log.LogInformation(
                 $"<<<{name}:{hash0.xby4()}>>> Subscribe recipient={recipient}, verb=Any (R+{hash1.xby4()})");
 
             // hash = hash1;
@@ -63,7 +63,7 @@ public partial class MqServer
                     return subscribers;
                 });
 
-            log.Log(LogLevel.Debug,
+            if (_isTrace) log.LogInformation(
                 $"<<<{name}:{hash0.xby4()}>>> Subscribe recipient={nameof(Omni)}, verb={verb} (V+{hash1.xby4()})");
 
             // hash = hash1;
@@ -80,7 +80,7 @@ public partial class MqServer
                 return subscribers;
             });
 
-        log.Log(LogLevel.Debug,
+        if (_isTrace) log.LogInformation(
             $"<<<{name}:{hash0.xby4()}>>> Subscribe recipient={recipient}, verb={verb} (RV+{hash2.xby4()})");
 
         // hash = hash2;
@@ -101,7 +101,7 @@ public partial class MqServer
 
         var hash0 = sub.url.GetHashCode();
 
-        log.Log(LogLevel.Debug,
+        if (_isTrace) log.LogInformation(
             $"<<<{name}:{hash0.xby4()}>>> Unsubscribe recipient=Any, verb=Any (0+{hash0.xby4()})");
 
         if (recipient == Omni && verb == AnyVerb)

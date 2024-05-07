@@ -31,12 +31,15 @@ public class MessageBusClientBase : IMessageBusClient, IDisposable
 
         isTrace = busConfig.IsTrace;
         var id = GetHashCode();
-        var localUrl = $"{(busConfig.LocalUrl.EndsWith('/') ? busConfig.LocalUrl : busConfig.LocalUrl + '/')}{id.xby4()}";
-        var remoteUrl = busConfig.RemoteUrl;
 
-        _bus = new MessageBusHttp(busConfig, dateTime, log);
+        var clientConfig = busConfig with
+        {
+            LocalUrl = $"{(busConfig.LocalUrl.EndsWith('/') ? busConfig.LocalUrl : busConfig.LocalUrl + '/')}{id.xby4()}"
+        };
 
-        var remoteHost = new Uri(remoteUrl).Host;
+        _bus = new MessageBusHttp(clientConfig, dateTime, log);
+
+        var remoteHost = new Uri(clientConfig.RemoteUrl).Host;
 
         var remoteIp = Dns.GetHostAddresses(remoteHost)
             .MinBy(a => a.AddressFamily == AddressFamily.InterNetwork ? 4 : a.AddressFamily == AddressFamily.InterNetworkV6 ? 6 : int.MaxValue);

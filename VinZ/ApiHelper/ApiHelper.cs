@@ -6,7 +6,9 @@ public static class ApiHelper
 
     public static IPAddress[] GetMyIps()
     {
-        var addressList = Dns.GetHostByName(Dns.GetHostName()).AddressList;
+        var hostName = Dns.GetHostName();
+
+        var addressList = Dns.GetHostByName(hostName).AddressList;
 
         return addressList
             .Select(a => a.MapToIPv4())

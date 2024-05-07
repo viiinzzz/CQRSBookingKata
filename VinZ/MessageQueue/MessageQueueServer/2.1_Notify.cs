@@ -98,14 +98,23 @@ From: {notification.Originator}
 Subject: {messageType}{notification.Verb}
 {messageJson}
 ---";
-            var logLevel = 
-                notification.IsErrorStatus() ? LogLevel.Error
-                // : notification.Verb == AuditMessage ? LogLevel.Debug
-                : LogLevel.Debug;
 
-            log.Log(logLevel, @$"{queuing} {notificationLabel}...{Environment.NewLine}{rvm}");
+            {
+                var message = @$"{queuing} {notificationLabel}...{Environment.NewLine}{rvm}";
 
-            Check(logLevel);
+                LogLevel? logLevel = 
+                    notification.IsErrorStatus() ? LogLevel.Error
+                    : _isTrace ? LogLevel.Information
+                    : null;
+
+                if (logLevel.HasValue)
+                {
+                    log.Log(logLevel.Value, message);
+                }
+
+                Check(logLevel ?? LogLevel.Debug);
+            }
+            
 
             //
             //
