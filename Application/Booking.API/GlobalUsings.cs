@@ -1,5 +1,6 @@
 ﻿global using System.Dynamic;
 global using System.Net;
+global using System.Net.NetworkInformation;
 global using System.Text.RegularExpressions;
 global using System.Transactions;
 global using System.Text;

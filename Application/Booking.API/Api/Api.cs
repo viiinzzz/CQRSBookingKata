@@ -4,9 +4,11 @@
   ╎                                                                            ╎
   ╰----------------------------------------------------------------------------╯*/
 
-using System.Net.NetworkInformation;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
+
+/*╭-----------------------------------------------------------------------------
+  ╎ basic variables
+  */
 {
     //for type dependency diagram, establish dependency
     _ = nameof(BookingKata.Infrastructure.EnterpriseStorage);
@@ -14,123 +16,55 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 }
 
 var isDebug = false;
+var isRelease = false;
 
 {
     var pif = ProgramInfo.Current;
     pif.Print();
 
     isDebug = pif.IsDebug;
+    isRelease = !isDebug;
 }
-
-var isRelease = !isDebug;
 
 
 var traceEF = false;//isDebug;
 var pauseOnError = false; //isDebug;
 var demoMode = true; //isDebug;
 
-/*╭-----------------------------------------------------------------------------
-  ╎ Storage methods
-  */
 
-void EnsureDatabaseCreated<TContext>(WebApplication app) where TContext : DbContext
-{
-    var database = app
-        .Services
-        .GetRequiredService<IDbContextFactory>()
-        .CreateDbContext<TContext>()
-        .Database;
-
-    var created = database.EnsureCreated();
-
-//     Console.WriteLine(@$"
-// {typeof(TContext).Name}: {(created ? "Created" : "Not created")}. {database.GetConnectionString()}
-// ");
+var url = ApiHelper.GetAppUrl();
 
 
-    if (isDebug)
-    {
-        //for in-memory sqlite, as currently configured for the 'Debug' build configuration,
-        //at least one client connection needs to be kept open, otherwise the database vanishes
-        var dbContext = Activator.CreateInstance(typeof(TContext)) as TContext;
-        
-        var keepAlive = Task.Run(async () =>
-        {
-            while (true)
-            {
-                await Task.Delay(30000);
+const int DbContextKeepAliveMilliseconds = 30_000;
 
-                dbContext.Database.OpenConnection();
+var dbContextTypes = Types.From
+<
+    BookingAdminContext,
+    BookingSalesContext,
+    BookingPlanningContext,
 
-//                 Console.WriteLine(@$"
-// {typeof(TContext).Name}: Keep Alive. {database.GetConnectionString()}
-// ");
-            }
-        });
-    }
-}
+    MessageQueueContext,
+    MoneyContext,
+    GazeteerContext
+>();
 
-void EnsureAllDatabasesCreated(WebApplication app)
-{
-    EnsureDatabaseCreated<BookingAdminContext>(app);
-    EnsureDatabaseCreated<BookingSalesContext>(app);
-    EnsureDatabaseCreated<BookingPlanningContext>(app);
+var busTypes = Types.From
+<
+    AdminBus,
+    SalesBus,
+    PlanningBus,
 
-    EnsureDatabaseCreated<MessageQueueContext>(app);
-    EnsureDatabaseCreated<MoneyContext>(app);
-    EnsureDatabaseCreated<GazeteerContext>(app);
-}
-
-void RegisterDbContext<TContext>(RegisteredDbContextFactory dbContextFactory, bool isDebug) where TContext : MyDbContext, new()
-{
-    dbContextFactory.RegisterDbContextType(() =>
-    {
-        var dbContext = new TContext
-        {
-            IsDebug = isDebug,
-            IsTrace = traceEF
-        };
-
-        return dbContext;
-    });
-}
-
-void RegisterDbContexts(WebApplicationBuilder webApplicationBuilder)
-{
-    var dbContextFactory = new RegisteredDbContextFactory();
-    
-    RegisterDbContext<BookingAdminContext>(dbContextFactory, isDebug);
-    RegisterDbContext<BookingSalesContext>(dbContextFactory, isDebug);
-    RegisterDbContext<BookingPlanningContext>(dbContextFactory, isDebug);
-
-    RegisterDbContext<MessageQueueContext>(dbContextFactory, isDebug);
-    RegisterDbContext<MoneyContext>(dbContextFactory, isDebug);
-    RegisterDbContext<GazeteerContext>(dbContextFactory, isDebug);
-
-    webApplicationBuilder.Services.AddSingleton<IDbContextFactory>(dbContextFactory);
-}
-
+    BillingBus,
+    ThirdPartyBus,
+    ConsoleAuditBus
+>();
 /*
-                                                                             ╎
------------------------------------------------------------------------------╯*/
+                                                                              ╎
+ -----------------------------------------------------------------------------╯*/
 
 
-Uri GetAppUrl()
-{
-    var urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS").Split(";");
-    var url1 = urls.First();
-    url1 = url1.Replace("//*", "//localhost");
-    var url = new Uri($"{url1}/bus/");
-    if (url.IsLoopback)
-    {
-        var host = Dns.GetHostEntry("").HostName;
-        url = new Uri($"{url.Scheme}://{host}:{url.Port}{url.PathAndQuery}");
-    }
 
-    return url;
-}
 
-var url = GetAppUrl();
 
 /*╭-----------------------------------------------------------------------------
   ╎ DI methods
@@ -138,48 +72,44 @@ var url = GetAppUrl();
 
 //adding components to the magic wiring box, aka. DI Container to achieve IoC
 
-
 void ConfigureDependencyInjection(WebApplicationBuilder builder)
 {
     var services = builder.Services;
 
     //infra
-    services.AddExceptionHandler<GlobalExceptionHandler>();
-    services.AddRazorPages();
     services.AddSingleton<IScopeProvider, ScopeProvider>();
+    services.AddExceptionHandler<GlobalExceptionHandler>();
 
+    //web
+    services.AddRazorPages();
+
+    //open api doc
     services.AddEndpointsApiExplorer();
     services.AddSwaggerGen();
 
+    //app services
     services.AddSingleton<IServerContextService, ServerContextService>();
     services.AddSingleton<ITimeService, TimeService>();
     services.AddSingleton<IRandomService, RandomService>();
+
+    //security
     services.AddAntiforgery();
     services.AddCors();
     services.AddAuthentication().AddJwtBearer();
     // https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/security?view=aspnetcore-8.0
 
-
-
-    //bus
+    //app bus
     services.AddMessageQueue(
         new BusConfiguration
         {
             LocalUrl = url.ToString(),
             RemoteUrl = url.ToString()
         },
-        Types.From<
-            AdminBus,
-            SalesBus, 
-            PlanningBus,
-            BillingBus,
-            ThirdPartyBus, 
-            ConsoleAuditBus
-        >(),
+        busTypes,
         pauseOnError
     );
 
-    //repo
+    //app repo
     services.AddScoped<IAdminRepository, AdminRepository>();
     services.AddScoped<ISalesRepository, SalesRepository>();
     services.AddScoped<IPlanningRepository, PlanningRepository>();
@@ -243,14 +173,15 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
     }
 }
 /*
-                                                                             ╎
------------------------------------------------------------------------------╯*/
+                                                                              ╎
+ -----------------------------------------------------------------------------╯*/
 
 
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
-RegisterDbContexts(builder);
+builder.RegisterDbContexts(dbContextTypes, isDebug, traceEF);
+
 ConfigureDependencyInjection(builder);
 
 var api = builder.Build();
@@ -271,7 +202,7 @@ if (isDevelopment)
     // api.UseExceptionHandler();
 }
 
-EnsureAllDatabasesCreated(api);
+api.EnsureDatabaseCreated(dbContextTypes, isDebug ? DbContextKeepAliveMilliseconds : null);
 
 api.UseStaticFiles();
 
