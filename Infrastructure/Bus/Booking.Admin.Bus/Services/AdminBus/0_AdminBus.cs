@@ -4,7 +4,8 @@ public partial class AdminBus(IScopeProvider sp, BookingConfiguration bconf) : M
 {
     public override async Task Configure()
     {
-        await Subscribe(Recipient.Admin);
+        // await
+        Subscribe(Recipient.Admin);
 
         Notified += (sender, notification) =>
         {

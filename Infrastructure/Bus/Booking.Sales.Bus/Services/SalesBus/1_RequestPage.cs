@@ -13,6 +13,15 @@ public partial class SalesBus
 
         switch (request.Path)
         {
+            case "/sales/customers":
+            {
+                page = salesRepository
+                    .Customers
+                    .Page(request.Path, request.Page, request.PageSize);
+
+                break;
+            }
+
             case "/admin/vacancies":
             {
                 page = salesRepository

@@ -1,8 +1,6 @@
-using System.Runtime.CompilerServices;
-
 namespace VinZ.Common;
 
-public record PageResult<TEntity>
+public record PageResult<TEntity> 
 (
     int page,
     int pageSize,
@@ -16,8 +14,20 @@ public record PageResult<TEntity>
     PageLinks[] links
 )
     : IHaveCollection<TEntity>
+    
+    where TEntity : class
 {
-    public string? _type { get; } = typeof(PageResult<TEntity>).FullName;
+    private static string Get_type()
+    {
+        if (typeof(TEntity).IsInterface)
+        {
+            throw new ArgumentException($"Invalid generic type {typeof(TEntity).Name}, must not be an interface.", nameof(TEntity));
+        }
+
+        return typeof(PageResult<TEntity>).FullName;
+    }
+
+    public string? _type { get; } = Get_type();
     public string? _itemType { get; } = typeof(TEntity).Name;
 
     public TEntity[]? items { get; set; }

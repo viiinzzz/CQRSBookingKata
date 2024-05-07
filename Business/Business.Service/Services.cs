@@ -72,7 +72,7 @@ public static class Verb
 
         public const string HotelSeasonOpening = $"{nameof(HotelSeasonOpening)}";
 
-        public const string RequestBook = $"{nameof(RequestBook)}";
+        public const string RequestBooking = $"{nameof(RequestBooking)}";
         public const string BookConfirmed = $"{nameof(BookConfirmed)}";
         public const string BookCancelled = $"{nameof(BookCancelled)}";
 

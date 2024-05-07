@@ -9,32 +9,32 @@ public static partial class ApiMethods
     private static void MapRoutes_11_Employees(RouteGroupBuilder admin)
     {
         var employees = admin.MapGroup("/employees"
-            ).WithOpenApi().WithTags(new [] { RestrictedTag, AdminTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag]);
 
         employees.MapListMq<Employee>("/", "/admin/employees", filter: null,
             Recipient.Admin, RequestPage, originator, 
             responseTimeoutSeconds
-            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, EmployeesTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag, EmployeesTag]);
 
         employees.MapPostMq<NewEmployee>("/",
             Recipient.Admin, RequestCreateEmployee, originator, 
             responseTimeoutSeconds
-            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, EmployeesTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag, EmployeesTag]);
 
         employees.MapGetMq<Employee>("/{id}",
             Recipient.Admin, RequestFetchEmployee, originator,
             responseTimeoutSeconds
-            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, EmployeesTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag, EmployeesTag]);
 
         employees.MapPatchMq<UpdateEmployee>("/{id}",
             Recipient.Admin, RequestModifyEmployee, originator, 
             responseTimeoutSeconds
-            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, EmployeesTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag, EmployeesTag]);
 
         employees.MapDisableMq<Employee>("/{id}",
             Recipient.Admin, RequestDisableEmployee, originator,
             responseTimeoutSeconds
-            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, EmployeesTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag, EmployeesTag]);
     }
 
 }

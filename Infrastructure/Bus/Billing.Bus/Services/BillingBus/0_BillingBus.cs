@@ -4,6 +4,7 @@ public partial class BillingBus(IScopeProvider sp) : MessageBusClientBase
 {
     public override async Task Configure()
     {
+        // await
         Subscribe(Recipient);
 
         Notified += (sender, notification) =>

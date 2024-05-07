@@ -22,17 +22,6 @@ public partial class AdminBus
                 break;
             }
 
-            case "/admin/geo/indexes":
-            {
-                var originator = GetType().FullName
-                                 ?? throw new ArgumentException("invalid originator");
-
-                //pass request to third-party
-                page = AskResult<PageRequest>(originator, Support.Services.ThirdParty.Recipient, RequestPage, request);
-
-                break;
-            }
-
             default:
             {
                 throw new NotImplementedException($"page request for path not supported: {request.Path}");

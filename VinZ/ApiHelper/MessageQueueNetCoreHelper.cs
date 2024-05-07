@@ -48,7 +48,8 @@ public static class MessageQueueNetCoreHelper
         string pattern, string uri, object filter,
         string recipient, string verb,
         string originator,
-        int responseTimeoutSeconds)
+        int responseTimeoutSeconds
+    )
         where TEntity : class
     {
         return builder.MapGet(pattern,
@@ -138,6 +139,11 @@ public static class MessageQueueNetCoreHelper
             var ret = await mq.Ask<PageResult<TEntity>>(
                 originator, recipient, verb, pageRequest,
                 requestCancel, responseTimeoutSeconds);
+
+            if (ret == null)
+            {
+                throw new Exception("Internal Server Error");
+            }
 
             return ret;
         };

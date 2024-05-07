@@ -7,24 +7,24 @@ public static partial class ApiMethods
     private static void MapRoutes_2_Money(WebApplication app)
     {
         var money = app.MapGroup("/money"
-            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag]);
 
         var payrolls = money.MapGroup("/payrolls"
-            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, MoneyTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag, MoneyTag]);
 
         var invoices = money.MapGroup("/invoices"
-            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, MoneyTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag, MoneyTag]);
 
 
         payrolls.MapListMq<Payroll>("/", "/money/payrolls", filter: null,
-            Recipient.Admin, RequestPage, originator,
+            Support.Services.Billing.Recipient, RequestPage, originator,
             responseTimeoutSeconds
-            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, MoneyTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag, MoneyTag]);
 
         invoices.MapListMq<Invoice>("/", "/money/invoices", filter: null,
-            Recipient.Admin, RequestPage, originator,
+            Support.Services.Billing.Recipient, RequestPage, originator,
             responseTimeoutSeconds
-            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, MoneyTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag, MoneyTag]);
 
     }
 }

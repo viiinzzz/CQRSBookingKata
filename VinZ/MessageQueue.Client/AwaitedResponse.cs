@@ -6,6 +6,7 @@ public class AwaitedResponse
     Action<AwaitedResponse> track, Action<AwaitedResponse> untrack
 )
 {
+    private const int CheckMilliseconds = 25;//100;
     public string Key { get; } = correlationId.Guid;
 
     public bool IsCorrelatedTo(IHaveCorrelation notification)
@@ -61,7 +62,7 @@ public class AwaitedResponse
     {
         while (true)
         {
-            await Task.Delay(100);
+            await Task.Delay(CheckMilliseconds);
 
             if (Responded || Cancelled)
             {

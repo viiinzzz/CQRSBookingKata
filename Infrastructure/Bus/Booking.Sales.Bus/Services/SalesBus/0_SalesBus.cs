@@ -4,6 +4,7 @@ public partial class SalesBus(IScopeProvider sp, BookingConfiguration bconf) : M
 {
     public override async Task Configure()
     {
+        // await
         Subscribe(Recipient.Sales);
 
         Notified += (sender, notification) =>
@@ -17,7 +18,7 @@ public partial class SalesBus(IScopeProvider sp, BookingConfiguration bconf) : M
                         Verb_Is_RequestOpenHotelSeason(notification);
                         break;
                     }
-                    case Verb.Sales.RequestBook:
+                    case Verb.Sales.RequestBooking:
                     {
                         Verb_Is_RequestBook(notification);
                         break;

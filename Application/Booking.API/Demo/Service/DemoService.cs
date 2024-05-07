@@ -28,7 +28,7 @@ public partial class DemoService
 
     private const string originator = nameof(demo);
 
-    private const int DelayBeforeDemoStartSeconds = 15; //DI/Bus warmup delay before demo kicks in
+    private const int DelayBeforeDemoStartSeconds = 20; //DI/Bus warmup delay before demo kicks in
 
     public async Task Execute(CancellationToken cancel)
     {

@@ -11,23 +11,23 @@ public static partial class ApiMethods
     private static void MapRoutes_1_Admin(WebApplication app, out RouteGroupBuilder admin)
     {
         admin = app.MapGroup("/admin"
-            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag]);
 
 
         admin.MapListMq<Vacancy>("/vacancies", "/admin/vacancies", filter: null, 
             Recipient.Sales, RequestPage, originator,
             responseTimeoutSeconds: responseTimeoutSeconds
-            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag]);
 
         admin.MapListMq<Shared.Booking>("/bookings", "/admin/bookings", filter: null,
             Recipient.Sales, RequestPage, originator, 
             responseTimeoutSeconds: responseTimeoutSeconds
-            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag]);
 
         admin.MapListMq<GeoIndex>("/geo/indexes", "/admin/geo/indexes", filter: null,
-            Recipient.Admin, RequestPage, originator,
+            Support.Services.ThirdParty.Recipient, RequestPage, originator,
             responseTimeoutSeconds: responseTimeoutSeconds
-            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag]);
 
 
         admin.MapGet("/hotels/{id}/kpi", async
@@ -52,7 +52,7 @@ public static partial class ApiMethods
 ";
 
             return Results.Content(html, "text/html");
-        }).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag });
+        }).WithOpenApi().WithTags([RestrictedTag, AdminTag]);
 
     }
 }

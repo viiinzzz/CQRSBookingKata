@@ -24,6 +24,6 @@ public static partial class ApiMethods
 
                 return await forward.WithStackTrace();
             }
-        ).WithOpenApi().WithTags(new[] { DemoTag });
+        ).WithOpenApi().WithTags([DemoTag]);
     }
 }

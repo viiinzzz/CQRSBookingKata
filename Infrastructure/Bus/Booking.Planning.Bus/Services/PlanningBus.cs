@@ -6,8 +6,11 @@ public class PlanningBus(IScopeProvider sp, BookingConfiguration bconf) : Messag
 {
     public override async Task Configure()
     {
+        // await
         Subscribe(Recipient.Planning);
+        // await
         Subscribe(Recipient.Sales, Verb.Sales.BookConfirmed);
+        // await
         Subscribe(Recipient.Sales, Verb.Sales.BookCancelled);
 
         Notified += (sender, notification) =>

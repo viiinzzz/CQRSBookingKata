@@ -103,7 +103,7 @@ public partial class MqServer
         var correlationId = new CorrelationId(serverNotification.CorrelationId1, serverNotification.CorrelationId2);
         var notificationLabel = $"Notification{correlationId}{(immediate ? "" : $" (Id:{serverNotification.NotificationId})")}";
         var dequeuing = immediate ? "            >>>Relaying>>>          Immediate" : ">>>Dequeuing>>>                     scheduled";
-        var subscribersCount = $"{subscriberUrls.Count + (awaitersBus?.SubscribersCount ?? 0)} subscriber{(subscriberUrls.Count + (awaitersBus?.SubscribersCount ?? 0) > 1 ? "s" : "")}";
+        var subscribersCountStr = $"{subscriberUrls.Count + (awaitersBus?.SubscribersCount ?? 0)} subscriber{(subscriberUrls.Count + (awaitersBus?.SubscribersCount ?? 0) > 1 ? "s" : "")}";
         var messageObj = serverNotification.MessageAsObject();
         var messageJson = messageObj.ToJson(true)
             .Replace("\\r", "")
@@ -120,7 +120,8 @@ Subject: {messageType}{serverNotification.Verb}
 ---";
         {
             var message =
-                @$"{dequeuing} {notificationLabel} to {subscribersCount}...{Environment.NewLine}{rvm}";
+                @$"{dequeuing} {notificationLabel}
+                                  to {subscribersCountStr}...{Environment.NewLine}{rvm}";
 
             LogLevel? logLevel =
                 serverNotification.IsErrorStatus() ? LogLevel.Error
@@ -233,14 +234,16 @@ Subject: {messageType}{serverNotification.Verb}
                 awaitersBus.OnNotified(clientNotification);
 
                 if (_isTrace) log.LogInformation(
-                    $"{delivering} {notificationLabel} to <<<awaitedBus>>>...");
+                    @$"{delivering} {notificationLabel}
+                                  to <<<awaitedBus>>>...");
 
                 count += new DeliveryCount(1, 0);
             }
             catch (Exception ex)
             {
                 log.LogError(
-                    @$"{delivering} {notificationLabel} to <<<awaitedBus>>>...
+                    @$"{delivering} {notificationLabel}
+                                  to <<<awaitedBus>>>...
 failure: {ex.Message}
 {ex.StackTrace}
 ");
@@ -338,8 +341,9 @@ failure: {ex.Message}
             if (logLevel.HasValue)
             {
                 var sent = "                         >>>Sent>>> scheduled";
-                var delivered = $"{count.Delivered} delivered, {count.Failed} undelivered";
-                var message = @$"{sent} {notificationLabel} to {subscribersCount + (awaitersBus?.SubscribersCount ?? 0)}, {delivered}...{Environment.NewLine}{rvm}";
+                var countStr = $"{subscribersCountStr}, {count.Delivered} delivered, {count.Failed} undelivered";
+                var message = @$"{sent} {notificationLabel}
+                                         to {countStr}...{Environment.NewLine}{rvm}";
              
                 log.Log(logLevel.Value, message);
             }
