@@ -3,6 +3,30 @@ namespace VinZ.Common;
 
 public static class ApiHelper
 {
+
+    public static IPAddress[] GetMyIps()
+    {
+        var addressList = Dns.GetHostByName(Dns.GetHostName()).AddressList;
+
+        return addressList
+            .Select(a => a.MapToIPv4())
+            .Distinct()
+            .OrderBy(a => BitConverter.ToString(a.GetAddressBytes()))
+            .AsParallel()
+            .Where(a =>
+            {
+                try
+                {
+                    return new Ping().Send(a).Status == IPStatus.Success;
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+            }).ToArray();
+    }
+
+
     public static Uri GetAppUrl()
     {
         var urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS").Split(";");

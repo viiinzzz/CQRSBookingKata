@@ -75,14 +75,11 @@ public partial class MqServer : Initializable, IMessageBus
                     var clients = (string prepend) => string.Join(Environment.NewLine + prepend, _domainBuses.Values
                         .Select(client => $"<<<{client.GetType().Name}:{client.GetHashCode().xby4()}>>>"));
 
-                    Console.WriteLine(@$"+----------------------------------------
+                    if (_isTrace) log.LogInformation(@$"+----------------------------------------
 | Bus definition:
 | {master}
 | {clients("| ")}
 +----------------------------------------");
-                    log.Log(LogLevel.Debug, @$"Bus definition:
-{master}
-{clients("")}");
                 }
             });
 

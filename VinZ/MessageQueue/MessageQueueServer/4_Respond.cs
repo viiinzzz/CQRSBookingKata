@@ -318,7 +318,7 @@ failure: {ex.Message}
                 : clientNotification.Verb == AuditMessage ? LogLevel.Debug
                 : LogLevel.Information;
 
-            log.Log(logLevel,
+            if (_isTrace) log.Log(logLevel,
                 @$"{sent} {notificationLabel} to {subscribersCount + (awaitersBus?.SubscribersCount ?? 0)}...{Environment.NewLine}{rvm}");
 
             Check(logLevel);
@@ -348,7 +348,7 @@ failure: {ex.Message}
             };
 
 
-            Console.WriteLine(@$"
+            if (_isTrace) log.LogInformation(@$"
 <<............................................................
 | HTTP POST {url} (0)
 +.............................................................
@@ -359,7 +359,7 @@ failure: {ex.Message}
 
             post.Wait(cancel.Token);
 
-            Console.WriteLine(@$"
+            if (_isTrace) log.LogInformation(@$"
                         +.........................................................
                         | HTTP POST {url}
                         +............................................( {(int)post.Result.StatusCode:000} )...>>>
@@ -402,7 +402,7 @@ failure: {ex.Message}
 
             if (ex is TaskCanceledException cancelEx)
             {
-                Console.WriteLine(@$"
+                if (_isTrace) log.LogInformation(@$"
                         +.........................................................
                         | HTTP POST {url} ({(int)HttpStatusCode.RequestTimeout})
                         +......................................................>>>
@@ -416,7 +416,7 @@ failure: {ex.Message}
                 };
             }
 
-            Console.WriteLine(@$"
+            if (_isTrace) log.LogInformation(@$"
                         +.........................................................
                         | HTTP POST {url} ({(int)HttpStatusCode.InternalServerError})
                         +......................................................>>>

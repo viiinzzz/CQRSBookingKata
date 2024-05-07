@@ -7,5 +7,7 @@ public record MqServerConfig
     bool PauseOnError = false,
 
     int BusRefreshMinMilliseconds = 50,
-    int BusRefreshMaxMilliseconds = 7000
+    int BusRefreshMaxMilliseconds = 7000,
+
+    bool IsTrace = false
 );

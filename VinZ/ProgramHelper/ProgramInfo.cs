@@ -2,11 +2,11 @@ namespace VinZ.Common;
 
 public record ProgramInfo(string? ExeName, string ExeVersion, string BuildConfiguration, bool IsDebug)
 {
-    public void Print()
+    public string Print()
     {
-        Console.WriteLine(@$"
+        return @$"
 {ExeName} {ExeVersion} ({BuildConfiguration})
-");
+";
     }
 
 

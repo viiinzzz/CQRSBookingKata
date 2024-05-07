@@ -56,8 +56,7 @@ public static class DbContextHelper
         var created = database.EnsureCreated();
 
         Console.WriteLine(@$"
-{typeof(TContext).Name}: {(created ? "Created" : "Not created")}. {database.GetConnectionString()}
-");
+{typeof(TContext).Name}: {(created ? "Created" : "Not created")}. {database.GetConnectionString()}");
 
 
         if (keepAliveMilliseconds.HasValue)

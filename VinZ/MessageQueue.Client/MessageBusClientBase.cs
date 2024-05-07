@@ -1,11 +1,5 @@
 ﻿namespace VinZ.MessageQueue;
 
-public record BusConfiguration
-(
-    string LocalUrl = default,
-    string RemoteUrl = default
-);
-
 public class MessageBusClientBase : IMessageBusClient, IDisposable
 {
     private MessageBusHttp? _bus;
@@ -27,17 +21,20 @@ public class MessageBusClientBase : IMessageBusClient, IDisposable
 
     public ILogger<IMessageBus>? Log { get; set; }
 
+    private bool isTrace = true;
+
     public IMessageBusClient ConnectToBus(IScopeProvider scp)
     {
         var scope1 = scp.GetScope<BusConfiguration>(out var busConfig);
         var scope2 = scp.GetScope<ITimeService>(out var dateTime);
         var scope3 = scp.GetScope<ILogger<IMessageBus>>(out var log);
 
+        isTrace = busConfig.IsTrace;
         var id = GetHashCode();
         var localUrl = $"{(busConfig.LocalUrl.EndsWith('/') ? busConfig.LocalUrl : busConfig.LocalUrl + '/')}{id.xby4()}";
         var remoteUrl = busConfig.RemoteUrl;
 
-        _bus = new MessageBusHttp(localUrl, remoteUrl, dateTime, log);
+        _bus = new MessageBusHttp(busConfig, dateTime, log);
 
         var remoteHost = new Uri(remoteUrl).Host;
 
@@ -122,13 +119,11 @@ public class MessageBusClientBase : IMessageBusClient, IDisposable
                 if (retryCount >= RetryMaxCount)
                 {
                     log?.LogError($"[{DateTime.Now:O}] Bus error: max retry reached: {ex.Message}");
-                    Console.Error.WriteLine($"[{DateTime.Now:O}] Bus error: max retry reached: {ex.Message}");
 
                     throw new Exception($"Max retry reached ({retryCount})", ex);
                 }
 
                 log?.LogInformation($"      --> waiting bus... {elapsedSeconds:0.0}s ({retryCount}/{RetryMaxCount})");
-                Console.Error.WriteLine($"      --> waiting bus... {elapsedSeconds:0.0}s ({retryCount}/{RetryMaxCount})");
             }
         }
     }

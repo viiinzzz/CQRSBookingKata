@@ -4,7 +4,10 @@ public partial class MqServer
 {
     private int _refresh = config.BusRefreshMinMilliseconds;
 
-    private void LogRefresh() => log.LogInformation($"--> Throttling refresh rate @{_refresh}ms");
+    private void LogRefresh()
+    {
+        if (_isTrace) log.LogInformation($"--> Throttling refresh rate @{_refresh}ms");
+    }
 
     private void RefreshFastest()
     {

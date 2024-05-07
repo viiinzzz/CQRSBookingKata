@@ -1,9 +1,16 @@
 ﻿namespace BookingKata.API.Infrastructure;
 
+public record MyDebugMiddlewareConfig
+(
+    bool IsTrace = false
+);
+
 public class MyDebugMiddleware
 (
     RequestDelegate next,
-    ILogger<MyDebugMiddleware> logger)
+    MyDebugMiddlewareConfig config,
+    ILogger<MyDebugMiddleware> logger
+)
 {
 
     private static int RequestId = 0;
@@ -33,7 +40,7 @@ public class MyDebugMiddleware
                 requestBodyObj = requestBody.FromJsonToExpando();
             }
 
-            Console.WriteLine(@$"
+            if (config.IsTrace) logger.LogInformation(@$"
         <<-( Request )--------------------------------/{rid:000000}/
         | {context.Request.Scheme.ToUpper()} {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
         | ORIGIN {context.Request.Host}
@@ -63,7 +70,7 @@ public class MyDebugMiddleware
 
             var dt = (DateTime.Now - t0).TotalMilliseconds;
 
-            Console.WriteLine(@$"
+            if (config.IsTrace) logger.LogInformation(@$"
                 +--( Response {$"{dt,6:#####0}"}ms)-----------------------/{rid:000000}/
                 | {context.Request.Scheme.ToUpper()} {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
                 | ORIGIN {context.Request.Host}
@@ -76,7 +83,7 @@ public class MyDebugMiddleware
         {
             var dt = (DateTime.Now - t0).TotalMilliseconds;
 
-            Console.Error.WriteLine(@$"
+            if (config.IsTrace) logger.LogInformation(@$"
                 !--( Canceled {dt,6:#####0}ms)-----------------------/{rid:000000}/
                 | {context.Request.Scheme.ToUpper()} {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
                 | ORIGIN {context.Request.Host}
@@ -94,7 +101,7 @@ Failure cause by {ex.GetType().Name}:
         {
             var dt = (DateTime.Now - t0).TotalMilliseconds;
 
-            Console.Error.WriteLine(@$"
+            if (config.IsTrace) logger.LogInformation(@$"
                 !--( Aborted {dt,6:#####0}ms)------------------------/{rid:000000}/
                 | {context.Request.Scheme.ToUpper()} {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
                 | ORIGIN {context.Request.Host} 

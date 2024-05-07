@@ -1,13 +1,10 @@
 ﻿global using System.Dynamic;
 global using System.Net;
-global using System.Net.NetworkInformation;
 global using System.Text.RegularExpressions;
 global using System.Transactions;
 global using System.Text;
-global using Microsoft.EntityFrameworkCore;
 global using Microsoft.AspNetCore.Mvc;
 global using Newtonsoft.Json.Linq;
-global using Zejji.Entity;
 
 
 global using VinZ.Common;

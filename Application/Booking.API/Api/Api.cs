@@ -20,15 +20,18 @@ var isRelease = false;
 
 {
     var pif = ProgramInfo.Current;
-    pif.Print();
+    Console.WriteLine(pif.Print());
 
     isDebug = pif.IsDebug;
     isRelease = !isDebug;
 }
 
 
-var traceEF = false;//isDebug;
+var traceStorage = false;//isDebug; //Entity Framework debugging
+var traceNetwork = true;//isDebug; //Bus debugging
+
 var pauseOnError = false; //isDebug;
+
 var demoMode = true; //isDebug;
 
 
@@ -103,7 +106,8 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
         new BusConfiguration
         {
             LocalUrl = url.ToString(),
-            RemoteUrl = url.ToString()
+            RemoteUrl = url.ToString(),
+            IsTrace = traceNetwork
         },
         busTypes,
         pauseOnError
@@ -171,6 +175,12 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
             options.ServicesStopConcurrently = true;
         });
     }
+
+    //debug
+    services.AddSingleton(new MyDebugMiddlewareConfig
+    {
+        IsTrace = traceNetwork
+    });
 }
 /*
                                                                               ╎
@@ -178,9 +188,10 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
 
 
 
+
 var builder = WebApplication.CreateSlimBuilder(args);
 
-builder.RegisterDbContexts(dbContextTypes, isDebug, traceEF);
+builder.RegisterDbContexts(dbContextTypes, isDebug, traceStorage);
 
 ConfigureDependencyInjection(builder);
 
@@ -214,22 +225,13 @@ api.UseAntiforgery();
 
 api.MapPrometheusScrapingEndpoint(); // path=/metrics
 
-var myIps = Dns.GetHostByName(Dns.GetHostName()).AddressList
-    .Select(a => a.MapToIPv4()).Distinct().OrderBy(a => BitConverter.ToString(a.GetAddressBytes()))
-    .AsParallel().Where(a =>
-    {
-        try
-        {
-            return new Ping().Send(a).Status == IPStatus.Success;
-        }
-        catch (Exception ex)
-        {
-            return false;
-        }
-    });
-Console.WriteLine($@"
+var myIps = ApiHelper.GetMyIps();
+
+Console.WriteLine($@"Listening...
 {string.Join(Environment.NewLine, myIps.Select(ip => $"http://{ip}:{url.Port}"))}
 ");
 
 
 api.Run();
+
+//let the show start...

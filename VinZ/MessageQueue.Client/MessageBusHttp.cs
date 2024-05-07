@@ -4,6 +4,7 @@ public class MessageBusHttp : IMessageBus
 {
     public Uri Url { get; private set; }
     private readonly HttpClient _remote = new();
+    private readonly bool _isTrace;
 
     private readonly ITimeService DateTime;
     private readonly ILogger<IMessageBus> log;
@@ -12,14 +13,16 @@ public class MessageBusHttp : IMessageBus
 
     public MessageBusHttp
     (
-        string myUrl, 
-        string remoteUrl,
+        BusConfiguration busConfig,
 
         ITimeService dateTime,
         ILogger<IMessageBus> log
     )
     {
+        _isTrace = busConfig.IsTrace;
+
         DateTime = dateTime;
+        var myUrl = busConfig.LocalUrl;
         if (!myUrl.EndsWith('/'))
         {
             myUrl += '/';
@@ -27,7 +30,7 @@ public class MessageBusHttp : IMessageBus
 
         Url = new Uri(myUrl);
 
-
+        var remoteUrl = busConfig.RemoteUrl;
         if (!remoteUrl.EndsWith('/'))
         {
             remoteUrl += '/';
@@ -57,7 +60,7 @@ public class MessageBusHttp : IMessageBus
 
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            Console.WriteLine(@$"
+            if (_isTrace) log.LogInformation(@$"
 <<-( Subscribe )............................../{rid:000000}/
 | HTTP POST {url}
 +.....................................................
@@ -68,7 +71,7 @@ public class MessageBusHttp : IMessageBus
 
             post.Wait(cancel.Token);
 
-            Console.WriteLine(@$"
+            if (_isTrace) log.LogInformation(@$"
                         +..( Subscribe )............................../{rid:000000}/
                         | HTTP POST {url}
                         +........................................( {(int)post.Result.StatusCode:000} )....>>
@@ -90,7 +93,7 @@ public class MessageBusHttp : IMessageBus
                 ex = ex.InnerException;
             }
 
-            Console.WriteLine(@$"
+            if (_isTrace) log.LogInformation(@$"
                         !..( Subscribe )............................../{rid:000000}/
                         | HTTP POST {url}
                         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!( {(int)HttpStatusCode.InternalServerError:000} )!!!!!X
@@ -124,7 +127,7 @@ public class MessageBusHttp : IMessageBus
 
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            Console.WriteLine(@$"
+            if (_isTrace) log.LogInformation(@$"
 <<-( Unsubscribe )............................/{rid:000000}/
 | HTTP POST {url}
 +.....................................................
@@ -135,7 +138,7 @@ public class MessageBusHttp : IMessageBus
 
             post.Wait(cancel.Token);
 
-            Console.WriteLine(@$"
+            if (_isTrace) log.LogInformation(@$"
                         +..( Unsubscribe )............................/{rid:000000}/
                         | HTTP POST {url} ({(int)post.Result.StatusCode})
                         +........................................( {(int)post.Result.StatusCode:000} )....>>
@@ -164,7 +167,7 @@ public class MessageBusHttp : IMessageBus
                 ex = ex.InnerException;
             }
 
-            Console.WriteLine(@$"
+            if (_isTrace) log.LogInformation(@$"
                         !..( Unsubscribe )............................/{rid:000000}/
                         | HTTP POST {url}
                         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!( {(int)HttpStatusCode.InternalServerError:000} )!!!!!X
@@ -200,7 +203,7 @@ public class MessageBusHttp : IMessageBus
 
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            Console.WriteLine(@$"
+            if (_isTrace) log.LogInformation(@$"
 <<-( Notify )........................................./{rid:000000}/
 | HTTP POST {url}
 | {toFromSubject}
@@ -212,7 +215,7 @@ public class MessageBusHttp : IMessageBus
 
             post.Wait(cancel.Token);
 
-            Console.WriteLine(@$"
+            if (_isTrace) log.LogInformation(@$"
                         +..( Notify )...................................../{rid:000000}/
                         | HTTP POST {url}
                         | {toFromSubject}
@@ -253,7 +256,7 @@ public class MessageBusHttp : IMessageBus
                 ex = ex.InnerException;
             }
 
-            Console.WriteLine(@$"
+            if (_isTrace) log.LogInformation(@$"
                         !--( Notify )-------------------------------------/{rid:000000}/
                         | HTTP POST {url}
                         | {toFromSubject}
