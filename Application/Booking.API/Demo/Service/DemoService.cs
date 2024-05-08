@@ -2,7 +2,7 @@ namespace BookingKata.API.Demo;
 
 public partial class DemoService
 (
-    BookingDemoContext demo,
+    BookingDemoContext demoContext,
     IAdminRepository admin,
     IMoneyRepository money,
     ISalesRepository sales,
@@ -26,20 +26,23 @@ public partial class DemoService
     private const int SeasonDayNumbers = 50;//250
     private const int CustomerCount = 1000;
 
-    private const string originator = nameof(demo);
+    private const string originator = nameof(demoContext);
 
-    private const int DelayBeforeDemoStartSeconds = 20; //DI/Bus warmup delay before demo kicks in
+    private const int DelayBeforeDemoStartSeconds = 20; 
+
 
     public async Task Execute(CancellationToken cancel)
     {
         try
         {
+            //DI/Bus warmup delay before demo kicks in
             await Task.Delay(DelayBeforeDemoStartSeconds * 1000);
 
 
             DateTime.Freeze();
 
             Seed();
+            demoContext.SeedComplete = true;
 
             cancel.ThrowIfCancellationRequested();
         }

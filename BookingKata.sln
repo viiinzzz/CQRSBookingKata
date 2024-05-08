@@ -129,7 +129,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Storage", "Storage", "{5C52
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Booking.API Infrastructure", "Booking.API Infrastructure", "{4A30330A-9E34-41D7-B729-E8F47A7675E2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VinZ.MessageQueue.Client", "VinZ\MessageQueue.Client\VinZ.MessageQueue.Client.csproj", "{E5B0BB04-7297-49FB-AEA4-EC615179D3F3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.MessageQueue.Client", "VinZ\MessageQueue.Client\VinZ.MessageQueue.Client.csproj", "{E5B0BB04-7297-49FB-AEA4-EC615179D3F3}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{0727C3D4-5D0A-43C9-8B04-F4B3BD6F4671}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -341,6 +343,10 @@ Global
 		{E5B0BB04-7297-49FB-AEA4-EC615179D3F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E5B0BB04-7297-49FB-AEA4-EC615179D3F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E5B0BB04-7297-49FB-AEA4-EC615179D3F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0727C3D4-5D0A-43C9-8B04-F4B3BD6F4671}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0727C3D4-5D0A-43C9-8B04-F4B3BD6F4671}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0727C3D4-5D0A-43C9-8B04-F4B3BD6F4671}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0727C3D4-5D0A-43C9-8B04-F4B3BD6F4671}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

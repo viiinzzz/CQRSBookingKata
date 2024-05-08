@@ -4,7 +4,7 @@ public partial class DemoService
 {
     private void Fake_BookingDay()
     {
-        if (demo.FakeCustomerIds == null)
+        if (demoContext.FakeCustomerIds == null)
         {
             throw new Exception("FakeCustomer not ready yet.");
         }
@@ -12,7 +12,7 @@ public partial class DemoService
         {
             var message = "Demo: Seeding Bookings {0}...";
 
-            var args = new object[] { demo.SimulationDay };
+            var args = new object[] { demoContext.SimulationDay };
 
             bus.Notify(new AdvertisementNotification(message, args)
             {
@@ -31,9 +31,9 @@ public partial class DemoService
         {
             try
             {
-                var ci = demo.FakeCustomerIds.Length.Rand();
-                var cid = demo.FakeCustomerIds[ci];
-                var c = demo.FakeCustomers[cid];
+                var ci = demoContext.FakeCustomerIds.Length.Rand();
+                var cid = demoContext.FakeCustomerIds[ci];
+                var c = demoContext.FakeCustomers[cid];
 
                 var stayStartDays = 1 + 45.Rand();
                 var stayDurationDays = 1 + 5.Rand();
@@ -46,11 +46,12 @@ public partial class DemoService
                     ) { CityName = "Paris", CountryCode = "FR" };
 
                 var preferredStayMatches = sales2.FindStay(r, cid)
-                    .Take(50)//let's say customer only examine 50 first matches (at max)
+                    .Take(20)//let's say customer only examine 20 first matches (at max)
                     .AsRandomEnumerable()
-                    .Take(10);//and finally validate only 10 (at max)
+                    .Take(5)//and finally validate only 5 (at max)
+                    .ToArray();
 
-                if (preferredStayMatches.Count() == 0)
+                if (!preferredStayMatches.Any())
                 {
                     var message = "Demo: Booking skipped because no stay were found matching the customer's request!";
 
@@ -66,35 +67,42 @@ public partial class DemoService
 
                 foreach (var m in preferredStayMatches)
                 {
-                    var lockProposition = sales2.LockStay(m, cid);
-
-                    if (lockProposition == null)
+                    try
                     {
-                        continue;
+                        var lockProposition = sales2.LockStay(m, cid);
+
+                        if (lockProposition == null)
+                        {
+                            continue; //the stay is not available anymore, go next
+                        }
+
+                        var bookingId = booking.Book
+                        (
+                            c.LastName,
+                            c.FirstName,
+
+                            c.DebitCardNumber,
+                            c.DebitCardSecrets,
+                            vendor,
+
+                            cid,
+
+                            lockProposition.StayPropositionId,
+
+                            RandomHelper.Long(), RandomHelper.Long() //correlationId1, correlationId2
+                        );
+
+                        break; //booked, exit
                     }
-
-                    var bookingId = booking.Book
-                    (
-                        c.LastName,
-                        c.FirstName,
-
-                        c.DebitCardNumber,
-                        c.DebitCardSecrets,
-                        vendor,
-
-                        cid,
-                        
-                        lockProposition.StayPropositionId,
-
-                        RandomHelper.Long(), RandomHelper.Long()//correlationId1, correlationId2
-                    );
-
-                    break;
+                    catch (Exception ex2)
+                    {
+                        errors.Add(new InvalidOperationException($"Booking failure during Day+{demoContext.SimulationDay}", ex2));
+                    }
                 }
             }
             catch (Exception ex)
             {
-                errors.Add(new InvalidOperationException($"Booking failure during Day+{demo.SimulationDay}", ex));
+                errors.Add(new InvalidOperationException($"Booking failure during Day+{demoContext.SimulationDay}", ex));
             }
         }
 

@@ -22,13 +22,13 @@ public partial class DemoService
                 });
             }
 
-            demo.FakeCustomerIds = FakeHelper
+            demoContext.FakeCustomerIds = FakeHelper
                 .GenerateFakeCustomers(CustomerCount)
                 .Select(fake =>
                 {
                     var customerId = sales.CreateCustomer(fake.EmailAddress);
 
-                    demo.FakeCustomers[customerId] = fake;
+                    demoContext.FakeCustomers[customerId] = fake;
 
                     return customerId;
                 })

@@ -12,6 +12,9 @@
     <FileVersion>1.24.5.4</FileVersion>
     <Authors>VinZ</Authors>
     <PackageIcon>viiinzzz-round.png</PackageIcon>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>..\..</DockerfileContext>
+    <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,6 +32,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.3" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
     <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.8.0-rc.1" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.8.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />

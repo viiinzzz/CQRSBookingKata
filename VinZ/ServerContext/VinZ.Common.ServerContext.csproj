@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\NumberHelper\VinZ.Common.NumberHelper.csproj" />
     <ProjectReference Include="..\ServerContext.Contract\VinZ.Common.ServerContext.Contract.csproj" />
     <ProjectReference Include="..\StringHelper\VinZ.Common.StringHelper.csproj" />
     <ProjectReference Include="..\UUIDHelper\VinZ.Common.UUIDHelper.csproj" />

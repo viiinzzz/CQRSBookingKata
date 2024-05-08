@@ -21,10 +21,13 @@ public partial class DemoService
 
 
 
-    public int SimulationDay => demo.SimulationDay;
+    public int SimulationDay => demoContext.SimulationDay;
 
     private const int DayMilliseconds = 24 * 60 * 1000;
     public const double SpeedFactorOneDayOneMinute = 24 * 60;
+
+    private readonly object Fake_BookingDay_lock = new();
+
     public async Task<DateTime> Forward(int days, double? speedFactor, CancellationToken cancellationToken)
     {
         try
@@ -41,10 +44,10 @@ public partial class DemoService
                 cancellationToken.ThrowIfCancellationRequested();
 
                 DateTime.Forward(TimeSpan.FromDays(1));
-                demo.SimulationDay++;
+                demoContext.SimulationDay++;
 
-                context.Execute(() => Fake_BookingDay());
-
+                context.ExecuteExclusive(() => Fake_BookingDay(), Fake_BookingDay_lock);
+                
                 if (days == SeasonDayNumbers)
                 {
                     break;

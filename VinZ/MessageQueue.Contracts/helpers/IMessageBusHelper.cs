@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Converters;
 using System.Dynamic;
+using System.Transactions;
 
 namespace VinZ.MessageQueue;
 
@@ -70,9 +71,22 @@ public static class IMessageBusHelper
             return messageObj as TReturn;
         }
 
+        if (notification.Verb == ErrorProcessingRequest)
+        {
+            // var messageObj = notification.MessageAsObject();
+            //
+            // throw new AskException(ErrorProcessingRequest, messageObj);
+
+            return null;
+        }
 
         var ret = notification.MessageAs<TReturn>();
 
         return ret;
     }
 }
+
+// public class AskException(string verb, object? messageObj) : Exception(verb)
+// {
+//
+// } 

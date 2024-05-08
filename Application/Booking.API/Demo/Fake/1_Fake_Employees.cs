@@ -21,7 +21,7 @@ public partial class DemoService
                 });
             }
 
-            demo.FakeStaffIds = FakeHelper
+            demoContext.FakeStaffIds = FakeHelper
                 .GenerateFakeEmployees(HotelCount * StaffPerHotel)
                 .Select(fake =>
                 {
@@ -43,7 +43,7 @@ public partial class DemoService
                 });
             }
 
-            demo.FakeManagerIds = FakeHelper
+            demoContext.FakeManagerIds = FakeHelper
                 .GenerateFakeEmployees(HotelCount * ManagerPerHotel)
                 .Select(fake =>
                 {

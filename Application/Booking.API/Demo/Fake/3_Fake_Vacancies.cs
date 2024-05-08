@@ -11,7 +11,7 @@ public partial class DemoService
             var originator = GetType().FullName
                              ?? throw new ArgumentException("invalid originator");
 
-            foreach (var hotelId in demo.FakeHotelsIds)
+            foreach (var hotelId in demoContext.FakeHotelsIds)
             {
                 var message = "Demo: Seeding Vacancies for hotel#{0}...";
 

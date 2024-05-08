@@ -1,6 +1,6 @@
 ﻿namespace BookingKata.Billing;
 
-public partial class BillingCommandService : IBillingCommandService
+public partial class BillingCommandService
 {
     public Id EmitQuotation
     (

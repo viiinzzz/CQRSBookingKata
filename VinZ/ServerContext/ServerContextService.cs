@@ -11,11 +11,13 @@ public class ServerContextService
     {
         _logger = logger;
         Id = UuidHelper.GetUuidInt64();
+        SessionId = RandomHelper.Long();
 
         logger.Log(LogLevel.Debug, 
-            $"<<<Server:{Id.xby4()}>>>");
+            $"<<<Server:{Id.xby4()}>>> SessiondId {SessionId}");
     }
 
     public long Id { get; }
+    public long SessionId { get; }
 }
 

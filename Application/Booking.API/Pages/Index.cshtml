@@ -5,6 +5,7 @@
 @using VinZ.Common
 @inject ITimeService DateTime
 @inject BookingDemoContext demo
+@inject IServerContextService serverContext
 
 @{
     Layout = "_Layout";
@@ -51,61 +52,85 @@
             <br/>
             This is an exploratory C# solution<br/>
             <br/>
-            #CQRS #Onion #Core #Layer #Functional #DDD
-            #Ubiquitous #Entities #Services #Bus #Notification
-            #Async #State #orchestrator #remote #cooperation #resiliency
-            #Data #semantic #domain #microservices
-            #data-ownership #Database #SQL #ORM #QueryTranslater #ObjectMapper #Repository
-            #architecture #Quality #Tests #landscape #simulation #performance
+                ✅CQRS ✅Onion ✅Core ✅Layer ✅Functional ✅DDD
+                ✅Ubiquitous ✅Entities ✅Services ✅Bus ✅Notification
+                ✅Async ✅State ✅Orchestrator ✅Remote ✅Cooperation ✅Resiliency
+                #Data ✅Semantic ✅Domain ✅ Container ❌Orchestration ❌Microservices ❌IaaS
+                ✅data-ownership ✅Database ✅SQL ✅Distributed Transactions ✅ORM ✅QueryTranslater ✅ObjectMapper ✅Repository
+                ✅architecture ✅Quality ❌Tests ✅Landscape ✅Simulation ✅Metrics ✅Observability ❌Performance
         </td>
     </tr>
     </tbody>
 </table>
 
-<hr/>
-<h2>/test</h2>
-The API can be easily tested with <a href="/test">Swagger UI</a>.
 
-<hr/>
-<h2>/metrics</h2>
-The API can be monitored with <a href="http://localhost:9090/graph">Prometheus</a> using <a href="/metrics">target</a>.
+
 
 <hr/>
 <h2>Demonstration Mode</h2>
 
-Fake Time:<br/>
-@($"{DateTime.UtcNow:u}")
-<b>(Day+@(demo.SimulationDay))</b>
+Fake Time: @($"{DateTime.UtcNow:u}") <b>(Day+@(demo.SimulationDay))</b><br />
+@if (!demo.SeedComplete)
+{
+    <b class="blink">Seed in progress...</b><br/>
 
-<table>
-    <tbody>
+    <script> setTimeout(function () { window.location.reload(); }, 5000); </script>
+}
+else
+{
+    <table>
+        <tbody>
         <tr>
             <td>
                 <form id="formDay1" action="/demo/forward" method="GET">
-                    <button id="submitDay1" type="submit" value="" class="glow-on-hover">Day+1</button>
+                    <button id="submitDay1" type="submit" value="" class="glow-on-hover" disabled="@(!demo.SeedComplete)">Day+1</button>
                     <input type="hidden" name="days" value="1">
                     <input type="hidden" name="speedFactor" value="1440">
+                    <input type="hidden" name="serverId" value="@serverContext.Id">
+                    <input type="hidden" name="sessionId" value="@serverContext.SessionId">
                 </form>
             </td>
             <td>
                 <form id="formDay7" action="/demo/forward" method="GET">
-                    <button id="submitDay7" type="submit" class="glow-on-hover">Day+7</button>
+                    <button id="submitDay7" type="submit" class="glow-on-hover" disabled="@(!demo.SeedComplete)">Day+7</button>
                     <input type="hidden" name="days" value="7">
                     <input type="hidden" name="speedFactor" value="10080">
+                    <input type="hidden" name="serverId" value="@serverContext.Id">
+                    <input type="hidden" name="sessionId" value="@serverContext.SessionId">
                 </form>
             </td>
             <td>
                 <form id="formDay30" action="/demo/forward" method="GET">
-                    <button id="submitDay30" type="submit" class="glow-on-hover">Day+30</button>
+                    <button id="submitDay30" type="submit" class="glow-on-hover" disabled="@(!demo.SeedComplete)">Day+30</button>
                     <input type="hidden" name="days" value="30">
                     <input type="hidden" name="speedFactor" value="43200">
+                    <input type="hidden" name="serverId" value="@serverContext.Id">
+                    <input type="hidden" name="sessionId" value="@serverContext.SessionId">
                 </form>
             </td>
         </tr>
-    </tbody>
-</table>
+        </tbody>
+    </table>
+}
 
 
+
+
+<hr/>
+<h2>/test</h2>
+The API is documented and testable with <a href="/test">Swagger UI</a>.
+
+
+
+
+<hr/>
+<h2>/metrics</h2>
+The API can be monitored using <a href="/metrics">target</a> in <a href="http://localhost:9090/graph">Prometheus</a> <a href="https://prometheus.io/download">download</a>
+
+
+
+
+<hr />
 <h2>Administration</h2>
 <ul>
     <li>Listing

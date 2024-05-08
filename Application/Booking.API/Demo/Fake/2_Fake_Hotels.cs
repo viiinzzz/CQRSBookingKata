@@ -21,11 +21,11 @@ public partial class DemoService
                 });
             }
 
-            demo.FakeHotelsIds = FakeHelper
+            demoContext.FakeHotelsIds = FakeHelper
                 .GenerateFakeHotels(HotelCount)
                 .Select((fake, hotelNum) =>
                 {
-                    var managerId = demo.FakeManagerIds[hotelNum];
+                    var managerId = demoContext.FakeManagerIds[hotelNum];
                     var hotelId = admin.Create(new NewHotel(fake.HotelName, fake.Latitude, fake.Longitude));
                     admin.Update(hotelId, new UpdateHotel
                     {
