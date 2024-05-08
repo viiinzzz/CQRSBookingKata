@@ -24,7 +24,7 @@ public partial class AdminRepository
     }
 
 
-    public Hotel Update(int hotelId, UpdateHotel update)
+    public Hotel Update(int hotelId, ModifyHotel modify)
     {
         var hotel = _admin.Hotels
             .Find(hotelId);
@@ -36,7 +36,7 @@ public partial class AdminRepository
 
         _admin.Entry(hotel).State = EntityState.Detached;
 
-        hotel = hotel.Patch(update);
+        hotel = hotel.Patch(modify);
 
         var entity = _admin.Hotels.Update(hotel);
         _admin.SaveChanges();

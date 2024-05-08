@@ -3,12 +3,12 @@ namespace BookingKata.API.Demo;
 public partial class DemoService
 (
     BookingDemoContext demoContext,
-    IAdminRepository admin,
-    IMoneyRepository money,
-    ISalesRepository sales,
-    IGazetteerService geo,
+    // IAdminRepository admin,
+    // IMoneyRepository money,
+    // ISalesRepository sales,
+    // IGazetteerService geo,
 
-    SalesQueryService sales2,
+    // SalesQueryService sales2,
     BookingCommandService booking,
 
     IMessageBus bus,
@@ -26,9 +26,8 @@ public partial class DemoService
     private const int SeasonDayNumbers = 50;//250
     private const int CustomerCount = 1000;
 
-    private const string originator = nameof(demoContext);
 
-    private const int DelayBeforeDemoStartSeconds = 20; 
+    private const int DelayBeforeDemoStartSeconds = 20;
 
 
     public async Task Execute(CancellationToken cancel)

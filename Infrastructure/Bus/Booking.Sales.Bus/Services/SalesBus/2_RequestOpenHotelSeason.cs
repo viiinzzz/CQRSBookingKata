@@ -13,7 +13,8 @@ public partial class SalesBus
 
         //
         //
-        booking.OpenHotelSeason(
+        booking.OpenHotelSeason
+        (
             request.hotelId,
             request.exceptRoomNumbers,
             openingDateUtc,
@@ -25,11 +26,11 @@ public partial class SalesBus
         //
         //
 
-        var opening = new
+        var opening = new HotelOpening
         {
-            request.hotelId,
-            openingDate = openingDateUtc,
-            closingDate = closingDateUtc
+            hotelId = request.hotelId,
+            openingDate = openingDateUtc.SerializeUniversal(),
+            closingDate = closingDateUtc.SerializeUniversal()
         };
 
         Notify(new ResponseNotification(Omni, Verb.Sales.HotelSeasonOpening, opening)

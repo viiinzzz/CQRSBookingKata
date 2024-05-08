@@ -35,4 +35,6 @@ global using BookingKata.Shared;
 global using OpenTelemetry.Metrics;
 global using Support.Infrastructure.Bus.Billing;
 global using Support.Infrastructure.Bus.ThirdParty;
+global using Support.Infrastructure.Network;
+global using static Business.Common.Exceptions;
 global using static VinZ.MessageQueue.Const;

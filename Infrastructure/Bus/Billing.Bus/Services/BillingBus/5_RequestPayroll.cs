@@ -2,24 +2,26 @@
 
 public partial class BillingBus
 {
-    private void Verb_Is_RequestRefund(IClientNotificationSerialized notification)
+    private void Verb_Is_RequestPayroll(IClientNotificationSerialized notification)
     {
-        var request = notification.MessageAs<RefundRequest>();
+        var request = notification.MessageAs<PayrollRequest>();
 
         using var scope = sp.GetScope<IBillingCommandService>(out var billing);
 
         //
         //
-        var refundId = billing.EmitRefund
+        var payrollId = billing.EnrollEmployee
         (
-            request.receiptId,
+            request.employeeId,
+            request.monthlyIncome,
+            request.currency,
             notification.CorrelationId1,
             notification.CorrelationId2
         );
         //
         //
 
-        Notify(new ResponseNotification(Omni, RefundEmitted, refundId)
+        Notify(new ResponseNotification(Omni, PayrollEmitted, payrollId)
         {
             CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });

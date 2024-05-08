@@ -38,6 +38,11 @@ public partial class BillingBus(IScopeProvider sp) : MessageBusClientBase
                         Verb_Is_RequestRefund(notification);
                         break;
                     }
+                    case RequestPayroll:
+                    {
+                        Verb_Is_RequestPayroll(notification);
+                        break;
+                    }
                     case RequestPage:
                     {
                         Verb_Is_RequestPage(notification);

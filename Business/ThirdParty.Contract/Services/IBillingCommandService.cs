@@ -15,7 +15,7 @@ public interface IBillingCommandService
         long correlationId2
     );
 
-    int EmitRefund
+    Id EmitRefund
     (
         int receiptId,
         long correlationId1,
@@ -43,6 +43,16 @@ public interface IBillingCommandService
 
         int customerId,
         int quotationId,
+        long correlationId1,
+        long correlationId2
+    );
+
+    Id EnrollEmployee
+    (
+        int employeeId,
+        double monthlyIncome,
+        string currency,
+
         long correlationId1,
         long correlationId2
     );

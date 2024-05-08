@@ -16,7 +16,7 @@ public static partial class ApiMethods
             responseTimeoutSeconds
             ).WithOpenApi().WithTags([RestrictedTag, AdminTag, EmployeesTag]);
 
-        employees.MapPostMq<NewEmployee>("/",
+        employees.MapPostMq<CreateEmployeeRequest>("/",
             Recipient.Admin, RequestCreateEmployee, originator, 
             responseTimeoutSeconds
             ).WithOpenApi().WithTags([RestrictedTag, AdminTag, EmployeesTag]);

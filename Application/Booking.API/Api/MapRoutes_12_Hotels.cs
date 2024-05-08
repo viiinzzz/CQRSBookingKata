@@ -26,7 +26,7 @@ public static partial class ApiMethods
             responseTimeoutSeconds
             ).WithOpenApi().WithTags([RestrictedTag, AdminTag, HotelsTag]);
 
-        hotels.MapPatchMq<UpdateHotel>("/{id}",
+        hotels.MapPatchMq<ModifyHotel>("/{id}",
             Recipient.Admin, RequestModifyHotel, originator, 
             responseTimeoutSeconds
             ).WithOpenApi().WithTags([RestrictedTag, AdminTag, HotelsTag]);

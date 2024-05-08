@@ -18,6 +18,6 @@ public interface IMoneyRepository
 
 
     IQueryable<Payroll> Payrolls { get; }
-    int Enroll(int employeeId, double monthlyBaseIncome, string currency);
+    int EnrollEmployee(int employeeId, double monthlyBaseIncome, string currency);
     void Deroll(int employeeId);
 }

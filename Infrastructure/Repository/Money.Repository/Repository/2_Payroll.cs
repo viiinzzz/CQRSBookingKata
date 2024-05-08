@@ -9,7 +9,7 @@ public partial class MoneyRepository
             .AsNoTracking();
 
 
-    public int Enroll(int employeeId, double monthlyBaseIncome, string currency)
+    public int EnrollEmployee(int employeeId, double monthlyBaseIncome, string currency)
     {
         var payroll = new Payroll(monthlyBaseIncome, currency, employeeId);
 

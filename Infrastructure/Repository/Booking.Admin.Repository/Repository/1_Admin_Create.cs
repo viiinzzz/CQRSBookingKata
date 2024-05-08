@@ -2,7 +2,7 @@
 
 public partial class AdminRepository
 {
-    public int Create(NewEmployee spec)
+    public int Create(CreateEmployeeRequest spec)
     {
         var employee = new Employee(spec.LastName, spec.FirstName, spec.SocialSecurityNumber);
 
@@ -36,7 +36,7 @@ public partial class AdminRepository
     }
 
 
-    public int[] Create(NewRooms newRooms)
+    public int[] Create(CreateHotelFloor newRooms)
     {
         var hotel = GetHotel(newRooms.HotelId);
 

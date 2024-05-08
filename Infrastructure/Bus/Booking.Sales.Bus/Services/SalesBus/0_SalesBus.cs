@@ -18,6 +18,11 @@ public partial class SalesBus(IScopeProvider sp, BookingConfiguration bconf) : M
                         Verb_Is_RequestOpenHotelSeason(notification);
                         break;
                     }
+                    case Verb.Sales.RequestCreateCustomer:
+                    {
+                        Verb_Is_RequestCreateCustomer(notification);
+                        break;
+                    }
                     case Verb.Sales.RequestBooking:
                     {
                         Verb_Is_RequestBook(notification);

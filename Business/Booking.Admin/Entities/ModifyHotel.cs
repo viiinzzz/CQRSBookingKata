@@ -1,6 +1,7 @@
 ﻿namespace BookingKata.Admin;
 
-public record UpdateHotel(
+public record ModifyHotel
+(
     string? HotelName = default, 
     int? EarliestCheckInTime = default, 
     int? LatestCheckOutTime = default,

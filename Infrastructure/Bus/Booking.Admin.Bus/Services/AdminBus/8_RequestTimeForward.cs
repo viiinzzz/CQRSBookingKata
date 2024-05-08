@@ -1,38 +1,18 @@
-namespace BookingKata.API.Demo;
+﻿namespace BookingKata.Infrastructure.Bus.Admin;
 
-public partial class DemoService
+public partial class AdminBus
 {
-    private void Seed()
-    {
-        var context = new TransactionContext() * admin * money * sales * geo;
-
-        //admin setup
-        context.Execute(() => Fake_Employees(false));
-        context.Execute(() => Fake_Hotels(false));
-        context.Execute(() => Fake_Vacancies(false));
-
-        //sales setup
-        context.Execute(() => Fake_Customers(false));
-
-
-        // DateTime.Unfreeze();
-    }
-
-
-
-
-    public int SimulationDay => demoContext.SimulationDay;
-
     private const int DayMilliseconds = 24 * 60 * 1000;
     public const double SpeedFactorOneDayOneMinute = 24 * 60;
-
     private readonly object Fake_BookingDay_lock = new();
 
-    public async Task<DateTime> Forward(int days, double? speedFactor, CancellationToken cancellationToken)
+    private void Verb_Is_RequestTimeForward(IClientNotificationSerialized notification)
     {
-        try
-        {
-            var context = new TransactionContext() * admin * money * sales * geo;
+        var request = notification.MessageAs<TimeForwardRequest>();
+
+        /*   using var scope = sp.GetScope<IAdminRepository>(out var repo);
+
+        var context = new TransactionContext() * admin * money * sales * geo;
 
             for (var d = 0; d < days; d++)
             {
@@ -47,7 +27,7 @@ public partial class DemoService
                 demoContext.SimulationDay++;
 
                 context.ExecuteExclusive(() => Fake_BookingDay(), Fake_BookingDay_lock);
-                
+
                 if (days == SeasonDayNumbers)
                 {
                     break;
@@ -66,5 +46,6 @@ public partial class DemoService
         }
 
         return DateTime.UtcNow;
+     */
     }
 }

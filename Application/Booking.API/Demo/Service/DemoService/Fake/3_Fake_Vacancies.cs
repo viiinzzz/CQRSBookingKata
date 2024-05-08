@@ -2,12 +2,10 @@ namespace BookingKata.API.Demo;
 
 public partial class DemoService
 {
-    private void Fake_Vacancies(bool scoped)
+    private void Fake_Vacancies()
     {
         try
         {
-            using var scope = !scoped ? null : new TransactionScope();
-
             var originator = GetType().FullName
                              ?? throw new ArgumentException("invalid originator");
 
@@ -23,12 +21,27 @@ public partial class DemoService
                     Immediate = true
                 });
 
-                booking.OpenHotelSeason(
-                    hotelId, default,
-                    DateTime.UtcNow, DateTime.UtcNow.AddDays(SeasonDayNumbers));
-            }
 
-            scope?.Complete();
+                var season = new OpenHotelSeasonRequest
+                {
+                    openingDateUtc = DateTime.UtcNow.SerializeUniversal(),
+                    closingDateUtc = DateTime.UtcNow.AddDays(SeasonDayNumbers).SerializeUniversal(),
+
+                    exceptRoomNumbers = default,
+                    hotelId = hotelId
+                };
+
+                var opening = bus.AskResult<HotelOpening>(Recipient.Sales, Verb.Sales.RequestOpenHotelSeason,
+                    season,
+                    originator);
+
+                if (opening == null)
+                {
+                    throw new ArgumentException(ReferenceInvalid, nameof(opening));
+                }
+
+
+            }
         }
         catch (Exception e)
         {
