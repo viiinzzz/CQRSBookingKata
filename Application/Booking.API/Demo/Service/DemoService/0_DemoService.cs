@@ -3,16 +3,17 @@ namespace BookingKata.API.Demo;
 public partial class DemoService
 (
     BookingDemoContext demoContext,
-    // IAdminRepository admin,
-    // IMoneyRepository money,
-    // ISalesRepository sales,
-    // IGazetteerService geo,
-
-    // SalesQueryService sales2,
-    BookingCommandService booking,
-
     IMessageBus bus,
-    ITimeService DateTime
+    ITimeService DateTime,
+
+    //direct plug into these repo/services below is a testing purpose shortcut that shall not be used in production
+    IAdminRepository admin,
+    IMoneyRepository money,
+    ISalesRepository sales,
+    IGazetteerService geo,
+    SalesQueryService sales2,
+    BookingCommandService booking
+
 )
     : MessageBusClientBase
 {
