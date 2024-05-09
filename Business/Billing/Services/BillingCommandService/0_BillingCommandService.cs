@@ -7,7 +7,8 @@ public partial class BillingCommandService
     IMessageBus bus,
 
     ITimeService DateTime
-)
+) 
+    : IBillingCommandService
 {
 
     private const string? Correlation = null;

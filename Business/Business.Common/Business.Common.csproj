@@ -15,7 +15,7 @@
     <ProjectReference Include="..\..\VinZ\FakeTime.Contracts\VinZ.Common.FakeTime.Contract.csproj" />
     <ProjectReference Include="..\..\VinZ\GeoIndexing.Contract\VinZ.GeoIndexing.Contract.csproj" />
     <ProjectReference Include="..\..\VinZ\NumberHelper\VinZ.Common.NumberHelper.csproj" />
-    <ProjectReference Include="..\..\VinZ\RecordHelper\Vinz.Common.RecordHelper.csproj" />
+    <ProjectReference Include="..\..\VinZ\RecordHelper\VinZ.Common.RecordHelper.csproj" />
     <ProjectReference Include="..\..\VinZ\ServerContext.Contract\VinZ.Common.ServerContext.Contract.csproj" />
     <ProjectReference Include="..\..\VinZ\StringHelper\VinZ.Common.StringHelper.csproj" />
   </ItemGroup>

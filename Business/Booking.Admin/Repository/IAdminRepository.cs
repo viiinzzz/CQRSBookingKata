@@ -5,7 +5,7 @@
 public interface IAdminRepository
 {
     IQueryable<Employee> Employees { get; }
-    int Create(NewEmployee employee);
+    int Create(CreateEmployeeRequest employee);
     Employee? GetEmployee(int employeeId);
     Employee Update(int employeeId, UpdateEmployee update);
     Employee DisableEmployee(int employeeId, bool disable);
@@ -14,7 +14,7 @@ public interface IAdminRepository
     IQueryable<Hotel> Hotels { get; }
     int Create(NewHotel hotel);
     Hotel? GetHotel(int hotelId);
-    Hotel Update(int hotelId, UpdateHotel update);
+    Hotel Update(int hotelId, ModifyHotel modify);
     Hotel DisableHotel(int hotelId, bool disable);
 
 
@@ -23,6 +23,6 @@ public interface IAdminRepository
     Room? GetRoom(int uniqueRoomId);
     Room Update(int roomId, UpdateRoom update);
     void DeleteRoom(int roomId);
-    int[] Create(NewRooms newRooms);
+    int[] Create(CreateHotelFloor newRooms);
     int[] GetFloorNextRoomNumbers(int hotelId, int floorNum, int roomCount);
 }

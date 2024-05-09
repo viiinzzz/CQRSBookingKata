@@ -2,7 +2,7 @@
 
 public partial class BillingCommandService
 {
-    public int EmitRefund
+    public Id EmitRefund
     (
         int receiptId,
         long correlationId1,
@@ -38,6 +38,6 @@ public partial class BillingCommandService
 
         var refundId = money.AddRefund(refund);
 
-        return refundId;
+        return new Id(refundId);
     }
 }

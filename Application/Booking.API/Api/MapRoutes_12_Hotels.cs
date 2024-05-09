@@ -9,31 +9,31 @@ public static partial class ApiMethods
     private static void MapRoutes_12_Hotels(RouteGroupBuilder admin)
     {
         var hotels = admin.MapGroup("/hotels"
-            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag]);
 
         hotels.MapListMq<Hotel>("/", "/admin/hotels", filter:null,
             Recipient.Admin, RequestPage, originator,
             responseTimeoutSeconds
-            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, HotelsTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag, HotelsTag]);
 
         hotels.MapPostMq<NewHotel>("/",
             Recipient.Admin, RequestCreateHotel, originator, 
             responseTimeoutSeconds
-            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, HotelsTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag, HotelsTag]);
 
         hotels.MapGetMq<Hotel>("/{id}",
             Recipient.Admin, RequestFetchHotel, originator,
             responseTimeoutSeconds
-            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, HotelsTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag, HotelsTag]);
 
-        hotels.MapPatchMq<UpdateHotel>("/{id}",
+        hotels.MapPatchMq<ModifyHotel>("/{id}",
             Recipient.Admin, RequestModifyHotel, originator, 
             responseTimeoutSeconds
-            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, HotelsTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag, HotelsTag]);
 
         hotels.MapDisableMq<Hotel>("/{id}",
             Recipient.Admin, RequestDisableHotel, originator, 
             responseTimeoutSeconds
-            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, HotelsTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag, HotelsTag]);
     }
 }

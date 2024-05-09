@@ -18,7 +18,7 @@ public partial class AdminBus
 
     private void Verb_Is_RequestModifyHotel(IClientNotificationSerialized notification)
     {
-        var request = notification.MessageAs<IdData<UpdateHotel>>();
+        var request = notification.MessageAs<IdData<ModifyHotel>>();
 
         using var scope = sp.GetScope<IAdminRepository>(out var repo);
 
@@ -71,6 +71,29 @@ public partial class AdminBus
         var id = new Id(hotelId);
 
         Notify(new ResponseNotification(notification.Originator, HotelCreated, id)
+        {
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
+        });
+    }
+
+    private void Verb_Is_RequestCreateFloorRooms(IClientNotificationSerialized notification)
+    {
+        var floors = notification.MessageAs<CreateHotelFloors>();
+
+        using var scope = sp.GetScope<IAdminRepository>(out var repo);
+
+        var urids = new List<int>();
+
+        for (var floorNum = 0; floorNum < floors.FloorCount; floorNum++)
+        {
+            var floor = new CreateHotelFloor(floors.HotelId, floorNum, floors.RoomPerFloor, floors.PersonPerRoom);
+
+            urids.AddRange(repo.Create(floor));
+        }
+
+        var ids = new Ids([.. urids]);
+
+        Notify(new ResponseNotification(notification.Originator, HotelCreated, ids)
         {
             CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });

@@ -9,6 +9,8 @@ public partial class MqServer
 )
     : IHostedLifecycleService
 {
+    private readonly bool _isTrace = config.IsTrace;
+
     private Task _executingTask = Task.CompletedTask;
     private CancellationTokenSource _executeCancel = new();
 

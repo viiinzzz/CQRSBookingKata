@@ -2,12 +2,19 @@
 
 public partial class MqServer
 {
-    public INotifyAck Notify(IClientNotificationSerialized notification)
+    public NotifyAck Notify(IClientNotificationSerialized notification, int busId)
     {
+        var bus = _domainBuses.Values.FirstOrDefault(bus => bus.GetHashCode() == busId);
+
+        if (bus != null)
+        {
+            return bus.Notify(notification).Result;
+        }
+
         return Notify(notification, CancellationToken.None);
     }
 
-    public INotifyAck Notify(IClientNotificationSerialized clientNotification, CancellationToken cancel)
+    public NotifyAck Notify(IClientNotificationSerialized clientNotification, CancellationToken cancel)
     {
         var now = DateTime.UtcNow;
 
@@ -78,7 +85,9 @@ public partial class MqServer
             var queuing = immediate ? "                     <<<Relaying<<< Immediate" : "                      <<<Queuing<<< Scheduled";
             var notificationLabel = $"Notification{correlationId.Guid}";
             var messageObj = notification.MessageAsObject();
-            var messageObjString = JsonConvert.SerializeObject(messageObj, Formatting.Indented).Replace("\\r", "").Replace("\\n", Environment.NewLine);
+            var messageJson = messageObj.ToJson(true)
+                .Replace("\\r", "")
+                .Replace("\\n", Environment.NewLine);
             var messageType = 
                 notification.Type == NotificationType.Response ? "Re: " 
                 : notification.Type == NotificationType.Advertisement ? "Ad: " 
@@ -87,16 +96,25 @@ public partial class MqServer
 To: {notification.Recipient}
 From: {notification.Originator}
 Subject: {messageType}{notification.Verb}
-{messageObjString}
+{messageJson}
 ---";
-            var logLevel = 
-                notification.IsErrorStatus() ? LogLevel.Error
-                // : notification.Verb == AuditMessage ? LogLevel.Debug
-                : LogLevel.Debug;
 
-            log.Log(logLevel, @$"{queuing} {notificationLabel}...{Environment.NewLine}{rvm}");
+            {
+                var message = @$"{queuing} {notificationLabel}...{Environment.NewLine}{rvm}";
 
-            Check(logLevel);
+                LogLevel? logLevel = 
+                    notification.IsErrorStatus() ? LogLevel.Error
+                    : _isTrace ? LogLevel.Information
+                    : null;
+
+                if (logLevel.HasValue)
+                {
+                    log.Log(logLevel.Value, message);
+                }
+
+                Check(logLevel ?? LogLevel.Debug);
+            }
+            
 
             //
             //

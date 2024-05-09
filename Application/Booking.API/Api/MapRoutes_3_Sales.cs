@@ -7,15 +7,15 @@ public static partial class ApiMethods
     private static void MapRoutes_3_Sales(WebApplication app)
     {
         var sales = app.MapGroup("/sales"
-            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, SalesTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag, SalesTag]);
 
         var customers = sales.MapGroup("/customers"
-            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, SalesTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag, SalesTag]);
 
         customers.MapListMq<Customer>("/", "/sales/customers", filter: null,
             Recipient.Sales, RequestPage, originator,
             responseTimeoutSeconds
-            ).WithOpenApi().WithTags(new[] { RestrictedTag, AdminTag, SalesTag });
+            ).WithOpenApi().WithTags([RestrictedTag, AdminTag, SalesTag]);
 
     }
 }

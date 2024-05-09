@@ -13,7 +13,7 @@ public partial class BillingBus
             ? "{}"
             : JsonConvert.SerializeObject(JsonConvert.DeserializeObject(request.jsonMeta));
 
-        using var scope = sp.GetScope<BillingCommandService>(out var billing);
+        using var scope = sp.GetScope<IBillingCommandService>(out var billing);
 
         //
         //

@@ -8,5 +8,7 @@ public class BookingDemoContext
     public int[] FakeCustomerIds { get; set; }
     public Dictionary<int, FakeHelper.FakeCustomer> FakeCustomers { get; } = new();
 
+    public bool SeedComplete { get; set; }
+
     public int SimulationDay { get; set; } = 0;
 }

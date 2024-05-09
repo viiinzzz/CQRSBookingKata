@@ -4,19 +4,16 @@ public partial class ThirdPartyBus
 {
     private void Verb_Is_RequestPage(IClientNotificationSerialized notification)
     {
-        using var scope2 = sp.GetScope<IGazetteerService>(out var geo);
         var request = notification.MessageAs<PageRequest>();
 
         object? page;
 
         switch (request.Path)
         {
+
             case "/admin/geo/indexes":
             {
-                page = ((GazetteerServiceBase)geo)
-                    .Indexes
-                    .Page(request.Path, request.Page, request.PageSize);
-
+                RequestGeoIndexesPage(request, out page);
                 break;
             }
 

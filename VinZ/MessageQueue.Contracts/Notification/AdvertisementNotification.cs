@@ -30,7 +30,8 @@ public record AdvertisementNotification
         EarliestDelivery, LatestDelivery, RepeatDelay,
         RepeatCount, Aggregate, Immediate,
         CorrelationId1, CorrelationId2
-    )
+    ),
+        IHaveMessageObj
 {
     public AdvertisementNotification
     (
@@ -71,7 +72,7 @@ public record AdvertisementNotification
         }
         catch
         {
-            return $"{messageText} {JsonConvert.SerializeObject(args)}";
+            return $"{messageText} {args.ToJson()}";
         }
     } 
 }

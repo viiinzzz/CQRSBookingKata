@@ -32,4 +32,5 @@ public record RequestNotification
         EarliestDelivery, LatestDelivery, RepeatDelay,
         RepeatCount, Aggregate, Immediate,
         CorrelationId1, CorrelationId2
-    );
+    ),
+        IHaveMessageObj;

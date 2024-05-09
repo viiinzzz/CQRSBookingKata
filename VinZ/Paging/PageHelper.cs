@@ -30,9 +30,6 @@ public static class PageHelper
         };
 
 
-        var elementType = typeof(TEntity).Name;
-        var type = $"{elementType}Collection";
-
         var page = pageSpec;
         if (page is null or < 1) page = 1;
 
@@ -52,7 +49,7 @@ public static class PageHelper
         {
             var pageResult = new PageResult<TEntity>
             (
-                type, elementType,
+                // elementType,
                 page.Value, pageSize,
                 error: true, reason: ex.Message,
                 0, 0, Array.Empty<PageLinks>()
@@ -88,7 +85,6 @@ public static class PageHelper
         {
             var pageResult = new PageResult<TEntity>
             (
-                type, elementType,
                 page.Value, pageSize,
                 error: false, reason: null,
                 pageCount, itemCount, _links

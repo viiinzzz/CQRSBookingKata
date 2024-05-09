@@ -28,6 +28,6 @@ public record ServerNotification
     long CorrelationId2 = default,
     int NotificationId = default
 )
-   : IHaveSerializedMessage, IHaveDeliveryStatus
+   : IHaveSerializedMessage, IHaveDeliveryStatus, IHaveCorrelation
 {
 }

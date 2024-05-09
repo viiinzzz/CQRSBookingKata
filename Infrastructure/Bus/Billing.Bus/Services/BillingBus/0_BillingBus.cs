@@ -2,8 +2,9 @@
 
 public partial class BillingBus(IScopeProvider sp) : MessageBusClientBase
 {
-    public override void Configure()
+    public override async Task Configure()
     {
+        // await
         Subscribe(Recipient);
 
         Notified += (sender, notification) =>
@@ -35,6 +36,11 @@ public partial class BillingBus(IScopeProvider sp) : MessageBusClientBase
                     case RequestRefund:
                     {
                         Verb_Is_RequestRefund(notification);
+                        break;
+                    }
+                    case RequestPayroll:
+                    {
+                        Verb_Is_RequestPayroll(notification);
                         break;
                     }
                     case RequestPage:

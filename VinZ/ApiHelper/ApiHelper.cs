@@ -1,7 +1,50 @@
+
 namespace VinZ.Common;
 
 public static class ApiHelper
 {
+
+    public static IPAddress[] GetMyIps()
+    {
+        var hostName = Dns.GetHostName();
+
+        var addressList = Dns.GetHostByName(hostName).AddressList;
+
+        return addressList
+            .Select(a => a.MapToIPv4())
+            .Distinct()
+            .OrderBy(a => BitConverter.ToString(a.GetAddressBytes()))
+            .AsParallel()
+            .Where(a =>
+            {
+                try
+                {
+                    return new Ping().Send(a).Status == IPStatus.Success;
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+            }).ToArray();
+    }
+
+
+    public static Uri GetAppUrl()
+    {
+        var urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS").Split(";");
+        var url1 = urls.First();
+        url1 = url1.Replace("//*", "//localhost");
+        var url = new Uri($"{url1}/bus/");
+        if (url.IsLoopback)
+        {
+            var host = Dns.GetHostEntry("").HostName;
+            url = new Uri($"{url.Scheme}://{host}:{url.Port}{url.PathAndQuery}");
+        }
+
+        return url;
+    }
+
+
     private static readonly Regex SpaceRx = new(@"\s+", RegexOptions.Multiline);
 
 

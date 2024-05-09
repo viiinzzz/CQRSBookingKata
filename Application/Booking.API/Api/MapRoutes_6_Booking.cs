@@ -47,7 +47,7 @@ public static partial class ApiMethods
                 return originator.ListMq<StayProposition>(
                     Recipient.Sales, Verb.Sales.RequestStay,
                     pattern, pattern, filter, responseTimeoutSeconds);
-            }).WithOpenApi().WithTags(new[] { PublicTag, BookingTag });
+            }).WithOpenApi().WithTags([PublicTag, BookingTag]);
 
     }
 }

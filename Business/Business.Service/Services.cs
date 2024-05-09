@@ -17,11 +17,15 @@ public static class Verb
     {
         private const string Employee = nameof(Employee);
         private const string Hotel = nameof(Hotel);
+        private const string Floor = nameof(Floor);
+        private const string Rooms = nameof(Rooms);
+        private const string FloorRooms = $"{nameof(Floor)}{nameof(Rooms)}";
         private const string HotelGeoProxy = $"{nameof(Hotel)}{nameof(GeoProxy)}";
         private const string HotelRoomDetails = nameof(HotelRoomDetails);
         private const string SingleRoomDetails = nameof(SingleRoomDetails);
         private const string ManyRoomDetails = nameof(ManyRoomDetails);
 
+        public const string RequestTimeForward = nameof(RequestTimeForward);
 
         public const string RequestCreateEmployee = $"{RequestCreate}{Employee}";
         public const string EmployeeCreated = $"{Employee}{Created}";
@@ -38,6 +42,9 @@ public static class Verb
 
         public const string RequestCreateHotel = $"{RequestCreate}{Hotel}";
         public const string HotelCreated = $"{Hotel}{Created}";
+
+        public const string RequestCreateFloorRooms = $"{RequestCreate}{FloorRooms}";
+        public const string FloorRoomsCreated = $"{FloorRooms}{Created}";
         
         public const string RequestFetchHotel = $"{RequestFetch}{Hotel}";
         public const string RequestFetchHotelGeoProxy = $"{RequestFetch}{HotelGeoProxy}";
@@ -69,10 +76,13 @@ public static class Verb
         public const string OpenHotelSeason = $"{nameof(OpenHotelSeason)}";
 
         public const string RequestOpenHotelSeason = $"{Request}{OpenHotelSeason}";
-
         public const string HotelSeasonOpening = $"{nameof(HotelSeasonOpening)}";
 
-        public const string RequestBook = $"{nameof(RequestBook)}";
+        public const string Customer = $"{nameof(Customer)}";
+        public const string RequestCreateCustomer = $"{RequestCreate}{Customer}";
+        public const string CustomerCreated = $"{Customer}{Created}";
+
+        public const string RequestBooking = $"{nameof(RequestBooking)}";
         public const string BookConfirmed = $"{nameof(BookConfirmed)}";
         public const string BookCancelled = $"{nameof(BookCancelled)}";
 

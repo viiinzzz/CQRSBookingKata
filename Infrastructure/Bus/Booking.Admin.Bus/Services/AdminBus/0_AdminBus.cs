@@ -2,8 +2,9 @@
 
 public partial class AdminBus(IScopeProvider sp, BookingConfiguration bconf) : MessageBusClientBase
 {
-    public override void Configure()
+    public override async Task Configure()
     {
+        // await
         Subscribe(Recipient.Admin);
 
         Notified += (sender, notification) =>
@@ -12,6 +13,13 @@ public partial class AdminBus(IScopeProvider sp, BookingConfiguration bconf) : M
             {
                 switch (notification.Verb)
                 {
+                    case RequestTimeForward:
+                    {
+                        Verb_Is_RequestTimeForward(notification);
+                        break;
+                    }
+
+
                     case RequestPage:
                     {
                         Verb_Is_RequestPage(notification);
@@ -47,6 +55,12 @@ public partial class AdminBus(IScopeProvider sp, BookingConfiguration bconf) : M
                     case RequestCreateHotel:
                     {
                         Verb_Is_RequestCreateHotel(notification);
+                        break;
+                    }
+
+                    case RequestCreateFloorRooms:
+                    {
+                        Verb_Is_RequestCreateFloorRooms(notification);
                         break;
                     }
 
@@ -104,5 +118,6 @@ public partial class AdminBus(IScopeProvider sp, BookingConfiguration bconf) : M
                 Notify(new NegativeResponseNotification(notification.Originator, notification, ex));
             }
         };
+
     }
 }

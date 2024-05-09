@@ -1,16 +1,35 @@
 namespace VinZ.Common;
 
-public record PageResult<TEntity>
+public record PageResult<TEntity> 
 (
-    string type, string elementType,
-    int page, int pageSize,
+    int page,
+    int pageSize,
 
-    bool error, string? reason,
-    int pageCount, int itemCount,
+    bool error,
+    string? reason,
+
+    int pageCount,
+    int itemCount,
+
     PageLinks[] links
 )
     : IHaveCollection<TEntity>
+    
+    where TEntity : class
 {
+    private static string Get_type()
+    {
+        if (typeof(TEntity).IsInterface)
+        {
+            throw new ArgumentException($"Invalid generic type {typeof(TEntity).Name}, must not be an interface.", nameof(TEntity));
+        }
+
+        return typeof(PageResult<TEntity>).FullName;
+    }
+
+    public string? _type { get; } = Get_type();
+    public string? _itemType { get; } = typeof(TEntity).Name;
+
     public TEntity[]? items { get; set; }
 
     [Newtonsoft.Json.JsonIgnore]

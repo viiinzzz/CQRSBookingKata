@@ -4,6 +4,11 @@
   ╎                                                                            ╎
   ╰----------------------------------------------------------------------------╯*/
 
+
+
+/*╭-----------------------------------------------------------------------------
+  ╎ basic variables
+  */
 {
     //for type dependency diagram, establish dependency
     _ = nameof(BookingKata.Infrastructure.EnterpriseStorage);
@@ -11,102 +16,64 @@
 }
 
 var isDebug = false;
+var isRelease = false;
 
 {
     var pif = ProgramInfo.Current;
-    pif.Print();
+    Console.WriteLine(pif.Print());
 
     isDebug = pif.IsDebug;
+    isRelease = !isDebug;
 }
 
-var traceEF = false;//isDebug;
 
-var isRelease = !isDebug;
+var traceStorage = false;//isDebug; //Entity Framework debugging
+var traceNetwork = true;//isDebug; //Bus debugging
 
-/*╭-----------------------------------------------------------------------------
-  ╎ Storage methods
-  */
+var pauseOnError = false; //isDebug;
 
-void EnsureDatabaseCreated<TContext>(WebApplication app) where TContext : DbContext
-{
-    var database = app
-        .Services
-        .GetRequiredService<IDbContextFactory>()
-        .CreateDbContext<TContext>()
-        .Database;
-
-    var created = database.EnsureCreated();
-
-//     Console.WriteLine(@$"
-// {typeof(TContext).Name}: {(created ? "Created" : "Not created")}. {database.GetConnectionString()}
-// ");
+var demoMode = true; //isDebug;
 
 
-    if (isDebug)
-    {
-        //for in-memory sqlite, as currently configured for the 'Debug' build configuration,
-        //at least one client connection needs to be kept open, otherwise the database vanishes
-        var dbContext = Activator.CreateInstance(typeof(TContext)) as TContext;
-        
-        var keepAlive = Task.Run(async () =>
-        {
-            while (true)
-            {
-                await Task.Delay(30000);
+var url = ApiHelper.GetAppUrl();
 
-                dbContext.Database.OpenConnection();
 
-//                 Console.WriteLine(@$"
-// {typeof(TContext).Name}: Keep Alive. {database.GetConnectionString()}
-// ");
-            }
-        });
-    }
-}
+var myIps = ApiHelper.GetMyIps();
 
-void EnsureAllDatabasesCreated(WebApplication app)
-{
-    EnsureDatabaseCreated<BookingAdminContext>(app);
-    EnsureDatabaseCreated<BookingSalesContext>(app);
-    EnsureDatabaseCreated<BookingPlanningContext>(app);
+Console.WriteLine($@"
+Network:
+{string.Join(Environment.NewLine, myIps.Select(ip => $"http://{ip}:{url.Port}"))}
+");
 
-    EnsureDatabaseCreated<MessageQueueContext>(app);
-    EnsureDatabaseCreated<MoneyContext>(app);
-    EnsureDatabaseCreated<GazeteerContext>(app);
-}
 
-void RegisterDbContext<TContext>(RegisteredDbContextFactory dbContextFactory, bool isDebug) where TContext : MyDbContext, new()
-{
-    dbContextFactory.RegisterDbContextType(() =>
-    {
-        var dbContext = new TContext
-        {
-            IsDebug = isDebug,
-            IsTrace = traceEF
-        };
+const int DbContextKeepAliveMilliseconds = 30_000;
 
-        return dbContext;
-    });
-}
+var dbContextTypes = Types.From
+<
+    BookingAdminContext,
+    BookingSalesContext,
+    BookingPlanningContext,
 
-void RegisterDbContexts(WebApplicationBuilder webApplicationBuilder)
-{
-    var dbContextFactory = new RegisteredDbContextFactory();
-    
-    RegisterDbContext<BookingAdminContext>(dbContextFactory, isDebug);
-    RegisterDbContext<BookingSalesContext>(dbContextFactory, isDebug);
-    RegisterDbContext<BookingPlanningContext>(dbContextFactory, isDebug);
+    MessageQueueContext,
+    MoneyContext,
+    GazeteerContext
+>();
 
-    RegisterDbContext<MessageQueueContext>(dbContextFactory, isDebug);
-    RegisterDbContext<MoneyContext>(dbContextFactory, isDebug);
-    RegisterDbContext<GazeteerContext>(dbContextFactory, isDebug);
+var busTypes = Types.From
+<
+    AdminBus,
+    SalesBus,
+    PlanningBus,
 
-    webApplicationBuilder.Services.AddSingleton<IDbContextFactory>(dbContextFactory);
-}
-
+    BillingBus,
+    ThirdPartyBus,
+    ConsoleAuditBus
+>();
 /*
-                                                                             ╎
------------------------------------------------------------------------------╯*/
+                                                                              ╎
+ -----------------------------------------------------------------------------╯*/
+
+
 
 
 
@@ -121,28 +88,40 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
     var services = builder.Services;
 
     //infra
-    services.AddExceptionHandler<GlobalExceptionHandler>();
-    services.AddRazorPages();
     services.AddSingleton<IScopeProvider, ScopeProvider>();
+    services.AddExceptionHandler<GlobalExceptionHandler>();
 
+    //web
+    services.AddRazorPages();
+
+    //open api doc
     services.AddEndpointsApiExplorer();
     services.AddSwaggerGen();
 
+    //app services
     services.AddSingleton<IServerContextService, ServerContextService>();
     services.AddSingleton<ITimeService, TimeService>();
     services.AddSingleton<IRandomService, RandomService>();
+
+    //security
     services.AddAntiforgery();
     services.AddCors();
     services.AddAuthentication().AddJwtBearer();
     // https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/security?view=aspnetcore-8.0
 
-    //bus
+    //app bus
     services.AddMessageQueue(
-        Types.From<AdminBus, SalesBus, PlanningBus, BillingBus, ThirdPartyBus, ConsoleAuditBus>(),
-        pauseOnError: isDebug
+        new BusConfiguration
+        {
+            LocalUrl = url.ToString(),
+            RemoteUrl = url.ToString(),
+            IsTrace = traceNetwork
+        },
+        busTypes,
+        pauseOnError
     );
 
-    //repo
+    //app repo
     services.AddScoped<IAdminRepository, AdminRepository>();
     services.AddScoped<ISalesRepository, SalesRepository>();
     services.AddScoped<IPlanningRepository, PlanningRepository>();
@@ -159,7 +138,7 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
     services.AddScoped<KpiQueryService>();
 
     //support/third-party
-    services.AddScoped<BillingCommandService>();
+    services.AddScoped<IBillingCommandService, BillingCommandService>();
     services.AddScoped<IGazetteerService, GazetteerService>();
     services.AddScoped<IPaymentCommandService, PaymentCommandService>();
     services.AddScoped<IPricingQueryService, PricingQueryService>();
@@ -170,25 +149,58 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
     };
     services.AddSingleton(bconf);
 
+    //metrics
+    services.AddOpenTelemetry().WithMetrics(builder =>
+    {
+        builder.AddPrometheusExporter();
+
+        builder.AddMeter(
+            "Microsoft.AspNetCore.Hosting",
+            "Microsoft.AspNetCore.Server.Kestrel"
+            );
+
+        builder.AddView(
+            "http-server-request-duration",
+            new ExplicitBucketHistogramConfiguration
+            {
+                Boundaries =
+                [
+                    0, 0.005, 0.01, 0.025, 0.05,
+                    0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10
+                ]
+            });
+    });
+
     //demo
     services.AddSingleton<BookingDemoContext>();
-    services.AddScoped<DemoService>();
-    services.AddHostedService<DemoHostService>();
-    services.Configure<HostOptions>(options =>
+    if (demoMode)
     {
-        options.ServicesStartConcurrently = true;
-        options.ServicesStopConcurrently = true;
+        services.AddScoped<DemoService>();
+        services.AddHostedService<DemoHostService>();
+        services.Configure<HostOptions>(options =>
+        {
+            options.ServicesStartConcurrently = true;
+            options.ServicesStopConcurrently = true;
+        });
+    }
+
+    //debug
+    services.AddSingleton(new MyDebugMiddlewareConfig
+    {
+        IsTrace = traceNetwork
     });
 }
 /*
-                                                                             ╎
------------------------------------------------------------------------------╯*/
+                                                                              ╎
+ -----------------------------------------------------------------------------╯*/
+
 
 
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
-RegisterDbContexts(builder);
+builder.RegisterDbContexts(dbContextTypes, isDebug, traceStorage);
+
 ConfigureDependencyInjection(builder);
 
 var api = builder.Build();
@@ -198,21 +210,31 @@ var isStaging = api.Environment.IsStaging();
 var isProduction = api.Environment.IsProduction();
 
 
+api.UseMiddleware<MyDebugMiddleware>();
+
+
 if (isDevelopment)
 {
+
     api.UseSwagger();
     api.UseSwaggerUI();
     // api.UseExceptionHandler();
 }
 
-EnsureAllDatabasesCreated(api);
+api.EnsureDatabaseCreated(dbContextTypes, isDebug ? DbContextKeepAliveMilliseconds : null);
 
 api.UseStaticFiles();
-api.UseMiddleware<OperationCanceledMiddleware>();
 
 MapRoutes(api);
 
 api.MapRazorPages();
 api.UseAntiforgery();
 
+
+api.MapPrometheusScrapingEndpoint(); // path=/metrics
+
+
+
 api.Run();
+
+//let the show start...

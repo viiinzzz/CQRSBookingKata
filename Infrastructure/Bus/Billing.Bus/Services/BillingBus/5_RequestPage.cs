@@ -12,10 +12,10 @@ public partial class BillingBus
 
         switch (request.Path)
         {
-            case "/money/payrolls":
+            case "/money/quotations":
             {
                 page = moneyRepository
-                    .Payrolls
+                    .Quotations
                     .Page(request.Path, request.Page, request.PageSize);
 
                 break;
@@ -25,6 +25,33 @@ public partial class BillingBus
             {
                 page = moneyRepository
                     .Invoices
+                    .Page(request.Path, request.Page, request.PageSize);
+
+                break;
+            }
+
+            case "/money/receipts":
+            {
+                page = moneyRepository
+                    .Receipts
+                    .Page(request.Path, request.Page, request.PageSize);
+
+                break;
+            }
+
+            case "/money/refunds":
+            {
+                page = moneyRepository
+                    .Refunds
+                    .Page(request.Path, request.Page, request.PageSize);
+
+                break;
+            }
+
+            case "/money/payrolls":
+            {
+                page = moneyRepository
+                    .Payrolls
                     .Page(request.Path, request.Page, request.PageSize);
 
                 break;

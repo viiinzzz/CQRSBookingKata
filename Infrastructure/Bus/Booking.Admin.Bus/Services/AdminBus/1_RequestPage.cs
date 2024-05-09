@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace BookingKata.Infrastructure.Bus.Admin;
+﻿namespace BookingKata.Infrastructure.Bus.Admin;
 
 public partial class AdminBus
 {
@@ -21,17 +19,6 @@ public partial class AdminBus
             case "/admin/employees":
             {
                 RequestEmployeesPage(request, out page);
-                break;
-            }
-
-            case "/admin/geo/indexes":
-            {
-                var originator = GetType().FullName
-                                 ?? throw new ArgumentException("invalid originator");
-
-                //pass request to third-party
-                page = AskResult<PageRequest>(originator, Support.Services.ThirdParty.Recipient, RequestPage, request);
-
                 break;
             }
 

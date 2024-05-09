@@ -63,12 +63,16 @@ public record ClientNotification
     {
         MessageType = messageObj.GetTypeSerializedName();
 
+        if (messageObj?.GetType()?.IsInterface ?? false)
+        {
+            throw new ArgumentException($"invalid type {messageObj.GetType().FullName} : must be concrete", nameof(messageObj));
+        }
+
         Message = messageObj == null ? EmptySerialized : System.Text.Json.JsonSerializer.Serialize(messageObj);
     }
 
-
-    public string? MessageType { get; }
-    public string? Message { get; }
-
+    public string _type { get; } = "ClientNotification";
+    public string? MessageType { get; set;  }
+    public string? Message { get; set;  }
 
 }

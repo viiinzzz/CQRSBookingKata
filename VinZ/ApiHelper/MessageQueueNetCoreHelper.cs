@@ -4,22 +4,34 @@ public static class MessageQueueNetCoreHelper
 {
     public static IServiceCollection AddMessageQueue
     (
-        this IServiceCollection services, 
+        this IServiceCollection services,
         
+        BusConfiguration busConfig,
         Type[] busTypes,
 
         bool pauseOnError
     )
     {
+        services.AddSingleton(busConfig);
+
         foreach (var busType in busTypes)
         {
             services.AddSingleton(busType);
+
+            // var logBusType = typeof(ILogger<>).MakeGenericType(busType);
+            // services.AddTransient(logBusType);
+            // services.AddSingleton(sp =>
+            // {
+            //     var logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger(busType);
+            //     return logger;
+            // });
         }
 
         services.AddSingleton(_ => new MqServerConfig
         {
             DomainBusTypes = busTypes,
-            PauseOnError = pauseOnError
+            PauseOnError = pauseOnError,
+            IsTrace = busConfig.IsTrace
         });
 
         services.AddSingleton<MqServer>();
@@ -36,7 +48,8 @@ public static class MessageQueueNetCoreHelper
         string pattern, string uri, object filter,
         string recipient, string verb,
         string originator,
-        int responseTimeoutSeconds)
+        int responseTimeoutSeconds
+    )
         where TEntity : class
     {
         return builder.MapGet(pattern,
@@ -127,6 +140,11 @@ public static class MessageQueueNetCoreHelper
                 originator, recipient, verb, pageRequest,
                 requestCancel, responseTimeoutSeconds);
 
+            if (ret == null)
+            {
+                throw new Exception("Internal Server Error");
+            }
+
             return ret;
         };
     }
@@ -214,13 +232,13 @@ public static class MessageQueueNetCoreHelper
     ) 
         where TEntity : class
     {
-        return async (
+        return async
+            (
                 int id,
                 bool? disable,
                 [FromServices] IMessageBus mq,
                 CancellationToken requestCancel
-            )
-            =>
+            ) => 
         {
             var ret = await mq.Ask<TEntity>(
                 originator, recipient, verb, new IdDisable(id, disable ?? true), 

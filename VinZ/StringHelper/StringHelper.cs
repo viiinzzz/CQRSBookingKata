@@ -1,5 +1,3 @@
-using System.Text;
-
 namespace VinZ.Common;
 
 public static class StringHelper

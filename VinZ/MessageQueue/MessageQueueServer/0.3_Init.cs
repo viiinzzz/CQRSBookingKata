@@ -1,10 +1,9 @@
 ﻿namespace VinZ.MessageQueue;
 
 
-public partial class MqServer 
-    : Initializable, IMessageBus
+public partial class MqServer : Initializable, IMessageBus
 {
-    private Dictionary<IServiceScope, IMessageBusClient> _domainBuses = new();
+    private ConcurrentDictionary<IServiceScope, IMessageBusClient> _domainBuses = new();
 
     public override void Init()
     {
@@ -21,13 +20,18 @@ public partial class MqServer
             //     time = $"{time.UtcNow.SerializeUniversal()}"
             // };
 
-            var message = $"Time {time.UtcNow.SerializeUniversal()} ({time.state})";
+            // var message = $"Time {time.UtcNow.SerializeUniversal()} ({time.state})";
+            var message = new
+            {
+                time = $"{time.UtcNow.SerializeUniversal()}",
+                state = $"{time.state}"
+            };
 
             Notify(new ResponseNotification(default, AuditMessage, message)
             {
                 Originator = originator,
                 Immediate = true
-            });
+            }, 0);
         };
 
         if (config.DomainBusTypes == default)
@@ -35,7 +39,8 @@ public partial class MqServer
             return;
         }
 
-        foreach (var type in config.DomainBusTypes)
+
+        var addClient = async (Type type) =>
         {
             if (typeof(IMessageBus).IsAssignableFrom(type))
             {
@@ -46,16 +51,38 @@ public partial class MqServer
 
             var client = (IMessageBusClient)domainBus;
 
-            
-            client.ConnectToBus(this);
+            // client.ConnectToBus(this);
+            client.ConnectToBus(scp);
 
-            client.Configure();
+            await client.Configure();
 
+            client.Log = log;
 
-            log.Log(LogLevel.Debug,
+            if (_isTrace) log.LogInformation(
                 $"<<<{type.Name}:{client.GetHashCode().xby4()}>>> Connected.");
 
             _domainBuses[scope] = client;
-        }
+        };
+
+
+        var allAdded = Task
+            .WhenAll(config.DomainBusTypes.Select(type => addClient(type)))
+            .ContinueWith(prev =>
+            {
+                if (prev.IsCompletedSuccessfully)
+                {
+                    var master = $"<<<{nameof(MqServer)}:{GetHashCode().xby4()}>>>";
+                    var clients = (string prepend) => string.Join(Environment.NewLine + prepend, _domainBuses.Values
+                        .Select(client => $"<<<{client.GetType().Name}:{client.GetHashCode().xby4()}>>>"));
+
+                    if (_isTrace) log.LogInformation(@$"+----------------------------------------
+| Bus definition:
+| {master}
+| {clients("| ")}
++----------------------------------------");
+                }
+            });
+
+
     }
 }

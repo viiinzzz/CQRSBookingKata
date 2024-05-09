@@ -46,7 +46,7 @@ public partial class AdminBus
 
     private void Verb_Is_RequestCreateEmployee(IClientNotificationSerialized notification)
     {
-        var request = notification.MessageAs<NewEmployee>();
+        var request = notification.MessageAs<CreateEmployeeRequest>();
 
         using var scope = sp.GetScope<IAdminRepository>(out var repo);
 

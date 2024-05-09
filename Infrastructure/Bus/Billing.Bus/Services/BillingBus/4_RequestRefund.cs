@@ -6,7 +6,7 @@ public partial class BillingBus
     {
         var request = notification.MessageAs<RefundRequest>();
 
-        using var scope = sp.GetScope<BillingCommandService>(out var billing);
+        using var scope = sp.GetScope<IBillingCommandService>(out var billing);
 
         //
         //
@@ -18,8 +18,6 @@ public partial class BillingBus
         );
         //
         //
-
-        var id = new Id(refundId);
 
         Notify(new ResponseNotification(Omni, RefundEmitted, refundId)
         {

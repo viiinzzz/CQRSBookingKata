@@ -1,4 +1,5 @@
-﻿namespace VinZ.MessageQueue;
+﻿/*
+namespace VinZ.MessageQueue;
 
 public class MessageBus(IMessageBus server) : IMessageBus
 {
@@ -22,3 +23,4 @@ public class MessageBus(IMessageBus server) : IMessageBus
         return server.Notify(notification);
     }
 }
+*/

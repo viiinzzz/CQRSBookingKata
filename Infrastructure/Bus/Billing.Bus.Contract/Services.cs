@@ -22,5 +22,8 @@ public static class Billing
 
         public const string RequestRefund = $"{Recipient}:{nameof(RequestRefund)}";
         public const string RefundEmitted = $"{Recipient}:{nameof(RefundEmitted)}";
+
+        public const string RequestPayroll = $"{Recipient}:{nameof(RequestPayroll)}";
+        public const string PayrollEmitted = $"{Recipient}:{nameof(PayrollEmitted)}";
     }
 }

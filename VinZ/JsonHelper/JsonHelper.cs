@@ -1,4 +1,5 @@
 using Newtonsoft.Json.Converters;
+using System;
 using System.Dynamic;
 
 namespace VinZ.Common;
@@ -81,11 +82,23 @@ public static class JsonHelper
 
         var retStr = retObj?.ToString();
 
-        return retStr.DeserializeToExpando();
+        return retStr.FromJsonToExpando();
     }
 
 
-    public static ExpandoObject? DeserializeToExpando(this string? json)
+    public static object? FromJson(this string? json)
+    {
+        if (json == null)
+        {
+            return null;
+        }
+
+        return JsonConvert.DeserializeObject(json);
+    }
+
+
+
+    public static ExpandoObject? FromJsonToExpando(this string? json)
     {
         if (json == null)
         {
@@ -93,5 +106,39 @@ public static class JsonHelper
         }
 
         return JsonConvert.DeserializeObject<ExpandoObject>(json, new ExpandoObjectConverter());
+    }
+
+
+    public static string ToJson(this object? obj, bool indent = false)
+    {
+        if (obj == null)
+        {
+            return "";
+        }
+
+        var formatting = indent ? Formatting.Indented : Formatting.None;
+
+        return JsonConvert.SerializeObject(obj, formatting);
+    }
+
+    public static string ToJsonIgnoring(this object obj, params string[] ignoreProperties)
+    {
+        return obj.ToJsonIgnoring(false, ignoreProperties);
+    }
+
+    public static string ToJsonIgnoring(this object? obj, bool indent, params string[] ignoreProperties)
+    {
+        if (obj == null)
+        {
+            return "";
+        }
+
+        var settings = new JsonSerializerSettings
+        {
+            Formatting = indent ? Formatting.Indented : Formatting.None,
+            ContractResolver = new IgnorePropertiesResolver(ignoreProperties)
+        };
+
+        return JsonConvert.SerializeObject(obj, settings);
     }
 }
