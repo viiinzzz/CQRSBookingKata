@@ -46,9 +46,11 @@ public static partial class S2GeometryHelper
         return (s2Level.EarthMinKmForS2Level(), s2Level.EarthMaxKmForS2Level());
     }
 
+    public const int S2MinLevel = 0;
+    public const int S2MaxLevel = 30;
 
-    private static int[] S2Levels = 
-        0.RangeTo(30)
+    private static int[] S2Levels =
+        S2MinLevel.RangeTo(S2MaxLevel)
             .ToArray();
 
     private static double[] S2Level2MinKm =

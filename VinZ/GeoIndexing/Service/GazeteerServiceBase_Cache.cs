@@ -42,7 +42,7 @@ public abstract partial class GazetteerServiceBase
     public IGeoIndexCell CacheGeoIndex<TEntity>(TEntity entity) 
         where TEntity : IHavePosition
     {
-        return GetCache<TEntity>().GetCache(entity).Last();
+        return GetCache<TEntity>().GetCache(entity).MaxBy(c => c.S2Level);
     }
 
 

@@ -32,7 +32,7 @@ public abstract partial class GazetteerServiceBase
 
     public (City?, double) NearestCity(IGeoIndexCell searchCell)
     {
-        var ret = Cities
+        var top = Cities
 
             .Select(city =>
             {
@@ -50,9 +50,21 @@ public abstract partial class GazetteerServiceBase
                 return (City: city, Km: km);
             })
 
-            .MinBy(c => c.Km) ;
+            .Where(c =>
+            {
+                return c.Km < 1000;
+            })
+            .OrderBy(c => c.Km)
 
-            return ret;
+            .Take(10)
+            .ToArray();
+
+        if (top.Length == 0)
+        {
+            return (null, double.MaxValue);
+        }
+
+        return top.MinBy(c => c.Km);
     }
 
 }

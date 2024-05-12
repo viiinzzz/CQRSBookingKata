@@ -1,4 +1,6 @@
-﻿namespace VinZ.GeoIndexing;
+﻿using System.Text.RegularExpressions;
+
+namespace VinZ.GeoIndexing;
 
 public abstract partial class GazetteerServiceBase
 {
@@ -13,10 +15,25 @@ public abstract partial class GazetteerServiceBase
         //
         //
 
-        referer.geoIndex = string.Join(" ", referer.Cells.Select(c =>
-            $"{c.S2CellIdSigned:x16}".Substring(0, 8)));
+        referer.geoIndex = ToGeoIndexString(referer.Cells);
 
         return referer;
+    }
+
+    private static readonly int[] S2Levels = Enumerable
+        .Range(S2GeometryHelper.S2MinLevel, S2GeometryHelper.S2MaxLevel - S2GeometryHelper.S2MinLevel + 1)
+        .Reverse()
+        .ToArray();
+
+    private static readonly Regex EndingZeroRx = new (@"0+$");
+    public static string ToGeoIndexString(IList<IGeoIndexCell> cells)
+    {
+        var cellsStr = S2Levels
+            .Select(level => cells.FirstOrDefault(cell => cell.S2Level == level))
+            .Select(c => c == default ? "" : $"{c.S2CellIdSigned:x16}")
+            .Select(c => EndingZeroRx.Replace(c, ""));
+
+        return string.Join(":", cellsStr);
     }
 
     public IEnumerable<TReferer> IncludeGeoIndex<TReferer>(IEnumerable<TReferer> referers, double precisionMaxKm)

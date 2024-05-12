@@ -133,6 +133,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.MessageQueue.Client", 
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{0727C3D4-5D0A-43C9-8B04-F4B3BD6F4671}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VinZ.GeoIndexing.Test", "VinZ\GeoIndexing.Test\VinZ.GeoIndexing.Test.csproj", "{A6FEF355-9E3B-43B3-98A4-5394B21C38BD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -347,6 +349,10 @@ Global
 		{0727C3D4-5D0A-43C9-8B04-F4B3BD6F4671}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0727C3D4-5D0A-43C9-8B04-F4B3BD6F4671}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0727C3D4-5D0A-43C9-8B04-F4B3BD6F4671}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6FEF355-9E3B-43B3-98A4-5394B21C38BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6FEF355-9E3B-43B3-98A4-5394B21C38BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6FEF355-9E3B-43B3-98A4-5394B21C38BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6FEF355-9E3B-43B3-98A4-5394B21C38BD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -412,6 +418,7 @@ Global
 		{5C52FE89-A48A-4B30-9604-170917971DF0} = {0392C343-C5AB-4CB7-993A-985DABCBD106}
 		{4A30330A-9E34-41D7-B729-E8F47A7675E2} = {E6711E40-9496-40AF-849F-6DB744F072CF}
 		{E5B0BB04-7297-49FB-AEA4-EC615179D3F3} = {A621E367-C479-4911-A23D-FD879A3277A2}
+		{A6FEF355-9E3B-43B3-98A4-5394B21C38BD} = {A621E367-C479-4911-A23D-FD879A3277A2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {590111C3-57D0-485D-BF05-544FE98D0519}
