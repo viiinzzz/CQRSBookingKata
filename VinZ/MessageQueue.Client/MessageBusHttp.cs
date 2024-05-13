@@ -280,18 +280,23 @@ public class MessageBusHttp : IMessageBus
 
 
 
-    public Task<IClientNotificationSerialized?> Wait(NotifyAck ack, CancellationToken cancellationToken)
+    public Task<IClientNotificationSerialized> Wait(NotifyAck ack, CancellationToken cancellationToken)
     {
         var correlationId = ack.CorrelationId;
 
         if (correlationId == null)
         {
-            throw new InvalidOperationException("Uncorrelated wait not allowed");
+            throw new InvalidOperationException("Uncorrelated wait");
         }
 
-        var awaitedResponse = new AwaitedResponse(correlationId.Value, DateTime, cancellationToken, Track, Untrack);
+        AwaitedResponse awaitedResponse = new(correlationId.Value, DateTime, cancellationToken, Track, Untrack);
 
-        var ret = awaitedResponse?.ResultNotification;
+        var ret = awaitedResponse.ResultNotification;
+
+        if (ret == null)
+        {
+            throw new InvalidOperationException("Unexpected wait");
+        }
 
         return Task.FromResult(ret);
     }

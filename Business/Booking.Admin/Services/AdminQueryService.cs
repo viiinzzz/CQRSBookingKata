@@ -48,7 +48,7 @@ public class AdminQueryService
         //sales search will be performed against known cities list,
         //hence determining nearest known city name for geo-indexing
 
-        var (nearestKnownCity, nearestKnownCityKm) = geo.NearestCity(hotelCell);
+        var (nearestKnownCity, nearestKnownCityKm) = geo.NearestCity(hotelCell, NearestKnownCityMaxKm);
         var nearestKnownCityName = nearestKnownCity?.name;
 
         var rooms = admin.Rooms(hotelId);
@@ -124,7 +124,7 @@ public class AdminQueryService
         //sales search will be performed against known cities list,
         //hence determining nearest known city name for geo-indexing
 
-        var (nearestKnownCity, nearestKnownCityKm) = geo.NearestCity(hotelCell);
+        var (nearestKnownCity, nearestKnownCityKm) = geo.NearestCity(hotelCell, NearestKnownCityMaxKm);
         var nearestKnownCityName = nearestKnownCity?.name;
 
         var rooms = admin.Rooms(hotelId);

@@ -24,7 +24,7 @@ public partial class SalesQueryService
             throw new HotelNotGeoIndexedException();
         }
 
-        var (nearestKnownCity, nearestKnownCityKm) = geo.NearestCity(hotelGeoProxy.Cells.TopCell());
+        var (nearestKnownCity, nearestKnownCityKm) = geo.NearestCity(hotelGeoProxy.Cells.TopCell(), NearestKnownCityMaxKm);
 
 
         var firstNight = OvernightStay.From(openingDate);

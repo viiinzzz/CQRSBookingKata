@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
 
 namespace VinZ.GeoIndexing;
 
@@ -26,14 +26,81 @@ public abstract partial class GazetteerServiceBase
         .ToArray();
 
     private static readonly Regex EndingZeroRx = new (@"0+$");
+
+
+
     public static string ToGeoIndexString(IList<IGeoIndexCell> cells)
     {
+        var previousLevel = byte.MaxValue;
+
+        foreach (var cell in cells)
+        {
+            if (cell.S2Level >= previousLevel)
+            {
+                throw new ArgumentException("must be ordered by descending S2Level", nameof(cells));
+            }
+
+            previousLevel = cell.S2Level;
+        }
+
         var cellsStr = S2Levels
             .Select(level => cells.FirstOrDefault(cell => cell.S2Level == level))
             .Select(c => c == default ? "" : $"{c.S2CellIdSigned:x16}")
             .Select(c => EndingZeroRx.Replace(c, ""));
 
         return string.Join(":", cellsStr);
+    }
+
+
+    public static string ToCompressedGeoIndexString(IList<IGeoIndexCell> cells)
+    {
+        var str = ToGeoIndexString(cells);
+
+        using var buffer = new MemoryStream();
+        using var compress = new DeflateStream(buffer, CompressionMode.Compress);
+
+        {
+            using var writer = new StreamWriter(compress, Encoding.ASCII);
+            writer.Write(str);
+        }
+
+        var b58 = SimpleBase.Base58.Bitcoin.Encode(buffer.ToArray());
+        return b58;
+    }
+
+    public static IList<IGeoIndexCell> FromCompressedGeoIndexString(string str)
+    {
+        var bytes = SimpleBase.Base58.Bitcoin.Decode(str);
+
+        using var inputStream = new MemoryStream(bytes);
+        using var compress = new DeflateStream(inputStream, CompressionMode.Decompress);
+
+        string cellsStr;
+        {
+            using var reader = new StreamReader(compress, Encoding.ASCII);
+            cellsStr = reader.ReadToEnd();
+        }
+
+        var cells = cellsStr
+            .Split([':'])
+            .Select(c => c + new string('0', 16 - c.Length))
+            .Select(c => long.Parse(c, System.Globalization.NumberStyles.HexNumber))
+            .Select((c, i) => (IGeoIndexCell)new GeoIndexCell(c, (byte)(S2GeometryHelper.S2MaxLevel - i)))
+            .ToList();
+
+        var previousLevel = byte.MaxValue;
+
+        foreach (var cell in cells)
+        {
+            if (cell.S2Level >= previousLevel)
+            {
+                throw new ArgumentException("must be ordered by descending S2Level", nameof(cells));
+            }
+
+            previousLevel = cell.S2Level;
+        }
+
+        return cells;
     }
 
     public IEnumerable<TReferer> IncludeGeoIndex<TReferer>(IEnumerable<TReferer> referers, double precisionMaxKm)

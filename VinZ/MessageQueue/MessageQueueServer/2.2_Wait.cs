@@ -37,20 +37,25 @@ public partial class MqServer
 
 
 
-    public async Task<IClientNotificationSerialized?> Wait(NotifyAck ack, CancellationToken cancellationToken)
+    public async Task<IClientNotificationSerialized> Wait(NotifyAck ack, CancellationToken cancellationToken)
     {
         var correlationId = ack.CorrelationId;
 
         if (correlationId == null)
         {
-            throw new InvalidOperationException("Uncorrelated wait not allowed");
+            throw new InvalidOperationException("Uncorrelated wait");
         }
 
-        var awaitedResponse = new AwaitedResponse(correlationId.Value, DateTime, cancellationToken, Track, Untrack);
+        AwaitedResponse awaitedResponse = new(correlationId.Value, DateTime, cancellationToken, Track, Untrack);
 
-        var notification = awaitedResponse?.ResultNotification;
+        var ret = awaitedResponse.ResultNotification;
 
-        return notification;
+        if (ret == null)
+        {
+            throw new InvalidOperationException("Unexpected wait");
+        }
+
+        return ret;
     }
 
     private AwaitersBus? GetAwaitersBus(ServerNotification notification)

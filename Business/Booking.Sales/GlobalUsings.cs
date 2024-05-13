@@ -13,4 +13,5 @@ global using VinZ.MessageQueue;
 global using static Business.Common.Exceptions;
 global using static VinZ.MessageQueue.Const;
 global using static BookingKata.Services.Verb.Sales;
+global using static BookingKata.Shared.Const;
 

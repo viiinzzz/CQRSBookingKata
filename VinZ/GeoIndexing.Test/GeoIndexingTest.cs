@@ -62,6 +62,30 @@ namespace GeoIndexing.Test
     public class GeoIndexingTest
     {
         [Fact]
+        public void Test0()
+        {
+            var geo = new GazetteerTestService();
+
+            var positionParis = new Position(48.86472, 2.34901);
+            var Paris = new TestReferer
+            {
+                PrimaryKey = 75,
+                Position = positionParis,
+            };
+
+            geo.AddReferer(Paris, 0, 40000);
+            geo.IncludeGeoIndex(Paris, S2GeometryHelper.S2MaxLevel);
+
+            var geoIndexStr = GazetteerServiceBase.ToGeoIndexString(Paris.Cells);
+            var compressedGeoIndexStr = GazetteerServiceBase.ToCompressedGeoIndexString(Paris.Cells);
+
+            var decompressedCells = GazetteerServiceBase.FromCompressedGeoIndexString(compressedGeoIndexStr);
+
+            Check.That(decompressedCells).Equals(Paris.Cells);
+        }
+
+
+        [Fact]
         public void Test1()
         {
             var geo = new GazetteerTestService();
@@ -85,9 +109,14 @@ namespace GeoIndexing.Test
             geo.IncludeGeoIndex(Paris, S2GeometryHelper.S2MaxLevel);
             geo.IncludeGeoIndex(Marseille, S2GeometryHelper.S2MaxLevel);
 
-            var dist = geo.EarthArcDist(Paris.Cells.First(), Marseille.Cells.First());
-
-            Check.That(dist.Km).IsCloseTo(660.1, 0.5);
+            var distKm = geo.EarthArcDist(Paris.Cells.First(), Marseille.Cells.First());
+            var expectedDistKm = 659.731;
+            var diffDistMeter = 1000 * Math.Abs(distKm.Km - expectedDistKm);
+            var worseToleranceMeter = distKm.WorseTolerance * 1000;
+            var bestToleranceMeter = distKm.BestTolerance * 1000;
+            Check.That(diffDistMeter).IsCloseTo(0, 500);
+            Check.That(diffDistMeter).IsCloseTo(0, worseToleranceMeter);
+            Check.That(diffDistMeter).IsCloseTo(0, bestToleranceMeter);
 
             var cellsParis = positionParis.AllGeoIndexCell().Select(cell => (IGeoIndexCell)cell).ToList();
 
@@ -95,7 +124,7 @@ namespace GeoIndexing.Test
             var parisGeoIndexString2 = GazetteerServiceBase.ToGeoIndexString(cellsParis);
             Check.That(Paris.Cells.First().S2CellIdSigned).Equals(cellsParis.First().S2CellIdSigned);
 
-            var (nearestCity, km) = geo.NearestCity(cellsParis.First());
+            var (nearestCity, km) = geo.NearestCity(cellsParis.First(), 50);
 
             Check.That(nearestCity).IsNotNull();
             Check.That(nearestCity.name).Equals("Paris");

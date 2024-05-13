@@ -30,7 +30,7 @@ public abstract partial class GazetteerServiceBase
         return cities;
     }
 
-    public (City?, double) NearestCity(IGeoIndexCell searchCell)
+    public (City?, double) NearestCity(IGeoIndexCell searchCell, double maxKm)
     {
         var top = Cities
 
@@ -52,19 +52,23 @@ public abstract partial class GazetteerServiceBase
 
             .Where(c =>
             {
-                return c.Km < 1000;
+                return c.Km < maxKm;
             })
-            .OrderBy(c => c.Km)
+            .OrderBy(c => c.Km);
 
-            .Take(10)
-            .ToArray();
-
-        if (top.Length == 0)
-        {
-            return (null, double.MaxValue);
-        }
-
-        return top.MinBy(c => c.Km);
+        return top.FirstOrDefault(_ => true, (null, double.MaxValue)!);
+        //
+        // var top10 = top
+        //
+        //     .Take(10) //if we had population data in the city, it would maybe better to propose the nearest biggest city
+        //     .ToArray();
+        //
+        // if (top10.Length == 0)
+        // {
+        //     return (null, double.MaxValue);
+        // }
+        //
+        // return top10.MinBy(c => c.Km);
     }
 
 }

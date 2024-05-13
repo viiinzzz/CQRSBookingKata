@@ -12,7 +12,7 @@ public interface IGazetteerService
 
 
     IQueryable<City> QueryCities(string cityName, bool? approximateNameMatch, string? countryCode);
-    (City?, double) NearestCity(IGeoIndexCell searchCell);
+    (City?, double) NearestCity(IGeoIndexCell searchCell, double maxKm);
 
     IGeoIndexCell[] NewGeoIndex<TSearch>(TSearch search, double maxPrecisionKm, double? maxDistanceKm)
         where TSearch : IHavePosition;
