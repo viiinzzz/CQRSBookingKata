@@ -40,6 +40,7 @@ public partial class DemoService
 
             demoContext.FakeCustomerIds = FakeHelper
                 .GenerateFakeCustomers(CustomerCount)
+                .AsParallel()
                 .Select(createCustomer)
                 .ToArray();
 

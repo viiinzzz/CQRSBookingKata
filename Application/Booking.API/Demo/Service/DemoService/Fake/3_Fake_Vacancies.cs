@@ -9,7 +9,7 @@ public partial class DemoService
             var originator = GetType().FullName
                              ?? throw new ArgumentException("invalid originator");
 
-            foreach (var hotelId in demoContext.FakeHotelsIds)
+            void createVacancies(int hotelId)
             {
                 var message = "Demo: Seeding Vacancies for hotel#{0}...";
 
@@ -39,9 +39,11 @@ public partial class DemoService
                 {
                     throw new ArgumentException(ReferenceInvalid, nameof(opening));
                 }
-
-
             }
+
+            demoContext.FakeHotelsIds
+                .AsParallel()
+                .ForAll(createVacancies);
         }
         catch (Exception e)
         {

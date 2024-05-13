@@ -24,8 +24,8 @@ public partial class DemoService
     private const int RoomPerFloor = 3;
     private const int PersonPerRoom = 2;
 
-    private const int SeasonDayNumbers = 50;//250
-    private const int CustomerCount = 1000;
+    private const int SeasonDayNumbers = 30;//250
+    private const int CustomerCount = 10;//1000
 
 
     private const int DelayBeforeDemoStartSeconds = 20;

@@ -1,25 +1,46 @@
-﻿namespace VinZ.MessageQueue;
+﻿using Microsoft.Extensions.Configuration;
+
+namespace VinZ.MessageQueue;
 
 public class MessageBusHttp : IMessageBus
 {
     public Uri Url { get; private set; }
     private readonly HttpClient _remote = new();
-    private readonly bool _isTrace;
 
     private readonly ITimeService DateTime;
     private readonly ILogger<IMessageBus> log;
 
     private static int RequestId = 500000;
 
+    private LogLevel logLevelSubscribe = LogLevel.Warning;
+    private LogLevel logLevelNotify = LogLevel.Warning;
+
+
     public MessageBusHttp
     (
         BusConfiguration busConfig,
+        IConfiguration appConfig,
 
         ITimeService dateTime,
         ILogger<IMessageBus> log
     )
     {
-        _isTrace = busConfig.IsTrace;
+        // _isTrace = busConfig.IsTrace;
+
+        if (!Enum.TryParse<LogLevel>(appConfig["Logging:LogLevel:Default"] , true, out var logLevelDefault))
+        {
+            logLevelDefault = LogLevel.Information;
+        }
+
+        if (!Enum.TryParse<LogLevel>(appConfig["Logging:LogLevel:MessageQueue.Subscribe"] , true, out logLevelSubscribe))
+        {
+            logLevelSubscribe = logLevelDefault;
+        }
+
+        if (!Enum.TryParse<LogLevel>(appConfig["Logging:LogLevel:MessageQueue.Notify"] , true, out logLevelNotify))
+        {
+            logLevelNotify = logLevelDefault;
+        }
 
         DateTime = dateTime;
         var myUrl = busConfig.LocalUrl;
@@ -39,6 +60,9 @@ public class MessageBusHttp : IMessageBus
         _remote.BaseAddress = new Uri(remoteUrl);
         this.log = log;
     }
+
+    private bool IsTraceSubscribe => logLevelSubscribe == LogLevel.Trace;
+    private bool IsTraceNotify => logLevelSubscribe == LogLevel.Trace;
 
     public void Subscribe(SubscriptionRequest sub, int busId)
     {
@@ -60,7 +84,7 @@ public class MessageBusHttp : IMessageBus
 
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            if (_isTrace) log.LogInformation(@$"
+            if (IsTraceSubscribe) log.LogInformation(@$"
 <<-( Subscribe )............................../{rid:000000}/
 | HTTP POST {url}
 +.....................................................
@@ -71,7 +95,7 @@ public class MessageBusHttp : IMessageBus
 
             post.Wait(cancel.Token);
 
-            if (_isTrace) log.LogInformation(@$"
+            if (IsTraceSubscribe) log.LogInformation(@$"
                         +..( Subscribe )............................../{rid:000000}/
                         | HTTP POST {url}
                         +........................................( {(int)post.Result.StatusCode:000} )....>>
@@ -93,7 +117,7 @@ public class MessageBusHttp : IMessageBus
                 ex = ex.InnerException;
             }
 
-            if (_isTrace) log.LogInformation(@$"
+            if (IsTraceSubscribe) log.LogInformation(@$"
                         !..( Subscribe )............................../{rid:000000}/
                         | HTTP POST {url}
                         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!( {(int)HttpStatusCode.InternalServerError:000} )!!!!!X
@@ -127,7 +151,7 @@ public class MessageBusHttp : IMessageBus
 
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            if (_isTrace) log.LogInformation(@$"
+            if (IsTraceSubscribe) log.LogInformation(@$"
 <<-( Unsubscribe )............................/{rid:000000}/
 | HTTP POST {url}
 +.....................................................
@@ -138,7 +162,7 @@ public class MessageBusHttp : IMessageBus
 
             post.Wait(cancel.Token);
 
-            if (_isTrace) log.LogInformation(@$"
+            if (IsTraceSubscribe) log.LogInformation(@$"
                         +..( Unsubscribe )............................/{rid:000000}/
                         | HTTP POST {url} ({(int)post.Result.StatusCode})
                         +........................................( {(int)post.Result.StatusCode:000} )....>>
@@ -167,7 +191,7 @@ public class MessageBusHttp : IMessageBus
                 ex = ex.InnerException;
             }
 
-            if (_isTrace) log.LogInformation(@$"
+            if (IsTraceSubscribe) log.LogInformation(@$"
                         !..( Unsubscribe )............................/{rid:000000}/
                         | HTTP POST {url}
                         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!( {(int)HttpStatusCode.InternalServerError:000} )!!!!!X
@@ -203,7 +227,7 @@ public class MessageBusHttp : IMessageBus
 
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            if (_isTrace) log.LogInformation(@$"
+            if (IsTraceNotify) log.LogInformation(@$"
 <<-( Notify )........................................./{rid:000000}/
 | HTTP POST {url}
 | {toFromSubject}
@@ -215,7 +239,7 @@ public class MessageBusHttp : IMessageBus
 
             post.Wait(cancel.Token);
 
-            if (_isTrace) log.LogInformation(@$"
+            if (IsTraceNotify) log.LogInformation(@$"
                         +..( Notify )...................................../{rid:000000}/
                         | HTTP POST {url}
                         | {toFromSubject}
@@ -256,7 +280,7 @@ public class MessageBusHttp : IMessageBus
                 ex = ex.InnerException;
             }
 
-            if (_isTrace) log.LogInformation(@$"
+            if (IsTraceNotify) log.LogInformation(@$"
                         !--( Notify )-------------------------------------/{rid:000000}/
                         | HTTP POST {url}
                         | {toFromSubject}

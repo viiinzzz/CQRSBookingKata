@@ -3,6 +3,17 @@ namespace VinZ.Common;
 
 public static class ApiHelper
 {
+    public static (bool isDevelopment, bool isStaging, bool isProduction, string? env) GetEnv(this WebApplication api)
+    {
+        var isDevelopment = api.Environment.IsDevelopment();
+        var isStaging = api.Environment.IsStaging();
+        var isProduction = api.Environment.IsProduction();
+
+        var env = isDevelopment ? "Development" : isStaging ? "Staging" : isProduction ? "Production" : null;
+
+        return (isDevelopment, isStaging, isProduction, env);
+    }
+
 
     public static IPAddress[] GetMyIps()
     {

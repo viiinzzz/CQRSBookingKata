@@ -6,7 +6,7 @@ public class GazeteerContext : MyDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {
-        builder.ConfigureMyWay<GazeteerContext>(IsDebug, IsTrace);
+        builder.ConfigureMyWay<GazeteerContext>(IsDebug, logLevel);
     }
 
 

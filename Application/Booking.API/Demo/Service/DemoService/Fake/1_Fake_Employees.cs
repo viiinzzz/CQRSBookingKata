@@ -56,6 +56,7 @@ public partial class DemoService
 
                 demoContext.FakeStaffIds = FakeHelper
                     .GenerateFakeEmployees(HotelCount * StaffPerHotel)
+                    .AsParallel()
                     .Select(createAndEnrollEmployee)
                     .ToArray();
             }

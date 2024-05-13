@@ -8,6 +8,7 @@ public static class DbContextHelper
     (
         this WebApplication app, 
         Type[] contextTypes,
+        LogLevel logLevel,
         int? keepAliveMilliseconds = default
     )
     {
@@ -15,9 +16,11 @@ public static class DbContextHelper
             .GetMethod(nameof(EnsureDatabaseCreatedPrivate), 
                 BindingFlags.NonPublic | BindingFlags.Static) ?? throw new MissingMethodException(
             nameof(DbContextHelper), nameof(EnsureDatabaseCreatedPrivate));
-
-        Console.Write(@"Storage:
+        if (logLevel <= LogLevel.Debug)
+        {
+            Console.Write(@"Storage:
 ");
+        }
 
         foreach (var contextType in contextTypes)
         {
@@ -28,27 +31,32 @@ public static class DbContextHelper
 
             ensureDatabaseCreated
                 .MakeGenericMethod([contextType])
-                .Invoke(null, [app, keepAliveMilliseconds]);
+                .Invoke(null, [app, logLevel, keepAliveMilliseconds]);
         }
     }
 
     public static void EnsureDatabaseCreated<TContext>
     (
         this WebApplication app,
+        LogLevel logLevel,
         int? keepAliveMilliseconds = default
     )
         where TContext : DbContext
     {
-        Console.Write(@"Storage:
+        if (logLevel <= LogLevel.Debug)
+        {
+            Console.Write(@"Storage:
 ");
+        }
 
-        EnsureDatabaseCreatedPrivate<TContext>(app, keepAliveMilliseconds);
+        EnsureDatabaseCreatedPrivate<TContext>(app, logLevel, keepAliveMilliseconds);
     }
 
 
     private static void EnsureDatabaseCreatedPrivate<TContext>
     (
         this WebApplication app,
+        LogLevel logLevel,
         int? keepAliveMilliseconds = default
     ) 
         where TContext : DbContext
@@ -61,8 +69,11 @@ public static class DbContextHelper
 
         var created = database.EnsureCreated();
 
-        Console.WriteLine(@$"{database.GetConnectionString()} {(created ? "created" : "already exists")} for {typeof(TContext).Name}");
-
+        if (logLevel <= LogLevel.Debug)
+        {
+            Console.WriteLine(
+                @$"{database.GetConnectionString()} {(created ? "created" : "already exists")} for {typeof(TContext).Name}");
+        }
 
         if (keepAliveMilliseconds.HasValue)
         {
@@ -91,7 +102,8 @@ public static class DbContextHelper
     (
         this WebApplicationBuilder webApplicationBuilder,
         Type[] myDbContextTypes,
-        bool isDebug, bool isTrace
+        bool isDebug, 
+        LogLevel logLevel
     )
     {
         var registerDbContext = typeof(DbContextHelper)
@@ -110,21 +122,30 @@ public static class DbContextHelper
 
             registerDbContext
                 .MakeGenericMethod([myDbContextType])
-                .Invoke(null, [dbContextFactory, isDebug, isTrace]);
+                .Invoke(null, [dbContextFactory, isDebug, logLevel]);
         }
 
         webApplicationBuilder.Services.AddSingleton<IDbContextFactory>(dbContextFactory);
     }
 
 
-    public static void RegisterDbContext<TContext>(this RegisteredDbContextFactory dbContextFactory, bool isDebug,
-        bool isTrace)
+    public static void RegisterDbContext<TContext>
+    (
+        this RegisteredDbContextFactory dbContextFactory,
+        bool isDebug,
+        LogLevel logLevel
+    )
         where TContext : MyDbContext, new()
     {
-        dbContextFactory.RegisterDbContextPrivate<TContext>(isDebug, isTrace);
+        dbContextFactory.RegisterDbContextPrivate<TContext>(isDebug, logLevel);
     }
 
-    private static void RegisterDbContextPrivate<TContext>(this RegisteredDbContextFactory dbContextFactory, bool isDebug, bool isTrace)
+    private static void RegisterDbContextPrivate<TContext>
+    (
+        this RegisteredDbContextFactory dbContextFactory,
+        bool isDebug,
+        LogLevel logLevel
+    )
         where TContext : MyDbContext, new()
     {
         dbContextFactory.RegisterDbContextType(() =>
@@ -132,7 +153,7 @@ public static class DbContextHelper
             var dbContext = new TContext
             {
                 IsDebug = isDebug,
-                IsTrace = isTrace
+                logLevel = logLevel
             };
 
             return dbContext;
@@ -143,7 +164,7 @@ public static class DbContextHelper
     private static readonly Regex contextRx = new("^(.*)Context$", RegexOptions.IgnoreCase);
     private static readonly Regex connectionStringRx = new(@"\(\$Context\)", RegexOptions.IgnoreCase);
 
-    public static void ConfigureMyWay<TContext>(this DbContextOptionsBuilder builder, bool isDebug, bool isTrace)
+    public static void ConfigureMyWay<TContext>(this DbContextOptionsBuilder builder, bool isDebug, LogLevel logLevel)
         where TContext : DbContext
     {
         if (builder.IsConfigured)
@@ -172,7 +193,7 @@ public static class DbContextHelper
             .EnableDetailedErrors(isDebug)
             .EnableSensitiveDataLogging(isDebug);
 
-        if (isTrace)
+        if (logLevel == LogLevel.Trace)
         {
             builder.LogTo(Console.WriteLine);
         }

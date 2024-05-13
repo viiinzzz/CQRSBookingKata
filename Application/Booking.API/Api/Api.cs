@@ -15,20 +15,9 @@
     _ = nameof(BookingKata.Infrastructure.EnterpriseNetwork);
 }
 
-var isDebug = false;
-var isRelease = false;
 
-{
-    var pif = ProgramInfo.Current;
-    Console.WriteLine(pif.Print());
+var (isDebug, isRelease, programInfoStr) = ProgramInfo.Get();
 
-    isDebug = pif.IsDebug;
-    isRelease = !isDebug;
-}
-
-
-var traceStorage = false;//isDebug; //Entity Framework debugging
-var traceNetwork = true;//isDebug; //Bus debugging
 
 var pauseOnError = false; //isDebug;
 
@@ -110,16 +99,12 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
     // https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/security?view=aspnetcore-8.0
 
     //app bus
-    services.AddMessageQueue(
-        new BusConfiguration
-        {
-            LocalUrl = url.ToString(),
-            RemoteUrl = url.ToString(),
-            IsTrace = traceNetwork
-        },
-        busTypes,
-        pauseOnError
-    );
+    var busConfig = new BusConfiguration
+    {
+        LocalUrl = url.ToString(),
+        RemoteUrl = url.ToString()
+    };
+    services.AddMessageQueue(busConfig, busTypes, pauseOnError);
 
     //app repo
     services.AddScoped<IAdminRepository, AdminRepository>();
@@ -143,11 +128,11 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
     services.AddScoped<IPaymentCommandService, PaymentCommandService>();
     services.AddScoped<IPricingQueryService, PricingQueryService>();
 
-    var bconf = new BookingConfiguration
+    var bookingConfig = new BookingConfiguration
     {
         PrecisionMaxKm = 0.5
     };
-    services.AddSingleton(bconf);
+    services.AddSingleton(bookingConfig);
 
     //metrics
     services.AddOpenTelemetry().WithMetrics(builder =>
@@ -184,11 +169,6 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
         });
     }
 
-    //debug
-    services.AddSingleton(new MyDebugMiddlewareConfig
-    {
-        IsTrace = traceNetwork
-    });
 }
 /*
                                                                               ╎
@@ -199,15 +179,25 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
-builder.RegisterDbContexts(dbContextTypes, isDebug, traceStorage);
+if (!Enum.TryParse<LogLevel>(builder.Configuration["Logging:LogLevel:Default"], true, out var logLevelDefault))
+{
+    logLevelDefault = LogLevel.Warning;
+}
+
+if (!Enum.TryParse<LogLevel>(builder.Configuration["Logging:LogLevel:Microsoft.EntityFrameworkCore.DbContext"], true, out var logLevelEFContext))
+{
+    logLevelEFContext = logLevelDefault;
+}
+
+builder.RegisterDbContexts(dbContextTypes, isDebug, logLevelEFContext);
 
 ConfigureDependencyInjection(builder);
 
 var api = builder.Build();
 
-var isDevelopment = api.Environment.IsDevelopment();
-var isStaging = api.Environment.IsStaging();
-var isProduction = api.Environment.IsProduction();
+var (isDevelopment, isStaging, isProduction, env) = api.GetEnv();
+
+Console.WriteLine($"{programInfoStr} ({env ?? "undefined"})");
 
 
 api.UseMiddleware<MyDebugMiddleware>();
@@ -221,7 +211,7 @@ if (isDevelopment)
     // api.UseExceptionHandler();
 }
 
-api.EnsureDatabaseCreated(dbContextTypes, isDebug ? DbContextKeepAliveMilliseconds : null);
+api.EnsureDatabaseCreated(dbContextTypes, logLevelEFContext, isDebug ? DbContextKeepAliveMilliseconds : null);
 
 api.UseStaticFiles();
 

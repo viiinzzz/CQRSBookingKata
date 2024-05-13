@@ -1,17 +1,43 @@
 ﻿namespace BookingKata.API.Infrastructure;
 
-public record MyDebugMiddlewareConfig
-(
-    bool IsTrace = false
-);
 
 public class MyDebugMiddleware
 (
     RequestDelegate next,
-    MyDebugMiddlewareConfig config,
+    IConfiguration appConfig,
     ILogger<MyDebugMiddleware> logger
 )
 {
+    private (LogLevel request, LogLevel response) logLevels = GetLogLevels(appConfig);
+
+    private static (LogLevel request, LogLevel response) GetLogLevels(IConfiguration appConfig)
+    {
+        if (!Enum.TryParse<LogLevel>(appConfig["Logging:LogLevel:Default"], true, out var logLevelDefault))
+        {
+            logLevelDefault = LogLevel.Information;
+        }
+
+        if (!Enum.TryParse<LogLevel>(appConfig[$"Logging:LogLevel:{nameof(MyDebugMiddleware)}"], true, out var logLevel))
+        {
+            logLevel = logLevelDefault;
+        }
+
+        if (!Enum.TryParse<LogLevel>(appConfig[$"Logging:LogLevel:{nameof(MyDebugMiddleware)}.Request"], true, out var logLevelRequest))
+        {
+            logLevelRequest = logLevel;
+        }
+
+        if (!Enum.TryParse<LogLevel>(appConfig[$"Logging:LogLevel:{nameof(MyDebugMiddleware)}.Response"], true, out var logLevelResponse))
+        {
+            logLevelResponse = logLevel;
+        }
+
+        return (logLevelRequest, logLevelResponse);
+    }
+
+    private bool IsTraceRequest => logLevels.request == LogLevel.Trace;
+    private bool IsTraceResponse => logLevels.response == LogLevel.Trace;
+
 
     private static int RequestId = 0;
 
@@ -40,7 +66,7 @@ public class MyDebugMiddleware
                 requestBodyObj = requestBody.FromJsonToExpando();
             }
 
-            if (config.IsTrace) logger.LogInformation(@$"
+            if (IsTraceRequest) logger.LogInformation(@$"
         <<-( Request )--------------------------------/{rid:000000}/
         | {context.Request.Scheme.ToUpper()} {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
         | ORIGIN {context.Request.Host}
@@ -70,12 +96,14 @@ public class MyDebugMiddleware
 
             var dt = (DateTime.Now - t0).TotalMilliseconds;
 
-            if (config.IsTrace) logger.LogInformation(@$"
+            if (IsTraceResponse) logger.LogInformation(@$"
                 +--( Response {$"{dt,6:#####0}"}ms)-----------------------/{rid:000000}/
                 | {context.Request.Scheme.ToUpper()} {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
                 | ORIGIN {context.Request.Host}
                 +---/{tid}/--------------( {context.Response.StatusCode:000} )--->>
 {ToJsonDebug(responseBodyObj)}
+---( Request )
+{ToJsonDebug(requestBodyObj)}
 ---");
 
         }
@@ -83,7 +111,7 @@ public class MyDebugMiddleware
         {
             var dt = (DateTime.Now - t0).TotalMilliseconds;
 
-            if (config.IsTrace) logger.LogInformation(@$"
+            logger.LogWarning(@$"
                 !--( Canceled {dt,6:#####0}ms)-----------------------/{rid:000000}/
                 | {context.Request.Scheme.ToUpper()} {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
                 | ORIGIN {context.Request.Host}
@@ -93,15 +121,14 @@ Failure cause by {ex.GetType().Name}:
 {ex.StackTrace}
 ---");
 
-            logger.LogError("Request was cancelled");
-
             context.Response.StatusCode = (int)HttpStatusCode.RequestTimeout; //408
         }
         catch (Exception ex)
         {
             var dt = (DateTime.Now - t0).TotalMilliseconds;
 
-            if (config.IsTrace) logger.LogInformation(@$"
+            // if (IsTraceResponse)
+                logger.LogError(@$"
                 !--( Aborted {dt,6:#####0}ms)------------------------/{rid:000000}/
                 | {context.Request.Scheme.ToUpper()} {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
                 | ORIGIN {context.Request.Host} 
@@ -110,11 +137,6 @@ Failure cause by {ex.GetType().Name}:
 {ex.Message}
 {ex.StackTrace}
 ---");
-
-            logger.LogError(@$"Request was aborted
-Failure cause by {ex.GetType().Name}:
-{ex.Message}
-{ex.StackTrace}");
 
             context.Response.StatusCode = (int)HttpStatusCode.Conflict; //409
         }

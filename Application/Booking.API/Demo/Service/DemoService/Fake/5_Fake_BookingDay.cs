@@ -23,6 +23,11 @@ public partial class DemoService
 
         var todayBookingCount = (int)(CustomerCount * 0.05).Rand();
 
+        if (todayBookingCount <= 0)
+        {
+            todayBookingCount = 1;
+        }
+
         var errors = new List<Exception>();
 
         var vendor = new VendorIdentifiers(7777_7777, 007);

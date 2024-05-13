@@ -50,9 +50,12 @@ Press a key to continue . . .
         //executing
     }
 
+    private IMessageQueueRepository? queue = default;
 
     private async Task Execute(CancellationToken cancel)
     {
+        using var scope = scp.GetScope<IMessageQueueRepository>(out var queue);
+
         while (!cancel.IsCancellationRequested)
         {
             var t0 = DateTime.UtcNow;

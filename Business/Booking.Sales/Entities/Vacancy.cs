@@ -40,9 +40,12 @@ public record Vacancy
     
         if (VacancyId == 0)
         {
+            // VacancyId = 
+            //     UniqueRoomId * 1_0000 +
+            //     DayNum; 
             VacancyId = 
-                UniqueRoomId * 1_0000 +
-                DayNum;
+                UniqueRoomId +
+                DayNum * 1_0000_0000l;
         }
 
         Position =

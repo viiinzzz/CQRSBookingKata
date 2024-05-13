@@ -21,15 +21,28 @@ public class MessageBusClientBase : IMessageBusClient, IDisposable
 
     public ILogger<IMessageBus>? Log { get; set; }
 
-    private bool isTrace = true;
+    // private bool isTrace = true;
+    private LogLevel logLevelNetwork = LogLevel.Information;
 
     public IMessageBusClient ConnectToBus(IScopeProvider scp)
     {
+        var scope0 = scp.GetScope<IConfiguration>(out var appConfig);
         var scope1 = scp.GetScope<BusConfiguration>(out var busConfig);
         var scope2 = scp.GetScope<ITimeService>(out var dateTime);
         var scope3 = scp.GetScope<ILogger<IMessageBus>>(out var log);
 
-        isTrace = busConfig.IsTrace;
+
+        if (!Enum.TryParse<LogLevel>(appConfig["Logging:LogLevel:Default"], true, out var logLevelDefault))
+        {
+            logLevelDefault = LogLevel.Information;
+        }
+
+        if (!Enum.TryParse<LogLevel>(appConfig["Logging:LogLevel:MessageQueue:Network"], true, out logLevelNetwork))
+        {
+            logLevelNetwork = logLevelDefault;
+        }
+
+        // isTrace = busConfig.IsTrace;
         var id = GetHashCode();
 
         var clientConfig = busConfig with
@@ -37,7 +50,7 @@ public class MessageBusClientBase : IMessageBusClient, IDisposable
             LocalUrl = $"{(busConfig.LocalUrl.EndsWith('/') ? busConfig.LocalUrl : busConfig.LocalUrl + '/')}{id.xby4()}"
         };
 
-        _bus = new MessageBusHttp(clientConfig, dateTime, log);
+        _bus = new MessageBusHttp(clientConfig, appConfig, dateTime, log);
 
         var remoteHost = new Uri(clientConfig.RemoteUrl).Host;
 

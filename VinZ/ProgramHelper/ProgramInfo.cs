@@ -4,16 +4,38 @@ public record ProgramInfo(string? ExeName, string ExeVersion, string BuildConfig
 {
     public string Print()
     {
-        return @$"
-{ExeName} {ExeVersion} ({BuildConfiguration})
-";
+        // var archi = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
+        var archi = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString().ToLower();
+
+        return $"{ExeName} {ExeVersion} {BuildConfiguration} {archi}";
     }
 
+    // public static string? GetPlatform()
+    // {
+    //     return IntPtr.Size switch
+    //     {
+    //         8 => "x64",
+    //
+    //         4 => "x86",
+    //
+    //         _ => null
+    //     };
+    // }
 
     public static ProgramInfo Current 
         
         => GetProgramInfo(Assembly.GetEntryAssembly());
 
+    public static (bool isDebug, bool isRelease, string programInfoStr) Get()
+    {
+        var pif = Current;
+        var programInfoStr = pif.Print();
+
+        var isDebug = pif.IsDebug;
+        var isRelease = !isDebug;
+        
+        return (isDebug, isRelease, programInfoStr);
+    }
 
     public static ProgramInfo GetProgramInfo(Assembly assembly)
     {

@@ -9,7 +9,7 @@ public class BookingAdminContext: MyDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {
-        builder.ConfigureMyWay<BookingAdminContext>(IsDebug, IsTrace);
+        builder.ConfigureMyWay<BookingAdminContext>(IsDebug, logLevel);
 
     }
 
