@@ -35,3 +35,16 @@ global using Support.Infrastructure.Network;
 global using Support.Infrastructure.Storage;
 global using static Business.Common.Exceptions;
 global using static VinZ.MessageQueue.Const;
+
+
+namespace Booking.API;
+
+internal class DependencyLinker
+{
+    private DependencyLinker()
+    {
+        //for type dependency diagram, establish dependency
+        _ = nameof(BookingKata.Infrastructure.EnterpriseStorage);
+        _ = nameof(BookingKata.Infrastructure.EnterpriseNetwork);
+    }
+}

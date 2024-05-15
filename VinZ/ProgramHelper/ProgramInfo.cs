@@ -17,17 +17,66 @@
 
 namespace VinZ.Common;
 
-public record ProgramInfo(string? ExeName, string ExeVersion, string BuildConfiguration, bool IsDebug)
+public class ProgramInfo
 {
-    public string Print()
-    {
-        // var archi = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
-        var archi = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString().ToLower();
+    private ProgramInfo() {}
 
-        return $"{ExeName} {ExeVersion} {BuildConfiguration} {archi}";
+    private static readonly ProgramInfo Instance = new();
+
+    public static ProgramInfo Get() => Instance;
+
+
+    public string ProgName { get; } = Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly()?.Location ?? string.Empty).Trim();
+    
+    public string ExeName =
+        Process.GetCurrentProcess().MainModule?.FileName == default ? string.Empty
+            : Path.GetFileNameWithoutExtension(Process.GetCurrentProcess().MainModule!.FileName) ?? string.Empty;
+
+    public string ExeVersion = 
+        Process.GetCurrentProcess().MainModule?.FileName == default ? string.Empty
+            : FileVersionInfo.GetVersionInfo(Process.GetCurrentProcess().MainModule!.FileName).FileVersion?.Trim() ?? string.Empty;
+
+
+    public string Env { get; } = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "undefined";
+
+    public bool IsDebug { get; } = IsDebugBuild(Assembly.GetExecutingAssembly());
+
+    public bool IsRelease => !IsDebugBuild(Assembly.GetExecutingAssembly());
+
+    public string BuildConfiguration { get; } = IsDebugBuild(Assembly.GetExecutingAssembly()) ? "Debug" : "Release";
+
+
+    public string ProcessorArchitecture { get; } = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE")?.ToLower() ?? string.Empty;
+
+    public string ProcessArchitecture { get; } = RuntimeInformation.ProcessArchitecture.ToString().ToLower();
+
+    public string Os { get; } = RuntimeInformation.OSDescription;
+
+    public string Framework { get; } = RuntimeInformation.FrameworkDescription;
+
+
+    public override string ToString() => $"{ExeName} v{ExeVersion} Build {BuildConfiguration} {ProcessArchitecture} ({Env})";
+
+
+
+    private static readonly string[] True = ["1", "true"];
+
+    public bool IsTrueEnv(string variableName)
+    {
+        return True.Contains(Environment.GetEnvironmentVariable(variableName)?.ToLower() ?? string.Empty);
     }
 
-    // public static string? GetPlatform()
+
+    private static bool IsDebugBuild(Assembly assembly)
+    {
+        return assembly
+            .GetCustomAttributes(false)
+            .OfType<DebuggableAttribute>()
+            .Any(attr => attr.IsJITTrackingEnabled);
+}
+
+
+    // private static string? GetPlatform()
     // {
     //     return IntPtr.Size switch
     //     {
@@ -38,42 +87,4 @@ public record ProgramInfo(string? ExeName, string ExeVersion, string BuildConfig
     //         _ => null
     //     };
     // }
-
-    public static ProgramInfo Current 
-        
-        => GetProgramInfo(Assembly.GetEntryAssembly());
-
-    public static (bool isDebug, bool isRelease, string programInfoStr) Get()
-    {
-        var pif = Current;
-        var programInfoStr = pif.Print();
-
-        var isDebug = pif.IsDebug;
-        var isRelease = !isDebug;
-        
-        return (isDebug, isRelease, programInfoStr);
-    }
-
-    public static ProgramInfo GetProgramInfo(Assembly assembly)
-    {
-        var dllPath = assembly.Location;
-        var rx = new Regex(@"^(?<path>.*)\.dll$");
-        var match = rx.Match(dllPath);
-        var exePath = !match.Success ? default : match.Result("${path}.exe");
-        var exeName = exePath == default ? default : Path.GetFileName(exePath);
-        var exeVersion = exePath == default ? "???" : System.Diagnostics.FileVersionInfo.GetVersionInfo(exePath).FileVersion;
-
-        var isDebug = IsDebugBuild(assembly);
-        var buildConfiguration = isDebug ? "Debug" : "Release";
-
-        return new ProgramInfo(exeName, exeVersion, buildConfiguration, isDebug);
-    }
-
-    public static bool IsDebugBuild(Assembly assembly)
-    {
-        return assembly
-            .GetCustomAttributes(false)
-            .OfType<DebuggableAttribute>()
-            .Any(attr => attr.IsJITTrackingEnabled);
-    }
 }

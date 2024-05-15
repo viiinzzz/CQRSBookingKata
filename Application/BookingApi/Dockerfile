@@ -3,9 +3,8 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER app
 WORKDIR /app
-EXPOSE 8080
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS restore
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Application/BookingApi/BookingApi.csproj", "Application/BookingApi/"]
@@ -60,6 +59,8 @@ COPY ["VinZ/ServerContext/VinZ.Common.ServerContext.csproj", "VinZ/ServerContext
 COPY ["VinZ/UUIDHelper/VinZ.Common.UUIDHelper.csproj", "VinZ/UUIDHelper/"]
 COPY ["VinZ/FakeTime/VinZ.Common.FakeTime.csproj", "VinZ/FakeTime/"]
 RUN dotnet restore "./Application/BookingApi/BookingApi.csproj"
+
+FROM restore AS build
 COPY . .
 WORKDIR "/src/Application/BookingApi"
 RUN dotnet build "./BookingApi.csproj" -c $BUILD_CONFIGURATION -o /app/build
@@ -71,4 +72,6 @@ RUN dotnet publish "./BookingApi.csproj" -c $BUILD_CONFIGURATION -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+EXPOSE 8080
+ENV ASPNETCORE_URLS=http://*:5291
 ENTRYPOINT ["dotnet", "BookingApi.dll"]

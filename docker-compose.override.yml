@@ -1,0 +1,23 @@
+services:
+
+  booking.backoffice:
+    image: ${DOCKER_REGISTRY-}bookingapi
+    build:
+      context: .
+      dockerfile: Application/BookingApi/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=backoffice
+      - ASPNETCORE_HTTP_PORTS=8080
+    ports:
+      - 5291:8080
+
+  booking.middleoffice:
+    image: ${DOCKER_REGISTRY-}bookingapi
+    build:
+      context: .
+      dockerfile: Application/BookingApi/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=middleoffice
+      - ASPNETCORE_HTTP_PORTS=8080
+    ports:
+      - 5391:8080

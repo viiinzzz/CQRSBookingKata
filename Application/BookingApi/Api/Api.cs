@@ -27,31 +27,34 @@
   ╎ basic variables
   */
 
-{
-    //for type dependency diagram, establish dependency
-    _ = nameof(BookingKata.Infrastructure.EnterpriseStorage);
-    _ = nameof(BookingKata.Infrastructure.EnterpriseNetwork);
-}
+var pif = ProgramInfo.Get();
 
+var pauseOnError = pif.IsDebug && pif.IsTrueEnv("DEBUG_PAUSE_ON_ERROR");
 
-var (isDebug, isRelease, programInfoStr) = ProgramInfo.Get();
+var demoMode = pif.IsDebug && pif.IsTrueEnv("DEBUG_DEMO_MODE");
 
-
-var pauseOnError = false; //isDebug;
-
-var demoMode = true; //isDebug;
-
-
-var url = ApiHelper.GetAppUrl();
-
+var busUrl = ApiHelper.GetAppUrlPrefix("bus");
 
 var myIps = ApiHelper.GetMyIps();
 
-Console.WriteLine($@"
-Network:
-{string.Join(Environment.NewLine, myIps.Select(ip => $"http://{ip}:{url.Port}"))}
-");
+{
+    var exeStr = $"{pif.ExeName} v{pif.ExeVersion}".Bold().ToString();
+    var buildArchiStr = $"Build {pif.BuildConfiguration} {pif.ProcessArchitecture}".Italic().ToString();
+    var osFwStr = $"{pif.Os} {pif.Framework}".Faint().ToString();
+    var envStr = pif.Env.Color(pif.IsRelease ? ConsoleColor.Magenta : ConsoleColor.Cyan).Inverted().ToString();
+    var pauseStr = pauseOnError ? " " + "PauseOnError".Color(ConsoleColor.Yellow).Inverted() : "";
+    var demoStr = demoMode ? " " + "DemoMode".Color(ConsoleColor.Yellow).Inverted() : "";
 
+    Console.WriteLine(@$"{exeStr} {buildArchiStr}
+{osFwStr}
+
+{envStr}{pauseStr}{demoStr}
+
+{"Network:".Faint()}
+{string.Join(Environment.NewLine, myIps.Select(ip => $"http://{ip}:{busUrl.Port}".Underlined()))}
+{busUrl.ToString().Underlined()}
+");
+}
 
 const int DbContextKeepAliveMilliseconds = 30_000;
 
@@ -99,8 +102,8 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder, Type[] busTypes
     //app bus
     var busConfig = new BusConfiguration
     {
-        LocalUrl = url.ToString(),
-        RemoteUrl = url.ToString()
+        LocalUrl = busUrl.ToString(),
+        RemoteUrl = busUrl.ToString()
     };
     services.AddMessageQueue(busConfig, busTypes, pauseOnError);
 
@@ -216,15 +219,14 @@ var busTypes = Types.From
 >()
     .Where(type => busTypesStr.Contains(type.FullName)).ToArray();
 
-builder.RegisterDbContexts(dbContextTypes, isDebug, logLevelEFContext);
+builder.RegisterDbContexts(dbContextTypes, pif.IsDebug, logLevelEFContext);
 
 ConfigureDependencyInjection(builder, busTypes);
 
 var api = builder.Build();
 
-var (isDevelopment, isStaging, isProduction, env) = api.GetEnv();
+var (isDevelopment, isStaging, isProduction, apiEnv) = api.GetEnv();
 
-Console.WriteLine($"{programInfoStr} ({env ?? "undefined"})");
 
 
 api.UseMiddleware<MyDebugMiddleware>();
@@ -238,7 +240,7 @@ if (isDevelopment)
     // api.UseExceptionHandler();
 }
 
-api.EnsureDatabaseCreated(dbContextTypes, logLevelEFContext, isDebug ? DbContextKeepAliveMilliseconds : null);
+api.EnsureDatabaseCreated(dbContextTypes, logLevelEFContext, pif.IsDebug ? DbContextKeepAliveMilliseconds : null);
 
 api.UseStaticFiles();
 

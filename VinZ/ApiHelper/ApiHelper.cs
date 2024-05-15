@@ -110,19 +110,49 @@ public static class ApiHelper
     }
 
 
-    public static Uri GetAppUrl()
+    public static Uri GetAppUrlPrefix(string prefix)
     {
-        var urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS").Split(";");
-        var url1 = urls.First();
-        url1 = url1.Replace("//*", "//localhost");
-        var url = new Uri($"{url1}/bus/");
-        if (url.IsLoopback)
+        var urls = (Environment.GetEnvironmentVariable("ASPNETCORE_URLS")?? string.Empty)
+            .Split(";")
+            .Select(url => url.Trim())
+            .ToArray();
+
+        if (urls.Length == 0)
         {
-            var host = Dns.GetHostEntry("").HostName;
-            url = new Uri($"{url.Scheme}://{host}:{url.Port}{url.PathAndQuery}");
+            throw new ApplicationException("Missing environment variable ASPNETCORE_URLS=http://*:5291 for example");
         }
 
-        return url;
+        var url1 = urls.First();
+        
+        url1 = url1.Replace("//*", "//localhost");
+
+        if (prefix.StartsWith('/'))
+        {
+            prefix = prefix[1..];
+        }
+
+        if (prefix.EndsWith('/'))
+        {
+            prefix = prefix[..^2];
+        }
+
+        try
+        {
+            var url = new Uri($"{url1}/{prefix}/");
+
+            if (!url.IsLoopback)
+            {
+                return url;
+            }
+
+            var host = Dns.GetHostEntry("").HostName;
+
+            return new Uri($"{url.Scheme}://{host}:{url.Port}{url.PathAndQuery}");
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException($"Invalid environment variable ASPNETCORE_URLS={string.Join(";", urls)}");
+        }
     }
 
 
