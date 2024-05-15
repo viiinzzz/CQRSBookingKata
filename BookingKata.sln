@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34616.47
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Booking.API", "Application\Booking.API\Booking.API.csproj", "{2DC1A390-34BE-4A2B-9AAB-1CF3C4D383B4}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.MessageQueue", "VinZ\MessageQueue\VinZ.MessageQueue.csproj", "{4E9989DB-0AB8-4036-ABE4-852C8B91530F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.MessageQueue.Contract", "VinZ\MessageQueue.Contracts\VinZ.MessageQueue.Contract.csproj", "{290995D1-BBBB-42C5-9310-9BA79C29A333}"
@@ -127,13 +125,23 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Network", "Network", "{A2BF
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Storage", "Storage", "{5C52FE89-A48A-4B30-9604-170917971DF0}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Booking.API Infrastructure", "Booking.API Infrastructure", "{4A30330A-9E34-41D7-B729-E8F47A7675E2}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BookingApi Infrastructure", "BookingApi Infrastructure", "{4A30330A-9E34-41D7-B729-E8F47A7675E2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.MessageQueue.Client", "VinZ\MessageQueue.Client\VinZ.MessageQueue.Client.csproj", "{E5B0BB04-7297-49FB-AEA4-EC615179D3F3}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{0727C3D4-5D0A-43C9-8B04-F4B3BD6F4671}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VinZ.GeoIndexing.Test", "VinZ\GeoIndexing.Test\VinZ.GeoIndexing.Test.csproj", "{A6FEF355-9E3B-43B3-98A4-5394B21C38BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VinZ.GeoIndexing.Test", "VinZ\GeoIndexing.Test\VinZ.GeoIndexing.Test.csproj", "{A6FEF355-9E3B-43B3-98A4-5394B21C38BD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookingApi", "Application\BookingApi\BookingApi.csproj", "{FCF4DC41-2C5E-4F8C-A167-90BD5FA7704C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingApi.Test", "Application\BookingApi.Test\BookingApi.Test.csproj", "{563174FB-DC0F-4727-9C67-BD5ACB6EEA77}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{298FB15F-EAC0-486F-9F7C-BBCD85A4A610}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -141,10 +149,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2DC1A390-34BE-4A2B-9AAB-1CF3C4D383B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2DC1A390-34BE-4A2B-9AAB-1CF3C4D383B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2DC1A390-34BE-4A2B-9AAB-1CF3C4D383B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2DC1A390-34BE-4A2B-9AAB-1CF3C4D383B4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4E9989DB-0AB8-4036-ABE4-852C8B91530F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4E9989DB-0AB8-4036-ABE4-852C8B91530F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E9989DB-0AB8-4036-ABE4-852C8B91530F}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -353,12 +357,19 @@ Global
 		{A6FEF355-9E3B-43B3-98A4-5394B21C38BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A6FEF355-9E3B-43B3-98A4-5394B21C38BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A6FEF355-9E3B-43B3-98A4-5394B21C38BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FCF4DC41-2C5E-4F8C-A167-90BD5FA7704C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCF4DC41-2C5E-4F8C-A167-90BD5FA7704C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCF4DC41-2C5E-4F8C-A167-90BD5FA7704C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCF4DC41-2C5E-4F8C-A167-90BD5FA7704C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{563174FB-DC0F-4727-9C67-BD5ACB6EEA77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{563174FB-DC0F-4727-9C67-BD5ACB6EEA77}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{563174FB-DC0F-4727-9C67-BD5ACB6EEA77}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{563174FB-DC0F-4727-9C67-BD5ACB6EEA77}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{2DC1A390-34BE-4A2B-9AAB-1CF3C4D383B4} = {E6711E40-9496-40AF-849F-6DB744F072CF}
 		{4E9989DB-0AB8-4036-ABE4-852C8B91530F} = {A621E367-C479-4911-A23D-FD879A3277A2}
 		{290995D1-BBBB-42C5-9310-9BA79C29A333} = {A621E367-C479-4911-A23D-FD879A3277A2}
 		{A9FFC471-B525-402E-8965-65835FFC1EC1} = {A621E367-C479-4911-A23D-FD879A3277A2}
@@ -418,7 +429,10 @@ Global
 		{5C52FE89-A48A-4B30-9604-170917971DF0} = {0392C343-C5AB-4CB7-993A-985DABCBD106}
 		{4A30330A-9E34-41D7-B729-E8F47A7675E2} = {E6711E40-9496-40AF-849F-6DB744F072CF}
 		{E5B0BB04-7297-49FB-AEA4-EC615179D3F3} = {A621E367-C479-4911-A23D-FD879A3277A2}
+		{0727C3D4-5D0A-43C9-8B04-F4B3BD6F4671} = {E6711E40-9496-40AF-849F-6DB744F072CF}
 		{A6FEF355-9E3B-43B3-98A4-5394B21C38BD} = {A621E367-C479-4911-A23D-FD879A3277A2}
+		{FCF4DC41-2C5E-4F8C-A167-90BD5FA7704C} = {E6711E40-9496-40AF-849F-6DB744F072CF}
+		{563174FB-DC0F-4727-9C67-BD5ACB6EEA77} = {E6711E40-9496-40AF-849F-6DB744F072CF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {590111C3-57D0-485D-BF05-544FE98D0519}

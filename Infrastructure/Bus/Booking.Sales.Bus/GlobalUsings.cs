@@ -1,4 +1,5 @@
 ﻿
+global using BookingKata.Infrastructure.Bus.Sales;
 global using BookingKata.Sales;
 global using BookingKata.Services;
 global using BookingKata.Shared;

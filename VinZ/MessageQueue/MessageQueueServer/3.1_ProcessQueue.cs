@@ -1,4 +1,21 @@
-﻿namespace VinZ.MessageQueue;
+﻿/*
+ * Copyright (C) 2024 Vincent Fontaine
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+namespace VinZ.MessageQueue;
 
 public partial class MqServer
 {
@@ -6,7 +23,7 @@ public partial class MqServer
     {
         // log.LogInformation($"Processing message queue...");
 
-        using var scope = scp.GetScope<IMessageQueueRepository>(out var queue);
+        // using var scope = scp.GetScope<IMessageQueueRepository>(out var queue);
 
         var now = DateTime.UtcNow;
 
@@ -93,20 +110,16 @@ Message purge failure: {ex.Message}
 
         try
         {
-            var (count2, updates) = messages
+         
+
+            var responded = messages
 
                 .AsParallel()
                 .WithCancellation(cancel)
 
                 .Select(notification => Respond(notification, immediate: false, cancel))
 
-                .Aggregate((a, b) =>
-                {
-                    count = a.Item1 + b.Item1;
-                    var updates2 = a.Item2.Concat(b.Item2).ToList();
-
-                    return (count, updates2);
-                });
+                .Aggregate((a, b) => a + b);
 
 
             if (count.Delivered > 0)
@@ -114,7 +127,14 @@ Message purge failure: {ex.Message}
                 RefreshFastest();
             }
 
-            foreach (var (notifications, update) in updates)
+
+            log.LogInformation(@$"
+---
+Message queue processed {responded.count.Total}.
+---
+");
+
+            foreach (var (notifications, update) in responded.updates)
             {
                 queue.UpdateNotification(notifications, update);
             }

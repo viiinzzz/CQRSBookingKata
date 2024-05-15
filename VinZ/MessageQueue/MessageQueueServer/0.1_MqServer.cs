@@ -1,4 +1,21 @@
-﻿namespace VinZ.MessageQueue;
+﻿/*
+ * Copyright (C) 2024 Vincent Fontaine
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+namespace VinZ.MessageQueue;
 
 public partial class MqServer
 (
@@ -33,9 +50,14 @@ Press a key to continue . . .
         Console.ReadKey();
     }
 
+    private IMessageQueueRepository? queue = default;
+    private IServiceScope? queueScope = default;
+
     public async Task StartingAsync(CancellationToken cancellationToken)
     {
         //initialize
+
+        queueScope = scp.GetScope<IMessageQueueRepository>(out queue);
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -50,12 +72,8 @@ Press a key to continue . . .
         //executing
     }
 
-    private IMessageQueueRepository? queue = default;
-
     private async Task Execute(CancellationToken cancel)
     {
-        using var scope = scp.GetScope<IMessageQueueRepository>(out var queue);
-
         while (!cancel.IsCancellationRequested)
         {
             var t0 = DateTime.UtcNow;
@@ -100,6 +118,8 @@ Press a key to continue . . .
     public async Task StoppingAsync(CancellationToken cancellationToken)
     {
         //tearing down
+
+        queueScope.Dispose();
     }
 
     public async Task StoppedAsync(CancellationToken cancellationToken)
