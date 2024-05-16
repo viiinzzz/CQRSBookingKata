@@ -19,7 +19,7 @@ namespace BookingKata.Billing;
 
 public partial class BillingCommandService
 {
-    public Id EmitRefund
+    public Id<RefundRef> EmitRefund
     (
         int receiptId,
         long correlationId1,
@@ -55,6 +55,6 @@ public partial class BillingCommandService
 
         var refundId = money.AddRefund(refund);
 
-        return new Id(refundId);
+        return new Id<RefundRef>(refundId);
     }
 }

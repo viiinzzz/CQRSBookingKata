@@ -59,7 +59,7 @@ public partial class BookingCommandService
         }
 
         var roomDetails = bus.AskResult<RoomDetails>(Recipient.Admin, Verb.Admin.RequestSingleRoomDetails,
-            new Id(stayProposition.Urid), originator);
+            new Id<RoomRef>(stayProposition.Urid), originator);
 
         if (roomDetails == null)
         {
@@ -85,7 +85,7 @@ public partial class BookingCommandService
         var amount = stayProposition.Price;
         var currency = stayProposition.Currency;
 
-        var quotationId = bus.AskResult<Id>(Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestQuotation,
+        var quotationId = bus.AskResult<Id<QuotationRequest>>(Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestQuotation,
             new QuotationRequest
             {
                 price = amount,
@@ -104,7 +104,7 @@ public partial class BookingCommandService
             throw new ArgumentException(ReferenceInvalid, nameof(quotationId));
         }
 
-        var invoiceId = bus.AskResult<Id>(Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestInvoice,
+        var invoiceId = bus.AskResult<Id<InvoiceRequest>>(Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestInvoice,
             new InvoiceRequest
             {
                 amount = amount,
@@ -120,7 +120,7 @@ public partial class BookingCommandService
         }
 
 
-        var receiptId = bus.AskResult<Id>(Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestPayment,
+        var receiptId = bus.AskResult<Id<ReceiptRequest>>(Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestPayment,
             new PaymentRequest
             {
                 referenceId = invoiceId.id,

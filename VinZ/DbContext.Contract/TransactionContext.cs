@@ -106,7 +106,7 @@ public class TransactionContext
                 {
                     _failed = true;
 
-                    throw new TransactionException($"transaction failed: {ex.Message}", ex);
+                    throw new TransactionException($"transaction failed: {(ex.InnerException ?? ex).Message}", ex.InnerException );
                 }
                 finally
                 {

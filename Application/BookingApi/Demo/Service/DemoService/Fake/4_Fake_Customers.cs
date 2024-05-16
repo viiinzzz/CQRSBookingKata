@@ -41,7 +41,7 @@ public partial class DemoService
                     EmailAddress = fake.EmailAddress
                 };
 
-                var customerId = bus.AskResult<Id>(Recipient.Sales, Verb.Sales.RequestCreateCustomer,
+                var customerId = bus.AskResult<Id<Customer>>(Recipient.Sales, Verb.Sales.RequestCreateCustomer,
                     createCustomerRequest,
                     originator);
 

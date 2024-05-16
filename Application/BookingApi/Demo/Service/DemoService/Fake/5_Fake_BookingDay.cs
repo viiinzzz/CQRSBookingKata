@@ -124,6 +124,22 @@ public partial class DemoService
             }
             catch (Exception ex)
             {
+                if (ex is StayNotFoundException stayNotFoundException)
+                {
+                    bus.Notify(new NegativeResponseNotification(Omni, AuditMessage)
+                    {
+                        MessageObj = new
+                        {
+                            _error = nameof(StayNotFoundException),
+                            stayNotFoundException.StayRequest
+                        },
+                        Originator = originator,
+                        Immediate = true
+                    });
+
+                    continue;
+                }
+
                 errors.Add(new InvalidOperationException($"Booking failure during Day+{demoContext.SimulationDay}", ex));
             }
         }

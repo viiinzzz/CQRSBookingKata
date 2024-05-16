@@ -56,7 +56,7 @@ public static partial class ApiMethods
             =>
         {
             var kpi = await mq.Ask<KeyPerformanceIndicators>(
-                originator, Recipient.Sales, Verb.Sales.RequestKpi, id,
+                originator, Recipient.Sales, Verb.Sales.RequestHotelKpi, id,
                 requestCancel, responseTimeoutSeconds);
 
 
@@ -64,7 +64,31 @@ public static partial class ApiMethods
 <h1>B O O K I N G  API</h1>
 <h2>Key Performance Indicators</h2>
 <ul>
-<li>Occupancy Rate: {kpi.OccupancyRate:P}
+<li>Occupancy Rate: {kpi.occupancyRate:P}
+</ul>
+";
+
+            return Results.Content(html, "text/html");
+        }).WithOpenApi().WithTags([RestrictedTag, AdminTag]);
+
+
+        admin.MapGet("/kpi", async
+            (
+                [FromServices] IMessageBus mq,
+                CancellationToken requestCancel
+            )
+            =>
+        {
+            var kpi = await mq.Ask<KeyPerformanceIndicators>(
+                originator, Recipient.Sales, Verb.Sales.RequestHotelChainKpi, null,
+                requestCancel, responseTimeoutSeconds);
+
+
+            var html = @$"
+<h1>B O O K I N G  API</h1>
+<h2>Key Performance Indicators</h2>
+<ul>
+<li>Occupancy Rate: {kpi.occupancyRate:P}
 </ul>
 ";
 

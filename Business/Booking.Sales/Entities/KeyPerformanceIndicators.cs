@@ -19,5 +19,7 @@ namespace BookingKata.Sales;
 
 public record KeyPerformanceIndicators
 (
-    double? OccupancyRate = default
+    int? hotelId = default,
+    int? totalBookingCount = default,
+    double? occupancyRate = default
 );

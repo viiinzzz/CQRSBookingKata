@@ -27,37 +27,42 @@
   ╎ basic variables
   */
 
+using System.Collections;
+
 var pif = ProgramInfo.Get();
 
 var pauseOnError = pif.IsDebug && pif.IsTrueEnv("DEBUG_PAUSE_ON_ERROR");
-
 var demoMode = pif.IsDebug && pif.IsTrueEnv("DEBUG_DEMO_MODE");
 
 var busUrl = ApiHelper.GetAppUrlPrefix("bus");
 
 var myIps = ApiHelper.GetMyIps();
 
-{
-    var exeStr = $"{pif.ExeName} v{pif.ExeVersion}".Bold().ToString();
-    var buildArchiStr = $"Build {pif.BuildConfiguration} {pif.ProcessArchitecture}".Italic().ToString();
-    var osFwStr = $"{pif.Os} {pif.Framework}".Faint().ToString();
-    var envStr = pif.Env.Color(pif.IsRelease ? ConsoleColor.Magenta : ConsoleColor.Cyan).Inverted().ToString();
-    var pauseStr = pauseOnError ? " " + "PauseOnError".Color(ConsoleColor.Yellow).Inverted() : "";
-    var demoStr = demoMode ? " " + "DemoMode".Color(ConsoleColor.Yellow).Inverted() : "";
+var Console = new cons.AnsiVtConsole(); //https://github.com/franck-gaspoz/AnsiVtConsole.NetCore
 
-    Console.WriteLine(@$"{exeStr} {buildArchiStr}
+{
+    var exeStr = pif.ExeName.Length > 0 || pif.ExeVersion.Length > 0 ? $"(bon){pif.ExeName} {pif.ExeVersion}(rdc){Environment.NewLine}" : "";
+    var buildArchiStr = $"(f=darkgray)Build {pif.BuildConfiguration} {pif.ProcessArchitecture}(rdc)";
+    var osFwStr = $"(f=darkgray){pif.Os} {pif.Framework}(rdc)";
+    var envStr = $"(invon,f={(pif.IsRelease ? "magenta" : "cyan")}){pif.Env}(rdc)";
+    var demoStr = demoMode ? " " + $"(invon,f=cyan)DemoMode(rdc)" : "";
+    var pauseStr = pauseOnError ? " " + $"(invon,f=yellow)PauseOnError(rdc)" : "";
+
+    Console.Out.WriteLine(@$"{exeStr}{buildArchiStr}
 {osFwStr}
 
-{envStr}{pauseStr}{demoStr}
+{envStr}{demoStr}{pauseStr}
 
-{"Network:".Faint()}
-{string.Join(Environment.NewLine, myIps.Select(ip => $"http://{ip}:{busUrl.Port}".Underlined()))}
-{busUrl.ToString().Underlined()}
+(f=darkgray)Network:(rdc)
+{string.Join(Environment.NewLine, myIps.Select(ip => $"(uon)http://{ip}:{busUrl.Port}(rdc)"))}
+(uon){busUrl}(rdc)
 ");
 }
 
-const int DbContextKeepAliveMilliseconds = 30_000;
 
+const double precisionMaxKm = 0.5;
+
+const int dbContextKeepAliveMilliseconds = 30_000;
 
 /*
                                                                               ╎
@@ -73,7 +78,7 @@ const int DbContextKeepAliveMilliseconds = 30_000;
 
 //adding components to the magic wiring box, aka. DI Container to achieve IoC
 
-void ConfigureDependencyInjection(WebApplicationBuilder builder, Type[] busTypes)
+void ConfigureDependencyInjection(WebApplicationBuilder builder)
 {
     var services = builder.Services;
 
@@ -99,39 +104,32 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder, Type[] busTypes
     services.AddAuthentication().AddJwtBearer();
     // https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/security?view=aspnetcore-8.0
 
-    //app bus
-    var busConfig = new BusConfiguration
+
+    //bus
+    var mqEnabled = builder.IsConfigurationTrue("Api:MessageQueue");
+
+    if (mqEnabled)
     {
-        LocalUrl = busUrl.ToString(),
-        RemoteUrl = busUrl.ToString()
-    };
-    services.AddMessageQueue(busConfig, busTypes, pauseOnError);
+        var busConfig = new BusConfiguration
+        {
+            LocalUrl = busUrl.ToString(),
+            RemoteUrl = busUrl.ToString()
+        };
 
-    //app repo
-    services.AddScoped<IAdminRepository, AdminRepository>();
-    services.AddScoped<ISalesRepository, SalesRepository>();
-    services.AddScoped<IPlanningRepository, PlanningRepository>();
+        var busTypes = builder.GetConfigurationTypes("Api:Bus", Dependencies.AvailableBusTypes);
 
-    services.AddScoped<IMessageQueueRepository, MessageQueueRepository>();
-    services.AddScoped<IMoneyRepository, MoneyRepository>();
+        services.AddMessageQueue(busConfig, busTypes.ToArray(), pauseOnError);
+    }
 
-    //business
-    services.AddScoped<AdminQueryService>();
-    services.AddScoped<SalesQueryService>();
-    services.AddScoped<BookingCommandService>();
-    services.AddScoped<PlanningQueryService>();
-    services.AddScoped<PlanningCommandService>();
-    services.AddScoped<KpiQueryService>();
+    //repo
+    builder.AddScopedConfigurationTypes("Api:Repository", Dependencies.AvailableRepositories);
 
-    //support/third-party
-    services.AddScoped<IBillingCommandService, BillingCommandService>();
-    services.AddScoped<IGazetteerService, GazetteerService>();
-    services.AddScoped<IPaymentCommandService, PaymentCommandService>();
-    services.AddScoped<IPricingQueryService, PricingQueryService>();
+    //business/support/third-party
+    builder.AddScopedConfigurationTypes("Api:Service", Dependencies.AvailableServices);
 
     var bookingConfig = new BookingConfiguration
     {
-        PrecisionMaxKm = 0.5
+        PrecisionMaxKm = precisionMaxKm
     };
     services.AddSingleton(bookingConfig);
 
@@ -177,53 +175,27 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder, Type[] busTypes
 
 
 
-
 var builder = WebApplication.CreateSlimBuilder(args);
 
-if (!Enum.TryParse<LogLevel>(builder.Configuration["Logging:LogLevel:Default"], true, out var logLevelDefault))
-{
-    logLevelDefault = LogLevel.Warning;
-}
 
-if (!Enum.TryParse<LogLevel>(builder.Configuration["Logging:LogLevel:Microsoft.EntityFrameworkCore.DbContext"], true, out var logLevelEFContext))
-{
-    logLevelEFContext = logLevelDefault;
-}
-
-
-var dbContextTypesStr = builder.GetConfigurationValues("Api:DbContext");
-var busTypesStr = builder.GetConfigurationValues("Api:Bus");
-
-
-var dbContextTypes = Types.From
-<
-    BookingAdminContext,
-    BookingSalesContext,
-    BookingPlanningContext,
-
-    MessageQueueContext,
-    MoneyContext,
-    GazeteerContext
->()
-    .Where(type => dbContextTypesStr.Contains(type.FullName)).ToArray();
-
-var busTypes = Types.From
-<
-    AdminBus,
-    SalesBus,
-    PlanningBus,
-
-    BillingBus,
-    ThirdPartyBus,
-    ConsoleAuditBus
->()
-    .Where(type => busTypesStr.Contains(type.FullName)).ToArray();
-
+//database
+var logLevelEFContext = builder.EnumConfiguration("Logging:LogLevel:Microsoft.EntityFrameworkCore.DbContext", 
+    "Logging:LogLevel:Default", LogLevel.Warning);
+var dbContextTypes = builder.GetConfigurationTypes("Api:DbContext", Dependencies.AvailableDbContextTypes);
 builder.RegisterDbContexts(dbContextTypes, pif.IsDebug, logLevelEFContext);
 
-ConfigureDependencyInjection(builder, busTypes);
+//let's cast participants
+//
+ConfigureDependencyInjection(builder);
+//
+//
 
+//onboard participants
+//
 var api = builder.Build();
+//
+//setup the stage
+
 
 var (isDevelopment, isStaging, isProduction, apiEnv) = api.GetEnv();
 
@@ -240,7 +212,7 @@ if (isDevelopment)
     // api.UseExceptionHandler();
 }
 
-api.EnsureDatabaseCreated(dbContextTypes, logLevelEFContext, pif.IsDebug ? DbContextKeepAliveMilliseconds : null);
+api.EnsureDatabaseCreated(dbContextTypes, logLevelEFContext, pif.IsDebug ? dbContextKeepAliveMilliseconds : null);
 
 api.UseStaticFiles();
 
@@ -253,7 +225,8 @@ api.UseAntiforgery();
 api.MapPrometheusScrapingEndpoint(); // path=/metrics
 
 
-
-api.Run();
-
 //let the show start...
+//
+api.Run();
+//
+//end of story

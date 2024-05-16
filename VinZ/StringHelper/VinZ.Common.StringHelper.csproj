@@ -5,6 +5,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+  <ItemGroup>
+    <Content Remove="C:\Users\vinz_\.nuget\packages\ansivtconsole.netcore\1.0.26\contentFiles\any\any\Component\Parser\ANSI\ansi-seq-patterns.txt" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CaseExtensions" Version="1.1.0" />

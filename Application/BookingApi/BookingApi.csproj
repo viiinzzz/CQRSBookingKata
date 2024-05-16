@@ -42,6 +42,7 @@
     <ProjectReference Include="..\..\Business\ThirdParty\ThirdParty.csproj" />
     <ProjectReference Include="..\..\Infrastructure\BookingKata.Enterprise\Enterprise.Bus\Booking.Enterprise.Network.csproj" />
     <ProjectReference Include="..\..\Infrastructure\BookingKata.Enterprise\Enterprise.Repository\Booking.Enterprise.Storage.csproj" />
+    <ProjectReference Include="..\..\VinZ\AnotherConsole\VinZ.Common.AnotherConsole.csproj" />
     <ProjectReference Include="..\..\VinZ\ApiHelper\VinZ.Common.ApiHelper.csproj" />
     <ProjectReference Include="..\..\VinZ\Paging\VinZ.Common.Paging.csproj" />
     <ProjectReference Include="..\..\VinZ\ParsableHelper\VinZ.Common.ParsableHelper.csproj" />

@@ -25,7 +25,7 @@ public partial class BookingCommandService
 
 
         var hotelGeoProxy = bus.AskResult<GeoProxy>(Recipient.Admin, Verb.Admin.RequestFetchHotelGeoProxy,
-            new Id(hotelId), originator);
+            new Id<HotelRef>(hotelId), originator);
 
         if (hotelGeoProxy == null)
         {

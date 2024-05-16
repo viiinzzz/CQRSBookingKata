@@ -19,7 +19,7 @@ namespace BookingKata.Billing;
 
 public interface IBillingCommandService
 {
-    Id EmitQuotation
+    Id<QuotationRef> EmitQuotation
     (
         double price,
         string currency,
@@ -32,14 +32,19 @@ public interface IBillingCommandService
         long correlationId2
     );
 
-    Id EmitRefund
+    Id<InvoiceRef> EmitInvoice
     (
-        int receiptId,
+        double amount,
+        string currency,
+
+        int customerId,
+        int quotationId,
         long correlationId1,
         long correlationId2
     );
 
-    Id EmitReceipt
+
+    Id<ReceiptRef> EmitReceipt
     (
         double amount,
         string currency,
@@ -53,18 +58,14 @@ public interface IBillingCommandService
         long correlationId2
     );
 
-    Id EmitInvoice
+    Id<RefundRef> EmitRefund
     (
-        double amount,
-        string currency,
-
-        int customerId,
-        int quotationId,
+        int receiptId,
         long correlationId1,
         long correlationId2
     );
 
-    Id EnrollEmployee
+    Id<PayrollRef> EmitPayroll
     (
         int employeeId,
         double monthlyIncome,

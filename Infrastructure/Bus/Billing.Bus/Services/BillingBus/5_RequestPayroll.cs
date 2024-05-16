@@ -27,7 +27,7 @@ public partial class BillingBus
 
         //
         //
-        var payrollId = billing.EnrollEmployee
+        var payrollId = billing.EmitPayroll
         (
             request.employeeId,
             request.monthlyIncome,

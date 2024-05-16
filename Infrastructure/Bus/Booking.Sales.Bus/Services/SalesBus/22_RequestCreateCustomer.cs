@@ -27,7 +27,7 @@ public partial class SalesBus
 
         var customerId = repo.CreateCustomer(request.EmailAddress);
 
-        var id = new Id(customerId);
+        var id = new Id<Customer>(customerId);
 
         Notify(new ResponseNotification(notification.Originator, Verb.Sales.CustomerCreated, id)
         {

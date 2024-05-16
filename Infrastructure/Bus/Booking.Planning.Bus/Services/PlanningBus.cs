@@ -56,7 +56,7 @@ public class PlanningBus(IScopeProvider sp, BookingConfiguration bconf) : Messag
                     {
                         using var scope = sp.GetScope<PlanningCommandService>(out var planning);
 
-                        var bookingId = notification.MessageAs<Id>();
+                        var bookingId = notification.MessageAs<Id<Booking>>();
 
                         planning.CancelPlanForBooking(bookingId.id);
 

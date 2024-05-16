@@ -44,7 +44,7 @@ public partial class DemoService
 
 
 
-                var hotelId = bus.AskResult<Id>(Recipient.Admin, Verb.Admin.RequestCreateHotel,
+                var hotelId = bus.AskResult<Id<HotelRef>>(Recipient.Admin, Verb.Admin.RequestCreateHotel,
                     newHotel,
                     originator);
 

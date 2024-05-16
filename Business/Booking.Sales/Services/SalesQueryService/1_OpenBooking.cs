@@ -25,7 +25,7 @@ public partial class SalesQueryService
                          ?? throw new Exception("invalid originator");
 
         var roomDetails = bus.AskResult<RoomDetails>(Recipient.Admin, Verb.Admin.RequestSingleRoomDetails,
-            new Id(urid.Value), originator);
+            new Id<RoomRef>(urid.Value), originator);
 
         if (roomDetails == default)
         {
@@ -34,7 +34,7 @@ public partial class SalesQueryService
 
 
         var hotelGeoProxy = bus.AskResult<GeoProxy>(Recipient.Admin, Verb.Admin.RequestFetchHotelGeoProxy,
-            new Id(urid.HotelId), originator);
+            new Id<HotelRef>(urid.HotelId), originator);
 
         if (hotelGeoProxy?.Cells is null or { Count: 0 })
         {

@@ -61,8 +61,12 @@ public static class MessageHelper
             return AnonymousType;
         }
 
-        return messageObj.GetType().FullName 
+        var typeStr = messageObj.GetType().FullName
                ?? throw new NullReferenceException("GetType().FullName");
+
+        typeStr = typeStr.Replace(", Culture=neutral, PublicKeyToken=null", "");
+
+        return typeStr;
     }
 
     public static Type? GetTypeFromSerializedName(this string? typeString)

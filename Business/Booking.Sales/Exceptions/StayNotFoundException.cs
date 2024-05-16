@@ -17,7 +17,7 @@
 
 namespace BookingKata.Sales;
 
-public class StayNotFoundException : Exception
+public class StayNotFoundException(StayRequest stayRequest) : Exception
 {
-
+    public StayRequest StayRequest => stayRequest;
 }

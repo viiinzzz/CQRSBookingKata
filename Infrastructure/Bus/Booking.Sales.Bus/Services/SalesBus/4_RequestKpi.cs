@@ -19,7 +19,7 @@ namespace BookingKata.Infrastructure.Network;
 
 public partial class SalesBus
 {
-    private void Verb_Is_RequestKpi(IClientNotificationSerialized notification)
+    private void Verb_Is_RequestHotelKpi(IClientNotificationSerialized notification)
     {
         var id = notification.MessageAs<int>();
 
@@ -29,12 +29,34 @@ public partial class SalesBus
         //
         var indicators = new KeyPerformanceIndicators
         {
-            OccupancyRate = kpi.GetOccupancyRate(id),
+            hotelId = id,
+            totalBookingCount = kpi.TotalBookingCount(id),
+            occupancyRate = kpi.GetOccupancyRate(id),
         };
         //
         //
 
-        Notify(new ResponseNotification(notification.Originator, Verb.Sales.RespondKpi, indicators)
+        Notify(new ResponseNotification(notification.Originator, Verb.Sales.RespondHotelKpi, indicators)
+        {
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
+        });
+    }
+
+    private void Verb_Is_RequestHotelChainKpi(IClientNotificationSerialized notification)
+    {
+        using var scope = sp.GetScope<KpiQueryService>(out var kpi);
+
+        //
+        //
+        var indicators = new KeyPerformanceIndicators
+        {
+            totalBookingCount = kpi.TotalBookingCount(null),
+            occupancyRate = kpi.GetOccupancyRate(null),
+        };
+        //
+        //
+
+        Notify(new ResponseNotification(notification.Originator, Verb.Sales.RespondHotelChainKpi, indicators)
         {
             CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });

@@ -19,7 +19,7 @@ namespace BookingKata.Billing;
 
 public partial class BillingCommandService
 {
-    public Id EmitReceipt
+    public Id<ReceiptRef> EmitReceipt
     (
         double amount,
         string currency,
@@ -89,6 +89,6 @@ public partial class BillingCommandService
         
         var receiptId = money.AddReceipt(receipt);
 
-        return new Id(receiptId);
+        return new Id<ReceiptRef>(receiptId);
     }
 }

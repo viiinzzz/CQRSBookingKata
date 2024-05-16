@@ -45,9 +45,14 @@ public partial class SalesBus(IScopeProvider sp, BookingConfiguration bconf) : M
                         Verb_Is_RequestBook(notification);
                         break;
                     }
-                    case Verb.Sales.RequestKpi:
+                    case Verb.Sales.RequestHotelKpi:
                     {
-                        Verb_Is_RequestKpi(notification);
+                        Verb_Is_RequestHotelKpi(notification);
+                        break;
+                    }
+                    case Verb.Sales.RequestHotelChainKpi:
+                    {
+                        Verb_Is_RequestHotelChainKpi(notification);
                         break;
                     }
                     case RequestPage:

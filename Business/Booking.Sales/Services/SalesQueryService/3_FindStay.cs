@@ -177,7 +177,7 @@ public partial class SalesQueryService
 
         if (ids.Length == 0)
         {
-            throw new StayNotFoundException();
+            throw new StayNotFoundException(request);
         }
 
         var originator = GetType().FullName

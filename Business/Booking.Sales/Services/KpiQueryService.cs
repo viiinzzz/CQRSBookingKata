@@ -28,14 +28,23 @@ public class KpiQueryService
 )
 {
   
-    public double GetOccupancyRate(int hotelId)
+    public int TotalBookingCount(int? hotelId)
+    {
+       var bookCount = sales.Bookings
+           .Where(b => !hotelId.HasValue || b.UniqueRoomId / 1_0000 == hotelId)
+           .Count(b => !b.Cancelled);
+
+       return bookCount;
+    }
+
+    public double GetOccupancyRate(int? hotelId)
     {
        var vacancyCount = sales.Vacancies
-           .Where(v => v.UniqueRoomId / 1_0000 == hotelId)
+           .Where(v => !hotelId.HasValue || v.UniqueRoomId / 1_0000 == hotelId)
            .Count(v => !v.Cancelled);
 
        var bookCount = sales.Bookings
-           .Where(b => b.UniqueRoomId / 1_0000 == hotelId)
+           .Where(b => !hotelId.HasValue || b.UniqueRoomId / 1_0000 == hotelId)
            .Count(b => !b.Cancelled);
 
        return 1.0 * bookCount / (vacancyCount + bookCount);

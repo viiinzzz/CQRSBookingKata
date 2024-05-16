@@ -19,7 +19,7 @@ namespace BookingKata.Billing;
 
 public partial class BillingCommandService
 {
-    public Id EmitInvoice
+    public Id<InvoiceRef> EmitInvoice
     (
         double amount,
         string currency,
@@ -75,6 +75,6 @@ public partial class BillingCommandService
 
         var invoiceId = money.AddInvoice(invoice);
 
-        return new Id(invoiceId);
+        return new Id<InvoiceRef>(invoiceId);
     }
 }

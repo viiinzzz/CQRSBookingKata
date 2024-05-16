@@ -166,7 +166,7 @@ public static class MessageQueueNetCoreHelper
         };
     }
 
-    public static Func<TNew, IMessageBus, CancellationToken, Task<Id>> PostMq<TNew>
+    public static Func<TNew, IMessageBus, CancellationToken, Task<Id<TNew>>> PostMq<TNew>
     (
         this string originator,
         
@@ -182,7 +182,7 @@ public static class MessageQueueNetCoreHelper
             )
             =>
         {
-            var id = await mq.Ask<Id>(
+            var id = await mq.Ask<Id<TNew>>(
                 originator, recipient, verb, post,
                 requestCancel, responseTimeoutSeconds);
 
@@ -207,7 +207,7 @@ public static class MessageQueueNetCoreHelper
             =>
         {
             var entity = await mq.Ask<TEntity>(
-                originator, recipient, verb, new Id(id), 
+                originator, recipient, verb, new Id<TEntity>(id), 
                 requestCancel, responseTimeoutSeconds);
 
             return entity.AsResult();
@@ -258,7 +258,7 @@ public static class MessageQueueNetCoreHelper
             ) => 
         {
             var ret = await mq.Ask<TEntity>(
-                originator, recipient, verb, new IdDisable(id, disable ?? true), 
+                originator, recipient, verb, new IdDisable<TEntity>(id, disable ?? true), 
                 requestCancel, responseTimeoutSeconds);
 
             return ret.AsAccepted();

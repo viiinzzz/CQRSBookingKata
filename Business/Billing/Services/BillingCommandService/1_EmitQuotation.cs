@@ -19,7 +19,7 @@ namespace BookingKata.Billing;
 
 public partial class BillingCommandService
 {
-    public Id EmitQuotation
+    public Id<QuotationRef> EmitQuotation
     (
         double price,
         string currency,
@@ -50,18 +50,18 @@ public partial class BillingCommandService
 
         if (previousQuotation == null)
         {
-            return new Id(money.AddQuotation(quotation));
+            return new Id<QuotationRef>(money.AddQuotation(quotation));
         }
 
         var quotationId = previousQuotation.QuotationId;
 
         if (previousQuotation with { VersionNumber = 0 } == quotation with { VersionNumber = 0 })
         {
-            return new Id(quotationId);
+            return new Id<QuotationRef>(quotationId);
         }
 
         money.UpdateQuotation(quotationId, quotation);
 
-        return new Id(quotationId);
+        return new Id<QuotationRef>(quotationId);
     }
 }

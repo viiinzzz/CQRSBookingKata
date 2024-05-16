@@ -41,7 +41,7 @@ public partial class BillingBus
                 select receipt.ReceiptId
             ).FirstOrDefault();
 
-            var id = new Id(receiptId);
+            var id = new Id<Receipt>(receiptId);
 
             Notify(new ResponseNotification(Omni, ReceiptFound, id)
             {

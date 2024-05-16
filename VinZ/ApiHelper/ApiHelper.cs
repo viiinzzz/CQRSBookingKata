@@ -19,6 +19,73 @@ namespace VinZ.Common;
 
 public static class ApiHelper
 {
+
+    public static IEnumerable<Type> GetConfigurationTypes(this WebApplicationBuilder? builder, string key, IEnumerable<Type> availableTypes)
+    {
+        if (builder == null)
+        {
+            return [];
+        }
+
+        var typesStr = builder.GetConfigurationValues(key);
+
+        return availableTypes.Where(type => typesStr.Contains(type.FullName));
+    }
+
+    public static IEnumerable<(Type typeInterface, Type typeImplementation)> GetConfigurationTypes(this WebApplicationBuilder? builder, string key, IEnumerable<(Type typeInterface, Type typeImplementation)> availableTypes)
+    {
+        if (builder == null)
+        {
+            return [];
+        }
+
+        var typesStr = builder.GetConfigurationValues(key);
+
+        return availableTypes.Where(type => typesStr.Contains(type.typeInterface.FullName));
+    }
+
+    public static IServiceCollection AddScopedConfigurationTypes(this WebApplicationBuilder? builder, string key, IEnumerable<(Type typeInterface, Type typeImplementation)> availableTypes)
+    {
+        var types = builder.GetConfigurationTypes(key, availableTypes);
+
+        var services = builder.Services;
+
+        foreach (var (serviceType, implementationType) in types)
+        {
+            if (serviceType == implementationType)
+            {
+                services.AddScoped(implementationType);
+                continue;
+            }
+
+            services.AddScoped(serviceType, implementationType);
+        }
+
+        return services;
+    }
+
+
+    public static TEnum EnumConfiguration<TEnum>(this WebApplicationBuilder? builder, string key, string defaultKey, TEnum defaultValue)
+    where TEnum : struct
+    {
+        if (builder == null)
+        {
+            return defaultValue;
+        }
+
+        if (!Enum.TryParse<TEnum>(builder.Configuration[defaultKey], true, out var configDefaultValue))
+        {
+            configDefaultValue = defaultValue;
+        }
+
+        if (!Enum.TryParse<TEnum>(builder.Configuration[key], true, out var value))
+        {
+            value = configDefaultValue;
+        }
+
+        return value;
+    }
+
     public static Type[] GetConfigurationTypes(this WebApplicationBuilder builder, string? key)
     {
         return builder.Configuration.GetConfigurationTypes(key);
@@ -47,6 +114,27 @@ public static class ApiHelper
     {
         return config.GetValues(key);
     }
+
+
+    private static readonly string[] True = ["1", "true"];
+
+    public static bool IsConfigurationTrue(this WebApplicationBuilder builder, string? key)
+    {
+        return builder.Configuration.IsTrue(key);
+    }
+
+    public static bool IsTrue(this IConfiguration config, string? key)
+    {
+        if (key == null)
+        {
+            return false;
+        }
+
+        var value = config[key] ?? string.Empty;
+
+        return True.Contains(value.ToLower());
+    }
+
 
     public static string[] GetValues(this IConfiguration config, string? key)
     {

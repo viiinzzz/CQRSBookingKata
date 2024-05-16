@@ -125,9 +125,26 @@ public static class NegativeResponseNotificationHelper
     {
         var ret = obj.PatchRelax(new
         {
-            error = ex.Message,
-            stackTrace = $"{Environment.NewLine}{ex.StackTrace}"
+            _error = ex.Message,
         });
+
+        if (!ex.Message.StartsWith("SQLite Error"))
+        {
+            var stacktrace = (ex.StackTrace ?? string.Empty)
+                .Split(Environment.NewLine)
+                .Select(line => line.Trim())
+                .Where(line => line.Length > 0 &&
+                               !line.StartsWith("at Microsoft.EntityFrameworkCore"))
+                .ToArray();
+
+            if (stacktrace.Length > 0)
+            {
+                ret = ret.PatchRelax(new
+                {
+                    _errorStackTrace = stacktrace
+                });
+            }
+        }
 
         if (ex.InnerException != null)
         {

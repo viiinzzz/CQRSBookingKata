@@ -17,12 +17,25 @@
 
 namespace VinZ.Common;
 
+
 public static class DbContextHelper
 {
+//     public static void WaitNoTransaction(this DbContext dbContext, int millisecondsTimeout = 30_000, int millisecondsWait = 100)
+//     {
+//         SpinWait.SpinUntil(() => 
+//             { 
+//                 Thread.Sleep(millisecondsWait);
+//
+//                 return dbContext.Database.CurrentTransaction == null;
+//             },
+//             millisecondsTimeout
+//         );
+//     }
+
     public static void EnsureDatabaseCreated
     (
         this WebApplication app, 
-        Type[] contextTypes,
+        IEnumerable<Type> contextTypes,
         LogLevel logLevel,
         int? keepAliveMilliseconds = default
     )
@@ -116,15 +129,15 @@ public static class DbContextHelper
     public static void RegisterDbContexts
     (
         this WebApplicationBuilder webApplicationBuilder,
-        Type[] myDbContextTypes,
+        IEnumerable<Type> myDbContextTypes,
         bool isDebug, 
         LogLevel logLevel
     )
     {
-        var registerDbContext = typeof(DbContextHelper)
-            .GetMethod(nameof(RegisterDbContextPrivate),
+        var registerDbContextType = typeof(DbContextHelper)
+            .GetMethod(nameof(RegisterDbContextTypePrivate),
                 BindingFlags.NonPublic | BindingFlags.Static) ?? throw new MissingMethodException(
-            nameof(DbContextHelper), nameof(RegisterDbContextPrivate));
+            nameof(DbContextHelper), nameof(RegisterDbContextTypePrivate));
 
         var dbContextFactory = new RegisteredDbContextFactory();
 
@@ -135,7 +148,7 @@ public static class DbContextHelper
                 throw new ArgumentException("types must be MyDbContext", nameof(myDbContextTypes));
             }
 
-            registerDbContext
+            registerDbContextType
                 .MakeGenericMethod([myDbContextType])
                 .Invoke(null, [dbContextFactory, isDebug, logLevel]);
         }
@@ -144,7 +157,7 @@ public static class DbContextHelper
     }
 
 
-    public static void RegisterDbContext<TContext>
+    public static void RegisterDbContextType<TContext>
     (
         this RegisteredDbContextFactory dbContextFactory,
         bool isDebug,
@@ -152,10 +165,11 @@ public static class DbContextHelper
     )
         where TContext : MyDbContext, new()
     {
-        dbContextFactory.RegisterDbContextPrivate<TContext>(isDebug, logLevel);
+        dbContextFactory.RegisterDbContextTypePrivate<TContext>(isDebug, logLevel);
     }
 
-    private static void RegisterDbContextPrivate<TContext>
+
+    private static void RegisterDbContextTypePrivate<TContext>
     (
         this RegisteredDbContextFactory dbContextFactory,
         bool isDebug,
@@ -163,15 +177,10 @@ public static class DbContextHelper
     )
         where TContext : MyDbContext, new()
     {
-        dbContextFactory.RegisterDbContextType(() =>
+        dbContextFactory.RegisterDbContextType(() => new TContext
         {
-            var dbContext = new TContext
-            {
-                IsDebug = isDebug,
-                logLevel = logLevel
-            };
-
-            return dbContext;
+            IsDebug = isDebug,
+            logLevel = logLevel
         });
     }
 

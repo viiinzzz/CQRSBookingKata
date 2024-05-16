@@ -19,7 +19,7 @@ namespace BookingKata.Billing;
 
 public partial class BillingCommandService
 {
-    public Id EnrollEmployee
+    public Id<PayrollRef> EmitPayroll
     (
         int employeeId,
         double monthlyIncome,
@@ -31,6 +31,6 @@ public partial class BillingCommandService
     {
         var payrollId = money.EnrollEmployee(employeeId, monthlyIncome, currency);
 
-        return new Id(payrollId);
+        return new Id<PayrollRef>(payrollId);
     }
 }

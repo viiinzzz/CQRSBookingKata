@@ -20,6 +20,7 @@ public static class ANSIInitializer
     private static readonly uint ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
     private static readonly uint DISABLE_NEWLINE_AUTO_RETURN = 0x0008;
 
+#if Windows
     [DllImport("kernel32.dll")]
     private static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
 
@@ -31,6 +32,29 @@ public static class ANSIInitializer
 
     [DllImport("kernel32.dll")]
     private static extern uint GetLastError();
+#elif Linux
+    private static bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode)
+    {
+        lpMode = ENABLE_VIRTUAL_TERMINAL_PROCESSING | DISABLE_NEWLINE_AUTO_RETURN;
+
+        return true;
+    }
+
+    private static bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode)
+    {
+        return true;
+    }
+   
+    private static IntPtr GetStdHandle(int nStdHandle)
+    {
+        return 0;
+    }
+   
+    private static uint GetLastError()
+    {
+        return 0;
+    }
+#endif
 
     /// <summary>
     /// Run once before using the console.

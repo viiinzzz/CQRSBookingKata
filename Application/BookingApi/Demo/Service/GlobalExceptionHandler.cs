@@ -15,10 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System.Net.Mime;
-using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-
 namespace BookingKata.API;
 
 internal class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger,

@@ -21,7 +21,7 @@ public partial class AdminBus
 {
     private void Verb_Is_RequestDisableEmployee(IClientNotificationSerialized notification)
     {
-        var request = notification.MessageAs<IdDisable>();
+        var request = notification.MessageAs<IdDisable<Employee>>();
 
         using var scope = sp.GetScope<IAdminRepository>(out var repo);
 
@@ -49,7 +49,7 @@ public partial class AdminBus
 
     private void Verb_Is_RequestFetchEmployee(IClientNotificationSerialized notification)
     {
-        var request = notification.MessageAs<Id>();
+        var request = notification.MessageAs<Id<Employee>>();
 
         using var scope = sp.GetScope<IAdminRepository>(out var repo);
 
@@ -69,7 +69,7 @@ public partial class AdminBus
 
         var employeeId = repo.Create(request);
 
-        var id = new Id(employeeId);
+        var id = new Id<Employee>(employeeId);
 
         Notify(new ResponseNotification(notification.Originator, EmployeeCreated, id)
         {

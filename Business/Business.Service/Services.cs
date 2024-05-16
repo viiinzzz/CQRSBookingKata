@@ -33,7 +33,7 @@ public static class Verb
     public static class Admin
     {
         private const string Employee = nameof(Employee);
-        private const string Hotel = nameof(Hotel);
+        public const string Hotel = nameof(Hotel);
         private const string Floor = nameof(Floor);
         private const string Rooms = nameof(Rooms);
         private const string FloorRooms = $"{nameof(Floor)}{nameof(Rooms)}";
@@ -107,8 +107,13 @@ public static class Verb
         public const string StayFound = $"{nameof(StayFound)}";
 
         public const string Kpi = $"{nameof(Kpi)}";
-        public const string RequestKpi = $"{Request}{Kpi}";
-        public const string RespondKpi = $"{Respond}{Kpi}";
+        public const string HotelChain = $"{nameof(HotelChain)}";
+        public const string HotelKpi = $"{Admin.Hotel}{Kpi}";
+        public const string HotelChainKpi = $"{HotelChain}{Kpi}";
+        public const string RequestHotelKpi = $"{Request}{HotelKpi}";
+        public const string RequestHotelChainKpi = $"{Request}{HotelChainKpi}";
+        public const string RespondHotelKpi = $"{Respond}{HotelKpi}";
+        public const string RespondHotelChainKpi = $"{Respond}{HotelChainKpi}";
 
 
     }

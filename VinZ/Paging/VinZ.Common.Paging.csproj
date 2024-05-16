@@ -9,7 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Paging.Contract\VinZ.Common.Paging.Contract.csproj" />
     <ProjectReference Include="..\ToolBox\VinZ.Common.ToolBox.csproj" />
-    <ProjectReference Include="..\TransactionHelper\VinZ.Common.DbContextHelper.csproj" />
+    <ProjectReference Include="..\TransactionHelper\VinZ.Common.DbContext.csproj" />
   </ItemGroup>
 
 </Project>

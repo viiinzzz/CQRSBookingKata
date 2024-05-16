@@ -17,4 +17,7 @@
 
 namespace VinZ.Common;
 
-public record Id(int id);
+public record Id<TEntity>(int id)
+{
+    public string _type { get; } = typeof(TEntity).Name;
+}

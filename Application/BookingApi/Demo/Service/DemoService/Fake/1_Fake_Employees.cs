@@ -30,7 +30,7 @@ public partial class DemoService
 
             int createAndEnrollEmployee(FakeHelper.FakeEmployee fakeEmployee)
             {
-                var employeeId = bus.AskResult<Id>(Recipient.Admin,Verb.Admin.RequestCreateEmployee,
+                var employeeId = bus.AskResult<Id<Employee>>(Recipient.Admin,Verb.Admin.RequestCreateEmployee,
                     new CreateEmployeeRequest
                     {
                         LastName = fakeEmployee.LastName,
@@ -44,7 +44,7 @@ public partial class DemoService
                     throw new ArgumentException(ReferenceInvalid, nameof(employeeId));
                 }
                     
-                var payrollId = bus.AskResult<Id>(Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestPayroll,
+                var payrollId = bus.AskResult<Id<PayrollRef>>(Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestPayroll,
                     new PayrollRequest
                     {
                         employeeId = employeeId.id,

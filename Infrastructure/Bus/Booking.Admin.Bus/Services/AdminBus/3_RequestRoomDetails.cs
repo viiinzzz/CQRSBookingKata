@@ -48,12 +48,12 @@ public partial class AdminBus
     {
         using var scope = sp.GetScope<AdminQueryService>(out var adminQueryService);
 
-        var request = notification.MessageAs<Id>();
+        var roomId = notification.MessageAs<Id<RoomRef>>();
 
         //
         //
         var roomDetails = adminQueryService
-            .GetSingleRoomDetails(request.id);
+            .GetSingleRoomDetails(roomId.id);
         //
         //
 

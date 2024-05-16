@@ -19,7 +19,18 @@ namespace VinZ.Common;
 
 public class ProgramInfo
 {
-    private ProgramInfo() {}
+    private ProgramInfo()
+    {
+        if (ExeName == "dotnet")
+        {
+            ExeName = "";
+        }
+
+        if (ExeVersion != "")
+        {
+            ExeVersion = "v" + ExeVersion;
+        }
+    }
 
     private static readonly ProgramInfo Instance = new();
 
@@ -37,7 +48,7 @@ public class ProgramInfo
             : FileVersionInfo.GetVersionInfo(Process.GetCurrentProcess().MainModule!.FileName).FileVersion?.Trim() ?? string.Empty;
 
 
-    public string Env { get; } = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "undefined";
+    public string Env { get; } = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
 
     public bool IsDebug { get; } = IsDebugBuild(Assembly.GetExecutingAssembly());
 

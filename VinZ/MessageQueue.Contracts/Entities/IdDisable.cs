@@ -17,4 +17,4 @@
 
 namespace VinZ.Common;
 
-public record IdDisable(int id, bool disable) : Id(id);
+public record IdDisable<TEntity>(int id, bool disable) : Id<TEntity>(id);

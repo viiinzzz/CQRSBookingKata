@@ -21,7 +21,7 @@ public partial class AdminBus
 {
     private void Verb_Is_RequestDisableHotel(IClientNotificationSerialized notification)
     {
-        var request = notification.MessageAs<IdDisable>();
+        var request = notification.MessageAs<IdDisable<Hotel>>();
 
         using var scope = sp.GetScope<IAdminRepository>(out var repo);
 
@@ -49,7 +49,7 @@ public partial class AdminBus
 
     private void Verb_Is_RequestFetchHotel(IClientNotificationSerialized notification)
     {
-        var request = notification.MessageAs<Id>();
+        var request = notification.MessageAs<Id<HotelRef>>();
 
         using var scope = sp.GetScope<IAdminRepository>(out var repo);
 
@@ -63,7 +63,7 @@ public partial class AdminBus
     
     private void Verb_Is_RequestFetchHotelGeoProxy(IClientNotificationSerialized notification)
     {
-        var request = notification.MessageAs<Id>();
+        var request = notification.MessageAs<Id<HotelRef>>();
 
         using var scope = sp.GetScope<IAdminRepository>(out var repo);
 
@@ -85,7 +85,7 @@ public partial class AdminBus
 
         var hotelId = repo.Create(request);
 
-        var id = new Id(hotelId);
+        var id = new Id<HotelRef>(hotelId);
 
         Notify(new ResponseNotification(notification.Originator, HotelCreated, id)
         {

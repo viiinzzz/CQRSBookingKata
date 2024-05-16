@@ -17,4 +17,4 @@
 
 namespace VinZ.Common;
 
-public record IdData<TData>(int id, TData data) where TData : class;
+public record IdData<TData>(int id, TData data) : Id<TData>(id) where TData : class;

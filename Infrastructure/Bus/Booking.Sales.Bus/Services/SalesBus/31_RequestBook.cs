@@ -48,7 +48,7 @@ public partial class SalesBus
         //
         //
 
-        var id = new Id(bookingId);
+        var id = new Id<Shared.Booking>(bookingId);
 
         Notify(new ResponseNotification(Omni, Verb.Sales.BookConfirmed, id)
         {

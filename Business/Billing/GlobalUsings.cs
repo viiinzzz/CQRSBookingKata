@@ -1,4 +1,5 @@
 ﻿
+global using BookingKata.Shared;
 global using BookingKata.ThirdParty;
 global using Business.Common;
 

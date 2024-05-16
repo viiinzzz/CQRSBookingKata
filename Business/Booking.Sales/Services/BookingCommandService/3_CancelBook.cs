@@ -59,7 +59,7 @@ public partial class BookingCommandService
         var originator = GetType().FullName
                          ?? throw new Exception("invalid originator");
 
-        var receiptId = bus.AskResult<Id>(Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestReceipt,
+        var receiptId = bus.AskResult<Id<ReceiptRef>>(Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestReceipt,
             new ReceiptRequest
             {
                 referenceId = bookingId
@@ -72,14 +72,14 @@ public partial class BookingCommandService
 
 
         var roomDetail = bus.AskResult<RoomDetails>(Recipient.Admin, Verb.Admin.RequestSingleRoomDetails,
-            new Id(booking.UniqueRoomId), originator);
+            new Id<RoomRef>(booking.UniqueRoomId), originator);
 
         if (roomDetail == null)
         {
             throw new RoomNotFoundException();
         }
 
-        var refundId = bus.AskResult<Id>(Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestRefund,
+        var refundId = bus.AskResult<Id<RefundRef>>(Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestRefund,
             new RefundRequest { receiptId = receiptId.id }, originator);
 
         if (refundId == null)
@@ -108,7 +108,7 @@ public partial class BookingCommandService
 
         sales.AddVacancies(unbooked);
 
-        var id = new Id(bookingId);
+        var id = new Id<Shared.Booking>(bookingId);
 
         bus.Notify(new ResponseNotification(Omni, BookCancelled, id)
         {
