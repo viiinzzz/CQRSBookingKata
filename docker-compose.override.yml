@@ -1,23 +1,41 @@
 services:
 
-  booking.backoffice:
-    image: ${DOCKER_REGISTRY-}bookingapi
-    build:
-      context: .
-      dockerfile: Application/BookingApi/Dockerfile
-    environment:
-      - ASPNETCORE_ENVIRONMENT=backoffice
-      - ASPNETCORE_HTTP_PORTS=8080
+  booking.admin:
+    container_name: booking.admin
+    networks:
+      - booking.backend
     ports:
       - 5291:8080
-
-  booking.middleoffice:
-    image: ${DOCKER_REGISTRY-}bookingapi
-    build:
-      context: .
-      dockerfile: Application/BookingApi/Dockerfile
     environment:
-      - ASPNETCORE_ENVIRONMENT=middleoffice
       - ASPNETCORE_HTTP_PORTS=8080
+      - DEMO_MODE=true
+
+  booking.planning:
+    container_name: booking.planning
+    networks:
+      - booking.backend
     ports:
-      - 5391:8080
+      - 5292:8080
+    environment:
+      - ASPNETCORE_HTTP_PORTS=8080
+
+  booking.sales:
+    container_name: booking.sales
+    networks:
+      - booking.backend
+    ports:
+      - 5293:8080
+    environment:
+      - ASPNETCORE_HTTP_PORTS=8080
+
+  booking.support:
+    container_name: booking.support
+    networks:
+      - booking.backend
+    ports:
+      - 5294:8080
+    environment:
+      - ASPNETCORE_HTTP_PORTS=8080
+ 
+networks:
+  booking.backend: {}

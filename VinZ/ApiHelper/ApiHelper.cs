@@ -98,7 +98,7 @@ public static class ApiHelper
             return [];
         }
 
-        var typesStr = config.GetValues(key);
+        var typesStr = config.GetConfigurationValues(key);
 
         return typesStr
             .Select(typeStr => typeStr.GetTypeFromFullNameWithLoading()
@@ -112,7 +112,27 @@ public static class ApiHelper
 
     public static string[] GetConfigurationValues(this IConfiguration config, string? key)
     {
-        return config.GetValues(key);
+        if (key == null)
+        {
+            return [];
+        }
+
+        var values = new List<string>();
+        var i = 0;
+
+        while (true)
+        {
+            var value = config[$"{key}:{i++}"];
+
+            if (value == null)
+            {
+                break;
+            }
+
+            values.Add(value);
+        }
+
+        return [.. values];
     }
 
 
@@ -136,29 +156,21 @@ public static class ApiHelper
     }
 
 
-    public static string[] GetValues(this IConfiguration config, string? key)
+    public static string? GetConfigurationValue(this WebApplicationBuilder builder, string? key)
+    {
+        return builder.Configuration.GetConfigurationValue(key);
+    }
+
+    public static string? GetConfigurationValue(this IConfiguration config, string? key)
     {
         if (key == null)
         {
-            return [];
+            return null;
         }
 
-        var values = new List<string>();
-        var i = 0;
+        var value = config[key];
 
-        while (true)
-        {
-            var value = config[$"{key}:{i++}"];
-
-            if (value == null)
-            {
-                break;
-            }
-
-            values.Add(value);
-        }
-
-        return [..values];
+        return value;
     }
 
     public static (bool isDevelopment, bool isStaging, bool isProduction, string? env) GetEnv(this WebApplication api)

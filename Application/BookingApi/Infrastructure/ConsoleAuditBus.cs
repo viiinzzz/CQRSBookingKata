@@ -30,7 +30,7 @@ public class ConsoleAuditBus
     ILogger<ConsoleAuditBus> log = logFactory.CreateLogger<ConsoleAuditBus>();
 
 
-    private static Regex unquote = new Regex(@"^""(.*)""$");
+    private static Regex unquote = new(@"^""(.*)""$");
 
 
     public override async Task Configure()

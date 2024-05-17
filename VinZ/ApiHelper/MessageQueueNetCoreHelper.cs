@@ -15,23 +15,52 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.Diagnostics;
+using System.Net.Mime;
+
 namespace VinZ.Common;
 
+public record MessageQueueConfiguration
+(
+    Uri busUrl = default,
+    string? messageQueueUrl = default,
+    Type[] busTypes = default,
+    bool pauseOnError = default
+);
 public static class MessageQueueNetCoreHelper
 {
+
     public static IServiceCollection AddMessageQueue
     (
         this IServiceCollection services,
-        
-        BusConfiguration busConfig,
-        Type[] busTypes,
-
-        bool pauseOnError
+        MessageQueueConfiguration mqConfig,
+        out string messageQueueUrl
     )
     {
+        if (mqConfig.messageQueueUrl == null)
+        {
+            Console.Error.WriteLine("Error: MessageQueueUrl undefined. (check appsettings.json)");
+
+            Environment.Exit(-1);
+        }
+
+        var isLocalMessageQueue = mqConfig.messageQueueUrl == "localhost";
+
+        var busConfig = new BusConfiguration
+        {
+            LocalUrl = mqConfig.busUrl.ToString(),
+
+            RemoteUrl = isLocalMessageQueue
+                ? mqConfig.busUrl.ToString() 
+                : new Uri(mqConfig.messageQueueUrl).ToString()
+        };
+
+        messageQueueUrl = busConfig.RemoteUrl;
+
+
         services.AddSingleton(busConfig);
 
-        foreach (var busType in busTypes)
+        foreach (var busType in mqConfig.busTypes)
         {
             services.AddSingleton(busType);
 
@@ -44,19 +73,36 @@ public static class MessageQueueNetCoreHelper
             // });
         }
 
-        services.AddSingleton(_ => new MqServerConfig
-        {
-            DomainBusTypes = busTypes,
-            PauseOnError = pauseOnError,
-            // IsTrace = busConfig.IsTrace
-        });
 
-        services.AddSingleton<MqServer>();
-        services.AddSingleton<IMessageBus>(sp => sp.GetRequiredService<MqServer>());
-        services.AddHostedService(sp => sp.GetRequiredService<MqServer>());
+        if (isLocalMessageQueue)
+        {
+            services.AddSingleton(_ => new MqServerConfig
+            {
+                DomainBusTypes = mqConfig.busTypes,
+                PauseOnError = mqConfig.pauseOnError
+            });
+
+            services.AddSingleton<MqServer>();
+            services.AddSingleton<IMessageBus>(sp => sp.GetRequiredService<MqServer>());
+            services.AddHostedService(sp => sp.GetRequiredService<MqServer>());
+
+            return services;
+        }
+
+        services.AddScoped<IMessageBus>(sp =>
+        {
+            var log = sp.GetRequiredService<ILogger<IMessageBus>>();
+            var dateTime = sp.GetRequiredService<ITimeService>();
+            var appConfig = sp.GetRequiredService<IConfiguration>();
+
+            var remoteBus = new MessageBusHttp(busConfig, appConfig, dateTime, log);
+
+            return remoteBus;
+        });
 
         return services;
     }
+
 
     public static RouteHandlerBuilder MapListMq<TEntity>
     (

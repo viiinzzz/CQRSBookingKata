@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BookingKata.API;
+namespace Booking.API.Infrastructure;
 
 internal class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger,
     ProblemDetailsFactory problemDetailsFactory) : IExceptionHandler

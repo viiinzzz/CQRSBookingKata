@@ -2,19 +2,34 @@ name: bookingsolution
 
 services:
 
-  booking.backoffice:
+  booking.admin:
     image: ${DOCKER_REGISTRY-}bookingapi
     build:
       context: .
       dockerfile: Application/BookingApi/Dockerfile
     environment:
-      - ASPNETCORE_ENVIRONMENT=backoffice
+      - ASPNETCORE_ENVIRONMENT=Production-Admin
 
-  booking.middleoffice:
+  booking.planning:
     image: ${DOCKER_REGISTRY-}bookingapi
     build:
       context: .
       dockerfile: Application/BookingApi/Dockerfile
     environment:
-      - ASPNETCORE_ENVIRONMENT=middleoffice
-      
+      - ASPNETCORE_ENVIRONMENT=Production-Planning
+
+  booking.sales:
+    image: ${DOCKER_REGISTRY-}bookingapi
+    build:
+      context: .
+      dockerfile: Application/BookingApi/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production-Sales
+
+  booking.support:
+    image: ${DOCKER_REGISTRY-}bookingapi
+    build:
+      context: .
+      dockerfile: Application/BookingApi/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production-Support

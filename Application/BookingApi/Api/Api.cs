@@ -27,12 +27,13 @@
   ╎ basic variables
   */
 
-using System.Collections;
+using Booking.API.Infrastructure;
 
 var pif = ProgramInfo.Get();
 
 var pauseOnError = pif.IsDebug && pif.IsTrueEnv("DEBUG_PAUSE_ON_ERROR");
-var demoMode = pif.IsDebug && pif.IsTrueEnv("DEBUG_DEMO_MODE");
+var demoMode = //pif.IsDebug && 
+               pif.IsTrueEnv("DEMO_MODE");
 
 var busUrl = ApiHelper.GetAppUrlPrefix("bus");
 
@@ -106,20 +107,20 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
 
 
     //bus
-    var mqEnabled = builder.IsConfigurationTrue("Api:MessageQueue");
-
-    if (mqEnabled)
+    
+    var mqConfig = new MessageQueueConfiguration
     {
-        var busConfig = new BusConfiguration
-        {
-            LocalUrl = busUrl.ToString(),
-            RemoteUrl = busUrl.ToString()
-        };
+        busUrl = busUrl,
+        messageQueueUrl = builder.GetConfigurationValue("Api:MessageQueueUrl"),
+        busTypes = builder.GetConfigurationTypes("Api:Bus", Dependencies.AvailableBusTypes).ToArray(),
+        pauseOnError = pauseOnError
+    };
 
-        var busTypes = builder.GetConfigurationTypes("Api:Bus", Dependencies.AvailableBusTypes);
-
-        services.AddMessageQueue(busConfig, busTypes.ToArray(), pauseOnError);
-    }
+    services.AddMessageQueue(mqConfig, out var messageQueueUrl);
+    Console.Out.WriteLine(@$"
+(f=darkgray)MessageQueue:(rdc)
+(uon){messageQueueUrl}(rdc)
+");
 
     //repo
     builder.AddScopedConfigurationTypes("Api:Repository", Dependencies.AvailableRepositories);

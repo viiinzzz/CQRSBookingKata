@@ -48,7 +48,7 @@ public class ProgramInfo
             : FileVersionInfo.GetVersionInfo(Process.GetCurrentProcess().MainModule!.FileName).FileVersion?.Trim() ?? string.Empty;
 
 
-    public string Env { get; } = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
+    public string Env { get; } = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Test";
 
     public bool IsDebug { get; } = IsDebugBuild(Assembly.GetExecutingAssembly());
 
