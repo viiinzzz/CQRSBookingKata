@@ -1,0 +1,58 @@
+#
+# (c) Fontaine Vincent, 2021-2023
+#
+
+ARG REG
+
+FROM ${REG}dpage/pgadmin4
+ENV PGADMIN_DEFAULT_EMAIL="bnto.social@gmail.com"
+ENV PGADMIN_DEFAULT_PASSWORD="postgres"
+
+ENV PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION="True"
+# ENV PGADMIN_CONFIG_CONSOLE_LOG_LEVEL="10"
+
+ENV PGADMIN_CONFIG_SERVER_MODE="False"
+ENV PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED="False"
+
+
+# USER pgadmin
+# RUN mkdir -p  /var/lib/pgadmin/storage/admin_bento-solidaires.fr
+# COPY ./db-admin/.pgpass /var/lib/pgadmin/storage/admin_bento-solidaires.fr/pgpass
+
+
+USER root
+COPY ./db-admin/.pgpass /pgadmin4/pgpass
+RUN chmod 0600 /pgadmin4/pgpass
+# RUN chmod 0600 /var/lib/pgadmin/storage/admin_bento-solidaires.fr/pgpass
+
+RUN chown 5050:5050 /pgadmin4/pgpass
+# RUN chown 5050:5050 /var/lib/pgadmin/storage/admin_bento-solidaires.fr/pgpass
+
+# TODO: password issue to be investigated
+# COPY ./Dockerfile-db-admin.servers.json /pgadmin4/servers.json
+
+COPY ./db-admin/servers0.json /pgadmin4/servers.json
+
+RUN echo "pgadmin:$PGADMIN_DEFAULT_PASSWORD" | chpasswd
+RUN echo "root:$PGADMIN_DEFAULT_PASSWORD" | chpasswd
+
+RUN chown -R 5050:5050 /pgadmin4/servers.json
+RUN chown -R 5050:5050 /var/lib/pgadmin
+# RUN mkhomedir_helper pgadmin
+
+# RUN useradd -m -d /home/temp temp
+# RUN cp -r /home/temp /home/pgadmin
+# RUN chown -R 5050:5050 /home/pgadmin
+# RUN deluser temp
+# RUN rm -rf /home/temp
+
+# USER pgadmin
+# disabled because storage not accessible
+
+# fix at runtime: reapply ownership
+# su root
+# chown -R 5050:5050 /var/lib/pgadmin
+
+ENTRYPOINT /entrypoint.sh
+# keep it running for dev purpose
+# ENTRYPOINT tail -f /dev/null

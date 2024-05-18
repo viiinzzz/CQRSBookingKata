@@ -15,9 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System.Diagnostics;
-using System.Net.Mime;
-
 namespace VinZ.Common;
 
 public record MessageQueueConfiguration
@@ -27,6 +24,7 @@ public record MessageQueueConfiguration
     Type[] busTypes = default,
     bool pauseOnError = default
 );
+
 public static class MessageQueueNetCoreHelper
 {
 
@@ -44,7 +42,7 @@ public static class MessageQueueNetCoreHelper
             Environment.Exit(-1);
         }
 
-        var isLocalMessageQueue = mqConfig.messageQueueUrl == "localhost";
+        var isLocalMessageQueue = mqConfig.messageQueueUrl == "self";
 
         var busConfig = new BusConfiguration
         {

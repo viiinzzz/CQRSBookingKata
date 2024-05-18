@@ -26,6 +26,14 @@ public static partial class ApiMethods
 
 
 
+        busGroup.MapGet("/ping",
+            () =>
+            {
+                return Results.Accepted();
+            }
+        ).ExcludeFromDescription();
+
+
         busGroup.MapPost("/subscribe",
             ([FromBody] SubscriptionRequest sub, [FromServices] IMessageBus bus) =>
             {

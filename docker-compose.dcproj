@@ -11,11 +11,16 @@
     <DockerComposeProjectName>bookingsolution</DockerComposeProjectName>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="db-admin\.pgpass" />
+    <None Include="db-admin\Dockerfile.db-admin" />
+    <None Include="db-admin\servers.json" />
+    <None Include="db-admin\servers0.json" />
     <None Include="docker-compose.override.yml">
       <DependentUpon>docker-compose.yml</DependentUpon>
     </None>
     <None Include="docker-compose.yml" />
     <None Include=".dockerignore" />
+    <None Include="db\Dockerfile.pg" />
     <None Include="notes.md" />
   </ItemGroup>
 </Project>

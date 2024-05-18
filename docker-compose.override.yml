@@ -1,41 +1,41 @@
 services:
 
-  booking.admin:
-    container_name: booking.admin
+  app:
+    hostname: app001
     networks:
-      - booking.backend
+      - booking_backend
+      - booking_frontend
     ports:
       - 5291:8080
     environment:
-      - ASPNETCORE_HTTP_PORTS=8080
       - DEMO_MODE=true
+      - MESSAGEQUEUE_URL=self
 
-  booking.planning:
-    container_name: booking.planning
+  admin:
+    hostname: adm001
     networks:
-      - booking.backend
-    ports:
-      - 5292:8080
+      - booking_backend
     environment:
-      - ASPNETCORE_HTTP_PORTS=8080
+      - MESSAGEQUEUE_URL=http://app001.booking.local:8080/bus
 
-  booking.sales:
-    container_name: booking.sales
+  planning:
+    hostname: pla001
     networks:
-      - booking.backend
-    ports:
-      - 5293:8080
+      - booking_backend
     environment:
-      - ASPNETCORE_HTTP_PORTS=8080
+      - MESSAGEQUEUE_URL=http://app001.booking.local:8080/bus
 
-  booking.support:
-    container_name: booking.support
+  sales:
+    hostname: sal001
     networks:
-      - booking.backend
-    ports:
-      - 5294:8080
+      - booking_backend
     environment:
-      - ASPNETCORE_HTTP_PORTS=8080
+      - MESSAGEQUEUE_URL=http://app001.booking.local:8080/bus
+
+  support:
+    hostname: sup001
+    networks:
+      - booking_backend
+    environment:
+      - MESSAGEQUEUE_URL=http://app001.booking.local:8080/bus
  
-networks:
-  booking.backend: {}

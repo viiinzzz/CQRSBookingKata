@@ -1,35 +1,126 @@
-name: bookingsolution
+name: booking_solution
 
 services:
 
-  booking.admin:
+  app:
     image: ${DOCKER_REGISTRY-}bookingapi
     build:
       context: .
       dockerfile: Application/BookingApi/Dockerfile
+    depends_on:
+      - admin
+      - planning
+      - sales
+      - support
+    domainname: booking.local
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production-App
+      - PROVIDER_NAME=npgsql
+      - ConnectionString=Host=db001.booking.local; Database=($Context); Username=postgres; Password=postgres
+
+  admin:
+    image: ${DOCKER_REGISTRY-}bookingapi
+    build:
+      context: .
+      dockerfile: Application/BookingApi/Dockerfile
+    depends_on:
+      - db
+    domainname: booking.local
     environment:
       - ASPNETCORE_ENVIRONMENT=Production-Admin
+      - PROVIDER_NAME=npgsql
+      - ConnectionString=Host=db001.booking.local; Database=($Context); Username=postgres; Password=postgres
 
-  booking.planning:
+  planning:
     image: ${DOCKER_REGISTRY-}bookingapi
     build:
       context: .
       dockerfile: Application/BookingApi/Dockerfile
+    depends_on:
+      - db
+    domainname: booking.local
     environment:
       - ASPNETCORE_ENVIRONMENT=Production-Planning
+      - PROVIDER_NAME=npgsql
+      - ConnectionString=Host=db001.booking.local; Database=($Context); Username=postgres; Password=postgres
 
-  booking.sales:
+  sales:
     image: ${DOCKER_REGISTRY-}bookingapi
     build:
       context: .
       dockerfile: Application/BookingApi/Dockerfile
+    depends_on:
+      - db
+    domainname: booking.local
     environment:
       - ASPNETCORE_ENVIRONMENT=Production-Sales
+      - PROVIDER_NAME=npgsql
+      - ConnectionString=Host=db001.booking.local; Database=($Context); Username=postgres; Password=postgres
 
-  booking.support:
+  support:
     image: ${DOCKER_REGISTRY-}bookingapi
     build:
       context: .
       dockerfile: Application/BookingApi/Dockerfile
+    depends_on:
+      - db
+    domainname: booking.local
     environment:
       - ASPNETCORE_ENVIRONMENT=Production-Support
+      - PROVIDER_NAME=npgsql
+      - ConnectionString=Host=db001.booking.local; Database=($Context); Username=postgres; Password=postgres
+
+  db:
+    image: ${DOCKER_REGISTRY-}postgres:16.3
+    domainname: booking.local
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      interval: 3s
+      retries: 5
+      test: pg_isready -q -h db
+      timeout: 5s
+    hostname: db001
+    networks:
+      booking_backend: null
+    ports:
+      - published: 7032
+        target: 5432
+    restart: on-failure
+    volumes:
+      - db_data:/var/lib/postgresql/data:rw
+  
+  dbadmin:
+    build:
+      context: .
+      dockerfile: db-admin/Dockerfile.db-admin
+    depends_on:
+      - db
+    domainname: booking.local
+    healthcheck:
+      test: exit 0
+    hostname: db901
+    networks:
+      booking_backend: null
+    ports:
+      - published: 7038
+        target: 80
+    restart: unless-stopped
+    tty: true
+    volumes:
+      - dbadmin_data:/var/lib/pgadmin:rw
+
+  #adminer:
+  #  image: adminer
+  #  restart: always
+  #  ports:
+  #    - 8080:8080
+    
+networks:
+  booking_backend: {}
+  booking_frontend: {}
+
+volumes:
+  db_data:
+  dbadmin_data:

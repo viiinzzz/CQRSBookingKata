@@ -17,12 +17,10 @@
 
 namespace VinZ.MessageQueue;
 
-public class MessageBusClientBase : IMessageBusClient, IDisposable
+public partial class MessageBusClientBase : IMessageBusClient, IDisposable
 {
     private MessageBusHttp? _bus;
     public ILogger<IMessageBus>? log { get; set; }
-
-    private Func<Task>? pingOrThrow;
 
     public int PingTimeoutMilliseconds { get; set; } = 2_000;
     public int DisposeDelaySeconds { get; set; } = 120;
@@ -31,15 +29,12 @@ public class MessageBusClientBase : IMessageBusClient, IDisposable
     public int SubscribeWarmupMilliseconds { get; set; } = 1000;
 
 
-    // public IMessageBusClient ConnectToBus(IMessageBus bus)
-    // {
-    //     throw new NotImplementedException();
-    // }
-
     public ILogger<IMessageBus>? Log { get; set; }
 
-    // private bool isTrace = true;
     private LogLevel logLevelNetwork = LogLevel.Information;
+
+    private string? _remoteHost;
+    private string? _busPing;
 
     public IMessageBusClient ConnectToBus(IScopeProvider scp)
     {
@@ -59,7 +54,6 @@ public class MessageBusClientBase : IMessageBusClient, IDisposable
             logLevelNetwork = logLevelDefault;
         }
 
-        // isTrace = busConfig.IsTrace;
         var id = GetHashCode();
 
         var clientConfig = busConfig with
@@ -69,29 +63,8 @@ public class MessageBusClientBase : IMessageBusClient, IDisposable
 
         _bus = new MessageBusHttp(clientConfig, appConfig, dateTime, log);
 
-        var remoteHost = new Uri(clientConfig.RemoteUrl).Host;
-
-        var remoteIp = Dns.GetHostAddresses(remoteHost)
-            .MinBy(a => a.AddressFamily == AddressFamily.InterNetwork ? 4 : a.AddressFamily == AddressFamily.InterNetworkV6 ? 6 : int.MaxValue);
-
-        var ping = new Ping();
-
-        pingOrThrow = async () =>
-        {
-            if (remoteIp == null)
-            {
-                throw new NullReferenceException(nameof(remoteIp));
-            }
-
-            var reply = await ping.SendPingAsync(remoteIp, PingTimeoutMilliseconds);
-
-            var fail = reply.Status != IPStatus.Success;
-
-            if (fail)
-            {
-                throw new InvalidOperationException($"No answer from <<<bus:{remoteHost}>>> ({remoteIp})");
-            }
-        };
+        _remoteHost = new Uri(clientConfig.RemoteUrl).Host;
+        _busPing = $"{clientConfig.RemoteUrl}{(clientConfig.RemoteUrl.EndsWith('/') ? "" : "/")}ping";
 
         return this;
     }
@@ -104,11 +77,7 @@ public class MessageBusClientBase : IMessageBusClient, IDisposable
             throw new InvalidOperationException("Not connected to a bus");
         }
 
-        if (pingOrThrow != null)
-        {
-            await pingOrThrow();
-        }
-
+        await ping();
     }
 
     public record RetryOptions
@@ -178,7 +147,8 @@ public class MessageBusClientBase : IMessageBusClient, IDisposable
         var done = await Unsubscribe(Omni, AnyVerb);
 
         _bus = null;
-        pingOrThrow = null;
+        _remoteHost = null;
+        _busPing = null;
 
         if (!done)
         {

@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.Diagnostics;
+
 namespace VinZ.Common;
 
 
@@ -44,11 +46,6 @@ public static class DbContextHelper
             .GetMethod(nameof(EnsureDatabaseCreatedPrivate), 
                 BindingFlags.NonPublic | BindingFlags.Static) ?? throw new MissingMethodException(
             nameof(DbContextHelper), nameof(EnsureDatabaseCreatedPrivate));
-        if (logLevel <= LogLevel.Debug)
-        {
-            Console.Write(@"Storage:
-");
-        }
 
         foreach (var contextType in contextTypes)
         {
@@ -71,12 +68,6 @@ public static class DbContextHelper
     )
         where TContext : DbContext
     {
-        if (logLevel <= LogLevel.Debug)
-        {
-            Console.Write(@"Storage:
-");
-        }
-
         EnsureDatabaseCreatedPrivate<TContext>(app, logLevel, keepAliveMilliseconds);
     }
 
@@ -95,12 +86,15 @@ public static class DbContextHelper
             .CreateDbContext<TContext>()
             .Database;
 
+        var providerName = database.ProviderName;
+        var connectionString = database.GetConnectionString();
+
         var created = database.EnsureCreated();
 
         if (logLevel <= LogLevel.Debug)
         {
-            Console.WriteLine(
-                @$"{database.GetConnectionString()} {(created ? "created" : "already exists")} for {typeof(TContext).Name}");
+            app.Logger.LogInformation(
+                @$"Storage: {database.GetConnectionString()} {(created ? "created" : "already exists")} for {typeof(TContext).Name}");
         }
 
         if (keepAliveMilliseconds.HasValue)
@@ -191,10 +185,10 @@ public static class DbContextHelper
     public static void ConfigureMyWay<TContext>(this DbContextOptionsBuilder builder, bool isDebug, LogLevel logLevel)
         where TContext : DbContext
     {
-        if (builder.IsConfigured)
-        {
-            return;
-        }
+        // if (builder.IsConfigured)
+        // {
+        //     return;
+        // }
 
         var configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
@@ -209,11 +203,20 @@ public static class DbContextHelper
         var tContext = typeof(TContext);
         var contextName = contextRx.Replace(tContext.Name, "$1");
 
+        var providerName = Environment.GetEnvironmentVariable("PROVIDER_NAME")  ?? configuration["DbProvider"]?.ToLower() ?? "sqlite";
+
         var connectionString = connectionStringRx.Replace(
-            configuration.GetConnectionString(buildConfigurationName),
+            Environment.GetEnvironmentVariable("ConnectionString") ?? configuration.GetConnectionString(buildConfigurationName),
             contextName);
 
-        builder.UseSqlite(connectionString)
+        var dbbuilder = providerName switch
+        {
+            "sqlite" => builder.UseSqlite(connectionString),
+            "npgsql" => builder.UseNpgsql(connectionString),
+            _ => throw new Exception($"unknown providerName {providerName}")
+        };
+
+        dbbuilder
             .EnableDetailedErrors(isDebug)
             .EnableSensitiveDataLogging(isDebug);
 

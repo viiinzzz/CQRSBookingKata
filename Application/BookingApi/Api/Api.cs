@@ -36,6 +36,7 @@ var demoMode = //pif.IsDebug &&
                pif.IsTrueEnv("DEMO_MODE");
 
 var busUrl = ApiHelper.GetAppUrlPrefix("bus");
+// var busUrl = new Uri("http://jenexiste.pas");
 
 var myIps = ApiHelper.GetMyIps();
 
@@ -111,7 +112,7 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder)
     var mqConfig = new MessageQueueConfiguration
     {
         busUrl = busUrl,
-        messageQueueUrl = builder.GetConfigurationValue("Api:MessageQueueUrl"),
+        messageQueueUrl = Environment.GetEnvironmentVariable("MESSAGEQUEUE_URL") ?? builder.GetConfigurationValue("Api:MessageQueueUrl"),
         busTypes = builder.GetConfigurationTypes("Api:Bus", Dependencies.AvailableBusTypes).ToArray(),
         pauseOnError = pauseOnError
     };
