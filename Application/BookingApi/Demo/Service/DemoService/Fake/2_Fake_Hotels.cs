@@ -17,7 +17,7 @@
 
 namespace BookingKata.API.Demo;
 
-public partial class DemoService
+public partial class DemoBus
 {
     private void Fake_Hotels()
     {
@@ -38,7 +38,7 @@ public partial class DemoService
 
             int createHotel(int hotelNum, FakeHelper.FakeHotel fakeHotel)
             {
-                var managerId = demoContext.FakeManagerIds[hotelNum];
+                var managerId = demoContextService.FakeManagerIds[hotelNum];
 
                 var newHotel = new NewHotel(fakeHotel.HotelName, fakeHotel.Latitude, fakeHotel.Longitude);
 
@@ -94,7 +94,7 @@ public partial class DemoService
                 return hotelId.id;
             }
 
-            demoContext.FakeHotelsIds = FakeHelper
+            demoContextService.FakeHotelsIds = FakeHelper
                 .GenerateFakeHotels(HotelCount)
                 .AsParallel()
                 .Select((fakeHotel, hotelNum) => createHotel(hotelNum, fakeHotel))

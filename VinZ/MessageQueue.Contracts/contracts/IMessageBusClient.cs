@@ -25,7 +25,7 @@ public interface IMessageBusClient
     IMessageBusClient ConnectToBus(IScopeProvider scp);
 
 
-    Task Disconnect();
+    Task<bool> Disconnect();
 
     Task Configure();
 

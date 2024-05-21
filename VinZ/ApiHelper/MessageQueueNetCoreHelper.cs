@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.Runtime.InteropServices.JavaScript;
+
 namespace VinZ.Common;
 
 public record MessageQueueConfiguration
@@ -32,7 +34,8 @@ public static class MessageQueueNetCoreHelper
     (
         this IServiceCollection services,
         MessageQueueConfiguration mqConfig,
-        out string messageQueueUrl
+        out string messageQueueUrl,
+        out string[] addedBus
     )
     {
         if (mqConfig.messageQueueUrl == null)
@@ -58,8 +61,12 @@ public static class MessageQueueNetCoreHelper
 
         services.AddSingleton(busConfig);
 
+        var addedBusList = new List<string>();
+
         foreach (var busType in mqConfig.busTypes)
         {
+            addedBusList.Add($"{busType.Name}");
+
             services.AddSingleton(busType);
 
             // var logBusType = typeof(ILogger<>).MakeGenericType(busType);
@@ -71,9 +78,10 @@ public static class MessageQueueNetCoreHelper
             // });
         }
 
-
         if (isLocalMessageQueue)
         {
+            addedBusList.Add($"{nameof(MqServer)}");
+
             services.AddSingleton(_ => new MqServerConfig
             {
                 DomainBusTypes = mqConfig.busTypes,
@@ -83,6 +91,8 @@ public static class MessageQueueNetCoreHelper
             services.AddSingleton<MqServer>();
             services.AddSingleton<IMessageBus>(sp => sp.GetRequiredService<MqServer>());
             services.AddHostedService(sp => sp.GetRequiredService<MqServer>());
+
+            addedBus = [.. addedBusList];
 
             return services;
         }
@@ -97,6 +107,8 @@ public static class MessageQueueNetCoreHelper
 
             return remoteBus;
         });
+
+        addedBus = [.. addedBusList];
 
         return services;
     }

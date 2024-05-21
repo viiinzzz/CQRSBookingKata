@@ -85,6 +85,12 @@ public partial class MessageBusClientBase : IMessageBusClient, IDisposable
         int WarmupDelayMilliseconds = default
     );
 
+    public class MaxRetryReachedException(DateTime time, int retryCount, int retryMaxCount, Exception ex) 
+        : Exception($"Max retry reached {retryCount}/{retryMaxCount}: {ex.Message}", ex)
+    {
+
+    }
+
     private async Task<T> Retry<T>(Func<T> action, RetryOptions? options = default)
     {
         var retryCount = 0;
@@ -116,13 +122,15 @@ public partial class MessageBusClientBase : IMessageBusClient, IDisposable
             }
             catch (Exception ex)
             {
-                var elapsedSeconds = (DateTime.Now - t0).TotalSeconds;
+                var now = DateTime.Now;
+
+                var elapsedSeconds = (now - t0).TotalSeconds;
 
                 if (retryCount >= RetryMaxCount)
                 {
-                    log?.LogError($"[{DateTime.Now:O}] Bus error: max retry reached: {ex.Message}");
+                    log?.LogError($"[{now:O}] Bus error: max retry reached: {ex.Message}");
 
-                    throw new Exception($"Max retry reached ({retryCount})", ex);
+                    throw new MaxRetryReachedException(now, retryCount, RetryMaxCount, ex);
                 }
 
                 log?.LogInformation($"      --> waiting bus... {elapsedSeconds:0.0}s ({retryCount}/{RetryMaxCount})");
@@ -137,23 +145,35 @@ public partial class MessageBusClientBase : IMessageBusClient, IDisposable
             return;
         }
 
-        Disconnect().Wait(DisposeDelaySeconds * 1000);
+        try
+        {
+            var done = Disconnect().Wait(DisposeDelaySeconds * 1000);
+        }
+        catch (Exception ex)
+        {
+            log?.LogError($"Failed to dispose {GetType().Name} bus: {_bus.Url}");
+
+            // throw new Exception($"Failed to dispose {GetType().Name} bus: {_bus.Url}");
+        }
     }
 
-    public async Task Disconnect()
+    public async Task<bool> Disconnect()
     {
         await CheckBus();
 
         var done = await Unsubscribe(Omni, AnyVerb);
 
+        if (!done)
+        {
+            return false;
+            // throw new InvalidOperationException("Disconnection failure");
+        }
+
         _bus = null;
         _remoteHost = null;
         _busPing = null;
 
-        if (!done)
-        {
-            throw new InvalidOperationException("Disconnection failure");
-        }
+        return true;
     }
 
 
@@ -165,39 +185,57 @@ public partial class MessageBusClientBase : IMessageBusClient, IDisposable
 
     public async Task Subscribe(string? recipient = default, string? verb = default)
     {
-        var task = await Retry(() =>
+        try
         {
-            _bus!.Subscribe(new SubscriptionRequest
+            var task = await Retry(() =>
             {
-                _type = $"{nameof(Subscribe)}",
-                name = GetType().Name,
-                url = _bus.Url.ToString(),
-                recipient = recipient,
-                verb =  verb
-            }, 0);
+                _bus!.Subscribe(new SubscriptionRequest
+                {
+                    _type = $"{nameof(Subscribe)}",
+                    name = GetType().Name,
+                    url = _bus.Url.ToString(),
+                    recipient = recipient,
+                    verb =  verb
+                }, 0);
 
-            return true;
-        }, new RetryOptions
+                return true;
+            }, new RetryOptions
+            {
+                WarmupDelayMilliseconds = SubscribeWarmupMilliseconds
+            });
+        }
+        catch (MaxRetryReachedException ex)
         {
-            WarmupDelayMilliseconds = SubscribeWarmupMilliseconds
-        });
+            log?.LogError(ex.Message);
+
+            // return false;
+        }
     }
 
     public async Task<bool> Unsubscribe(string? recipient = default, string? verb = default)
     {
-        return await Retry(() =>
+        try
         {
-            var done = _bus!.Unsubscribe(new SubscriptionRequest
+            return await Retry(() =>
             {
-                _type = $"{nameof(Unsubscribe)}",
-                name = GetType().Name,
-                url = _bus.Url.ToString(),
-                recipient = recipient,
-                verb = verb
-            }, 0);
+                var done = _bus!.Unsubscribe(new SubscriptionRequest
+                {
+                    _type = $"{nameof(Unsubscribe)}",
+                    name = GetType().Name,
+                    url = _bus.Url.ToString(),
+                    recipient = recipient,
+                    verb = verb
+                }, 0);
 
-            return done;
-        });
+                return done;
+            });
+        }
+        catch (MaxRetryReachedException ex)
+        {
+            log?.LogError(ex.Message);
+
+            return false;
+        }
     }
 
 

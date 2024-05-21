@@ -17,9 +17,9 @@
 
 namespace BookingKata.API.Demo;
 
-public partial class DemoService
+public partial class DemoBus
 {
-    public int SimulationDay => demoContext.SimulationDay;
+    public int SimulationDay => demoContextService.SimulationDay;
     private const int DayMilliseconds = 24 * 60 * 1000;
     public const double SpeedFactorOneDayOneMinute = 24 * 60;
     private readonly object Fake_BookingDay_lock = new();
@@ -28,6 +28,11 @@ public partial class DemoService
     {
         try
         {
+            using var scope1 = sp.GetScope<IAdminRepository>(out var admin);
+            using var scope2 = sp.GetScope<ISalesRepository>(out var sales);
+            using var scope3 = sp.GetScope<IMoneyRepository>(out var money);
+            using var scope4 = sp.GetScope<IGazetteerService>(out var geo);
+
             var context = new TransactionContext() * admin * money * sales * geo;
 
             for (var d = 0; d < days; d++)
@@ -40,7 +45,7 @@ public partial class DemoService
                 cancellationToken.ThrowIfCancellationRequested();
 
                 DateTime.Forward(TimeSpan.FromDays(1));
-                demoContext.SimulationDay++;
+                demoContextService.SimulationDay++;
 
                 context.ExecuteExclusive(() => Fake_BookingDay(), Fake_BookingDay_lock);
 

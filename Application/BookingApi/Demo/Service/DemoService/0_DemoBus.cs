@@ -17,22 +17,22 @@
 
 namespace BookingKata.API.Demo;
 
-public partial class DemoService
+public partial class DemoBus
 (
-    BookingDemoContext demoContext,
+    DemoContextService demoContextService,
     IMessageBus bus,
     ITimeService DateTime,
 
     //direct plug into these repo/services below is a testing purpose shortcut that shall not be used in production
-    IAdminRepository admin,
-    IMoneyRepository money,
-    ISalesRepository sales,
-    IGazetteerService geo,
-    SalesQueryService sales2,
-    BookingCommandService booking
+    // IAdminRepository admin,
+    // IMoneyRepository money,
+    // ISalesRepository sales,
+    // IGazetteerService geo,
+    // SalesQueryService sales2,
+    // BookingCommandService booking,
 
+    IScopeProvider sp
 )
-    : MessageBusClientBase
 {
     private const int StaffPerHotel = 1;//3;
     private const int ManagerPerHotel = 1;
@@ -59,7 +59,7 @@ public partial class DemoService
             DateTime.Freeze();
 
             Seed();
-            demoContext.SeedComplete = true;
+            demoContextService.SeedComplete = true;
 
             cancel.ThrowIfCancellationRequested();
         }

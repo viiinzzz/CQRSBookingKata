@@ -6,6 +6,7 @@ docker run -e ASPNETCORE_ENVIRONMENT=Production-Admin -it bookingapi /bin/bash
 
 docker compose up
 
+docker stack deploy -c docker-compose.yml my-db-stack
 
 services:
 

@@ -17,7 +17,7 @@
 
 namespace BookingKata.API.Demo;
 
-public partial class DemoService
+public partial class DemoBus
 {
 
     private void Fake_Employees()
@@ -71,7 +71,7 @@ public partial class DemoService
                     Immediate = true
                 });
 
-                demoContext.FakeStaffIds = FakeHelper
+                demoContextService.FakeStaffIds = FakeHelper
                     .GenerateFakeEmployees(HotelCount * StaffPerHotel)
                     .AsParallel()
                     .Select(createAndEnrollEmployee)
@@ -88,7 +88,7 @@ public partial class DemoService
                     Immediate = true
                 });
 
-                demoContext.FakeManagerIds = FakeHelper
+                demoContextService.FakeManagerIds = FakeHelper
                     .GenerateFakeEmployees(HotelCount * ManagerPerHotel)
                     .Select(createAndEnrollEmployee)
                     .ToArray();

@@ -19,17 +19,20 @@ namespace BookingKata.API.Demo;
 
 public class DemoHostService : IHostedLifecycleService
 {
-    private readonly DemoService _demo;
+    private readonly DemoBus _demo;
 
     public DemoHostService(IServiceProvider sp)
     {
         using var scope = sp.CreateScope();
 
-        _demo = scope.ServiceProvider.GetRequiredService<DemoService>() ?? throw new NullReferenceException();
+        _demo = scope.ServiceProvider.GetRequiredService<DemoBus>() ?? throw new NullReferenceException();
     }
 
 
-    protected async Task Execute(CancellationToken cancel) => await _demo.Execute(cancel);
+    protected async Task Execute(CancellationToken cancel)
+    {
+        await _demo.Execute(cancel);
+    }
 
     // public async Task<DateTime> Forward(int days, double? speedFactor, CancellationToken cancel) => await _demo.Forward(days, speedFactor, cancel);
 

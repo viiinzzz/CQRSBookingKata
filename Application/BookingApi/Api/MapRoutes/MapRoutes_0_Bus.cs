@@ -19,6 +19,8 @@ namespace BookingKata.API;
 
 public static partial class ApiMethods
 {
+    private const string BusTag = "Bus";
+
     private static void MapRoutes_0_Bus(WebApplication app)
     {
         var busGroup = app.MapGroup("/bus"
@@ -31,7 +33,7 @@ public static partial class ApiMethods
             {
                 return Results.Accepted();
             }
-        ).ExcludeFromDescription();
+        ).WithOpenApi().WithTags([BusTag]);
 
 
         busGroup.MapPost("/subscribe",
@@ -39,14 +41,14 @@ public static partial class ApiMethods
             {
                 bus.Subscribe(sub, 0);
             }
-        ).ExcludeFromDescription();
+        ).WithOpenApi().WithTags([BusTag]);
 
         busGroup.MapPost("/unsubscribe",
             ([FromBody] SubscriptionRequest sub, [FromServices] IMessageBus bus) =>
             {
                 bus.Unsubscribe(sub, 0);
             }
-        ).ExcludeFromDescription();
+        ).WithOpenApi().WithTags([BusTag]);
 
 
 
@@ -72,7 +74,18 @@ public static partial class ApiMethods
             {
                 return bus.Notify(notification, 0);
             }
-        ).ExcludeFromDescription();
+        ).WithOpenApi().WithTags([BusTag]);
 
+
+
+        app.MapGet("/context/server", async
+                (
+                    [FromServices] IServerContextService serverContext
+                )
+                =>
+            {
+                return Results.Json(serverContext);
+            }
+        ).WithOpenApi().WithTags([BusTag]);
     }
 }

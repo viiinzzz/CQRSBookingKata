@@ -17,6 +17,19 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production-App
       - PROVIDER_NAME=npgsql
       - ConnectionString=Host=db001.booking.local; Database=($Context); Username=postgres; Password=postgres
+ 
+  demo:
+    image: ${DOCKER_REGISTRY-}bookingapi
+    build:
+      context: .
+      dockerfile: Application/BookingApi/Dockerfile
+    depends_on:
+      - db
+    domainname: booking.local
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production-Demo
+      - PROVIDER_NAME=npgsql
+      - ConnectionString=Host=db001.booking.local; Database=($Context); Username=postgres; Password=postgres
 
   admin:
     image: ${DOCKER_REGISTRY-}bookingapi
@@ -81,7 +94,7 @@ services:
       retries: 5
       test: pg_isready -q -h db
       timeout: 5s
-    hostname: db001
+    hostname: db001.booking.local
     networks:
       booking_backend: null
     ports:
@@ -100,7 +113,7 @@ services:
     domainname: booking.local
     healthcheck:
       test: exit 0
-    hostname: db901
+    hostname: db901.booking.local
     networks:
       booking_backend: null
     ports:

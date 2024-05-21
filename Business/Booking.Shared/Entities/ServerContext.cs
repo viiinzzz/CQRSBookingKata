@@ -15,11 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace BookingKata.Planning;
+namespace BookingKata.Shared;
 
 public record ServerContext
 (
     DateTime UtcNow, 
     double UtcNowDayNum,
-    long ServerContextId
+
+    long ServerContextId,
+    long SessionId
 );

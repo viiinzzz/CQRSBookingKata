@@ -32,7 +32,7 @@ public static partial class ApiMethods
                 long serverId,
                 long sessionId,
 
-                [FromServices] DemoService demos,
+                [FromServices] DemoBus demos,
                 [FromServices] IServerContextService serverContext
             ) 
                 =>
@@ -57,5 +57,17 @@ public static partial class ApiMethods
                 return await forward.WithStackTrace();
             }
         ).WithOpenApi().WithTags([DemoTag]);
+
+
+        app.MapGet("/context/demo", async
+            (
+                [FromServices] DemoContextService demoContext
+            ) 
+                =>
+            {
+                return Results.Json(demoContext);
+            }
+        ).WithOpenApi().WithTags([DemoTag]);
+
     }
 }

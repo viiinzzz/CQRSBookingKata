@@ -17,7 +17,7 @@
 
 namespace BookingKata.API.Demo;
 
-public partial class DemoService
+public partial class DemoBus
 {
     private void Fake_Vacancies()
     {
@@ -58,7 +58,7 @@ public partial class DemoService
                 }
             }
 
-            demoContext.FakeHotelsIds
+            demoContextService.FakeHotelsIds
                 .AsParallel()
                 .ForAll(createVacancies);
         }

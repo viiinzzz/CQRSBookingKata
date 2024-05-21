@@ -1,39 +1,46 @@
 services:
 
   app:
-    hostname: app001
+    hostname: app001.booking.local
     networks:
       - booking_backend
       - booking_frontend
     ports:
       - 5291:8080
     environment:
-      - DEMO_MODE=true
       - MESSAGEQUEUE_URL=self
 
+  demo:
+    hostname: dmo001.booking.local
+    networks:
+      - booking_backend
+    environment:
+      - DEMO_MODE=true
+      - MESSAGEQUEUE_URL=http://app001.booking.local:8080/bus
+
   admin:
-    hostname: adm001
+    hostname: adm001.booking.local
     networks:
       - booking_backend
     environment:
       - MESSAGEQUEUE_URL=http://app001.booking.local:8080/bus
 
   planning:
-    hostname: pla001
+    hostname: pla001.booking.local
     networks:
       - booking_backend
     environment:
       - MESSAGEQUEUE_URL=http://app001.booking.local:8080/bus
 
   sales:
-    hostname: sal001
+    hostname: sal001.booking.local
     networks:
       - booking_backend
     environment:
       - MESSAGEQUEUE_URL=http://app001.booking.local:8080/bus
 
   support:
-    hostname: sup001
+    hostname: sup001.booking.local
     networks:
       - booking_backend
     environment:

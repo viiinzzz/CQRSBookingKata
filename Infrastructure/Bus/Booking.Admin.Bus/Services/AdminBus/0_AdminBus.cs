@@ -30,12 +30,6 @@ public partial class AdminBus(IScopeProvider sp, BookingConfiguration bconf) : M
             {
                 switch (notification.Verb)
                 {
-                    case RequestTimeForward:
-                    {
-                        Verb_Is_RequestTimeForward(notification);
-                        break;
-                    }
-
 
                     case RequestPage:
                     {
@@ -121,6 +115,12 @@ public partial class AdminBus(IScopeProvider sp, BookingConfiguration bconf) : M
                     case RequestManyRoomDetails:
                     {
                         Verb_Is_RequestManyRoomDetails(notification);
+                        break;
+                    }
+
+                    case RequestServerContext:
+                    {
+                        Verb_Is_RequestServerContext(notification);
                         break;
                     }
 

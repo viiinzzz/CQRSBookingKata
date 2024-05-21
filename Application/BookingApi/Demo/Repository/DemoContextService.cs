@@ -17,13 +17,16 @@
 
 namespace BookingKata.API.Demo;
 
-public class BookingDemoContext
+public class DemoContextService : IDemoContext
 {
     public int[] FakeStaffIds { get; set; }
     public int[] FakeManagerIds { get; set; }
     public int[] FakeHotelsIds { get; set; }
     public int[] FakeCustomerIds { get; set; }
-    public ConcurrentDictionary<int, FakeHelper.FakeCustomer> FakeCustomers { get; } = new();
+    public ConcurrentDictionary<int, FakeHelper.FakeCustomer> FakeCustomersDictionary { get; } = new();
+
+    public (int, FakeHelper.FakeCustomer)[] FakeCustomers
+        => FakeCustomersDictionary.Select(kv => (kv.Key, kv.Value)).ToArray();
 
     public bool SeedComplete { get; set; }
 

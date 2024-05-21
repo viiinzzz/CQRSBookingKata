@@ -21,9 +21,14 @@ public static partial class ApiMethods
 {
     const int responseTimeoutSeconds = 120;
 
-    public static void MapRoutes(WebApplication app)
+    public static void MapRoutes(WebApplication app, bool isMainContainer)
     {
         MapRoutes_0_Bus(app);
+
+        if (!isMainContainer)
+        {
+            return;
+        }
 
         MapRoutes_1_Admin(app, out var admin);
         {
@@ -32,13 +37,13 @@ public static partial class ApiMethods
         }
 
         MapRoutes_2_Money(app);
-        
+
         MapRoutes_3_Sales(app);
-        
+
         MapRoutes_4_Reception(app);
-        
+
         MapRoutes_5_Service(app);
-        
+
         MapRoutes_6_Booking(app);
 
         MapRoutes_8_Demo(app);

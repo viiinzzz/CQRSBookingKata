@@ -15,15 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using BookingKata.Shared;
+
 namespace BookingKata.Services;
 
 public static class Recipient
 {
-    public const string Time = nameof(Time);
-
     public const string Admin = nameof(Admin);
     public const string Planning = nameof(Planning);
     public const string Sales = nameof(Sales);
+
+    public const string Time = nameof(Time);
+
+    public const string Demo = nameof(Demo);
 }
 
 public static class Verb
@@ -41,8 +45,6 @@ public static class Verb
         private const string HotelRoomDetails = nameof(HotelRoomDetails);
         private const string SingleRoomDetails = nameof(SingleRoomDetails);
         private const string ManyRoomDetails = nameof(ManyRoomDetails);
-
-        public const string RequestTimeForward = nameof(RequestTimeForward);
 
         public const string RequestCreateEmployee = $"{RequestCreate}{Employee}";
         public const string EmployeeCreated = $"{Employee}{Created}";
@@ -81,8 +83,17 @@ public static class Verb
         public const string RespondHotelRoomDetails = $"{Respond}{HotelRoomDetails}";
         public const string RespondSingleRoomDetails = $"{Respond}{SingleRoomDetails}";
         public const string RespondManyRoomDetails = $"{Respond}{ManyRoomDetails}";
-    } 
-    
+
+        public const string RequestServerContext = $"{Request}{nameof(ServerContext)}";
+    }
+
+    public static class Demo
+    {
+        private const string DemoContext = nameof(DemoContext);
+
+        public const string RequestDemoContext = $"{Request}{DemoContext}";
+    }
+
     public static class Planning
     {
         public const string RequestSomething = $"{Recipient.Planning}:{nameof(RequestSomething)}";

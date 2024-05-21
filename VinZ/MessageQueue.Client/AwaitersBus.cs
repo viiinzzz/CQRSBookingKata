@@ -33,9 +33,9 @@ public class AwaitersBus(AwaitedResponse[] awaitedResponses) : IMessageBusClient
         return this;
     }
 
-    public Task Disconnect()
+    public Task<bool> Disconnect()
     {
-        return Task.CompletedTask;
+        return Task.FromResult(true);
     }
 
     public Task Configure()

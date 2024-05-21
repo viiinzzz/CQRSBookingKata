@@ -16,6 +16,7 @@
  */
 
 using System.Diagnostics;
+using System.Net.NetworkInformation;
 
 namespace VinZ.Common;
 
@@ -89,7 +90,19 @@ public static class DbContextHelper
         var providerName = database.ProviderName;
         var connectionString = database.GetConnectionString();
 
-        var created = database.EnsureCreated();
+        bool created = false;
+        try
+        {
+            created = database.EnsureCreated();
+        }
+        catch (Exception ex)
+        {
+            app.Logger.LogError(
+                @$"Storage: {database.GetConnectionString()} failure for {typeof(TContext).Name}
+Error: {ex.Message}
+");
+            throw new NetworkInformationException();
+        }
 
         if (logLevel <= LogLevel.Debug)
         {

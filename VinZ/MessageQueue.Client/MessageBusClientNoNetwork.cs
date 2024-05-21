@@ -58,19 +58,26 @@ public class MessageBusClientNoNetwork : IMessageBusClient //ancien MessageBusCl
         return this;
     }
 
-    public async Task Disconnect()
+    public async Task<bool> Disconnect()
     {
         CheckBus();
 
 
         var done = await Unsubscribe(Omni, AnyVerb);
 
-        _bus = null;
-
         if (!done)
         {
-            throw new InvalidOperationException("Disconnection failure");
+            return false;
         }
+
+        _bus = null;
+
+        // if (!done)
+        // {
+        //     throw new InvalidOperationException("Disconnection failure");
+        // }
+
+        return true;
     }
 
 

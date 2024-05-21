@@ -17,7 +17,7 @@
 
 namespace BookingKata.API.Demo;
 
-public partial class DemoService
+public partial class DemoBus
 {
 
     private void Fake_Customers()
@@ -50,12 +50,12 @@ public partial class DemoService
                     throw new ArgumentException(ReferenceInvalid, nameof(customerId));
                 }
 
-                demoContext.FakeCustomers[customerId.id] = fake;
+                demoContextService.FakeCustomersDictionary[customerId.id] = fake;
 
                 return customerId.id;
             }
 
-            demoContext.FakeCustomerIds = FakeHelper
+            demoContextService.FakeCustomerIds = FakeHelper
                 .GenerateFakeCustomers(CustomerCount)
                 .AsParallel()
                 .Select(createCustomer)

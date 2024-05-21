@@ -17,13 +17,46 @@
 
 namespace BookingKata.API.Demo;
 
-public partial class DemoService
+public partial class DemoBus : MessageBusClientBase
 {
-    private readonly string originator = nameof(DemoService);
+    private readonly string originator = nameof(DemoBus);
 
     public override async Task Configure()
     {
+        Subscribe(Recipient.Demo, Verb.Demo.RequestDemoContext);
 
+        Notified += (sender, notification) =>
+        {
+            try
+            {
+                switch (notification.Verb)
+                {
+                    case Verb.Demo.RequestDemoContext:
+                    {
+                        Verb_Is_RequestDemoContext(notification);
+                        break;
+                    }
+
+                    default:
+                    {
+                        throw new VerbInvalidException(notification.Verb);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Notify(new NegativeResponseNotification(notification, ex));
+            }
+        };
+    }
+
+    private void Verb_Is_RequestDemoContext(IClientNotificationSerialized notification)
+    {
+        Notify(new ResponseNotification(Omni, Respond, demoContextService)
+        {
+            CorrelationId1 = notification.CorrelationId1,
+            CorrelationId2 = notification.CorrelationId2
+        });
     }
 
 }

@@ -17,7 +17,7 @@
 
 namespace BookingKata.API.Demo;
 
-public partial class DemoService
+public partial class DemoBus
 {
     private void Seed()
     {

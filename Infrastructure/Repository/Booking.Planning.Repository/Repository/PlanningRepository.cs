@@ -17,7 +17,13 @@
 
 namespace BookingKata.Infrastructure.Storage;
 
-public class PlanningRepository(IDbContextFactory factory, IServerContextService serverContext, ITimeService DateTime) : IPlanningRepository, ITransactionable
+public class PlanningRepository
+(
+    IDbContextFactory factory,
+    IServerContextService serverContext, 
+    ITimeService DateTime
+)
+    : IPlanningRepository, ITransactionable
 {
     private readonly BookingPlanningContext _planning = factory.CreateDbContext<BookingPlanningContext>();
 
@@ -29,7 +35,7 @@ public class PlanningRepository(IDbContextFactory factory, IServerContextService
         var utcNowDayNum = utcNow.FractionalDayNum();
         var serverContextId = serverContext.Id;
 
-        var serverContext2 = new ServerContext(utcNow, utcNowDayNum, serverContextId);
+        var serverContext2 = new ServerContext(utcNow, utcNowDayNum, serverContextId, 0);
 
         SetServerContext(serverContext2);
 

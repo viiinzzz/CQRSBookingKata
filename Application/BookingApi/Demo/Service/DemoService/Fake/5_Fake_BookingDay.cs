@@ -17,19 +17,25 @@
 
 namespace BookingKata.API.Demo;
 
-public partial class DemoService
+public partial class DemoBus
 {
     private void Fake_BookingDay()
     {
-        if (demoContext.FakeCustomerIds == null)
+        if (demoContextService.FakeCustomerIds == null)
         {
             throw new Exception("FakeCustomer not ready yet.");
         }
 
+
+
+        using var scope1 = sp.GetScope<SalesQueryService>(out var sales2);
+        using var scope2 = sp.GetScope<BookingCommandService>(out var booking);
+
+
         {
             var message = "Demo: Seeding Bookings {0}...";
 
-            var args = new object[] { demoContext.SimulationDay };
+            var args = new object[] { demoContextService.SimulationDay };
 
             bus.Notify(new AdvertisementNotification(message, args)
             {
@@ -53,9 +59,9 @@ public partial class DemoService
         {
             try
             {
-                var ci = demoContext.FakeCustomerIds.Length.Rand();
-                var cid = demoContext.FakeCustomerIds[ci];
-                var c = demoContext.FakeCustomers[cid];
+                var ci = demoContextService.FakeCustomerIds.Length.Rand();
+                var cid = demoContextService.FakeCustomerIds[ci];
+                var c = demoContextService.FakeCustomersDictionary[cid];
 
                 var stayStartDays = 1 + 45.Rand();
                 var stayDurationDays = 1 + 5.Rand();
@@ -118,7 +124,7 @@ public partial class DemoService
                     }
                     catch (Exception ex2)
                     {
-                        errors.Add(new InvalidOperationException($"Booking failure during Day+{demoContext.SimulationDay}", ex2));
+                        errors.Add(new InvalidOperationException($"Booking failure during Day+{demoContextService.SimulationDay}", ex2));
                     }
                 }
             }
@@ -140,7 +146,7 @@ public partial class DemoService
                     continue;
                 }
 
-                errors.Add(new InvalidOperationException($"Booking failure during Day+{demoContext.SimulationDay}", ex));
+                errors.Add(new InvalidOperationException($"Booking failure during Day+{demoContextService.SimulationDay}", ex));
             }
         }
 

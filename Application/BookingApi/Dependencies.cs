@@ -48,6 +48,7 @@ internal class Dependencies
     public static readonly Type[] AvailableBusTypes = Types.From
     <
         AdminBus, SalesBus, PlanningBus,
-        BillingBus, ThirdPartyBus, ConsoleAuditBus
+        BillingBus, ThirdPartyBus, ConsoleAuditBus,
+        DemoBus
     >();
 }
