@@ -45,16 +45,11 @@ public partial class DemoBus
     private const int CustomerCount = 10;//1000
 
 
-    private const int DelayBeforeDemoStartSeconds = 20;
-
-
     public async Task Execute(CancellationToken cancel)
     {
         try
         {
-            //DI/Bus warmup delay before demo kicks in
-            await Task.Delay(DelayBeforeDemoStartSeconds * 1000);
-
+         
 
             DateTime.Freeze();
 

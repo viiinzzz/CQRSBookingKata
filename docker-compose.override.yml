@@ -46,3 +46,10 @@ services:
     environment:
       - MESSAGEQUEUE_URL=http://app001.booking.local:8080/bus
  
+  dbadmin:
+    ports:
+      - 7038:80
+  
+  #dbadmin2:
+  #  ports:
+  #    - 7039:8080

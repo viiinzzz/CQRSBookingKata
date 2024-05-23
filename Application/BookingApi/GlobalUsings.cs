@@ -6,6 +6,7 @@ global using System.Text.RegularExpressions;
 global using System.Transactions;
 global using System.Text;
 global using Booking.API;
+global using Booking.API.Infrastructure;
 global using Microsoft.AspNetCore.Mvc;
 global using Newtonsoft.Json.Linq;
 global using cons = AnsiVtConsole.NetCore;

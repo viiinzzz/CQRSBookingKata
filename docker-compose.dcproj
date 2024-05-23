@@ -12,7 +12,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="db-admin\.pgpass" />
-    <None Include="db-admin\Dockerfile.db-admin" />
+    <None Include="db-admin\Dockerfile.dbadmin" />
     <None Include="db-admin\servers.json" />
     <None Include="db-admin\servers0.json" />
     <None Include="docker-compose.override.yml">

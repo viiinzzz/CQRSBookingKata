@@ -19,11 +19,29 @@ namespace VinZ.MessageQueue;
 
 public partial class MqServer
 {
+    public string[] GetSubscribeUrls()
+    {
+        return _subscribers_0.Values
+            .Concat(_subscribers_R.Values.SelectMany(s => s))
+            .Concat(_subscribers_V.Values.SelectMany(s => s))
+            .Concat(_subscribers_RV.Values.SelectMany(s => s))
+            .Distinct()
+            .Select(url =>
+            {
+                _url2name.TryGetValue(url, out var name);
+
+                return $"{url}{(name !=null ? " ": string.Empty)}{name ?? string.Empty}";
+            })
+            .ToArray();
+    }
+
     private readonly ConcurrentDictionary<int, string> _subscribers_0 = new(); //recipient* verb*
     private readonly ConcurrentDictionary<int, HashSet<string>> _subscribers_R = new(); //recipient verb*
     private readonly ConcurrentDictionary<int, HashSet<string>> _subscribers_V = new(); //recipient* verb
     private readonly ConcurrentDictionary<int, HashSet<string>> _subscribers_RV = new(); //recipient verb
-  
+    
+    private readonly ConcurrentDictionary<string, string> _url2name = new(); //recipient verb
+
     public void Subscribe(SubscriptionRequest sub, int busId)
     {
         if (busId != 0)
@@ -35,6 +53,8 @@ public partial class MqServer
         var url = sub.url;
         var recipient = sub.recipient;
         var verb = sub.verb;
+
+        _url2name[url] = name;
 
         var hash0 = url.GetHashCode();
 

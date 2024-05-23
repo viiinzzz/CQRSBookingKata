@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.Net.Sockets;
+
 namespace VinZ.Common;
 
 public static partial class ApiHelper
@@ -37,22 +39,44 @@ public static partial class ApiHelper
 
         var addressList = Dns.GetHostByName(hostName).AddressList;
 
-        return addressList
+        IPAddress ip0;
+        {
+            using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0);
+        
+            socket.Connect("8.8.8.8", 65530);
+            var endPoint = socket.LocalEndPoint as IPEndPoint;
+            ip0 = endPoint.Address;
+        }
+        // Console.Error.WriteLine($"localIP={ip0}");
+        //
+        // foreach (var a in addressList)
+        // {
+        //     Console.Error.WriteLine($"address={a}");
+        // }
+
+        var ip1 = addressList
             .Select(a => a.MapToIPv4())
             .Distinct()
             .OrderBy(a => BitConverter.ToString(a.GetAddressBytes()))
-            .AsParallel()
-            .Where(a =>
-            {
-                try
-                {
-                    return new Ping().Send(a).Status == IPStatus.Success;
-                }
-                catch (Exception ex)
-                {
-                    return false;
-                }
-            }).ToArray();
+            // .AsParallel()
+            // .Where(a =>
+            // {
+            //     try
+            //     {//ping only workds well on Windows -- don't use
+            //         return new Ping().Send(a).Status == IPStatus.Success;
+            //     }
+            //     catch (Exception ex)
+            //     {
+            //         return false;
+            //     }
+            // })
+            .ToArray();
+
+        var ret = ip1.Append(ip0).Distinct().ToArray();
+
+        // Console.Error.WriteLine($"ret={string.Join(", ", ret.Select(a => a.ToString()))}");
+
+        return ret;
     }
 
 

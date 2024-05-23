@@ -15,7 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System.Diagnostics;
 using System.Net.NetworkInformation;
 
 namespace VinZ.Common;
@@ -89,6 +88,10 @@ public static class DbContextHelper
 
         var providerName = database.ProviderName;
         var connectionString = database.GetConnectionString();
+
+        var contextName = contextRx.Replace(typeof(TContext).Name, "$1");
+
+        // Console.Error.WriteLine($"ensurecreated contextName={contextName} connectionString={connectionString}");
 
         bool created = false;
         try
@@ -221,6 +224,8 @@ Error: {ex.Message}
         var connectionString = connectionStringRx.Replace(
             Environment.GetEnvironmentVariable("ConnectionString") ?? configuration.GetConnectionString(buildConfigurationName),
             contextName);
+
+        // Console.Error.WriteLine($"contextName={contextName} connectionString={connectionString}");
 
         var dbbuilder = providerName switch
         {

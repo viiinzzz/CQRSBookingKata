@@ -27,7 +27,8 @@
   ╎ basic variables
   */
 
-using Booking.API.Infrastructure;
+var Console = new cons.AnsiVtConsole(); //https://github.com/franck-gaspoz/AnsiVtConsole.NetCore
+
 
 var pif = ProgramInfo.Get();
 
@@ -41,7 +42,14 @@ var busUrl = ApiHelper.GetAppUrlPrefix("bus");
 
 var myIps = ApiHelper.GetMyIps();
 
-var Console = new cons.AnsiVtConsole(); //https://github.com/franck-gaspoz/AnsiVtConsole.NetCore
+if (myIps.Length == 0)
+{
+    Console.Out.WriteLine(@$"
+(f=darkgray)Error:(rdc) IP not found
+");
+
+    Environment.Exit(-1);
+}
 
 {
     var exeStr = pif.ExeName.Length > 0 || pif.ExeVersion.Length > 0 ? $"(bon){pif.ExeName} {pif.ExeVersion}(rdc)" : "";
@@ -50,16 +58,12 @@ var Console = new cons.AnsiVtConsole(); //https://github.com/franck-gaspoz/AnsiV
     var envStr = $"(invon,f={(pif.IsRelease ? "magenta" : "cyan")}){pif.Env}(rdc)";
     var pauseStr = pauseOnError ? " " + $"(invon,f=yellow)PauseOnError(rdc)" : "";
 
-    Console.Out.WriteLine(@$"{exeStr} {envStr}{pauseStr}
-{buildArchiStr} - {osFwStr} 
-
-(f=darkgray)Network:(rdc)
-{string.Join(Environment.NewLine, myIps.Select(ip => $"(uon)http://{ip}:{busUrl.Port}(rdc)"))}
-(uon){busUrl}(rdc)
-");
+    Console.Out.WriteLine(@$"{exeStr} {envStr}{pauseStr} {buildArchiStr} {osFwStr} 
+(f=darkgray)Network:(rdc) {string.Join(", ", myIps.Select(ip => $"(uon)http://{ip}:{busUrl.Port}(rdc)"))}");
 }
+// (uon){busUrl}(rdc)
 
-var demoStr = () => demoMode ? "" + $"(invon,f=yellow)DemoMode(rdc)" : "";
+const string demoModeStr = "(invon,f=yellow)DemoMode(rdc)";
 
 const double precisionMaxKm = 0.5;
 
@@ -134,12 +138,11 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder, out Action<WebA
         pauseOnError = pauseOnError
     };
 
+    services.AddSingleton(mqConfig);
+
     services.AddMessageQueue(mqConfig, out var messageQueueUrl, out var addedBus);
 
-    Console.Out.WriteLine(@$"
-(f=darkgray)MessageQueue: {string.Join(", ", addedBus)}(rdc)
-(uon){messageQueueUrl}(rdc)
-");
+    Console.Out.WriteLine(@$"(f=darkgray)Bus:(rdc) (uon){messageQueueUrl}(rdc) (f=darkgray){string.Join(", ", addedBus)}(rdc)");
 
     //repo
     builder.AddScopedConfigurationTypes("Api:Repository", Dependencies.AvailableRepositories);
@@ -159,10 +162,12 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder, out Action<WebA
     //demo
     demoMode = demoMode || builder.IsTrueConfiguration("Api:DemoMode");
 
-    Console.Out.WriteLine(@$"{demoStr()}");
-
     if (demoMode)
     {
+        if (demoModeStr != null) Console.Out.WriteLine(@$"
+{demoModeStr}
+");
+
         services.AddSingleton<DemoContextService>();
         services.AddSingleton<IDemoContext>(sp => sp.GetRequiredService<DemoContextService>());
 
@@ -180,6 +185,10 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder, out Action<WebA
         services.AddSingleton<IDemoContext, DemoContextProxyService>();
     }
 
+    // if (pif.IsDebug)
+    // {
+        services.AddHostedService<DebugRoutesHostService>();
+    // }
 }
 /*
                                                                               ╎

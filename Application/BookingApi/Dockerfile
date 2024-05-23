@@ -1,8 +1,14 @@
 #See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+
+RUN apt-get update -yq && apt-get upgrade -yq && apt-get install -yq curl inetutils-ping
+#git nano
+
 USER app
 WORKDIR /app
+
+
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS restore
 ARG BUILD_CONFIGURATION=Release
@@ -74,6 +80,9 @@ RUN dotnet publish "./BookingApi.csproj" -c $BUILD_CONFIGURATION -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+
+
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://*:8080
 ENTRYPOINT ["dotnet", "BookingApi.dll"]
