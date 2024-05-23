@@ -22,7 +22,6 @@ services:
       ConnectionString: Host=db001.booking.local; Database=($$Context); Username=postgres; Password=postgres
  
   demo:
-    entrypoint: ["echo", "Service disabled"] #Un/Comment me out
     image: ${DOCKER_REGISTRY-}bookingapi
     build:
       context: .
@@ -53,7 +52,6 @@ services:
       ConnectionString: Host=db001.booking.local; Database=($$Context); Username=postgres; Password=postgres
 
   planning:
-    entrypoint: ["echo", "Service disabled"] #Un/Comment me out
     image: ${DOCKER_REGISTRY-}bookingapi
     build:
       context: .
@@ -69,7 +67,6 @@ services:
       ConnectionString: Host=db001.booking.local; Database=($$Context); Username=postgres; Password=postgres
 
   sales:
-    entrypoint: ["echo", "Service disabled"] #Un/Comment me out
     image: ${DOCKER_REGISTRY-}bookingapi
     build:
       context: .
@@ -85,7 +82,6 @@ services:
       ConnectionString: Host=db001.booking.local; Database=($$Context); Username=postgres; Password=postgres
 
   support:
-    entrypoint: ["echo", "Service disabled"] #Un/Comment me out
     image: ${DOCKER_REGISTRY-}bookingapi
     build:
       context: .
@@ -153,25 +149,25 @@ services:
     volumes:
       - dbadmin_data:/var/lib/pgadmin:rw
 
-  #dbadmin2:
-  #  image: adminer
-  #  depends_on:
-  #    - db
-  #  domainname: booking.local
-  #  environment: 
-  #    ADMINER_DEFAULT_SERVER: db001.booking.local
-  #    ADMINER_DEFAULT_DB_DRIVER: pgsql
-  #    #ADMINER_DEFAULT_DB_NAME:
-  #    #ADMINER_DESIGN: galkaev
-  #    ADMINER_DESIGN: nette
-  #  networks:
-  #    - booking_backend
-  #    - booking_frontend
-  #  #restart: always
-  #  restart: unless-stopped
-  #  #ports:
-  #  #  - published: 7039
-  #  #    target: 8080
+  dbadmin2:
+    image: adminer
+    depends_on:
+     - db
+    domainname: booking.local
+    environment: 
+      ADMINER_DEFAULT_SERVER: db001.booking.local
+      ADMINER_DEFAULT_DB_DRIVER: pgsql
+      #ADMINER_DEFAULT_DB_NAME:
+      #ADMINER_DESIGN: galkaev
+      ADMINER_DESIGN: nette
+    networks:
+      - booking_backend
+      - booking_frontend
+    #restart: always
+    restart: unless-stopped
+    #ports:
+    #  - published: 7039
+    #    target: 8080
 
 
 

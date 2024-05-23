@@ -68,15 +68,15 @@ public partial class MessageBusClientBase
 
         try
         {
-            var isLocalhost = string.Compare(new Uri(_busPing).Host, Dns.GetHostName(), StringComparison.InvariantCultureIgnoreCase) == 0;
-            Console.WriteLine($"ping... {_busPing} local {Dns.GetHostName()} local={isLocalhost}");
+            var isLocalhost = string.Compare(new Uri(_ping).Host, Dns.GetHostName(), StringComparison.InvariantCultureIgnoreCase) == 0;
+            Console.WriteLine($"ping... {_ping} local {Dns.GetHostName()} local={isLocalhost}");
 
             if (isLocalhost)
             {
                 return;
             }
 
-            response = await http.GetAsync(_busPing, cts.Token);
+            response = await http.GetAsync(_ping, cts.Token);
         }
         catch (OperationCanceledException ex)
         {

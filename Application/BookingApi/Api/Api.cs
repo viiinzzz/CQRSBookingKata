@@ -83,30 +83,75 @@ const int dbContextKeepAliveMilliseconds = 30_000;
 
 //adding components to the magic wiring box, aka. DI Container to achieve IoC
 
-void ConfigureDependencyInjection(WebApplicationBuilder builder, out Action<WebApplication> configureApplication)
+
+void ConfigureDependencyInjection
+(
+    WebApplicationBuilder builder,
+    out Action<WebApplication> configureApplication
+)
 {
+    var configureApiHooks = new List<Action<WebApplication>>();
+
     //database
     var logLevelEFContext = builder.EnumConfiguration("Logging:LogLevel:Microsoft.EntityFrameworkCore.DbContext",
         "Logging:LogLevel:Default", LogLevel.Warning);
     var dbContextTypes = builder.GetConfigurationTypes("Api:DbContext", Dependencies.AvailableDbContextTypes);
     builder.RegisterDbContexts(dbContextTypes, pif.IsDebug, logLevelEFContext);
 
-    configureApplication = app =>
-        app.EnsureDatabaseCreated(dbContextTypes, logLevelEFContext, pif.IsDebug ? dbContextKeepAliveMilliseconds : null);
+    configureApiHooks.Add(app =>
+    {
+        app.EnsureDatabaseCreated(dbContextTypes, logLevelEFContext,
+            pif.IsDebug ? dbContextKeepAliveMilliseconds : null);
+    });
 
 
     var services = builder.Services;
+
 
     //infra
     services.AddSingleton<IScopeProvider, ScopeProvider>();
     services.AddExceptionHandler<GlobalExceptionHandler>();
 
+
     //web
-    services.AddRazorPages();
+    var servePages = builder.IsTrueConfiguration("Api:ServePages");
+    if (servePages)
+    {
+        services.AddRazorPages();
+
+        configureApiHooks.Add(app =>
+        {
+            app.MapRazorPages();
+            app.UseAntiforgery();
+        });
+    }
+    else
+    {
+        services.AddDefaultProblemDetailsFactory();
+    }
+
 
     //open api doc
-    services.AddEndpointsApiExplorer();
-    services.AddSwaggerGen();
+    var serveApiDoc = builder.IsTrueConfiguration("Api:ServeApiDoc");
+    if (serveApiDoc)
+    {
+        // /test -> /swagger
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen();
+
+        configureApiHooks.Add(app =>
+        {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+                // api.UseExceptionHandler();
+        });
+    }
+
+    // if (pif.IsDebug)
+    // {
+    services.AddHostedService<DebugRoutesHostService>();
+    // }
+
 
     //security
     services.AddAntiforgery();
@@ -114,11 +159,10 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder, out Action<WebA
     services.AddAuthentication().AddJwtBearer();
     // https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/security?view=aspnetcore-8.0
 
+
     //app services
     services.AddSingleton<ITimeService, TimeService>();
     services.AddSingleton<IRandomService, RandomService>();
-
-
 
     if (pif.Env is "Development" or "Production-Admin")
     {
@@ -128,6 +172,7 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder, out Action<WebA
     {
         services.AddSingleton<IServerContextService, ServerContextProxyService>();
     }
+
 
     //bus
     var mqConfig = new MessageQueueConfiguration
@@ -144,8 +189,10 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder, out Action<WebA
 
     Console.Out.WriteLine(@$"(f=darkgray)Bus:(rdc) (uon){messageQueueUrl}(rdc) (f=darkgray){string.Join(", ", addedBus)}(rdc)");
 
+
     //repo
     builder.AddScopedConfigurationTypes("Api:Repository", Dependencies.AvailableRepositories);
+
 
     //business/support/third-party
     builder.AddScopedConfigurationTypes("Api:Service", Dependencies.AvailableServices);
@@ -156,8 +203,15 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder, out Action<WebA
     };
     services.AddSingleton(bookingConfig);
 
-    //metrics
+
+    //observability
     services.AddObservability();
+
+    configureApiHooks.Add(app =>
+    {
+        app.MapObservability(); // path = /metrics
+    });
+
 
     //demo
     demoMode = demoMode || builder.IsTrueConfiguration("Api:DemoMode");
@@ -185,10 +239,14 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder, out Action<WebA
         services.AddSingleton<IDemoContext, DemoContextProxyService>();
     }
 
-    // if (pif.IsDebug)
-    // {
-        services.AddHostedService<DebugRoutesHostService>();
-    // }
+
+    configureApplication = app =>
+    {
+        foreach (var hook in configureApiHooks)
+        {
+            hook(app);
+        }
+    };
 }
 /*
                                                                               ╎
@@ -198,9 +256,10 @@ void ConfigureDependencyInjection(WebApplicationBuilder builder, out Action<WebA
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
+
 //let's cast participants
 //
-ConfigureDependencyInjection(builder, out var configureApi);
+ConfigureDependencyInjection(builder, out var useServices);
 //
 //
 
@@ -216,26 +275,15 @@ var (isDevelopment, isStaging, isProduction, apiEnv) = api.GetEnv();
 
 api.UseMiddleware<MyDebugMiddleware>();
 
-
-if (isDevelopment)
-{
-
-    api.UseSwagger();
-    api.UseSwaggerUI();
-    // api.UseExceptionHandler();
-}
-
-configureApi(api);
+//
+//
+useServices(api);
+//
+//
 
 api.UseStaticFiles();
 
 MapRoutes(api, isMainContainer);
-
-api.MapRazorPages();
-api.UseAntiforgery();
-
-
-api.MapObservability(); // path = /metrics
 
 
 //let the show start...

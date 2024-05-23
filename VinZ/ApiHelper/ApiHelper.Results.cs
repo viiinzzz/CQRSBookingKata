@@ -1,6 +1,6 @@
 namespace VinZ.Common;
 
-public static partial class ApiHelper
+public partial class ApiHelper
 {
     public static IResult AsResult<TEntity>(this TEntity? result) where TEntity : class
     {

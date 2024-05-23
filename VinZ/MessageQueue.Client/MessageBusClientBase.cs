@@ -34,7 +34,7 @@ public partial class MessageBusClientBase : IMessageBusClient, IDisposable
     private LogLevel logLevelNetwork = LogLevel.Information;
 
     private string? _remoteHost;
-    private string? _busPing;
+    private string? _ping;
 
     public IMessageBusClient ConnectToBus(IScopeProvider scp)
     {
@@ -63,8 +63,10 @@ public partial class MessageBusClientBase : IMessageBusClient, IDisposable
 
         _bus = new MessageBusHttp(clientConfig, appConfig, dateTime, log);
 
-        _remoteHost = new Uri(clientConfig.RemoteUrl).Host;
-        _busPing = $"{clientConfig.RemoteUrl}{(clientConfig.RemoteUrl.EndsWith('/') ? "" : "/")}ping";
+        var remoteUri = new Uri(clientConfig.RemoteUrl);
+        _remoteHost = remoteUri.Host;
+        // _ping = $"{clientConfig.RemoteUrl}{(clientConfig.RemoteUrl.EndsWith('/') ? "" : "/")}ping";
+        _ping = $"{remoteUri.Scheme}://{remoteUri.Host}:{remoteUri.Port}/debug/ping";
 
         return this;
     }
@@ -171,7 +173,7 @@ public partial class MessageBusClientBase : IMessageBusClient, IDisposable
 
         _bus = null;
         _remoteHost = null;
-        _busPing = null;
+        _ping = null;
 
         return true;
     }

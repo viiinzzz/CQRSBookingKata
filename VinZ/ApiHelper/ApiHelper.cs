@@ -15,12 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System.Net.Sockets;
-
 namespace VinZ.Common;
 
 public static partial class ApiHelper
 {
+
+
     public static (bool isDevelopment, bool isStaging, bool isProduction, string? env) GetEnv(this WebApplication api)
     {
         var isDevelopment = api.Environment.IsDevelopment();
@@ -62,7 +62,7 @@ public static partial class ApiHelper
             // .Where(a =>
             // {
             //     try
-            //     {//ping only workds well on Windows -- don't use
+            //     {//ping only works well on Windows -- don't use
             //         return new Ping().Send(a).Status == IPStatus.Success;
             //     }
             //     catch (Exception ex)

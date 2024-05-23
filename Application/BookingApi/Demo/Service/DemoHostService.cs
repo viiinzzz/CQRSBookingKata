@@ -98,7 +98,7 @@ public class DemoHostService
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            string url;
+            string url = string.Empty;
             try
             {
                 url = $"{_messageQueueUrl}/debug/subscribe";
@@ -127,10 +127,10 @@ public class DemoHostService
             {
                 ;
             }
-            // catch (Exception ex)
-            // {
-            //     ;
-            // }
+            catch (Exception ex)
+            {
+                _log.LogWarning($"GET {url} failed: {ex.Message}");
+            }
             var currentParticipants = subscribe.Select(s => s.name).ToHashSet();
 
             var ready = currentParticipants.IsSupersetOf(_requiredParticipants);

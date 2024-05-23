@@ -28,10 +28,10 @@ public static partial class ApiMethods
 
 
 
-        busGroup.MapGet("/ping",
-            () =>
+        app.MapGet("/debug/ping",
+            (IMessageBus bus) =>
             {
-                return Results.Accepted();
+                return Results.Accepted($"/bus/{bus.GetHashCode().xby4()}", "Pong");
             }
         ).WithOpenApi().WithTags([BusTag]);
 

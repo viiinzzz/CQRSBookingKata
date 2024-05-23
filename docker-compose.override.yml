@@ -11,6 +11,7 @@ services:
       - MESSAGEQUEUE_URL=self
 
   demo:
+    #entrypoint: ["echo", "warn: Service disabled"] #Un/Comment me out
     hostname: dmo001.booking.local
     networks:
       - booking_backend
@@ -26,6 +27,7 @@ services:
       - MESSAGEQUEUE_URL=http://app001.booking.local:8080/bus
 
   planning:
+    #entrypoint: ["echo", "warn: Service disabled"] #Un/Comment me out
     hostname: pla001.booking.local
     networks:
       - booking_backend
@@ -33,6 +35,7 @@ services:
       - MESSAGEQUEUE_URL=http://app001.booking.local:8080/bus
 
   sales:
+    #entrypoint: ["echo", "warn: Service disabled"] #Un/Comment me out
     hostname: sal001.booking.local
     networks:
       - booking_backend
@@ -40,6 +43,7 @@ services:
       - MESSAGEQUEUE_URL=http://app001.booking.local:8080/bus
 
   support:
+    #entrypoint: ["echo", "warn: Service disabled"] #Un/Comment me out
     hostname: sup001.booking.local
     networks:
       - booking_backend
@@ -47,9 +51,11 @@ services:
       - MESSAGEQUEUE_URL=http://app001.booking.local:8080/bus
  
   dbadmin:
+    #entrypoint: ["echo", "warn: Service disabled"] #Un/Comment me out
     ports:
       - 7038:80
   
-  #dbadmin2:
-  #  ports:
-  #    - 7039:8080
+  dbadmin2:
+    #entrypoint: ["echo", "warn: Service disabled"] #Un/Comment me out
+    ports:
+      - 7039:8080

@@ -1,6 +1,6 @@
 namespace VinZ.Common;
 
-public static partial class ApiHelper
+public partial class ApiHelper
 {
     public static IEnumerable<Type> GetConfigurationTypes(this WebApplicationBuilder? builder, string key,
         IEnumerable<Type> availableTypes)
