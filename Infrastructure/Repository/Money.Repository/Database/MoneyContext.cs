@@ -28,7 +28,7 @@ public class MoneyContext : MyDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {
-        builder.ConfigureMyWay<MoneyContext>(IsDebug, logLevel);
+        builder.ConfigureMyWay<MoneyContext>(IsDebug, Env, logLevel);
     }
 
 

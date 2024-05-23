@@ -36,8 +36,6 @@ var pauseOnError = pif.IsDebug && pif.IsTrueEnv("DEBUG_PAUSE_ON_ERROR");
 
 var demoMode = pif.IsTrueEnv("DEMO_MODE");
 
-var isMainContainer = pif.Env is "Development" or "Production-App";
-
 var busUrl = ApiHelper.GetAppUrlPrefix("bus");
 
 var myIps = ApiHelper.GetMyIps();
@@ -96,7 +94,7 @@ void ConfigureDependencyInjection
     var logLevelEFContext = builder.EnumConfiguration("Logging:LogLevel:Microsoft.EntityFrameworkCore.DbContext",
         "Logging:LogLevel:Default", LogLevel.Warning);
     var dbContextTypes = builder.GetConfigurationTypes("Api:DbContext", Dependencies.AvailableDbContextTypes);
-    builder.RegisterDbContexts(dbContextTypes, pif.IsDebug, logLevelEFContext);
+    builder.RegisterDbContexts(dbContextTypes, pif.IsDebug, pif.Env, logLevelEFContext);
 
     configureApiHooks.Add(app =>
     {
@@ -283,8 +281,16 @@ useServices(api);
 
 api.UseStaticFiles();
 
-MapRoutes(api, isMainContainer);
 
+MapParticipantRoutes(api);
+
+
+var serveApi = builder.IsTrueConfiguration("Api:ServeApi");
+
+if (serveApi)
+{
+    MapApiRoutes(api);
+}
 
 //let the show start...
 //

@@ -24,7 +24,7 @@ public class MessageQueueContext : MyDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {
-        builder.ConfigureMyWay<MessageQueueContext>(IsDebug, logLevel);
+        builder.ConfigureMyWay<MessageQueueContext>(IsDebug, Env, logLevel);
     }
 
 

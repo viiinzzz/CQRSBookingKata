@@ -20,7 +20,6 @@ namespace VinZ.Common;
 public static partial class ApiHelper
 {
 
-
     public static (bool isDevelopment, bool isStaging, bool isProduction, string? env) GetEnv(this WebApplication api)
     {
         var isDevelopment = api.Environment.IsDevelopment();

@@ -15,13 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System;
+
 namespace BookingKata.API.Demo;
 
 public class DemoHostService
     // : IHostedLifecycleService
     : BackgroundService
 {
-    private readonly string _messageQueueUrl;
+    private readonly string _debugSubscribeUrl;
     private readonly HashSet<string> _requiredParticipants;
     private readonly ILogger<DemoHostService> _log;
     private readonly TaskCompletionSource _applicationStartedSource = new();
@@ -36,14 +38,18 @@ public class DemoHostService
     )
     {
 
-        _messageQueueUrl = mqConfig.messageQueueUrl == "self"
+        var messageQueueUrl = mqConfig.messageQueueUrl == "self"
             ? $"{mqConfig.busUrl.Scheme}://{mqConfig.busUrl.Host}:{mqConfig.busUrl.Port}" 
             : mqConfig.messageQueueUrl;
         
-        if (_messageQueueUrl?.EndsWith('/') ?? false)
+        if (messageQueueUrl?.EndsWith('/') ?? false)
         {
-            _messageQueueUrl = _messageQueueUrl[..^1];
+            messageQueueUrl = messageQueueUrl[..^1];
         }
+
+        var mqUri = new Uri(messageQueueUrl);
+
+        _debugSubscribeUrl = $"{mqUri.Scheme}://{mqUri.Host}:{mqUri.Port}/debug/subscribe";
 
 
         _requiredParticipants = mqConfig.busTypes.Select(type => type.Name).ToHashSet();
@@ -92,22 +98,27 @@ public class DemoHostService
 
 
         //wait bus composed
+        var bigtimeout = new CancellationTokenSource(180000); //3min
+        var bigcancel = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, bigtimeout.Token);
+
         var http = new HttpClient();
 
         (string url, string name)[] subscribe = [];
+        bool ready = false;
 
-        while (!stoppingToken.IsCancellationRequested)
+        while (!bigcancel.IsCancellationRequested)
         {
-            string url = string.Empty;
             try
             {
-                url = $"{_messageQueueUrl}/debug/subscribe";
-        
                 var timeout = new CancellationTokenSource(30000);
                 var cancel = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, timeout.Token);
 
-                var text = await http.GetStringAsync(url, cancel.Token);
-        
+                //
+                //
+                var text = await http.GetStringAsync(_debugSubscribeUrl, cancel.Token);
+                //
+                //
+
                 subscribe = text.Split('\n', StringSplitOptions.TrimEntries)
                     .Select(line =>
                     {
@@ -129,22 +140,29 @@ public class DemoHostService
             }
             catch (Exception ex)
             {
-                _log.LogWarning($"GET {url} failed: {ex.Message}");
+                _log.LogWarning(@$"Failed to GET {_debugSubscribeUrl}
+{ex.Message}");
             }
             var currentParticipants = subscribe.Select(s => s.name).ToHashSet();
 
-            var ready = currentParticipants.IsSupersetOf(_requiredParticipants);
+            ready = currentParticipants.IsSupersetOf(_requiredParticipants);
 
             if (ready)
             {
                 break;
             }
 
-            _log.LogWarning("Waiting for all required participants to join the bus . . .");
+            _log.LogWarning("Waiting all required participants to join the bus . . .");
 
             await Task.Delay(5000, stoppingToken);
         }
 
+        if (!ready)
+        {
+            _log.LogError("Give up waiting all required participants to join the bus.");
+
+            return;
+        }
 
         //let's demo
         await Execute(stoppingToken);

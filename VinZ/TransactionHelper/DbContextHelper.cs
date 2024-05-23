@@ -140,7 +140,8 @@ Error: {ex.Message}
     (
         this WebApplicationBuilder webApplicationBuilder,
         IEnumerable<Type> myDbContextTypes,
-        bool isDebug, 
+        bool isDebug,
+        string env,
         LogLevel logLevel
     )
     {
@@ -160,7 +161,7 @@ Error: {ex.Message}
 
             registerDbContextType
                 .MakeGenericMethod([myDbContextType])
-                .Invoke(null, [dbContextFactory, isDebug, logLevel]);
+                .Invoke(null, [dbContextFactory, isDebug, env, logLevel]);
         }
 
         webApplicationBuilder.Services.AddSingleton<IDbContextFactory>(dbContextFactory);
@@ -171,11 +172,12 @@ Error: {ex.Message}
     (
         this RegisteredDbContextFactory dbContextFactory,
         bool isDebug,
+        string env,
         LogLevel logLevel
     )
         where TContext : MyDbContext, new()
     {
-        dbContextFactory.RegisterDbContextTypePrivate<TContext>(isDebug, logLevel);
+        dbContextFactory.RegisterDbContextTypePrivate<TContext>(isDebug, env, logLevel);
     }
 
 
@@ -183,6 +185,7 @@ Error: {ex.Message}
     (
         this RegisteredDbContextFactory dbContextFactory,
         bool isDebug,
+        string env,
         LogLevel logLevel
     )
         where TContext : MyDbContext, new()
@@ -190,6 +193,7 @@ Error: {ex.Message}
         dbContextFactory.RegisterDbContextType(() => new TContext
         {
             IsDebug = isDebug,
+            Env = env,
             logLevel = logLevel
         });
     }
@@ -198,7 +202,7 @@ Error: {ex.Message}
     private static readonly Regex contextRx = new("^(.*)Context$", RegexOptions.IgnoreCase);
     private static readonly Regex connectionStringRx = new(@"\(\$Context\)", RegexOptions.IgnoreCase);
 
-    public static void ConfigureMyWay<TContext>(this DbContextOptionsBuilder builder, bool isDebug, LogLevel logLevel)
+    public static void ConfigureMyWay<TContext>(this DbContextOptionsBuilder builder, bool isDebug, string env, LogLevel logLevel)
         where TContext : DbContext
     {
         // if (builder.IsConfigured)
@@ -209,6 +213,7 @@ Error: {ex.Message}
         var configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json")
+            .AddJsonFile($"appsettings.{env}.json")
             .Build();
 
         var buildConfigurationName = Assembly
@@ -222,9 +227,11 @@ Error: {ex.Message}
         var providerName = Environment.GetEnvironmentVariable("PROVIDER_NAME")  ?? configuration["DbProvider"]?.ToLower() ?? "sqlite";
 
         var connectionString = connectionStringRx.Replace(
-            Environment.GetEnvironmentVariable("ConnectionString") ?? configuration.GetConnectionString(buildConfigurationName),
+            Environment.GetEnvironmentVariable("ConnectionString")
+            ?? configuration.GetConnectionString(buildConfigurationName),
+            // ?? configuration.GetConnectionString(env),
             contextName);
-
+        
         // Console.Error.WriteLine($"contextName={contextName} connectionString={connectionString}");
 
         var dbbuilder = providerName switch

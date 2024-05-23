@@ -26,7 +26,7 @@ public class BookingAdminContext: MyDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {
-        builder.ConfigureMyWay<BookingAdminContext>(IsDebug, logLevel);
+        builder.ConfigureMyWay<BookingAdminContext>(IsDebug, Env, logLevel);
 
     }
 
