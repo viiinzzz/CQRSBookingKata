@@ -81,11 +81,48 @@ public static partial class ApiHelper
 
     public static Uri GetAppUrlPrefix(string prefix)
     {
-        var urls = (Environment.GetEnvironmentVariable("ASPNETCORE_URLS")?? string.Empty)
+        Func<string?, string[]> strings = str => (str ?? string.Empty)
             .Split(";")
             .Select(url => url.Trim())
             .Where(url => url.Length > 0)
             .ToArray();
+
+        Func<string?, int[]> numbers = str => strings(str)
+            .Select(s => int.Parse(s))
+            .ToArray();
+
+        string[] urls = [];
+
+        Func<bool> noUrl = () => urls.Length == 0;
+
+
+        if (noUrl())
+        {
+            urls = strings(Environment.GetEnvironmentVariable("DOTNET_URLS"));
+        }
+
+        if (noUrl())
+        {
+            urls = strings(Environment.GetEnvironmentVariable("ASPNETCORE_URLS"));
+        }
+
+        if (noUrl())
+        {
+            var httpPorts = numbers(Environment.GetEnvironmentVariable("DOTNET_HTTP_PORTS"));
+            var httpsPorts = numbers(Environment.GetEnvironmentVariable("DOTNET_HTTPS_PORTS"));
+            urls = httpPorts.Select(port => $"http://localhost:{port}")
+                .Concat(httpsPorts.Select(port => $"https://localhost:{port}"))
+                .ToArray();
+        }
+
+        if (noUrl())
+        {
+            var httpPorts = numbers(Environment.GetEnvironmentVariable("ASPNETCORE_HTTP_PORTS"));
+            var httpsPorts = numbers(Environment.GetEnvironmentVariable("ASPNETCORE_HTTPS_PORTS"));
+            urls = httpPorts.Select(port => $"http://localhost:{port}")
+                .Concat(httpsPorts.Select(port => $"https://localhost:{port}"))
+                .ToArray();
+        }
 
         if (urls.Length == 0)
         {

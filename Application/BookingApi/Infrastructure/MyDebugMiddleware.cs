@@ -142,6 +142,8 @@ Failure cause by {ex.GetType().Name}:
         }
         catch (Exception ex)
         {
+            if (ex.InnerException != null) ex = ex.InnerException;
+
             var dt = (DateTime.Now - t0).TotalMilliseconds;
 
             // if (IsTraceResponse)

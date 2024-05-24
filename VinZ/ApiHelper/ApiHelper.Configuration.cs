@@ -29,21 +29,34 @@ public partial class ApiHelper
         return availableTypes.Where(type => typesStr.Contains(type.typeInterface.FullName));
     }
 
-    public static IServiceCollection AddScopedConfigurationTypes(this WebApplicationBuilder? builder, string key,
-        IEnumerable<(Type typeInterface, Type typeImplementation)> availableTypes)
+    public static IServiceCollection AddScopedConfigurationTypes
+    (
+        this WebApplicationBuilder? builder, 
+        string key,
+        IEnumerable<(Type typeInterface, Type typeImplementation)> availableTypes,
+        out IEnumerable<Type> registeredTypes
+    )
     {
-        var types = builder.GetConfigurationTypes(key, availableTypes);
+        var types = builder.GetConfigurationTypes(key, availableTypes).ToArray();
 
         var services = builder.Services;
 
+        var _registeredTypes = new List<Type>();
+        registeredTypes = _registeredTypes;
+
+        Console.Out.WriteLine($"dbug: Registering {key} ({types.Length})");
         foreach (var (serviceType, implementationType) in types)
         {
+            _registeredTypes.Add(serviceType);
+
             if (serviceType == implementationType)
             {
+                Console.Out.WriteLine($"dbug:   Registering <{implementationType.Name}>");
                 services.AddScoped(implementationType);
                 continue;
             }
 
+            Console.Out.WriteLine($"dbug:   Registering <{serviceType.Name}, {implementationType.Name}>");
             services.AddScoped(serviceType, implementationType);
         }
 

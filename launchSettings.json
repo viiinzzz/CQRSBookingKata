@@ -7,9 +7,8 @@
         "booking.api": "StartDebugging"
       },
       "environmentVariables": {
-        "ASPNETCORE_HTTP_PORTS": "5291"
-      },
-      "applicationUrl": "http://*:5291"
+        "ASPNETCORE_URLS": "http://*:5291"
+      }
     }
   }
 }

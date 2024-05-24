@@ -1,16 +1,26 @@
 
-# build
+# build image
 
 A:\Kata\BookingKata> cls&&docker build -f Application\BookingApi\Dockerfile --force-rm -t bookingapi .
--or-
-A:\Kata\BookingKata> cls&&docker compose build&&cls&&docker compose up
 
-A:\Kata\BookingKata> dive bookingapi
-
+# run api -single container
 A:\Kata\BookingKata> docker run -e ASPNETCORE_ENVIRONMENT=Production-Admin -it bookingapi /bin/bash 
 
-A:\Kata\BookingKata>
+# run solution - multiple containers (no rebuild)
+A:\Kata\BookingKata> cls&&docker compose up
 
+# rebuild+clean+run solution oneliner
+A:\Kata\BookingKata> for /f "delims=" %A in ('docker images -f "dangling=true" -q ') do docker rmi %A&&cls&&docker compose build&&cls&&docker compose up
+
+# cleanup
+docker images -f "dangling=true" -q
+## linux
+docker rmi $(docker images -f "dangling=true" -q)
+## windows
+echo off&for /f "delims=" %A in ('docker images -f "dangling=true" -q ') do docker rmi %A & echo on
+
+# inspect
+A:\Kata\BookingKata> dive bookingapi
 
 # troubleshoot
 

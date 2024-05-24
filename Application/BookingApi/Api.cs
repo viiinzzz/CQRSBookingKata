@@ -93,7 +93,9 @@ void ConfigureDependencyInjection
     //database
     var logLevelEFContext = builder.EnumConfiguration("Logging:LogLevel:Microsoft.EntityFrameworkCore.DbContext",
         "Logging:LogLevel:Default", LogLevel.Warning);
+
     var dbContextTypes = builder.GetConfigurationTypes("Api:DbContext", Dependencies.AvailableDbContextTypes);
+
     builder.RegisterDbContexts(dbContextTypes, pif.IsDebug, pif.Env, logLevelEFContext);
 
     configureApiHooks.Add(app =>
@@ -164,7 +166,7 @@ void ConfigureDependencyInjection
     services.AddSingleton<ITimeService, TimeService>();
     services.AddSingleton<IRandomService, RandomService>();
 
-    if (pif.Env is "Development" or "Production-Admin")
+    if (pif.Env is "Development" or "Production-App")
     {
         services.AddSingleton<IServerContextService, ServerContextService>();
     }
@@ -191,11 +193,25 @@ void ConfigureDependencyInjection
 
 
     //repo
-    builder.AddScopedConfigurationTypes("Api:Repository", Dependencies.AvailableRepositories);
-
+    builder.AddScopedConfigurationTypes("Api:Repository", Dependencies.AvailableRepositories, out var registeredRepository);
+    if (servePages &&
+        !registeredRepository.Contains(typeof(IAdminRepository)))
+    {
+        throw new ApplicationException(@"Invalid configuration:
+{
+  Api:
+    ServePages: true
+-requires-
+    DbContext: [
+      ""BookingKata.Infrastructure.Storage.BookingAdminContext""
+    ],
+    Repository: [
+      ""BookingKata.Admin.IAdminRepository""
+    ]");
+    }
 
     //business/support/third-party
-    builder.AddScopedConfigurationTypes("Api:Service", Dependencies.AvailableServices);
+    builder.AddScopedConfigurationTypes("Api:Service", Dependencies.AvailableServices, out var registeredServices);
 
     var bookingConfig = new BookingConfiguration
     {
@@ -244,6 +260,10 @@ void ConfigureDependencyInjection
 
 
 var builder = WebApplication.CreateSlimBuilder(args);
+// builder.WebHost.ConfigureKestrel(options =>
+// {
+//   
+// });
 
 
 //let's cast actors
