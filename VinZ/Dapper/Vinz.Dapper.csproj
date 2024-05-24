@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>KVStore.Dapper.Custom</AssemblyName>
+    <Title>Dapper</Title>
+    <PackageTags>orm;sql;micro-orm</PackageTags>
+    <Description>A high performance Micro-ORM supporting SQL Server, MySQL, Sqlite, SqlCE, Firebird etc..</Description>
+    <Authors>Sam Saffron;Marc Gravell;Nick Craver</Authors>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RootNamespace>Dapper</RootNamespace>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- common base API goes here -->
+    <AdditionalFiles Include="PublicAPI.*.txt" />
+    <!-- TFM-specific additions go here; in reality this just means "current" (to avoid DisposeAsync etc in netfx/netstandard) -->
+    <AdditionalFiles Include="PublicAPI/$(TargetFramework)/PublicAPI.*.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="System.Reflection.Emit.Lightweight" />
+  </ItemGroup>
+</Project>

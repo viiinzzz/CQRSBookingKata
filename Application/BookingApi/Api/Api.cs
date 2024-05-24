@@ -119,6 +119,8 @@ void ConfigureDependencyInjection
 
         configureApiHooks.Add(app =>
         {
+            app.UseStaticFiles();
+
             app.MapRazorPages();
             app.UseAntiforgery();
         });
@@ -278,8 +280,6 @@ api.UseMiddleware<MyDebugMiddleware>();
 useServices(api);
 //
 //
-
-api.UseStaticFiles();
 
 
 MapParticipantRoutes(api);

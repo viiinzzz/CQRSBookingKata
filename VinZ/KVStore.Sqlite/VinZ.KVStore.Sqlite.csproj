@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>VinZ.Common.$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>VinZ.Common</RootNamespace>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ImpromptuInterface" Version="8.0.4" />
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.118" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Dapper\Vinz.Dapper.csproj" />
+    <ProjectReference Include="..\FileKVStore\VinZ.KVStore.csproj" />
+    <ProjectReference Include="..\StringHelper\VinZ.Common.StringHelper.csproj" />
+  </ItemGroup>
+
+</Project>

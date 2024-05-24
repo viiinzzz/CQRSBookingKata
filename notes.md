@@ -25,7 +25,8 @@ A:\Kata\BookingKata>
 /pgadmin4 # curl http://192.168.128.9:8080
 
 
-
+netstat -anop
+TCPView from SysInternals--
 
 # investigate
 
