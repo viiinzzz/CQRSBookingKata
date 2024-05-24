@@ -80,7 +80,7 @@ const int dbContextKeepAliveMilliseconds = 30_000;
   */
 
 //adding components to the magic wiring box, aka. DI Container to achieve IoC
-
+//configureApplication is the hook for using services
 
 void ConfigureDependencyInjection
 (
@@ -221,22 +221,11 @@ void ConfigureDependencyInjection
         if (demoModeStr != null) Console.Out.WriteLine(@$"
 {demoModeStr}
 ");
-
-        services.AddSingleton<DemoContextService>();
-        services.AddSingleton<IDemoContext>(sp => sp.GetRequiredService<DemoContextService>());
-
-        services.AddSingleton<DemoBus>();
-
-        services.AddHostedService<DemoHostService>();
-        services.Configure<HostOptions>(options =>
-        {
-            options.ServicesStartConcurrently = true;
-            options.ServicesStopConcurrently = true;
-        });
+        services.ConfigureDemo();
     }
     else
     {
-        services.AddSingleton<IDemoContext, DemoContextProxyService>();
+        services.ConfigureDemoProxy();
     }
 
 
@@ -257,13 +246,13 @@ void ConfigureDependencyInjection
 var builder = WebApplication.CreateSlimBuilder(args);
 
 
-//let's cast participants
+//let's cast actors
 //
 ConfigureDependencyInjection(builder, out var useServices);
 //
 //
 
-//onboard participants
+//onboard actors
 //
 var api = builder.Build();
 //
@@ -275,22 +264,23 @@ var (isDevelopment, isStaging, isProduction, apiEnv) = api.GetEnv();
 
 api.UseMiddleware<MyDebugMiddleware>();
 
-//
+//task the actors
 //
 useServices(api);
 //
 //
 
 
-MapParticipantRoutes(api);
-
-
+//api routes
 var serveApi = builder.IsTrueConfiguration("Api:ServeApi");
+
+MapParticipantRoutes(api); //basic compulsory for participants collaboration
 
 if (serveApi)
 {
-    MapApiRoutes(api);
+    MapApiRoutes(api); //front api gateway
 }
+
 
 //let the show start...
 //

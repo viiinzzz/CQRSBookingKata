@@ -56,24 +56,29 @@ Press a key to continue . . .
     public async Task StartingAsync(CancellationToken cancellationToken)
     {
         //initialize
-
+        Console.Out.WriteLine("Starting MqServer...");
         queueScope = scp.GetScope<IMessageQueueRepository>(out queue);
+        Console.Out.WriteLine("Starting MqServer.");
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
+        Console.Out.WriteLine("Start MqServer...");
         _executeCancel = new CancellationTokenSource();
 
         _executingTask = Execute(_executeCancel.Token);
+        Console.Out.WriteLine("Start MqServer.");
     }
 
     public async Task StartedAsync(CancellationToken cancellationToken)
     {
+        Console.Out.WriteLine("Started MqServer.");
         //executing
     }
 
     private async Task Execute(CancellationToken cancel)
     {
+        Console.Out.WriteLine("Execute MqServer...");
         while (!cancel.IsCancellationRequested)
         {
             var t0 = DateTime.UtcNow;
@@ -106,24 +111,30 @@ Press a key to continue . . .
 
             await Task.Delay(delay, cancel);
         }
+        Console.Out.WriteLine("Execute MqServer.");
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
+        Console.Out.WriteLine("Stop MqServer...");
         _executeCancel.Cancel();
 
         await Task.WhenAny(_executingTask, Task.Delay(Timeout.Infinite, cancellationToken));
+        Console.Out.WriteLine("Stop MqServer...");
     }
 
     public async Task StoppingAsync(CancellationToken cancellationToken)
     {
+        Console.Out.WriteLine("Stopping MqServer...");
         //tearing down
 
         queueScope.Dispose();
+        Console.Out.WriteLine("Stopping MqServer...");
     }
 
     public async Task StoppedAsync(CancellationToken cancellationToken)
     {
+        Console.Out.WriteLine("Stopped MqServer.");
         //tear down
     }
 

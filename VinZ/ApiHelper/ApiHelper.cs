@@ -84,6 +84,7 @@ public static partial class ApiHelper
         var urls = (Environment.GetEnvironmentVariable("ASPNETCORE_URLS")?? string.Empty)
             .Split(";")
             .Select(url => url.Trim())
+            .Where(url => url.Length > 0)
             .ToArray();
 
         if (urls.Length == 0)
@@ -102,7 +103,7 @@ public static partial class ApiHelper
 
         if (prefix.EndsWith('/'))
         {
-            prefix = prefix[..^2];
+            prefix = prefix[..^1];
         }
 
         try

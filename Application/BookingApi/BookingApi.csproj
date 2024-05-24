@@ -14,7 +14,7 @@
     <PackageIcon>viiinzzz-round.png</PackageIcon>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
-    <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
+    <DockerComposeProjectPath>..\..\BookingSolution.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -48,6 +48,10 @@
     <ProjectReference Include="..\..\VinZ\ServerContext\VinZ.Common.ServerContext.csproj" />
     <ProjectReference Include="..\..\VinZ\FakeTime\VinZ.Common.FakeTime.csproj" />
     <ProjectReference Include="..\..\VinZ\MessageQueue\VinZ.MessageQueue.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Api\" />
   </ItemGroup>
 
 </Project>

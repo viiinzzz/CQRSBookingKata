@@ -5,7 +5,11 @@
       "commandVersion": "1.0",
       "serviceActions": {
         "booking.api": "StartDebugging"
-      }
+      },
+      "environmentVariables": {
+        "ASPNETCORE_HTTP_PORTS": "5291"
+      },
+      "applicationUrl": "http://*:5291"
     }
   }
 }

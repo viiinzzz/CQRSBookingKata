@@ -19,7 +19,7 @@ namespace VinZ.Common;
 
 public class ScopeProvider(IServiceProvider sp, IConfiguration appConfig, ILogger<ScopeProvider> log) : IScopeProvider
 {
-    private readonly LogLevel logLevel = GetLogLevel(appConfig);
+    private readonly LogLevel _logLevel = GetLogLevel(appConfig);
 
     private static LogLevel GetLogLevel(IConfiguration appConfig)
     {
@@ -43,9 +43,13 @@ public class ScopeProvider(IServiceProvider sp, IConfiguration appConfig, ILogge
 
         t = scope.ServiceProvider.GetRequiredService<T>();
 
-        if (logLevel <= LogLevel.Debug)
+        if (_logLevel <= LogLevel.Debug)
         {
             log.LogWarning(@$"
+
+                                              ...GetScope {typeof(T).FullName}...
+");  
+            Console.Out.WriteLine(@$"
 
                                               ...GetScope {typeof(T).FullName}...
 ");
@@ -60,9 +64,13 @@ public class ScopeProvider(IServiceProvider sp, IConfiguration appConfig, ILogge
 
         t = scope.ServiceProvider.GetRequiredService(serviceType);
 
-        if (logLevel <= LogLevel.Debug)
+        if (_logLevel <= LogLevel.Debug)
         {
             log.LogWarning(@$"
+
+                                              ...GetScope {serviceType.FullName}...
+");
+            Console.Out.WriteLine(@$"
 
                                               ...GetScope {serviceType.FullName}...
 ");
