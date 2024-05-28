@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.IO;
+
 namespace BookingKata.API.Infrastructure;
 
 
@@ -64,56 +66,84 @@ public class MyDebugMiddleware
         var tid = context.Request.HttpContext.TraceIdentifier;
         RequestId++;
         var t0 = DateTime.Now;
+
         try
         {
+
             ExpandoObject? requestBodyObj = null;
-            MemoryStream? requestBodyMemoryStream = null;
-            if (context.Request.Body.CanRead) 
+
+            if (IsTraceRequest)
             {
-                var requestBody = await new StreamReader(context.Request.Body).ReadToEndAsync();
-                requestBodyMemoryStream = new MemoryStream();
+                MemoryStream? requestBodyMemoryStream;
+                if (context.Request.Body.CanRead)
                 {
-                    var requestBodyCopy = new StreamWriter(requestBodyMemoryStream, Encoding.UTF8);
-                    await requestBodyCopy.WriteAsync(requestBody);
-                    await requestBodyCopy.FlushAsync();
-                    requestBodyMemoryStream.Seek(0, SeekOrigin.Begin);
+                    var requestBody = await new StreamReader(context.Request.Body).ReadToEndAsync();
+                    requestBodyMemoryStream = new MemoryStream();
+                    {
+                        var requestBodyCopy = new StreamWriter(requestBodyMemoryStream, Encoding.UTF8);
+                        await requestBodyCopy.WriteAsync(requestBody);
+                        await requestBodyCopy.FlushAsync();
+                        requestBodyMemoryStream.Seek(0, SeekOrigin.Begin);
 
+                    }
+                    context.Request.Body = requestBodyMemoryStream;
+                    requestBodyObj = requestBody.FromJsonToExpando();
                 }
-                context.Request.Body = requestBodyMemoryStream;
-                requestBodyObj = requestBody.FromJsonToExpando();
-            }
 
-            if (IsTraceRequest) logger.LogInformation(@$"
+                logger.LogInformation(@$"
         <<-( Request )--------------------------------/{rid:000000}/
         | {context.Request.Scheme.ToUpper()} {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
         | ORIGIN {context.Request.Host}
         +---/{tid}/--------------------------
 {ToJsonDebug(requestBodyObj)}
 ---");
-          
-            await next(context);
+            }
 
-            requestBodyMemoryStream?.Dispose();
+            if (!IsTraceResponse)
+            {
+                //
+                //
+                await next(context);
+                //
+                //
+
+                return;
+            }
+
+            var originalBodyStream = context.Response.Body;
+            await using var responseBodyMemoryStream = new MemoryStream();
+            context.Response.Body = responseBodyMemoryStream;
+
+            //
+            //
+            await next(context);
+            //
+            //
+
+            responseBodyMemoryStream.Seek(0, SeekOrigin.Begin);
+            var responseBody = await new StreamReader(context.Response.Body, Encoding.UTF8).ReadToEndAsync();
+            responseBodyMemoryStream.Seek(0, SeekOrigin.Begin);
+
 
             ExpandoObject? responseBodyObj = null;
-            if (context.Response.Body.CanRead)
-            {
-                var responseBody = await new StreamReader(context.Response.Body).ReadToEndAsync();
-                await using var responseBodyMemoryStream = new MemoryStream();
-                {
-                    var responseBodyCopy = new StreamWriter(responseBodyMemoryStream, Encoding.UTF8);
-                    await responseBodyCopy.WriteAsync(responseBody);
-                    await responseBodyCopy.FlushAsync();
-                    responseBodyMemoryStream.Seek(0, SeekOrigin.Begin);
 
-                }
-                context.Response.Body = responseBodyMemoryStream;
+            if (context.Response.ContentType == "application/json")
+            {
                 responseBodyObj = responseBody.FromJsonToExpando();
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(responseBody))
+                {
+                    responseBodyObj = new ExpandoObject();
+                    ((IDictionary<string, object>)responseBodyObj!)[context.Response.ContentType ?? "text"] =
+                        responseBody.Replace("\r", "").Split('\n');
+                }
             }
 
             var dt = (DateTime.Now - t0).TotalMilliseconds;
 
-            if (IsTraceResponse) logger.LogInformation(@$"
+            logger.LogInformation(@$"
                 +--( Response {$"{dt,6:#####0}"}ms)-----------------------/{rid:000000}/
                 | {context.Request.Scheme.ToUpper()} {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
                 | ORIGIN {context.Request.Host}
@@ -123,9 +153,13 @@ public class MyDebugMiddleware
 {ToJsonDebug(requestBodyObj)}
 ---");
 
+            await responseBodyMemoryStream.CopyToAsync(originalBodyStream);
+            context.Response.Body = originalBodyStream;
         }
         catch (OperationCanceledException ex)
         {
+            context.Response.StatusCode = (int)HttpStatusCode.RequestTimeout; //408
+
             var dt = (DateTime.Now - t0).TotalMilliseconds;
 
             logger.LogWarning(@$"
@@ -137,17 +171,16 @@ Failure cause by {ex.GetType().Name}:
 {ex.Message}
 {ex.StackTrace}
 ---");
-
-            context.Response.StatusCode = (int)HttpStatusCode.RequestTimeout; //408
         }
         catch (Exception ex)
         {
+            context.Response.StatusCode = (int)HttpStatusCode.Conflict; //409
+
             if (ex.InnerException != null) ex = ex.InnerException;
 
             var dt = (DateTime.Now - t0).TotalMilliseconds;
 
-            // if (IsTraceResponse)
-                logger.LogError(@$"
+            logger.LogError(@$"
                 !--( Aborted {dt,6:#####0}ms)------------------------/{rid:000000}/
                 | {context.Request.Scheme.ToUpper()} {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
                 | ORIGIN {context.Request.Host} 
@@ -156,8 +189,6 @@ Failure cause by {ex.GetType().Name}:
 {ex.Message}
 {ex.StackTrace}
 ---");
-
-            context.Response.StatusCode = (int)HttpStatusCode.Conflict; //409
         }
     }
 
@@ -169,7 +200,7 @@ Failure cause by {ex.GetType().Name}:
         {
             if (response == null)
             {
-                return response.ToJson();
+                return "{}";//response.ToJson();
             }
 
             var message = ((IDictionary<string, object>)response!)["Message"]?.ToString();

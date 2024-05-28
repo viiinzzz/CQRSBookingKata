@@ -45,12 +45,12 @@ public partial class DemoBus
     private const int CustomerCount = 10;//1000
 
 
+
+
     public async Task Execute(CancellationToken cancel)
     {
         try
         {
-         
-
             DateTime.Freeze();
 
             Seed();

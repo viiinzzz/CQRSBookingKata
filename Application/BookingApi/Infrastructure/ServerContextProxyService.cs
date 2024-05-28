@@ -3,22 +3,17 @@
 public class ServerContextProxyService(IMessageBus mq)
     : IServerContextService
 {
-    private ServerContext GetContext()
+    private ServerContext? GetContext()
     {
-            var serverContextTask = mq.Ask<ServerContext>(
-                                        nameof(ServerContextProxyService), Recipient.Admin, Verb.Admin.RequestServerContext, null,
-                                        CancellationToken.None, 30)
-                              ?? throw new NullReferenceException();
+            var serverContext = mq.Ask<ServerContext>(
+                    nameof(ServerContextProxyService), Recipient.Admin, Verb.Admin.RequestServerContext, null, 
+                    CancellationToken.None, 30)
+                .Result;
 
-            serverContextTask.Wait();
-
-            return serverContextTask.Result
-                   ?? throw new NullReferenceException();
+            return serverContext;
     } 
     
-    public long Id => GetContext()?.ServerContextId
-                      ?? throw new NullReferenceException();
+    public long Id => GetContext()?.ServerContextId ?? 0;
     
-    public long SessionId => GetContext()?.SessionId
-                             ?? throw new NullReferenceException();
+    public long SessionId => GetContext()?.SessionId ?? 0;
 }

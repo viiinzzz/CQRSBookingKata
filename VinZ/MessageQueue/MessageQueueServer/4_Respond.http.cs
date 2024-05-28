@@ -64,7 +64,7 @@ public partial class MqServer
 
             if (statusCode is < 200 or > 299)
             {
-                return new NotifyAck
+                return notification.Ack() with
                 {
                     Valid = false,
                     Status = res.StatusCode,
@@ -102,7 +102,7 @@ public partial class MqServer
                         +......................................................>>>
 ");
 
-                return new NotifyAck
+                return notification.Ack() with
                 {
                     Valid = false,
                     Status = HttpStatusCode.RequestTimeout,
@@ -117,7 +117,7 @@ public partial class MqServer
                         +......................................................>>>
 ");
 
-            return new NotifyAck
+            return notification.Ack() with
             {
                 Valid = false,
                 Status = HttpStatusCode.InternalServerError,

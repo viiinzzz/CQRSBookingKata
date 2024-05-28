@@ -16,6 +16,8 @@ services:
     hostname: dmo001.booking.local
     networks:
       - booking_backend
+    ports:
+      - 5292:8080 #for troubleshooting
     environment:
       - DEMO_MODE=true
       - MESSAGEQUEUE_URL=http://app001.booking.local:8080/bus
@@ -25,6 +27,8 @@ services:
     hostname: adm001.booking.local
     networks:
       - booking_backend
+    ports:
+      - 5293:8080 #for troubleshooting
     environment:
       - MESSAGEQUEUE_URL=http://app001.booking.local:8080/bus
 
@@ -33,6 +37,8 @@ services:
     hostname: pla001.booking.local
     networks:
       - booking_backend
+    ports:
+      - 5294:8080 #for troubleshooting
     environment:
       - MESSAGEQUEUE_URL=http://app001.booking.local:8080/bus
 
@@ -41,19 +47,23 @@ services:
     hostname: sal001.booking.local
     networks:
       - booking_backend
+    ports:
+      - 5295:8080 #for troubleshooting
     environment:
       - MESSAGEQUEUE_URL=http://app001.booking.local:8080/bus
 
   support:
-    #entrypoint: ["echo", "warn: Service disabled"] #Un/Comment me out
+    entrypoint: ["echo", "warn: Service disabled"] #Un/Comment me out
     hostname: sup001.booking.local
     networks:
       - booking_backend
+    ports:
+      - 5296:8080 #for troubleshooting
     environment:
       - MESSAGEQUEUE_URL=http://app001.booking.local:8080/bus
  
   dbadmin:
-    #entrypoint: ["echo", "warn: Service disabled"] #Un/Comment me out
+    entrypoint: ["echo", "warn: Service disabled"] #Un/Comment me out
     ports:
       - 7038:80
   

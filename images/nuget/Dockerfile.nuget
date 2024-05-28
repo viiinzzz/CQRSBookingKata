@@ -1,0 +1,4 @@
+
+ARG REG
+
+FROM ${REG}loicsharma/baget:latest as nuget

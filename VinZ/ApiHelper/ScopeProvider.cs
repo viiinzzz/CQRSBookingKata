@@ -49,10 +49,10 @@ public class ScopeProvider(IServiceProvider sp, IConfiguration appConfig, ILogge
 
                                               ...GetScope {typeof(T).FullName}...
 ");  
-            Console.Out.WriteLine(@$"
-
-                                              ...GetScope {typeof(T).FullName}...
-");
+//             Console.Out.WriteLine(@$"
+//
+//                                               ...GetScope {typeof(T).FullName}...
+// ");
         }
 
         return scope;
@@ -70,10 +70,10 @@ public class ScopeProvider(IServiceProvider sp, IConfiguration appConfig, ILogge
 
                                               ...GetScope {serviceType.FullName}...
 ");
-            Console.Out.WriteLine(@$"
-
-                                              ...GetScope {serviceType.FullName}...
-");
+//             Console.Out.WriteLine(@$"
+//
+//                                               ...GetScope {serviceType.FullName}...
+// ");
         }
 
         return scope;

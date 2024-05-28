@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\VinZ\GeoIndexing.Contract\VinZ.GeoIndexing.Contract.csproj" />
+    <ProjectReference Include="..\..\VinZ\ToolBox\VinZ.Common.ToolBox.csproj" />
   </ItemGroup>
 
 </Project>

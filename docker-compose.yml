@@ -2,6 +2,23 @@ name: booking_solution
 
 services:
 
+  nuget:
+    image: ${DOCKER_REGISTRY-}bookingapi:latest
+    build:
+      context: .
+      dockerfile: images/nuget/Dockerfile.nuget
+    networks:
+      - booking_backend
+      - booking_frontend
+    #restart: always
+    #restart: unless-stopped
+    ports:
+      - published: 5555
+        target: 80
+    volumes:
+      - nuget_data:/var/baget:rw
+
+
   app:
     image: ${DOCKER_REGISTRY-}bookingapi:latest
     build:
@@ -132,7 +149,7 @@ services:
     container_name: booking_dbadmin
     build:
       context: .
-      dockerfile: db-admin/Dockerfile.dbadmin
+      dockerfile: images/db-admin/Dockerfile.dbadmin
     depends_on:
       - db
     domainname: booking.local
@@ -186,6 +203,7 @@ networks:
 volumes:
   db_data:
   dbadmin_data:
+  nuget_data:
   #configdir:
   #  driver: local
   #  driver_opts:

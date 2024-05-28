@@ -41,13 +41,18 @@ public class AwaitedResponse
 
     public void Respond(IClientNotificationSerialized notification)
     {
-        if (Responded || Cancelled)
+        if (Cancelled)
         {
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("respond cancelled not allowed");
         }
 
-        Responded = true;
+        if (/*already*/Responded)
+        {
+            throw new InvalidOperationException("respond more than once not allowed");
+        }
+
         ResponseNotification = notification;
+        Responded = true;
     }
 
     private bool resultAlreadyCalled;
@@ -81,7 +86,12 @@ public class AwaitedResponse
         {
             await Task.Delay(CheckMilliseconds);
 
-            if (Responded || Cancelled)
+            if (Cancelled)
+            {
+                break;
+            }
+            
+            if (Responded)
             {
                 break;
             }
@@ -91,7 +101,12 @@ public class AwaitedResponse
             DateTime.UtcNow - StartedTime.Value
         ).Seconds;
 
-        if (Cancelled || !Responded)
+        if (Cancelled)
+        {
+            return null;
+        }
+        
+        if (!Responded)
         {
             return null;
         }

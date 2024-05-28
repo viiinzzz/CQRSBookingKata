@@ -150,7 +150,11 @@ public class DemoHostService
                 break;
             }
 
-            _log.LogWarning("Waiting all required participants to join the bus . . .");
+            var missingParticipants = _requiredParticipants.Except(currentParticipants);
+
+            _log.LogWarning(@$"Waiting {missingParticipants.Count()} more required participant{(missingParticipants.Count() > 1 ? "s" : "")} to join the bus . . .
+{string.Join(Environment.NewLine, currentParticipants.Select(p => $" - {p} Registered"))}
+{string.Join(Environment.NewLine, missingParticipants.Select(p => $" ? {p} Waiting"))}");
 
             await Task.Delay(5000, stoppingToken);
         }

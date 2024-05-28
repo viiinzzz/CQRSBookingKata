@@ -81,6 +81,12 @@ public partial class AdminBus(IScopeProvider sp, BookingConfiguration bconf) : M
                         break;
                     }
 
+                    case RequestFetchHotelList:
+                    {
+                        Verb_Is_RequestFetchHotelList(notification);
+                        break;
+                    }
+
                     case RequestFetchHotelGeoProxy:
                     {
                         Verb_Is_RequestFetchHotelGeoProxy(notification);

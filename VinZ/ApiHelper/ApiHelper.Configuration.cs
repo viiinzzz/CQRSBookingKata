@@ -44,21 +44,46 @@ public partial class ApiHelper
         var _registeredTypes = new List<Type>();
         registeredTypes = _registeredTypes;
 
-        Console.Out.WriteLine($"dbug: Registering {key} ({types.Length})");
+        var success = new List<string>();
+        var failed = new List<string>();
         foreach (var (serviceType, implementationType) in types)
         {
             _registeredTypes.Add(serviceType);
 
             if (serviceType == implementationType)
             {
-                Console.Out.WriteLine($"dbug:   Registering <{implementationType.Name}>");
-                services.AddScoped(implementationType);
-                continue;
+                var registering = $"<{implementationType.Name}>";
+                try
+                {
+                    services.AddScoped(implementationType);
+                    success.Add($"{registering} Registered");
+                }
+                catch (Exception ex)
+                {
+                    failed.Add(@$"{registering} Failed
+{ex.Message}");
+                }
             }
-
-            Console.Out.WriteLine($"dbug:   Registering <{serviceType.Name}, {implementationType.Name}>");
-            services.AddScoped(serviceType, implementationType);
+            else
+            {
+                var registering = $"<{serviceType.Name}, {implementationType.Name}> Registered";
+                try
+                {
+                    services.AddScoped(serviceType, implementationType);
+                    success.Add(registering);
+                }
+                catch (Exception ex)
+                {
+                    failed.Add(@$"{registering} Failed
+{ex.Message}");
+                }
+            }
         }
+        
+        Console.Out.WriteLine(@$"dbug: {key}{(types.Length > 0 ? "" : " has no dependency.")}
+{string.Join(Environment.NewLine, success.Select(s=> $"       - {s}"))
+}{(failed.Count == 0 ? "" : Environment.NewLine)
+}{string.Join(Environment.NewLine, failed.Select(s=> $"       X {s}"))}");
 
         return services;
     }

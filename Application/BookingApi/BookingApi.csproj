@@ -50,8 +50,4 @@
     <ProjectReference Include="..\..\VinZ\MessageQueue\VinZ.MessageQueue.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Api\" />
-  </ItemGroup>
-
 </Project>

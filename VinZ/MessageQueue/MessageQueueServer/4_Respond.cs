@@ -328,7 +328,11 @@ failure: {ex.Message}
 
                         client.OnNotified(clientNotification);
 
-                        ack = new (HttpStatusCode.Accepted, true, null, correlationId);
+                        ack = new NotifyAck {
+                            Valid = true,
+                            Status = HttpStatusCode.Accepted,
+                            CorrelationId = correlationId
+                        };
                     }
                     else
                     {

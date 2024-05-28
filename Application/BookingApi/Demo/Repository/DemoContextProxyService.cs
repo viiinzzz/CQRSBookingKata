@@ -1,18 +1,18 @@
 ﻿namespace BookingKata.API.Demo;
 
-public class DemoContextProxyService(IMessageBus mq) : IDemoContext
+public class DemoContextProxyService(IMessageBus mq, IServerContextService serverContext) : IDemoContext
 {
+    public long ServerId => serverContext.Id;
+    public long SessionId => serverContext.SessionId;
+
     private DemoContext GetContext()
     {
         var context = mq.Ask<DemoContext>(
-                                  nameof(ServerContextProxyService), Recipient.Demo, Verb.Demo.RequestDemoContext, null,
-                                  CancellationToken.None, 30)
-                              ?? throw new NullReferenceException();
+                nameof(ServerContextProxyService), Recipient.Demo, Verb.Demo.RequestDemoContext, null, 
+                CancellationToken.None, 30)
+            .Result ?? throw new NullReferenceException();
 
-        context.Wait();
-
-        return context.Result
-               ?? throw new NullReferenceException();
+        return context;
     }
     
     public int[] FakeStaffIds => GetContext().FakeStaffIds;
@@ -28,4 +28,16 @@ public class DemoContextProxyService(IMessageBus mq) : IDemoContext
     public bool SeedComplete => GetContext().SeedComplete;
 
     public int SimulationDay => GetContext().SimulationDay;
+
+    private Hotel[] GetHotels()
+    {
+        var hotels = mq.Ask<Hotel[]>(
+                         nameof(ServerContextProxyService), Recipient.Demo, Verb.Demo.RequestDemoHotels, null, 
+                         CancellationToken.None, 30)
+            .Result ?? throw new NullReferenceException();
+
+        return hotels;
+    }
+
+    public Hotel[] Hotels => GetHotels();
 }

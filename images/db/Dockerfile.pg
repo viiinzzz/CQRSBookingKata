@@ -1,0 +1,12 @@
+
+ARG REG
+
+FROM ${REG}postgis/postgis:latest as pg
+
+ARG ApiKey=welcome
+
+ARG Storage__Type=FileSystem
+ARG Storage__Path=/var/baget/packages
+ARG Database__Type=Sqlite
+ARG Database__ConnectionString=Data Source=/var/baget/baget.db
+ARG Search__Type=Database

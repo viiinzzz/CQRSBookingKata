@@ -55,12 +55,11 @@ public class AwaitersBus(AwaitedResponse[] awaitedResponses) : IMessageBusClient
 
     public Task<NotifyAck> Notify(IClientNotificationSerialized notification)
     {
-        return Task.FromResult(new NotifyAck
+        return Task.FromResult(notification.Ack() with
         {
             Valid = true,
             Status = 0,
             data = default,
-            CorrelationId = notification.CorrelationId()
         });
     }
 

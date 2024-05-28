@@ -123,12 +123,10 @@ public class MessageBusClientNoNetwork : IMessageBusClient //ancien MessageBusCl
 
         _bus!.Notify(notification);
 
-        return Task.FromResult(new NotifyAck
+        return Task.FromResult(notification.Ack() with
         {
             Valid = true,
             Status = 0,
-            data = default,
-            CorrelationId = notification.CorrelationId()
         });
     }
 

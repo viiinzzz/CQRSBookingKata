@@ -75,7 +75,11 @@ public static class Verb
         
         public const string RequestDisableHotel = $"{RequestDelete}{Hotel}";
         public const string HotelDisabled = $"{Hotel}{Deleted}";
-        
+
+        public const string HotelList = $"{nameof(Hotel)}List";
+        public const string RequestFetchHotelList = $"{RequestFetch}{HotelList}";
+        public const string HotelListFetched = $"{HotelList}{Fetched}";
+
 
         public const string RequestHotelRoomDetails = $"{Request}{HotelRoomDetails}";
         public const string RequestSingleRoomDetails = $"{Request}{SingleRoomDetails}";
@@ -85,13 +89,16 @@ public static class Verb
         public const string RespondManyRoomDetails = $"{Respond}{ManyRoomDetails}";
 
         public const string RequestServerContext = $"{Request}{nameof(ServerContext)}";
+        public const string RespondServerContext = $"{Respond}{nameof(ServerContext)}";
     }
 
     public static class Demo
     {
         private const string DemoContext = nameof(DemoContext);
-
         public const string RequestDemoContext = $"{Request}{DemoContext}";
+
+        private const string DemoHotels = $"{Admin.Hotel}s";
+        public const string RequestDemoHotels = $"{Request}{DemoHotels}";
     }
 
     public static class Planning

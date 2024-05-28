@@ -267,7 +267,7 @@ public class MessageBusHttp : IMessageBus
 
             if (statusCode is < 200 or > 299)
             {
-                return new NotifyAck
+                return notification.Ack() with
                 {
                     Valid = false,
                     Status = res.StatusCode,
@@ -306,13 +306,13 @@ public class MessageBusHttp : IMessageBus
 {ex.StackTrace}
 !!!");
 
-            throw new Exception($"{nameof(Unsubscribe)} failure: {url} {ex.Message}", ex);
+            // throw new Exception($"{nameof(Unsubscribe)} failure: {url} {ex.Message}", ex);
 
-            return new NotifyAck
+            return notification.Ack() with
             {
                 Valid = false,
                 Status = HttpStatusCode.InternalServerError,
-                data = ex.Message
+                data = $"{nameof(Unsubscribe)} failure: {url} {ex.Message}"
             };
         }
     }
@@ -321,11 +321,16 @@ public class MessageBusHttp : IMessageBus
 
     public Task<IClientNotificationSerialized> Wait(NotifyAck ack, CancellationToken cancellationToken)
     {
+        if (!ack.Valid)
+        {
+            throw new InvalidOperationException("Invalid wait. (ack.Valid == false)");
+        }
+
         var correlationId = ack.CorrelationId;
 
         if (correlationId == null)
         {
-            throw new InvalidOperationException("Uncorrelated wait");
+            throw new InvalidOperationException("Uncorrelated wait. (ack.CorrelationId == null)");
         }
 
         AwaitedResponse awaitedResponse = new(correlationId.Value, DateTime, cancellationToken, Track, Untrack);

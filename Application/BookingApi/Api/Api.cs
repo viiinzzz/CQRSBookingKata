@@ -194,21 +194,22 @@ void ConfigureDependencyInjection
 
     //repo
     builder.AddScopedConfigurationTypes("Api:Repository", Dependencies.AvailableRepositories, out var registeredRepository);
-    if (servePages &&
-        !registeredRepository.Contains(typeof(IAdminRepository)))
-    {
-        throw new ApplicationException(@"Invalid configuration:
-{
-  Api:
-    ServePages: true
--requires-
-    DbContext: [
-      ""BookingKata.Infrastructure.Storage.BookingAdminContext""
-    ],
-    Repository: [
-      ""BookingKata.Admin.IAdminRepository""
-    ]");
-    }
+
+//     if (servePages &&
+//         !registeredRepository.Contains(typeof(IAdminRepository)))
+//     {
+//         throw new ApplicationException(@"Invalid configuration:
+// {
+//   Api:
+//     ServePages: true
+// -requires-
+//     DbContext: [
+//       ""BookingKata.Infrastructure.Storage.BookingAdminContext""
+//     ],
+//     Repository: [
+//       ""BookingKata.Admin.IAdminRepository""
+//     ]");
+//     }
 
     //business/support/third-party
     builder.AddScopedConfigurationTypes("Api:Service", Dependencies.AvailableServices, out var registeredServices);

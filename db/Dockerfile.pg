@@ -1,8 +1,0 @@
-#
-# (c) Fontaine Vincent, 2021-2023
-#
-
-
-ARG REG
-
-FROM ${REG}postgis/postgis:latest as pg

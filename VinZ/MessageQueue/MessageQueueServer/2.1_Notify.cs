@@ -144,7 +144,8 @@ Subject: {messageType}{notification.Verb}
 
         return new NotifyAck
         {
-            Valid = false
+            Valid = false,
+            CorrelationId = correlationId
         };
     }
 }

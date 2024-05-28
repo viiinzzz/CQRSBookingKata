@@ -21,7 +21,7 @@ public static partial class ApiMethods
 {
     private const string BusTag = "Bus";
 
-    private static void MapRoutes_0_Bus(WebApplication app)
+    private static void MapRoutes_01_Bus(WebApplication app)
     {
         var busGroup = app.MapGroup("/bus"
         ).ExcludeFromDescription();

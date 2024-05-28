@@ -1,11 +1,12 @@
 ﻿@page
 
-@* @inject KpiQueryService kpi *@
-@inject IAdminRepository admin
-@using VinZ.Common
-@inject ITimeService DateTime
 @inject IDemoContext demo
-@inject IServerContextService serverContext
+
+@{
+    var simulationDay = demo.SimulationDay;
+    var seedComplete = demo.SeedComplete;
+    var hotels = demo.Hotels;
+}
 
 @{
     Layout = "_Layout";
@@ -58,9 +59,10 @@
                 ✅Ubiquitous ✅Entities ✅Services ✅Bus ✅Notification
                 ✅REST ❌GraphQL ✅APIGateway
                 ✅Async ✅State ✅Orchestrator ✅Remote ✅Cooperation ✅Resiliency
-                #Data ✅Semantic ✅Domain ✅ Container ✅Orchestration ✅Microservices ❌IaaS
+                #Data ✅Semantic ✅Domain ✅ Container ✅Orchestration ✅Microservices ✅InfrastructureAsCode ✅Docker
                 ✅data-ownership ✅Database ✅SQL ✅Distributed Transactions ✅ORM ✅QueryTranslation ✅ObjectMapper ✅Repository
                 ✅architecture ✅Quality ❌Tests ✅Landscape ✅Simulation ✅Metrics ✅Observability ❌Performance ❌Caching
+                ❌plug production-grade message broker, ie. RabbitMq, ❌cache, ie. Redis
         </td>
     </tr>
     </tbody>
@@ -72,12 +74,12 @@
 <hr/>
 <h2>Demonstration Mode</h2>
 
-Fake Time: @($"{DateTime.UtcNow:u}") <b>(Day+@(demo.SimulationDay))</b><br />
-@if (!demo.SeedComplete)
+Fake Time: @($"{DateTime.UtcNow:u}") <b>(Day+@(simulationDay))</b><br />
+@if (!seedComplete)
 {
     <b class="blink">Seed in progress...</b><br/>
 
-    <script> setTimeout(function () { window.location.reload(); }, 5000); </script>
+    <script> setTimeout(function () { window.location.reload(); }, 500000); </script>
 }
 else
 {
@@ -86,29 +88,29 @@ else
         <tr>
             <td>
                 <form id="formDay1" action="/demo/forward" method="GET">
-                    <button id="submitDay1" type="submit" value="" class="glow-on-hover" disabled="@(!demo.SeedComplete)">Day+1</button>
+                    <button id="submitDay1" type="submit" value="" class="glow-on-hover" disabled="@(!seedComplete)">Day+1</button>
                     <input type="hidden" name="days" value="1">
                     <input type="hidden" name="speedFactor" value="1440">
-                    <input type="hidden" name="serverId" value="@serverContext.Id">
-                    <input type="hidden" name="sessionId" value="@serverContext.SessionId">
+                    <input type="hidden" name="serverId" value="@demo.ServerId">
+                    <input type="hidden" name="sessionId" value="@demo.SessionId">
                 </form>
             </td>
             <td>
                 <form id="formDay7" action="/demo/forward" method="GET">
-                    <button id="submitDay7" type="submit" class="glow-on-hover" disabled="@(!demo.SeedComplete)">Day+7</button>
+                    <button id="submitDay7" type="submit" class="glow-on-hover" disabled="@(!seedComplete)">Day+7</button>
                     <input type="hidden" name="days" value="7">
                     <input type="hidden" name="speedFactor" value="10080">
-                    <input type="hidden" name="serverId" value="@serverContext.Id">
-                    <input type="hidden" name="sessionId" value="@serverContext.SessionId">
+                    <input type="hidden" name="serverId" value="@demo.ServerId">
+                    <input type="hidden" name="sessionId" value="@demo.SessionId">
                 </form>
             </td>
             <td>
                 <form id="formDay30" action="/demo/forward" method="GET">
-                    <button id="submitDay30" type="submit" class="glow-on-hover" disabled="@(!demo.SeedComplete)">Day+30</button>
+                    <button id="submitDay30" type="submit" class="glow-on-hover" disabled="@(!seedComplete)">Day+30</button>
                     <input type="hidden" name="days" value="30">
                     <input type="hidden" name="speedFactor" value="43200">
-                    <input type="hidden" name="serverId" value="@serverContext.Id">
-                    <input type="hidden" name="sessionId" value="@serverContext.SessionId">
+                    <input type="hidden" name="serverId" value="@demo.ServerId">
+                    <input type="hidden" name="sessionId" value="@demo.SessionId">
                 </form>
             </td>
         </tr>
@@ -183,7 +185,7 @@ The instance can be debugged
                 All<br>
                 <a href="/admin/kpi">Key Performance Indicators</a>
             </li>
-            @foreach (var hotel in admin.Hotels)
+            @foreach (var hotel in hotels)
             {
                 <li>
                     @hotel.HotelName<br>
@@ -196,7 +198,7 @@ The instance can be debugged
 <h2>Planning</h2>
 
 <ul>
-    @foreach (var hotel in admin.Hotels)
+    @foreach (var hotel in hotels)
     {
         <li>
             @hotel.HotelName<br>

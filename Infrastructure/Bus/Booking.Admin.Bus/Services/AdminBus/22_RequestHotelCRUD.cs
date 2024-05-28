@@ -60,6 +60,18 @@ public partial class AdminBus
             CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });
     }
+
+    private void Verb_Is_RequestFetchHotelList(IClientNotificationSerialized notification)
+    {
+        using var scope = sp.GetScope<IAdminRepository>(out var repo);
+
+        IdCollection<Hotel> list = new([.. repo.Hotels.Select(hotel => hotel.HotelId)]);
+
+        Notify(new ResponseNotification(notification.Originator, HotelListFetched, list)
+        {
+            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
+        });
+    }
     
     private void Verb_Is_RequestFetchHotelGeoProxy(IClientNotificationSerialized notification)
     {

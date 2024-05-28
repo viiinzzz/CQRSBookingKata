@@ -11,7 +11,6 @@ WORKDIR /app
 
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS restore1
-ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Business/ThirdParty/ThirdParty.csproj", "Business/ThirdParty/"]
 COPY ["Business/Business.Common/Business.Common.csproj", "Business/Business.Common/"]
@@ -74,24 +73,23 @@ FROM restore3 AS restore
 COPY ["Application/BookingApi/BookingApi.csproj", "Application/BookingApi/"]
 RUN dotnet restore "./Application/BookingApi/BookingApi.csproj"
 
+
+
 FROM restore AS build
+ARG BUILD_CONFIGURATION=Release
 COPY . .
 WORKDIR "/src/Application/BookingApi"
 RUN dotnet build "./BookingApi.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./BookingApi.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-
 WORKDIR "/src"
-COPY ["appsettings.Production*.json", "/app"]
+COPY ["./appsettings/appsettings.Production*.json", "/app"]
 WORKDIR /app
-
-
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://*:8080
 ENTRYPOINT ["dotnet", "BookingApi.dll"]

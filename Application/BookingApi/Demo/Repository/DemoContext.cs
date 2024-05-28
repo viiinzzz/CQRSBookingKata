@@ -10,5 +10,10 @@ public record DemoContext
 
     bool SeedComplete,
 
-    int SimulationDay
+    int SimulationDay,
+
+    Hotel[] Hotels,
+
+    long SessionId,
+    long ServerId
 ) : IDemoContext;

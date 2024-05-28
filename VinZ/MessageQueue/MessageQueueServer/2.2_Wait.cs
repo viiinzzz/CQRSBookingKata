@@ -63,7 +63,7 @@ public partial class MqServer
             throw new InvalidOperationException("Uncorrelated wait");
         }
 
-        AwaitedResponse awaitedResponse = new(correlationId.Value, DateTime, cancellationToken, Track, Untrack);
+        var awaitedResponse = new AwaitedResponse(correlationId.Value, DateTime, cancellationToken, Track, Untrack);
 
         var ret = awaitedResponse.ResultNotification;
 

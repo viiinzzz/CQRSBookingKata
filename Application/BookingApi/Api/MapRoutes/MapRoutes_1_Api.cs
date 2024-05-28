@@ -21,30 +21,9 @@ public static partial class ApiMethods
 {
     const int responseTimeoutSeconds = 120;
 
-    public static void MapParticipantRoutes(WebApplication app)
-    {
-        app.MapDebugRoutes();
-
-        MapRoutes_0_Bus(app);
-    }
-    
     public static void MapApiRoutes(WebApplication app)
     {
-        app.MapGet("/debug/subscribe",
-            ([FromServices] IMessageBus bus) =>
-            {
-                var urls = (bus as MqServer)?.GetSubscribeUrls();
-
-                if (urls == null)
-                {
-                    return "";
-                }
-
-                return string.Join(Environment.NewLine, urls);
-            }
-        ).WithOpenApi().WithTags([BusTag]);
-
-
+       
         MapRoutes_1_Admin(app, out var admin);
         {
             MapRoutes_11_Employees(admin);

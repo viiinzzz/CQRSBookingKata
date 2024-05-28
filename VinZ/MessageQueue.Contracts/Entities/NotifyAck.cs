@@ -23,9 +23,21 @@ public record NotifyAck
 
     bool Valid = false,
     string? data = default,
-    CorrelationId? CorrelationId = default
+
+    CorrelationId? CorrelationId = null
 )
-   // : INotifyAck
 {
     public Task<object?> Response { get; set; } = Task.FromResult<object?>(null);
+}
+
+
+public static class NotifyAckHelper
+{
+    public static NotifyAck Ack(this IClientNotificationSerialized notification)
+    {
+        return new NotifyAck
+        {
+            CorrelationId = notification.CorrelationId()
+        };
+    }
 }

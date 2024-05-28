@@ -37,6 +37,12 @@ public partial class DemoBus : MessageBusClientBase
                         break;
                     }
 
+                    case Verb.Demo.RequestDemoHotels:
+                    {
+                        Verb_Is_RequestDemoHotels(notification);
+                        break;
+                    }
+
                     default:
                     {
                         throw new VerbInvalidException(notification.Verb);
@@ -52,7 +58,32 @@ public partial class DemoBus : MessageBusClientBase
 
     private void Verb_Is_RequestDemoContext(IClientNotificationSerialized notification)
     {
-        Notify(new ResponseNotification(Omni, Respond, demoContextService)
+        Notify(new ResponseNotification(Omni, Verb.Demo.RequestDemoContext, demoContextService)
+        {
+            CorrelationId1 = notification.CorrelationId1,
+            CorrelationId2 = notification.CorrelationId2
+        });
+    }
+    
+    private void Verb_Is_RequestDemoHotels(IClientNotificationSerialized notification)
+    {
+
+        var list = bus.Ask<IdCollection<Hotel>>(
+                nameof(DemoBus), Recipient.Admin, Verb.Admin.RequestFetchHotelList,
+                null, CancellationToken.None)
+            ?.Result ?? throw new HotelNotFoundException();
+
+        var hotels = list.ids
+
+            .Select(hotelId => bus.Ask<Hotel>(
+                    nameof(DemoBus), Recipient.Admin, Verb.Admin.RequestFetchHotel,
+                    new HotelRef(hotelId), CancellationToken.None)
+                ?.Result ?? throw new HotelNotFoundException())
+
+            .ToArray();
+
+
+        Notify(new ResponseNotification(Omni, Verb.Demo.RequestDemoHotels, hotels)
         {
             CorrelationId1 = notification.CorrelationId1,
             CorrelationId2 = notification.CorrelationId2

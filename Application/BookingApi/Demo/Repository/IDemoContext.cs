@@ -11,4 +11,9 @@ public interface IDemoContext
     public bool SeedComplete { get; }
 
     public int SimulationDay { get; }
+
+    public Hotel[] Hotels { get; }
+
+    public long ServerId { get; }
+    public long SessionId { get; }
 }

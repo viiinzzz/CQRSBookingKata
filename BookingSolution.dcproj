@@ -11,16 +11,24 @@
     <DockerComposeProjectName>bookingsolution</DockerComposeProjectName>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="db-admin\.pgpass" />
-    <None Include="db-admin\Dockerfile.dbadmin" />
-    <None Include="db-admin\servers.json" />
-    <None Include="db-admin\servers0.json" />
+    <None Include="appsettings\appsettings.Production-Admin.json" />
+    <None Include="appsettings\appsettings.Production-App.json" />
+    <None Include="appsettings\appsettings.Production-Demo.json" />
+    <None Include="appsettings\appsettings.Production-Planning.json" />
+    <None Include="appsettings\appsettings.Production-Sales.json" />
+    <None Include="appsettings\appsettings.Production-Support.json" />
+    <None Include="images\db-admin\.pgpass" />
+    <None Include="images\db-admin\Dockerfile.dbadmin" />
+    <None Include="images\db-admin\servers.json" />
+    <None Include="images\db-admin\servers0.json" />
+    <None Include="docker-compose.debug.yml" />
     <None Include="docker-compose.override.yml">
       <DependentUpon>docker-compose.yml</DependentUpon>
     </None>
     <None Include="docker-compose.yml" />
     <None Include=".dockerignore" />
-    <None Include="db\Dockerfile.pg" />
+    <None Include="images\db\Dockerfile.pg" />
+    <None Include="images\nuget\Dockerfile.nuget" />
     <None Include="notes.md" />
   </ItemGroup>
   <ItemGroup>
