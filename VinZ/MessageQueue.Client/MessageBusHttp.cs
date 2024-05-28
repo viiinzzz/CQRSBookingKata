@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.Drawing;
+
 namespace VinZ.MessageQueue;
 
 public class MessageBusHttp : IMessageBus
@@ -29,6 +31,10 @@ public class MessageBusHttp : IMessageBus
 
     private LogLevel logLevelSubscribe = LogLevel.Warning;
     private LogLevel logLevelNotify = LogLevel.Warning;
+
+    private static readonly string scheme = $"{Bg(Color.Gray)}{Fg(Color.Black)}HTTP{Rs}";
+
+    private static readonly string postMethod = $"{Bg(Color.MediumSeaGreen)}{Fg(Color.Black)}POST{Rs}";
 
 
     public MessageBusHttp
@@ -79,6 +85,7 @@ public class MessageBusHttp : IMessageBus
     private bool IsTraceSubscribe => logLevelSubscribe <= LogLevel.Trace;
     private bool IsTraceNotify => logLevelSubscribe <= LogLevel.Trace;
 
+
     public void Subscribe(SubscriptionRequest sub, int busId)
     {
         // if (busId != 0)
@@ -102,26 +109,27 @@ public class MessageBusHttp : IMessageBus
 
             if (IsTraceSubscribe) log.LogInformation(@$"
 <<-( Subscribe )............................../{rid:000000}/
-| HTTP POST {url}
+| {scheme}{postMethod} {Href(url)}
 +.....................................................
-{sub.ToJson(true)}
+{ToJsonDebug(sub)}
 ...");
             
             var post = _remote.PostAsync(uri, content, cancel.Token);
 
             post.Wait(cancel.Token);
 
-            if (IsTraceSubscribe) log.LogInformation(@$"
-                        +..( Subscribe )............................../{rid:000000}/
-                        | HTTP POST {url}
-                        +........................................( {(int)post.Result.StatusCode:000} )....>>
-");
 
             var res = post.Result;
-
             var statusCode = (int)res.StatusCode;
+            var statusOk = statusCode >= 200 && statusCode < 300;
 
-            if (statusCode is < 200 or > 299)
+            if (IsTraceSubscribe) log.LogInformation(@$"
+                        +..( Subscribe )............................../{rid:000000}/
+                        | {scheme}{postMethod} {Href(url)}
+                        +........................................( {Fg(statusOk ? Color.Green : Color.Red)}{(int)post.Result.StatusCode:000}{Rs} )....>>
+");
+
+            if (!statusOk)
             {
                 throw new Exception($"({(int)res.StatusCode}) {res.ReasonPhrase}");
             }
@@ -133,15 +141,18 @@ public class MessageBusHttp : IMessageBus
                 ex = ex.InnerException;
             }
 
-            if (IsTraceSubscribe) log.LogInformation(@$"
-                        !..( Subscribe )............................../{rid:000000}/
-                        | HTTP POST {url}
+            if (IsTraceSubscribe)
+            {
+                log.LogInformation(@$"
+                        !..( {Fg(Color.Red)}Subscribe{Rs} )............................../{rid:000000}/
+                        | {scheme}{postMethod} {Href(url)}
                         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!( {(int)HttpStatusCode.InternalServerError:000} )!!!!!X
 
-!!! sensitive
-{ ex.Message}
-{ ex.StackTrace}
-!!!");
+{(ex is HttpRequestException ? ex.Message : @$"!!! sensitive
+{ex.Message}
+{ex.StackTrace}
+!!!")}");
+            }
 
             throw new Exception($"{nameof(Subscribe)} failure: {url} {ex.Message}", ex);
         }
@@ -159,6 +170,7 @@ public class MessageBusHttp : IMessageBus
 
         int rid = RequestId++;
 
+
         try
         {
             var cancel = new CancellationTokenSource();
@@ -169,26 +181,26 @@ public class MessageBusHttp : IMessageBus
 
             if (IsTraceSubscribe) log.LogInformation(@$"
 <<-( Unsubscribe )............................/{rid:000000}/
-| HTTP POST {url}
+| {scheme}{postMethod} {Href(url)}
 +.....................................................
-{sub.ToJson(true)}
+{ToJsonDebug(sub)}
 ...");
 
             var post = _remote.PostAsync(uri, content, cancel.Token);
 
             post.Wait(cancel.Token);
 
+            var res = post.Result;
+            var statusCode = (int)res.StatusCode;
+            var statusOk = statusCode >= 200 && statusCode < 300;
+
             if (IsTraceSubscribe) log.LogInformation(@$"
                         +..( Unsubscribe )............................/{rid:000000}/
-                        | HTTP POST {url} ({(int)post.Result.StatusCode})
-                        +........................................( {(int)post.Result.StatusCode:000} )....>>
+                        | {scheme}{postMethod} {Href(url)} ({(int)post.Result.StatusCode})
+                        +........................................( {Fg(statusOk ? Color.Green : Color.Red)}{(int)post.Result.StatusCode:000}{Rs} )....>>
 ");
 
-            var res = post.Result;
-
-            var statusCode = (int)res.StatusCode;
-
-            if (statusCode is >= 200 and < 299)
+            if (statusOk)
             {
                 return true;
             }
@@ -208,14 +220,14 @@ public class MessageBusHttp : IMessageBus
             }
 
             if (IsTraceSubscribe) log.LogInformation(@$"
-                        !..( Unsubscribe )............................/{rid:000000}/
-                        | HTTP POST {url}
+                        !..( {Fg(Color.Red)}Unsubscribe{Rs} )............................/{rid:000000}/
+                        | {scheme}{postMethod} {Href(url)}
                         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!( {(int)HttpStatusCode.InternalServerError:000} )!!!!!X
 
-!!! sensitive
+{(ex is HttpRequestException ? ex.Message : @$"!!! sensitive
 {ex.Message}
 {ex.StackTrace}
-!!!");
+!!!")}");
 
             throw new Exception($"{nameof(Unsubscribe)} failure: {url} {ex.Message}", ex);
         }
@@ -234,7 +246,7 @@ public class MessageBusHttp : IMessageBus
         
         int rid = RequestId++;
 
-        var toFromSubject = $"To: {notification.Recipient ?? nameof(Omni)} From: {notification.Originator ?? ""} Subject: ({notification.Type}) {notification.Verb ?? nameof(AnyVerb)} ({notification.Status:000})";
+        var fromToSubject = $"From: {notification.Originator ?? ""} --> To: {notification.Recipient ?? nameof(Omni)} Subject: ({notification.Type}) {notification.Verb ?? nameof(AnyVerb)} ({notification.Status:000})";
 
         try
         {
@@ -246,28 +258,28 @@ public class MessageBusHttp : IMessageBus
 
             if (IsTraceNotify) log.LogInformation(@$"
 <<-( Notify )........................................./{rid:000000}/
-| HTTP POST {url}
-| {toFromSubject}
+| {scheme}{postMethod} {Href(url)}
+| {fromToSubject}
 +....{notification.CorrelationGuid()}...................
-{notification.ToJson(true)}
+{ToJsonDebug(notification)}
 ...");
 
             var post = _remote.PostAsync(uri, content, cancel.Token);
 
             post.Wait(cancel.Token);
 
+            var res = post.Result;
+            var statusCode = (int)res.StatusCode;
+            var statusOk = statusCode >= 200 && statusCode < 300;
+
             if (IsTraceNotify) log.LogInformation(@$"
                         +..( Notify )...................................../{rid:000000}/
-                        | HTTP POST {url}
-                        | {toFromSubject}
-                        +....{notification.CorrelationGuid()}..( {(int)post.Result.StatusCode:000} )....>>
+                        | {scheme}{postMethod} {Href(url)}
+                        | {fromToSubject}
+                        +....{notification.CorrelationGuid()}..( {Fg(statusOk ? Color.Green : Color.Red)}{statusCode:000}{Rs} )....>>
 ");
 
-            var res = post.Result;
-
-            var statusCode = (int)res.StatusCode;
-
-            if (statusCode is < 200 or > 299)
+            if (!statusOk)
             {
                 return notification.Ack() with
                 {
@@ -298,15 +310,15 @@ public class MessageBusHttp : IMessageBus
             }
 
             if (IsTraceNotify) log.LogInformation(@$"
-                        !--( Notify )-------------------------------------/{rid:000000}/
-                        | HTTP POST {url}
-                        | {toFromSubject}
-                        !!!!!{notification.CorrelationGuid()}!!!( {(int)HttpStatusCode.InternalServerError:000} )!!!!!X
+                        !--( {Fg(ex is HttpRequestException ? Color.Orange : Color.Red)}Notify{Rs} )-------------------------------------/{rid:000000}/
+                        | {scheme}{postMethod} {Href(url)}
+                        | {fromToSubject}
+                        !!!!!{notification.CorrelationGuid()}!!!( {Fg(ex is HttpRequestException ? Color.Orange : Color.Red)}{(int)HttpStatusCode.InternalServerError:000}{Rs} )!!!!!X
 
-!!! sensitive
+{(ex is HttpRequestException ? ex.Message : @$"!!! sensitive
 {ex.Message}
 {ex.StackTrace}
-!!!");
+!!!")}");
 
             // throw new Exception($"{nameof(Unsubscribe)} failure: {url} {ex.Message}", ex);
 
@@ -419,8 +431,41 @@ public class MessageBusHttp : IMessageBus
         return new AwaitersBus(awaiters);
     }
 
-   
 
+    private string ToJsonDebug(object obj)
+    {
+        var ret = obj.ToJson(true);
 
+        return string.Join('\n', ret.Split('\n').Select(line =>
+            
+            $"{Faint}{line}{Rs}"
+        
+        ));
+    }
 
+    //ANSI
+    //
+    private const string ESC = "\u001b";
+    private const string CSI = $"{ESC}[";
+    private static string SGR(params byte[] codes) => $"{CSI}{string.Join(";", codes.Select(c => c.ToString()))}m";
+
+    private static readonly string Rs = SGR(39, 49); //0
+    private static readonly string Bold = SGR(1);
+    private static readonly string Faint = SGR(2);
+    private static readonly string Italic = SGR(3);
+    private static readonly string Underlined = SGR(4);
+    private static readonly string Blink = SGR(5);
+    private static readonly string Inverted = SGR(7);
+    private static readonly string StrikeThrough = SGR(9);
+    private static readonly string Overlined = SGR(53);
+
+    private static string Fg(Color color) => SGR(38, 2, color.R, color.G, color.B);
+    private static string Bg(Color color) => SGR(48, 2, color.R, color.G, color.B);
+    private static string Href(string link, string? text = null) => $"{ESC}]8;;{link}\a{text ?? link}{ESC}]8;;\a{Rs}"; //hyperlink
+
+    private static readonly string UpAndClearStr = $"{CSI}1A{CSI}2K";
+    private static readonly string BoldAndBlinkStr = $"{CSI}1{CSI}5";
+
+    //
+    //
 }

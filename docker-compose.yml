@@ -21,7 +21,9 @@ services:
           source: ./Application/Docker/bookingapi/config/appsettings.Production-App.json
           target: /app/appsettings.Production-App.json
           read_only: true
+    tty: true
     environment:
+      TERM: xterm-256color
       ASPNETCORE_CAPTURESTARTUPERRORS: true
       ASPNETCORE_ENVIRONMENT: Production-App
       PROVIDER_NAME: npgsql
@@ -42,7 +44,9 @@ services:
           source: ./Application/Docker/bookingapi/config/appsettings.Production-Demo.json
           target: /app/appsettings.Production-Demo.json
           read_only: true
+    tty: true
     environment:
+      TERM: xterm-256color
       ASPNETCORE_CAPTURESTARTUPERRORS: true
       ASPNETCORE_ENVIRONMENT: Production-Demo
       PROVIDER_NAME: npgsql
@@ -63,7 +67,9 @@ services:
           source: ./Application/Docker/bookingapi/config/appsettings.Production-Admin.json
           target: /app/appsettings.Production-Admin.json
           read_only: true
+    tty: true
     environment:
+      TERM: xterm-256color
       ASPNETCORE_CAPTURESTARTUPERRORS: true
       ASPNETCORE_ENVIRONMENT: Production-Admin
       PROVIDER_NAME: npgsql
@@ -84,7 +90,9 @@ services:
           source: ./Application/Docker/bookingapi/config/appsettings.Production-Planning.json
           target: /app/appsettings.Production-Planning.json
           read_only: true
+    tty: true
     environment:
+      TERM: xterm-256color
       ASPNETCORE_CAPTURESTARTUPERRORS: true
       ASPNETCORE_ENVIRONMENT: Production-Planning
       PROVIDER_NAME: npgsql
@@ -105,7 +113,9 @@ services:
           source: ./Application/Docker/bookingapi/config/appsettings.Production-Sales.json
           target: /app/appsettings.Production-Sales.json
           read_only: true
+    tty: true
     environment:
+      TERM: xterm-256color
       ASPNETCORE_CAPTURESTARTUPERRORS: true
       ASPNETCORE_ENVIRONMENT: Production-Sales
       PROVIDER_NAME: npgsql
@@ -126,7 +136,9 @@ services:
           source: ./Application/Docker/bookingapi/config/appsettings.Production-Support.json
           target: /app/appsettings.Production-Support.json
           read_only: true
+    tty: true
     environment:
+      TERM: xterm-256color
       ASPNETCORE_CAPTURESTARTUPERRORS: true
       ASPNETCORE_ENVIRONMENT: Production-Support
       PROVIDER_NAME: npgsql
@@ -139,7 +151,9 @@ services:
     command: ["postgres", "-c", "log_statement=none"]
     container_name: booking_db
     domainname: booking.local
+    tty: true
     environment:
+      TERM: xterm-256color
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     healthcheck:
@@ -169,7 +183,9 @@ services:
     healthcheck:
       test: exit 0
     hostname: db901.booking.local
+    tty: true
     environment:
+      TERM: xterm-256color
       GUNICORN_ACCESS_LOGFILE: /var/log/access.log
       #PGADMIN_CONFIG_SERVER_MODE: 1
       #PGADMIN_DEFAULT_EMAIL: nobili.andrea@gmail.com
@@ -181,7 +197,6 @@ services:
     #  - published: 7038
     #    target: 80
     #restart: unless-stopped
-    tty: true
     volumes:
       - dbadmin_data:/var/lib/pgadmin:rw
 
@@ -190,7 +205,9 @@ services:
     depends_on:
      - db
     domainname: booking.local
-    environment: 
+    tty: true
+    environment:
+      TERM: xterm-256color
       ADMINER_DEFAULT_SERVER: db001.booking.local
       ADMINER_DEFAULT_DB_DRIVER: pgsql
       #ADMINER_DEFAULT_DB_NAME:

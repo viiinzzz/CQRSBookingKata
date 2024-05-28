@@ -12,6 +12,9 @@ public class DemoContextProxyService(IMessageBus mq, IServerContextService serve
                 CancellationToken.None, 30)
             .Result ?? throw new NullReferenceException();
 
+        System.Console.WriteLine(@$"=================================DemoContextProxyService GetContext
+{context.ToJson(true)}");
+
         return context;
     }
     

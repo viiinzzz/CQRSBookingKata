@@ -15,9 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Newtonsoft.Json.Linq;
-using System;
-using System.IO;
+using OpenTelemetry.Trace;
+using System.Drawing;
 
 namespace BookingKata.API.Infrastructure;
 
@@ -29,6 +28,8 @@ public class MyDebugMiddleware
     ILogger<MyDebugMiddleware> logger
 )
 {
+  
+
     private (LogLevel request, LogLevel response) logLevels = GetLogLevels(appConfig);
 
     private static (LogLevel request, LogLevel response) GetLogLevels(IConfiguration appConfig)
@@ -68,20 +69,37 @@ public class MyDebugMiddleware
         var tid = context.Request.HttpContext.TraceIdentifier;
         var t0 = DateTime.Now;
 
+        var scheme = $"{Bg(Color.Gray)}{Fg(Color.Black)}{context.Request.Scheme.ToUpper()}{Rs}";
+
+        var method = context.Request.Method switch
+        {
+            "GET" => $"{Bg(Color.DeepSkyBlue)}{Fg(Color.Black)}{context.Request.Method}{Rs}",
+            "POST" => $"{Bg(Color.MediumSeaGreen)}{Fg(Color.Black)}{context.Request.Method}{Rs}",
+            "PUT" => $"{Bg(Color.Orange)}{Fg(Color.Black)}{context.Request.Method}{Rs}",
+            "DELETE" => $"{Bg(Color.IndianRed)}{Fg(Color.Black)}{context.Request.Method}{Rs}",
+            _ => $"{Bg(Color.Gray)}{Fg(Color.Black)}{context.Request.Method}{Rs}"
+        };
+
         try
         {
 
             ExpandoObject? requestBodyObj = null;
+
 
             if (IsTraceRequest)
             {
                 MemoryStream? requestBodyMemoryStream;
                 if (context.Request.Body.CanRead)
                 {
-                    var requestBody = await new StreamReader(context.Request.Body).ReadToEndAsync();
+                    var requestMime = context.Request.ContentType  == null ? new ContentType(MediaTypeNames.Text.Plain) : new ContentType(context.Request.ContentType);
+                    var requestEncoding = requestMime.CharSet == null ? Encoding.UTF8 : Encoding.GetEncoding(requestMime.CharSet);
+                    var requestType = requestMime.MediaType;
+
+                    var requestBody = await new StreamReader(context.Request.Body, requestEncoding).ReadToEndAsync();
                     requestBodyMemoryStream = new MemoryStream();
                     {
-                        var requestBodyCopy = new StreamWriter(requestBodyMemoryStream, Encoding.UTF8);
+
+                        var requestBodyCopy = new StreamWriter(requestBodyMemoryStream, requestEncoding);
                         await requestBodyCopy.WriteAsync(requestBody);
                         await requestBodyCopy.FlushAsync();
                         requestBodyMemoryStream.Seek(0, SeekOrigin.Begin);
@@ -92,8 +110,8 @@ public class MyDebugMiddleware
                 }
 
                 logger.LogInformation(@$"
-        <<-( Request )--------------------------------/{rid:000000}/
-        | {context.Request.Scheme.ToUpper()} {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
+        <<-( {Bold}Request{Rs} )--------------------------------/{rid:000000}/
+        | {scheme}{method} {context.Request.Path}{context.Request.QueryString}
         | ORIGIN {context.Request.Host}
         +---/{tid}/--------------------------
 {ToJsonDebug(requestBodyObj)}
@@ -121,14 +139,18 @@ public class MyDebugMiddleware
             //
             //
 
+            var responseMime = context.Response.ContentType == null ? new ContentType(MediaTypeNames.Text.Plain) : new ContentType(context.Response.ContentType);
+            var responseEncoding = responseMime.CharSet == null ? Encoding.UTF8 : Encoding.GetEncoding(responseMime.CharSet);
+            var responseType = responseMime.MediaType;
+
             responseBodyMemoryStream.Seek(0, SeekOrigin.Begin);
-            var responseBody = await new StreamReader(context.Response.Body, Encoding.UTF8).ReadToEndAsync();
+            var responseBody = await new StreamReader(context.Response.Body, responseEncoding).ReadToEndAsync();
             responseBodyMemoryStream.Seek(0, SeekOrigin.Begin);
 
 
             ExpandoObject? responseBodyObj = null;
 
-            if (context.Response.ContentType == "application/json")
+            if (responseType == MediaTypeNames.Application.Json)
             {
                 responseBodyObj = responseBody.FromJsonToExpando();
             }
@@ -137,26 +159,33 @@ public class MyDebugMiddleware
                 if (!string.IsNullOrEmpty(responseBody))
                 {
                     responseBodyObj = new ExpandoObject();
-                    ((IDictionary<string, object>)responseBodyObj!)[context.Response.ContentType ?? "text"] =
-                        responseBody.Replace("\r", "").Split('\n');
+                    var responseBodyDict = (IDictionary<string, object>)responseBodyObj!;
+
+                    responseBodyDict[responseType] = responseBody.Replace("\r", "").Split('\n');
                 }
             }
 
             var dt = (DateTime.Now - t0).TotalMilliseconds;
             var statusStr = Enum.GetName(typeof(HttpStatusCode), context.Response.StatusCode);
-                
+            var statusOk = context.Response.StatusCode is >= 200 and < 300;
+            // var status = (HttpStatusCode)context.Response.StatusCode;
+
             logger.LogInformation(@$"
-                +--( Response {$"{dt,6:#####0}"}ms)-----------------------/{rid:000000}/
-                | {context.Request.Scheme.ToUpper()} {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
+                +--( {Fg(Color.Green)}Response{Rs} {Italic}{$"{dt,6:#####0}"}ms{Rs})-----------------------/{rid:000000}/
+                | {scheme}{method} {context.Request.Path}{context.Request.QueryString}
                 | ORIGIN {context.Request.Host}
-                +---/{tid}/--------------( {context.Response.StatusCode:000} )--->>
-{(responseBodyObj == null ? $"({statusStr})" : "")}{ToJsonDebug(responseBodyObj)}
+                +---/{tid}/--------------( {Fg(statusOk ? Color.Green : Color.Red)}{context.Response.StatusCode:000}{Rs} )--->>
+{(responseBodyObj == null ? $"({statusStr}) " : "")}{ToJsonDebug(responseBodyObj)}
 ---( Request )
 {ToJsonDebug(requestBodyObj)}
 ---");
 
             await responseBodyMemoryStream.CopyToAsync(originalBodyStream);
             context.Response.Body = originalBodyStream;
+
+
+
+
         }
         catch (OperationCanceledException ex)
         {
@@ -165,10 +194,11 @@ public class MyDebugMiddleware
             var dt = (DateTime.Now - t0).TotalMilliseconds;
 
             logger.LogWarning(@$"
-                !--( Canceled {dt,6:#####0}ms)-----------------------/{rid:000000}/
-                | {context.Request.Scheme.ToUpper()} {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
-                | ORIGIN {context.Request.Host}
-                !!!!!{tid}!!!!!!!!!!!!!!( {context.Response.StatusCode:000} )!!!!!X
+                !--( {Fg(Color.Orange)}Canceled{Rs} {Italic}{dt,6:#####0}ms{Rs})-----------------------/{rid:000000}/
+                | {scheme}{method} {context.Request.Path}{context.Request.QueryString}
+                | ORIGIN 
+            {context.Request.Host}
+                !!!!!{tid}!!!!!!!!!!!!!!( {Fg(Color.Orange)}{context.Response.StatusCode:000}{Rs} )!!!!!X
 Failure cause by {ex.GetType().Name}:
 {ex.Message}
 {ex.StackTrace}
@@ -183,10 +213,10 @@ Failure cause by {ex.GetType().Name}:
             var dt = (DateTime.Now - t0).TotalMilliseconds;
 
             logger.LogError(@$"
-                !--( Aborted {dt,6:#####0}ms)------------------------/{rid:000000}/
-                | {context.Request.Scheme.ToUpper()} {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
+                !--( {Fg(Color.Red)}Aborted{Rs} {dt,6:#####0}ms)------------------------/{rid:000000}/
+                | {scheme}{method} {context.Request.Path}{context.Request.QueryString}
                 | ORIGIN {context.Request.Host} 
-                !!!!!{tid}!!!!!!!!!!!!!!( {context.Response.StatusCode:000} )!!!!!X
+                !!!!!{tid}!!!!!!!!!!!!!!( {Fg(Color.Red)}{context.Response.StatusCode:000}{Rs} )!!!!!X
 Failure cause by {ex.GetType().Name}:
 {ex.Message}
 {ex.StackTrace}
@@ -197,6 +227,17 @@ Failure cause by {ex.GetType().Name}:
 
 
     private static string ToJsonDebug(ExpandoObject? response)
+    {
+        var ret = ToJsonDebug_(response);
+
+        return string.Join('\n', ret.Split('\n').Select(line => 
+            
+            $"{Faint}{line}{Rs}"
+        
+        ));
+    }
+
+    private static string ToJsonDebug_(ExpandoObject? response)
     {
         try
         {
@@ -228,4 +269,30 @@ Failure cause by {ex.GetType().Name}:
     }
 
 
+
+    //ANSI
+    //
+    private const string ESC = "\u001b";
+    private const string CSI = $"{ESC}[";
+    private static string SGR(params byte[] codes) => $"{CSI}{string.Join(";", codes.Select(c => c.ToString()))}m";
+
+    private static readonly string Rs = SGR(39, 49); //0
+    private static readonly string Bold = SGR(1);
+    private static readonly string Faint = SGR(2);
+    private static readonly string Italic = SGR(3);
+    private static readonly string Underlined = SGR(4);
+    private static readonly string Blink = SGR(5);
+    private static readonly string Inverted = SGR(7);
+    private static readonly string StrikeThrough = SGR(9);
+    private static readonly string Overlined = SGR(53);
+
+    private static string Fg(Color color) => SGR(38, 2, color.R, color.G, color.B);
+    private static string Bg(Color color) => SGR(48, 2, color.R, color.G, color.B);
+    private static string Href(string link, string? text = null) => $"{ESC}]8;;{link}\a{text ?? link}{ESC}]8;;\a{Rs}"; //hyperlink
+
+    private static readonly string UpAndClearStr = $"{CSI}1A{CSI}2K";
+    private static readonly string BoldAndBlinkStr = $"{CSI}1{CSI}5";
+
+    //
+    //
 }

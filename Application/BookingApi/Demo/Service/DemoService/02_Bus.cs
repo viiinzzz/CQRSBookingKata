@@ -58,6 +58,9 @@ public partial class DemoBus : MessageBusClientBase
 
     private void Verb_Is_RequestDemoContext(IClientNotificationSerialized notification)
     {
+        System.Console.WriteLine(@$"=================================Verb_Is_RequestDemoContext
+{demoContextService.ToJson(true)}");
+
         Notify(new ResponseNotification(Omni, Verb.Demo.RequestDemoContext, demoContextService)
         {
             CorrelationId1 = notification.CorrelationId1,

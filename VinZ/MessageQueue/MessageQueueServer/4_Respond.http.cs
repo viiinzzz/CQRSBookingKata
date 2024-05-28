@@ -15,10 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.Drawing;
+
 namespace VinZ.MessageQueue;
 
 public partial class MqServer
 {
+
+
+    private static readonly string scheme = $"{Bg(Color.Gray)}{Fg(Color.Black)}HTTP{Rs}";
+
+    private static readonly string postMethod = $"{Bg(Color.MediumSeaGreen)}{Fg(Color.Black)}POST{Rs}";
+
+
+
+
     private NotifyAck HttpSend(string clientUrl, ClientNotification notification)
     {
         var baseAddress = new Uri(clientUrl);
@@ -42,27 +53,28 @@ public partial class MqServer
             if (_isTrace)
                 log.LogInformation(@$"
 <<............................................................
-| HTTP POST {url} (0)
-+.............................................................
-| {notification.ToJson(true)}
-");
+| {scheme}{postMethod} {Href(url)}
++...................................................( {0:000} )...
+{notification.ToJson(true)}
+...");
 
             var post = http.PostAsync(uri, content, cancel.Token);
 
             post.Wait(cancel.Token);
 
+            var res = post.Result;
+            var statusCode = (int)res.StatusCode;
+            var statusOk = statusCode is >= 200 and < 300;
+
             if (_isTrace)
                 log.LogInformation(@$"
                         +.........................................................
-                        | HTTP POST {url}
-                        +............................................( {(int)post.Result.StatusCode:000} )...>>>
+                        | {scheme}{postMethod} {Href(url)}
+                        +............................................( {Fg(statusOk ? Color.Green : Color.Red)}{statusCode:000}{Rs} )...>>>
 ");
 
-            var res = post.Result;
 
-            var statusCode = (int)res.StatusCode;
-
-            if (statusCode is < 200 or > 299)
+            if (!statusOk)
             {
                 return notification.Ack() with
                 {
@@ -98,8 +110,8 @@ public partial class MqServer
                 if (_isTrace)
                     log.LogInformation(@$"
                         +.........................................................
-                        | HTTP POST {url} ({(int)HttpStatusCode.RequestTimeout})
-                        +......................................................>>>
+                        | {scheme}{postMethod} {Href(url)}
+                        +............................................( {Fg(Color.Orange)}{(int)HttpStatusCode.RequestTimeout:000}{Rs} )...>>>
 ");
 
                 return notification.Ack() with
@@ -113,20 +125,53 @@ public partial class MqServer
             if (_isTrace)
                 log.LogInformation(@$"
                         +.........................................................
-                        | HTTP POST {url} ({(int)HttpStatusCode.InternalServerError})
-                        +......................................................>>>
+                        | {scheme}{postMethod} {Href(url)}
+                        +............................................( {Fg(Color.Red)}{(int)HttpStatusCode.InternalServerError:000}{Rs} )...>>>
 ");
 
             return notification.Ack() with
             {
                 Valid = false,
                 Status = HttpStatusCode.InternalServerError,
-                data = @$"failed to reach {url}
+                data = ex is HttpRequestException 
+                    ? @$"failed to reach {url}
 
----sensitive
+{ex.Message}"
+                    : @$"failed to reach {url}
+
+!!! sensitive
 {ex.Message}
-{ex.StackTrace}"
+{ex.StackTrace}
+!!!"
             };
         }
     }
+
+
+
+    //ANSI
+    //
+    private const string ESC = "\u001b";
+    private const string CSI = $"{ESC}[";
+    private static string SGR(params byte[] codes) => $"{CSI}{string.Join(";", codes.Select(c => c.ToString()))}m";
+
+    private static readonly string Rs = SGR(39, 49); //0
+    private static readonly string Bold = SGR(1);
+    private static readonly string Faint = SGR(2);
+    private static readonly string Italic = SGR(3);
+    private static readonly string Underlined = SGR(4);
+    private static readonly string Blink = SGR(5);
+    private static readonly string Inverted = SGR(7);
+    private static readonly string StrikeThrough = SGR(9);
+    private static readonly string Overlined = SGR(53);
+
+    private static string Fg(Color color) => SGR(38, 2, color.R, color.G, color.B);
+    private static string Bg(Color color) => SGR(48, 2, color.R, color.G, color.B);
+    private static string Href(string link, string? text = null) => $"{ESC}]8;;{link}\a{text ?? link}{ESC}]8;;\a{Rs}"; //hyperlink
+
+    private static readonly string UpAndClearStr = $"{CSI}1A{CSI}2K";
+    private static readonly string BoldAndBlinkStr = $"{CSI}1{CSI}5";
+
+    //
+    //
 }

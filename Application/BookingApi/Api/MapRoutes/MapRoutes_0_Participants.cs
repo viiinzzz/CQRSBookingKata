@@ -19,9 +19,6 @@ public static partial class ApiMethods
 
                 var subscribe = string.Join(Environment.NewLine, urls);
 
-                System.Console.Out.WriteLine(@$"subscribe=
-{subscribe}");
-
                 return subscribe;
             }
         ).WithOpenApi().WithTags([BusTag]);
