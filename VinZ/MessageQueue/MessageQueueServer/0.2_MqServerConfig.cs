@@ -26,5 +26,5 @@ public record MqServerConfig
     int BusRefreshMinMilliseconds = 100,//50
     int BusRefreshMaxMilliseconds = 100,//7000,
 
-    bool IsTrace = false
+    LogLevel logLevel = LogLevel.Trace
 );

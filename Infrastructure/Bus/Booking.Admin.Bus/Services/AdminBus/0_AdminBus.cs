@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using VinZ.MessageQueue;
+
 namespace BookingKata.Infrastructure.Network;
 
 public partial class AdminBus(IScopeProvider sp, BookingConfiguration bconf) : MessageBusClientBase
@@ -23,25 +25,21 @@ public partial class AdminBus(IScopeProvider sp, BookingConfiguration bconf) : M
     {
         // await
         Subscribe(Recipient.Admin);
-
         Notified += (sender, notification) =>
         {
             try
             {
                 switch (notification.Verb)
                 {
-
                     case RequestPage:
-                    {
-                        Verb_Is_RequestPage(notification);
-                        break;
-                    }
-
-
+                        {
+                            Verb_Is_RequestPage(notification);
+                            break;
+                        }
                     case RequestCreateEmployee:
-                    {
-                        Verb_Is_RequestCreateEmployee(notification);
-                        break;
+                        {
+                            Verb_Is_RequestCreateEmployee(notification);
+                            break;
                     }
 
                     case RequestFetchEmployee:

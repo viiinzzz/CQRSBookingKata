@@ -76,15 +76,16 @@ public class MessageBusHttp : IMessageBus
         this.log = log;
     }
 
-    private bool IsTraceSubscribe => logLevelSubscribe == LogLevel.Trace;
-    private bool IsTraceNotify => logLevelSubscribe == LogLevel.Trace;
+    private bool IsTraceSubscribe => logLevelSubscribe <= LogLevel.Trace;
+    private bool IsTraceNotify => logLevelSubscribe <= LogLevel.Trace;
 
     public void Subscribe(SubscriptionRequest sub, int busId)
     {
-        if (busId != 0)
-        {
-            throw new ArgumentException("Only value 0 allowed", nameof(busId));
-        }
+        // if (busId != 0)
+        // {
+        //     Console.WriteLine($"==================subscribe from me {GetHashCode().xby4()} to busId {busId.xby4()}  me {sub.url} remote {(_remote.BaseAddress + nameof(Subscribe).ToLower())}");
+        //     throw new ArgumentException("Only value 0 allowed", nameof(busId));
+        // }
 
         var uri = nameof(Subscribe).ToLower();
         var url = _remote.BaseAddress + uri;
@@ -222,10 +223,11 @@ public class MessageBusHttp : IMessageBus
 
     public NotifyAck Notify(IClientNotificationSerialized notification, int busId)
     {
-        if (busId != 0)
-        {
-            throw new ArgumentException("Only value 0 allowed", nameof(busId));
-        }
+        // if (busId != 0)
+        // {
+        //     Console.WriteLine($"==================notify from me {GetHashCode().xby4()} to busId {busId.xby4()} remote {(_remote.BaseAddress + nameof(Notify).ToLower())}");
+        //     throw new ArgumentException("Only value 0 allowed", nameof(busId));
+        // }
 
         var uri = nameof(Notify).ToLower();
         var url = _remote.BaseAddress + uri;

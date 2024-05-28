@@ -37,6 +37,15 @@ public partial class ApiHelper
         out IEnumerable<Type> registeredTypes
     )
     {
+        var appConfig = builder.Configuration;
+
+        var logLevel = LogLevel.Debug;
+
+        if (!Enum.TryParse(appConfig[$"Logging:LogLevel:ConfigurationTypes.Register"], true, out logLevel))
+        {
+            logLevel = LogLevel.Debug;
+        }
+
         var types = builder.GetConfigurationTypes(key, availableTypes).ToArray();
 
         var services = builder.Services;
@@ -80,10 +89,13 @@ public partial class ApiHelper
             }
         }
         
-        Console.Out.WriteLine(@$"dbug: {key}{(types.Length > 0 ? "" : " has no dependency.")}
-{string.Join(Environment.NewLine, success.Select(s=> $"       - {s}"))
+        if (logLevel <= LogLevel.Debug || failed.Count > 0)
+        {
+            Console.Out.WriteLine(@$"dbug: {key}{(types.Length > 0 ? "" : " has no dependency.")}
+{string.Join(Environment.NewLine, success.Select(s => $"       - {s}"))
 }{(failed.Count == 0 ? "" : Environment.NewLine)
-}{string.Join(Environment.NewLine, failed.Select(s=> $"       X {s}"))}");
+}{string.Join(Environment.NewLine, failed.Select(s => $"       X {s}"))}");
+        }
 
         return services;
     }

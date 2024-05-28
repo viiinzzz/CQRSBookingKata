@@ -15,17 +15,59 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System.Runtime.InteropServices.JavaScript;
-
 namespace VinZ.Common;
 
 public record MessageQueueConfiguration
 (
+    LogLevel logLevel = LogLevel.Trace,
     Uri busUrl = default,
     string? messageQueueUrl = default,
     Type[] busTypes = default,
     bool pauseOnError = default
 );
+
+public class AddClientsService
+(
+    IScopeProvider scp
+)
+    : BackgroundService
+{
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        var scope0 = scp.GetScope<MessageQueueConfiguration>(out var mqConfig);
+        var scope1 = scp.GetScope<ILogger<IMessageBus>>(out var log);
+
+        var busTypes = mqConfig.busTypes;
+        var logLevel = mqConfig.logLevel;
+
+        return Task.WhenAll(busTypes.Select(busType =>
+        {
+            if (logLevel <= LogLevel.Trace)
+            {
+                log.LogInformation(
+                    $"Connecting {busType.Name} to remote bus {mqConfig.busUrl}...");
+            }
+
+            var scope2 = scp.GetScope(busType, out var domainBus);
+            var client = (IMessageBusClient)domainBus;
+
+            client.Log = log;
+
+            client.ConnectToBus(scp);
+
+            return client
+                .Configure()
+                .ContinueWith(prev =>
+                {
+                    if (logLevel <= LogLevel.Trace)
+                    {
+                        log.LogInformation(
+                            $"<<<{busType.Name}:{client.GetHashCode().xby4()}>>> Connected.");
+                    }
+                }, stoppingToken);
+        }));
+    }
+}
 
 public static class MessageQueueNetCoreHelper
 {
@@ -85,7 +127,8 @@ public static class MessageQueueNetCoreHelper
             services.AddSingleton(_ => new MqServerConfig
             {
                 DomainBusTypes = mqConfig.busTypes,
-                PauseOnError = mqConfig.pauseOnError
+                PauseOnError = mqConfig.pauseOnError,
+                logLevel = mqConfig.logLevel
             });
 
             services.AddSingleton<MqServer>();
@@ -97,6 +140,8 @@ public static class MessageQueueNetCoreHelper
             return services;
         }
 
+        //remote message queue
+
         services.AddScoped<IMessageBus>(sp =>
         {
             var log = sp.GetRequiredService<ILogger<IMessageBus>>();
@@ -107,6 +152,8 @@ public static class MessageQueueNetCoreHelper
 
             return remoteBus;
         });
+
+        services.AddHostedService<AddClientsService>();
 
         addedBus = [.. addedBusList];
 

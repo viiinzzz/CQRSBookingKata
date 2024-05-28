@@ -189,16 +189,18 @@ public partial class MessageBusClientBase : IMessageBusClient, IDisposable
     {
         try
         {
+            var subscriptionRequest = new SubscriptionRequest
+            {
+                _type = $"{nameof(Subscribe)}",
+                name = GetType().Name,
+                url = _bus.Url.ToString(),
+                recipient = recipient,
+                verb = verb
+            };
+
             var task = await Retry(() =>
             {
-                _bus!.Subscribe(new SubscriptionRequest
-                {
-                    _type = $"{nameof(Subscribe)}",
-                    name = GetType().Name,
-                    url = _bus.Url.ToString(),
-                    recipient = recipient,
-                    verb =  verb
-                }, 0);
+                _bus!.Subscribe(subscriptionRequest, 0);
 
                 return true;
             }, new RetryOptions

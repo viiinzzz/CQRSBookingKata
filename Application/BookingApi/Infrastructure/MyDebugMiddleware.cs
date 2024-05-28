@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Newtonsoft.Json.Linq;
+using System;
 using System.IO;
 
 namespace BookingKata.API.Infrastructure;
@@ -62,9 +64,8 @@ public class MyDebugMiddleware
 
     public async Task Invoke(HttpContext context)
     {
-        var rid = RequestId;
+        var rid = RequestId++;
         var tid = context.Request.HttpContext.TraceIdentifier;
-        RequestId++;
         var t0 = DateTime.Now;
 
         try
@@ -142,13 +143,14 @@ public class MyDebugMiddleware
             }
 
             var dt = (DateTime.Now - t0).TotalMilliseconds;
-
+            var statusStr = Enum.GetName(typeof(HttpStatusCode), context.Response.StatusCode);
+                
             logger.LogInformation(@$"
                 +--( Response {$"{dt,6:#####0}"}ms)-----------------------/{rid:000000}/
                 | {context.Request.Scheme.ToUpper()} {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
                 | ORIGIN {context.Request.Host}
                 +---/{tid}/--------------( {context.Response.StatusCode:000} )--->>
-{ToJsonDebug(responseBodyObj)}
+{(responseBodyObj == null ? $"({statusStr})" : "")}{ToJsonDebug(responseBodyObj)}
 ---( Request )
 {ToJsonDebug(requestBodyObj)}
 ---");
@@ -200,7 +202,7 @@ Failure cause by {ex.GetType().Name}:
         {
             if (response == null)
             {
-                return "{}";//response.ToJson();
+                return "(empty)";
             }
 
             var message = ((IDictionary<string, object>)response!)["Message"]?.ToString();

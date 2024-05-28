@@ -61,3 +61,12 @@ TCPView from SysInternals--
 
 ??? A:\Kata\BookingKata> `docker stack deploy -c docker-compose.yml my-db-stack`
 https://aws.plainenglish.io/deploying-services-on-aws-with-docker-swarm-using-a-docker-stack-for-efficient-management-5cf1830909a8
+
+
+## nuget repo --> baget
+https://netcoregenesis.com/documentation/docs/3.22.0/BaGet_Installation/
+`docker compose -f "Application/Docker/nuget/docker-compose.nuget.yml" up`
+RUN dotnet nuget push -k welcome -s http://localhost:5555/v3/index.json .\CoreSvc.1.0.2.nupkg
+
+
+dotnet add package EntityFramework

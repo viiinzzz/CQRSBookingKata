@@ -1,0 +1,26 @@
+name: booking_ci
+
+services:
+
+  nuget:
+    build:
+      context: .
+      dockerfile: Dockerfile.nuget
+    networks:
+      - booking_ci
+    #restart: always
+    #restart: unless-stopped
+    ports:
+      - published: 5555
+        target: 80
+    volumes:
+      - nuget_data:/var/baget:rw
+
+      
+networks:
+  booking_ci:
+    driver: bridge
+
+volumes:
+  nuget_data:
+    

@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.Dynamic;
+
 namespace VinZ.MessageQueue;
 
 public static class AnonymousTypeHelper
@@ -59,8 +61,13 @@ public static class AnonymousTypeHelper
             return false;
         }
 
-        var type = instance.GetType();
+        if (instance is JObject or ExpandoObject)
+        {
+            return true;
+        }
 
+        var type = instance.GetType();
+        
         return IsAnonymousType(type);
     }
 }

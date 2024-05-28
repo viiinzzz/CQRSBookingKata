@@ -22,7 +22,6 @@ public class ConsoleAuditBus
 (
     ITimeService DateTime,
     IServerContextService server,
-    // ILogger<ConsoleAuditBus> log
     ILoggerFactory logFactory
 )
     : MessageBusClientBase

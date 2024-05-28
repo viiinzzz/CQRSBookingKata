@@ -175,10 +175,14 @@ void ConfigureDependencyInjection
         services.AddSingleton<IServerContextService, ServerContextProxyService>();
     }
 
+    var appConfig = builder.Configuration;
+    var logLevelMessageQueueDefault = LogLevel.Trace;
+    Enum.TryParse(appConfig[$"MessageQueue.Default"], true, out logLevelMessageQueueDefault);
 
     //bus
     var mqConfig = new MessageQueueConfiguration
     {
+        logLevel = logLevelMessageQueueDefault,
         busUrl = busUrl,
         messageQueueUrl = Environment.GetEnvironmentVariable("MESSAGEQUEUE_URL") ?? builder.GetConfigurationValue("Api:MessageQueueUrl"),
         busTypes = builder.GetConfigurationTypes("Api:Bus", Dependencies.AvailableBusTypes).ToArray(),

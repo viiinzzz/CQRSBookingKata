@@ -2,23 +2,6 @@ name: booking_solution
 
 services:
 
-  nuget:
-    image: ${DOCKER_REGISTRY-}bookingapi:latest
-    build:
-      context: .
-      dockerfile: images/nuget/Dockerfile.nuget
-    networks:
-      - booking_backend
-      - booking_frontend
-    #restart: always
-    #restart: unless-stopped
-    ports:
-      - published: 5555
-        target: 80
-    volumes:
-      - nuget_data:/var/baget:rw
-
-
   app:
     image: ${DOCKER_REGISTRY-}bookingapi:latest
     build:
@@ -33,6 +16,11 @@ services:
     networks:
       - booking_backend
       - booking_frontend
+    volumes:
+        - type: bind
+          source: ./Application/Docker/bookingapi/config/appsettings.Production-App.json
+          target: /app/appsettings.Production-App.json
+          read_only: true
     environment:
       ASPNETCORE_CAPTURESTARTUPERRORS: true
       ASPNETCORE_ENVIRONMENT: Production-App
@@ -49,6 +37,11 @@ services:
     domainname: booking.local
     networks:
       - booking_backend
+    volumes:
+        - type: bind
+          source: ./Application/Docker/bookingapi/config/appsettings.Production-Demo.json
+          target: /app/appsettings.Production-Demo.json
+          read_only: true
     environment:
       ASPNETCORE_CAPTURESTARTUPERRORS: true
       ASPNETCORE_ENVIRONMENT: Production-Demo
@@ -65,6 +58,11 @@ services:
     domainname: booking.local
     networks:
       - booking_backend
+    volumes:
+        - type: bind
+          source: ./Application/Docker/bookingapi/config/appsettings.Production-Admin.json
+          target: /app/appsettings.Production-Admin.json
+          read_only: true
     environment:
       ASPNETCORE_CAPTURESTARTUPERRORS: true
       ASPNETCORE_ENVIRONMENT: Production-Admin
@@ -81,6 +79,11 @@ services:
     domainname: booking.local
     networks:
       - booking_backend
+    volumes:
+        - type: bind
+          source: ./Application/Docker/bookingapi/config/appsettings.Production-Planning.json
+          target: /app/appsettings.Production-Planning.json
+          read_only: true
     environment:
       ASPNETCORE_CAPTURESTARTUPERRORS: true
       ASPNETCORE_ENVIRONMENT: Production-Planning
@@ -97,6 +100,11 @@ services:
     domainname: booking.local
     networks:
       - booking_backend
+    volumes:
+        - type: bind
+          source: ./Application/Docker/bookingapi/config/appsettings.Production-Sales.json
+          target: /app/appsettings.Production-Sales.json
+          read_only: true
     environment:
       ASPNETCORE_CAPTURESTARTUPERRORS: true
       ASPNETCORE_ENVIRONMENT: Production-Sales
@@ -113,6 +121,11 @@ services:
     domainname: booking.local
     networks:
       - booking_backend
+    volumes:
+        - type: bind
+          source: ./Application/Docker/bookingapi/config/appsettings.Production-Support.json
+          target: /app/appsettings.Production-Support.json
+          read_only: true
     environment:
       ASPNETCORE_CAPTURESTARTUPERRORS: true
       ASPNETCORE_ENVIRONMENT: Production-Support
@@ -149,7 +162,7 @@ services:
     container_name: booking_dbadmin
     build:
       context: .
-      dockerfile: images/db-admin/Dockerfile.dbadmin
+      dockerfile: Application/Docker/db-admin/Dockerfile.dbadmin
     depends_on:
       - db
     domainname: booking.local
@@ -203,7 +216,6 @@ networks:
 volumes:
   db_data:
   dbadmin_data:
-  nuget_data:
   #configdir:
   #  driver: local
   #  driver_opts:

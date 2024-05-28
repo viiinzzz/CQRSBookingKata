@@ -88,7 +88,7 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 WORKDIR "/src"
-COPY ["./appsettings/appsettings.Production*.json", "/app"]
+#COPY ["./Application/Docker/bookingapi/config/appsettings.*.json", "/app"]
 WORKDIR /app
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://*:8080

@@ -53,7 +53,7 @@ services:
       - MESSAGEQUEUE_URL=http://app001.booking.local:8080/bus
 
   support:
-    entrypoint: ["echo", "warn: Service disabled"] #Un/Comment me out
+    #entrypoint: ["echo", "warn: Service disabled"] #Un/Comment me out
     hostname: sup001.booking.local
     networks:
       - booking_backend
