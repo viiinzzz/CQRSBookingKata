@@ -15,10 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using OpenTelemetry.Trace;
 using System.Drawing;
+using System.Dynamic;
+using System.Net.Mime;
+using System.Text;
+using static VinZ.Common.MiniAnsi;
 
-namespace BookingKata.API.Infrastructure;
+namespace VinZ.Common;
 
 
 public class MyDebugMiddleware
@@ -111,7 +114,7 @@ public class MyDebugMiddleware
 
                 logger.LogInformation(@$"
         <<-( {Bold}Request{Rs} )--------------------------------/{rid:000000}/
-        | {scheme}{method} {context.Request.Path}{context.Request.QueryString}
+        | {scheme}{method} {Href(context.Request.Path + context.Request.QueryString)}
         | ORIGIN {context.Request.Host}
         +---/{tid}/--------------------------
 {ToJsonDebug(requestBodyObj)}
@@ -172,7 +175,7 @@ public class MyDebugMiddleware
 
             logger.LogInformation(@$"
                 +--( {Fg(Color.Green)}Response{Rs} {Italic}{$"{dt,6:#####0}"}ms{Rs})-----------------------/{rid:000000}/
-                | {scheme}{method} {context.Request.Path}{context.Request.QueryString}
+                | {scheme}{method} {Href(context.Request.Path + context.Request.QueryString)}
                 | ORIGIN {context.Request.Host}
                 +---/{tid}/--------------( {Fg(statusOk ? Color.Green : Color.Red)}{context.Response.StatusCode:000}{Rs} )--->>
 {(responseBodyObj == null ? $"({statusStr}) " : "")}{ToJsonDebug(responseBodyObj)}
@@ -195,7 +198,7 @@ public class MyDebugMiddleware
 
             logger.LogWarning(@$"
                 !--( {Fg(Color.Orange)}Canceled{Rs} {Italic}{dt,6:#####0}ms{Rs})-----------------------/{rid:000000}/
-                | {scheme}{method} {context.Request.Path}{context.Request.QueryString}
+                | {scheme}{method} {Href(context.Request.Path + context.Request.QueryString)}
                 | ORIGIN 
             {context.Request.Host}
                 !!!!!{tid}!!!!!!!!!!!!!!( {Fg(Color.Orange)}{context.Response.StatusCode:000}{Rs} )!!!!!X
@@ -214,7 +217,7 @@ Failure cause by {ex.GetType().Name}:
 
             logger.LogError(@$"
                 !--( {Fg(Color.Red)}Aborted{Rs} {dt,6:#####0}ms)------------------------/{rid:000000}/
-                | {scheme}{method} {context.Request.Path}{context.Request.QueryString}
+                | {scheme}{method} {Href(context.Request.Path + context.Request.QueryString)}
                 | ORIGIN {context.Request.Host} 
                 !!!!!{tid}!!!!!!!!!!!!!!( {Fg(Color.Red)}{context.Response.StatusCode:000}{Rs} )!!!!!X
 Failure cause by {ex.GetType().Name}:
@@ -268,31 +271,4 @@ Failure cause by {ex.GetType().Name}:
         }
     }
 
-
-
-    //ANSI
-    //
-    private const string ESC = "\u001b";
-    private const string CSI = $"{ESC}[";
-    private static string SGR(params byte[] codes) => $"{CSI}{string.Join(";", codes.Select(c => c.ToString()))}m";
-
-    private static readonly string Rs = SGR(39, 49); //0
-    private static readonly string Bold = SGR(1);
-    private static readonly string Faint = SGR(2);
-    private static readonly string Italic = SGR(3);
-    private static readonly string Underlined = SGR(4);
-    private static readonly string Blink = SGR(5);
-    private static readonly string Inverted = SGR(7);
-    private static readonly string StrikeThrough = SGR(9);
-    private static readonly string Overlined = SGR(53);
-
-    private static string Fg(Color color) => SGR(38, 2, color.R, color.G, color.B);
-    private static string Bg(Color color) => SGR(48, 2, color.R, color.G, color.B);
-    private static string Href(string link, string? text = null) => $"{ESC}]8;;{link}\a{text ?? link}{ESC}]8;;\a{Rs}"; //hyperlink
-
-    private static readonly string UpAndClearStr = $"{CSI}1A{CSI}2K";
-    private static readonly string BoldAndBlinkStr = $"{CSI}1{CSI}5";
-
-    //
-    //
 }

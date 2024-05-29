@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MessageQueue\VinZ.MessageQueue.csproj" />
+    <ProjectReference Include="..\MiniAnsi\VinZ.Common.MiniAnsi.csproj" />
     <ProjectReference Include="..\Paging.Contract\VinZ.Common.Paging.Contract.csproj" />
   </ItemGroup>
 

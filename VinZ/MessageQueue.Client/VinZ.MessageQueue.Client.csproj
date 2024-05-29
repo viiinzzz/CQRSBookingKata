@@ -15,6 +15,7 @@
     <ProjectReference Include="..\FakeTime.Contracts\VinZ.Common.FakeTime.Contract.csproj" />
     <ProjectReference Include="..\JsonHelper\VinZ.Common.JsonHelper.csproj" />
     <ProjectReference Include="..\MessageQueue.Contracts\VinZ.MessageQueue.Contract.csproj" />
+    <ProjectReference Include="..\MiniAnsi\VinZ.Common.MiniAnsi.csproj" />
     <ProjectReference Include="..\StringHelper\VinZ.Common.StringHelper.csproj" />
   </ItemGroup>
 

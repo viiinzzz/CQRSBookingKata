@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using static VinZ.Common.MiniAnsi;
 using System.Drawing;
 
 namespace VinZ.MessageQueue;
@@ -246,7 +247,10 @@ public class MessageBusHttp : IMessageBus
         
         int rid = RequestId++;
 
-        var fromToSubject = $"From: {notification.Originator ?? ""} --> To: {notification.Recipient ?? nameof(Omni)} Subject: ({notification.Type}) {notification.Verb ?? nameof(AnyVerb)} ({notification.Status:000})";
+        var messageType =
+            notification.Type == NotificationType.Response ? "Re: "
+            : notification.Type == NotificationType.Advertisement ? "Ad: "
+            : "";
 
         try
         {
@@ -259,7 +263,9 @@ public class MessageBusHttp : IMessageBus
             if (IsTraceNotify) log.LogInformation(@$"
 <<-( Notify )........................................./{rid:000000}/
 | {scheme}{postMethod} {Href(url)}
-| {fromToSubject}
+| From: {notification.Originator ?? ""}
+| To: {notification.Recipient ?? nameof(Omni)}
+| Subject: {messageType}{notification.Verb ?? nameof(AnyVerb)}
 +....{notification.CorrelationGuid()}...................
 {ToJsonDebug(notification)}
 ...");
@@ -275,7 +281,9 @@ public class MessageBusHttp : IMessageBus
             if (IsTraceNotify) log.LogInformation(@$"
                         +..( Notify )...................................../{rid:000000}/
                         | {scheme}{postMethod} {Href(url)}
-                        | {fromToSubject}
+                        | From: {notification.Originator ?? ""}
+                        | To: {notification.Recipient ?? nameof(Omni)}
+                        | Subject: {messageType}{notification.Verb ?? nameof(AnyVerb)}
                         +....{notification.CorrelationGuid()}..( {Fg(statusOk ? Color.Green : Color.Red)}{statusCode:000}{Rs} )....>>
 ");
 
@@ -312,7 +320,9 @@ public class MessageBusHttp : IMessageBus
             if (IsTraceNotify) log.LogInformation(@$"
                         !--( {Fg(ex is HttpRequestException ? Color.Orange : Color.Red)}Notify{Rs} )-------------------------------------/{rid:000000}/
                         | {scheme}{postMethod} {Href(url)}
-                        | {fromToSubject}
+                        | From: {notification.Originator ?? ""}
+                        | To: {notification.Recipient ?? nameof(Omni)}
+                        | Subject: {messageType}{notification.Verb ?? nameof(AnyVerb)}
                         !!!!!{notification.CorrelationGuid()}!!!( {Fg(ex is HttpRequestException ? Color.Orange : Color.Red)}{(int)HttpStatusCode.InternalServerError:000}{Rs} )!!!!!X
 
 {(ex is HttpRequestException ? ex.Message : @$"!!! sensitive
@@ -443,29 +453,4 @@ public class MessageBusHttp : IMessageBus
         ));
     }
 
-    //ANSI
-    //
-    private const string ESC = "\u001b";
-    private const string CSI = $"{ESC}[";
-    private static string SGR(params byte[] codes) => $"{CSI}{string.Join(";", codes.Select(c => c.ToString()))}m";
-
-    private static readonly string Rs = SGR(39, 49); //0
-    private static readonly string Bold = SGR(1);
-    private static readonly string Faint = SGR(2);
-    private static readonly string Italic = SGR(3);
-    private static readonly string Underlined = SGR(4);
-    private static readonly string Blink = SGR(5);
-    private static readonly string Inverted = SGR(7);
-    private static readonly string StrikeThrough = SGR(9);
-    private static readonly string Overlined = SGR(53);
-
-    private static string Fg(Color color) => SGR(38, 2, color.R, color.G, color.B);
-    private static string Bg(Color color) => SGR(48, 2, color.R, color.G, color.B);
-    private static string Href(string link, string? text = null) => $"{ESC}]8;;{link}\a{text ?? link}{ESC}]8;;\a{Rs}"; //hyperlink
-
-    private static readonly string UpAndClearStr = $"{CSI}1A{CSI}2K";
-    private static readonly string BoldAndBlinkStr = $"{CSI}1{CSI}5";
-
-    //
-    //
 }
