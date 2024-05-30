@@ -154,9 +154,6 @@ public class PlanningBus(IScopeProvider sp, BookingConfiguration bconf) : Messag
             }
         }
 
-        Notify(new ResponseNotification(notification.Originator, Respond, page)
-        {
-            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-        });
+        Notify(new ResponseNotification(notification, notification.Originator, Respond, page));
     }
 }

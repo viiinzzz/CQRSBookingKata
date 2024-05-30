@@ -22,26 +22,28 @@ public record ClientNotification
     NotificationType Type,
     string? Recipient,
     string? Verb,
-
     int Status = default,
-
     string? Originator = default,
-
     TimeSpan? EarliestDelivery = default,
     TimeSpan? LatestDelivery = default,
     TimeSpan? RepeatDelay = default,
-
     int? RepeatCount = default,
     bool? Aggregate = default,
     bool? Immediate = default,
-
     long CorrelationId1 = default,
     long CorrelationId2 = default
 )
     : IClientNotificationSerialized
 {
+    [Newtonsoft.Json.JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string[] _steps { get; set; } = [];
+    public int _hops => _steps.Length;
+
     public ClientNotification
     (
+        string[] previousSteps,
+
         NotificationType Type,
         string? Recipient,
         string? Verb,
@@ -67,17 +69,19 @@ public record ClientNotification
         Type,
         Recipient,
         Verb,
-
         Status,
 
         Originator,
 
-        EarliestDelivery, LatestDelivery, RepeatDelay,
-        RepeatCount, Aggregate, Immediate,
+        EarliestDelivery: EarliestDelivery, LatestDelivery: LatestDelivery, RepeatDelay: RepeatDelay,
+        RepeatCount: RepeatCount, Aggregate: Aggregate, Immediate: Immediate,
 
-        CorrelationId1, CorrelationId2
+        CorrelationId1: CorrelationId1, CorrelationId2: CorrelationId2
     )
     {
+        // _steps = [..previousSteps.Append($"{Recipient ?? nameof(Omni)}.{Verb}")];
+        _steps = previousSteps ?? [];
+
         MessageType = messageObj.GetTypeSerializedName();
 
         if (messageObj?.GetType()?.IsInterface ?? false)

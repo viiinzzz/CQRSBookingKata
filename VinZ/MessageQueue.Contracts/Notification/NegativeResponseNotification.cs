@@ -22,13 +22,11 @@ namespace VinZ.MessageQueue;
 
 public record NegativeResponseNotification
 (
-    string? Recipient,
+    IClientNotificationSerialized parentNotification,
 
-    string? Verb = ErrorProcessingRequest,
-    
-    object? MessageObj = default,
-
-    string? Originator = default,
+    Exception ex,
+    string? Recipient = default,
+    string? Verb = default,
 
     TimeSpan? EarliestDelivery = default,
     TimeSpan? LatestDelivery = default,
@@ -36,85 +34,19 @@ public record NegativeResponseNotification
 
     int? RepeatCount = default,
     bool? Aggregate = default,
-    bool? Immediate = default,
-
-    long CorrelationId1 = default,
-    long CorrelationId2 = default
+    bool? Immediate = default
 )
-    : ClientNotification
+    : ResponseNotification
     (
-        NotificationType.Response,
+        parentNotification,
 
-        Recipient, 
-        Verb, MessageObj, 
-        (int)HttpStatusCode.InternalServerError, Originator,
-
-        EarliestDelivery, LatestDelivery, RepeatDelay,
-        RepeatCount, Aggregate, Immediate,
-        CorrelationId1, CorrelationId2
+        Recipient: Recipient ?? parentNotification.Originator,
+        MessageObj: parentNotification.MessageAsObject().IncludeError(ex),
+        Negative: true
     ),
         IHaveMessageObj
 {
-    public NegativeResponseNotification
-    (
-        IClientNotificationSerialized childNotification,
-        Exception ex,
 
-        string? Originator = default,
-
-        TimeSpan? EarliestDelivery = default,
-        TimeSpan? LatestDelivery = default,
-        TimeSpan? RepeatDelay = default,
-
-        int? RepeatCount = default,
-        bool? Aggregate = default,
-        bool? Immediate = default
-    )
-        : this
-        (
-            Omni, ErrorProcessingRequest,
-
-            
-            childNotification.MessageAsObject().IncludeError(ex),
-
-            childNotification.Originator,
-
-            EarliestDelivery, LatestDelivery, RepeatDelay,
-            RepeatCount, Aggregate, Immediate,
-            childNotification.CorrelationId1, childNotification.CorrelationId2
-        )
-    { }
-
-
-    public NegativeResponseNotification
-    (
-        string recipient,
-        IClientNotificationSerialized childNotification,
-        Exception ex,
-
-        string? Originator = default,
-
-        TimeSpan? EarliestDelivery = default,
-        TimeSpan? LatestDelivery = default,
-        TimeSpan? RepeatDelay = default,
-
-        int? RepeatCount = default,
-        bool? Aggregate = default,
-        bool? Immediate = default
-    )
-        : this
-        (
-            recipient, ErrorProcessingRequest,
-
-            childNotification.MessageAsObject().IncludeError(ex),
-
-            childNotification.Originator,
-
-            EarliestDelivery, LatestDelivery, RepeatDelay,
-            RepeatCount, Aggregate, Immediate,
-            childNotification.CorrelationId1, childNotification.CorrelationId2
-        )
-    { }
 }
 
 
@@ -150,9 +82,11 @@ public static class NegativeResponseNotificationHelper
         {
             ret = ret.PatchRelax(new
             {
-                errorInner = IncludeError(null, ex.InnerException)
+                _errorInner = IncludeError(new {}, ex.InnerException)
             });
         }
+
+        ret = JsonConvert.DeserializeObject<ExpandoObject>(JsonConvert.SerializeObject(ret));
 
         return ret;
     }

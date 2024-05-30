@@ -260,12 +260,14 @@ public partial class MessageBusClientBase : IMessageBusClient, IDisposable
         Notified?.Invoke(this, notification);
     }
 
-    public TReturn? AskResult<TReturn>(string originator, string recipient, string verb, object? message)
+    public TReturn? AskResult<TReturn>(
+        string originator, string[] steps,
+        string recipient, string verb, object? message)
     where TReturn : class
     {
         CheckBus();
 
-        var ret = _bus!.AskResult<TReturn>(recipient, verb, message, originator);
+        var ret = _bus!.AskResult<TReturn>(recipient, verb, message, originator, steps);
 
         return ret;
     }

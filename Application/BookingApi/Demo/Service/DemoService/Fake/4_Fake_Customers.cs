@@ -27,8 +27,9 @@ public partial class DemoBus
             {
                 var message = "Demo: Seeding Customers...";
 
-                bus.Notify(new AdvertisementNotification(message, [])
+                bus.Notify(new AdvertisementNotification(message)
                 {
+                    _steps = [nameof(Fake_Customers)],
                     Originator = originator,
                     Immediate = true
                 });
@@ -43,7 +44,7 @@ public partial class DemoBus
 
                 var customerId = bus.AskResult<Id<Customer>>(Recipient.Sales, Verb.Sales.RequestCreateCustomer,
                     createCustomerRequest,
-                    originator);
+                    originator, [nameof(Fake_Customers)]);
 
                 if (customerId == null)
                 {

@@ -20,6 +20,7 @@ namespace VinZ.MessageQueue;
 public interface IClientNotificationSerialized :
     IHaveDeliveryOptions,
     IHaveCorrelation,
+    IHaveHops,
     IHaveDestination,
     IHaveOrigin,
 

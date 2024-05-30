@@ -60,7 +60,7 @@ public partial class MqServer
 
         if (correlationId == null)
         {
-            throw new InvalidOperationException("Uncorrelated wait");
+            throw new InvalidOperationException("Uncorrelated wait. (ack.CorrelationId == null)");
         }
 
         var awaitedResponse = new AwaitedResponse(correlationId.Value, DateTime, cancellationToken, Track, Untrack);
@@ -69,6 +69,8 @@ public partial class MqServer
 
         if (ret == null)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             throw new InvalidOperationException("Unexpected wait");
         }
 

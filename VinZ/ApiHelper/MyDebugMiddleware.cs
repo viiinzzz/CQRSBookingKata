@@ -85,9 +85,11 @@ public class MyDebugMiddleware
 
         try
         {
+            var requestHeaders = string.Join(Environment.NewLine, context.Request.Headers
+                .Where(h => h.Key.StartsWith('_'))
+                .Select(h => $"{Faint}---{Rs} {Fg(Color.DarkMagenta)}{h.Key}{Rs} {Faint}={Rs} {Bold}{Fg(Color.DarkMagenta)}{h.Value}{Rs}"));
 
             ExpandoObject? requestBodyObj = null;
-
 
             if (IsTraceRequest)
             {
@@ -117,6 +119,7 @@ public class MyDebugMiddleware
         | {scheme}{method} {Href(context.Request.Path + context.Request.QueryString)}
         | ORIGIN {context.Request.Host}
         +---/{tid}/--------------------------
+{requestHeaders}
 {ToJsonDebug(requestBodyObj)}
 ---");
             }
@@ -142,6 +145,10 @@ public class MyDebugMiddleware
             //
             //
 
+            var responseHeaders = string.Join(Environment.NewLine, context.Response.Headers
+                .Where(h => h.Key.StartsWith('_'))
+                .Select(h => $"{Faint}---{Rs} {Fg(Color.DarkMagenta)}{h.Key}{Rs} {Faint}={Rs} {Bold}{Fg(Color.DarkMagenta)}{h.Value}{Rs}"));
+
             var responseMime = context.Response.ContentType == null ? new ContentType(MediaTypeNames.Text.Plain) : new ContentType(context.Response.ContentType);
             var responseEncoding = responseMime.CharSet == null ? Encoding.UTF8 : Encoding.GetEncoding(responseMime.CharSet);
             var responseType = responseMime.MediaType;
@@ -164,7 +171,14 @@ public class MyDebugMiddleware
                     responseBodyObj = new ExpandoObject();
                     var responseBodyDict = (IDictionary<string, object>)responseBodyObj!;
 
-                    responseBodyDict[responseType] = responseBody.Replace("\r", "").Split('\n');
+                    var bodyLines = new[]{ $"({responseBody.Length} char{(responseBody.Length > 1 ? "s": "")})" };
+
+                    if (responseType.StartsWith("text"))
+                    {
+                        bodyLines = responseBody.Replace("\r", "").Split('\n');
+                    }
+
+                    responseBodyDict[responseType] = bodyLines;
                 }
             }
 
@@ -178,8 +192,10 @@ public class MyDebugMiddleware
                 | {scheme}{method} {Href(context.Request.Path + context.Request.QueryString)}
                 | ORIGIN {context.Request.Host}
                 +---/{tid}/--------------( {Fg(statusOk ? Color.Green : Color.Red)}{context.Response.StatusCode:000}{Rs} )--->>
+{responseHeaders}
 {(responseBodyObj == null ? $"({statusStr}) " : "")}{ToJsonDebug(responseBodyObj)}
 ---( Request )
+{requestHeaders}
 {ToJsonDebug(requestBodyObj)}
 ---");
 

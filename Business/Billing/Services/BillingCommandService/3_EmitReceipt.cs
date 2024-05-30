@@ -67,7 +67,7 @@ public partial class BillingCommandService
                 vendorId = vendor.vendorId,
                 terminalId = vendor.terminalId,
                 transactionId = invoiceId
-            }, originator);
+            }, originator, [nameof(BillingCommandService)]);
         //
         //
 

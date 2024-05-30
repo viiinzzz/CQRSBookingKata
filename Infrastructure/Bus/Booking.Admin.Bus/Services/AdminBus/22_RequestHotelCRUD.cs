@@ -27,10 +27,7 @@ public partial class AdminBus
 
         var hotel = repo.DisableHotel(request.id, request.disable);
 
-        Notify(new ResponseNotification(notification.Originator, HotelDisabled, hotel)
-        {
-            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-        });
+        Notify(new ResponseNotification(notification, notification.Originator, HotelDisabled, hotel));
     }
 
     private void Verb_Is_RequestModifyHotel(IClientNotificationSerialized notification)
@@ -41,10 +38,7 @@ public partial class AdminBus
 
         var hotel = repo.Update(request.id, request.data);
 
-        Notify(new ResponseNotification(notification.Originator, HotelModified, hotel)
-        {
-            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-        });
+        Notify(new ResponseNotification(notification, notification.Originator, HotelModified, hotel));
     }
 
     private void Verb_Is_RequestFetchHotel(IClientNotificationSerialized notification)
@@ -55,10 +49,7 @@ public partial class AdminBus
 
         var hotel = repo.GetHotel(request.id);
 
-        Notify(new ResponseNotification(notification.Originator, HotelFetched, hotel)
-        {
-            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-        });
+        Notify(new ResponseNotification(notification, notification.Originator, HotelFetched, hotel));
     }
 
     private void Verb_Is_RequestFetchHotelList(IClientNotificationSerialized notification)
@@ -67,10 +58,7 @@ public partial class AdminBus
 
         IdCollection<Hotel> list = new([.. repo.Hotels.Select(hotel => hotel.HotelId)]);
 
-        Notify(new ResponseNotification(notification.Originator, HotelListFetched, list)
-        {
-            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-        });
+        Notify(new ResponseNotification(notification, notification.Originator, HotelListFetched, list));
     }
     
     private void Verb_Is_RequestFetchHotelGeoProxy(IClientNotificationSerialized notification)
@@ -83,10 +71,7 @@ public partial class AdminBus
 
         var geoProxy = ret?.GetGeoProxy();
         
-        Notify(new ResponseNotification(notification.Originator, HotelGeoProxyFetched, geoProxy)
-        {
-            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-        });
+        Notify(new ResponseNotification(notification, notification.Originator, HotelGeoProxyFetched, geoProxy));
     }
 
     private void Verb_Is_RequestCreateHotel(IClientNotificationSerialized notification)
@@ -99,10 +84,7 @@ public partial class AdminBus
 
         var id = new Id<HotelRef>(hotelId);
 
-        Notify(new ResponseNotification(notification.Originator, HotelCreated, id)
-        {
-            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-        });
+        Notify(new ResponseNotification(notification, notification.Originator, HotelCreated, id));
     }
 
     private void Verb_Is_RequestCreateFloorRooms(IClientNotificationSerialized notification)
@@ -122,9 +104,6 @@ public partial class AdminBus
 
         var ids = new Ids([.. urids]);
 
-        Notify(new ResponseNotification(notification.Originator, HotelCreated, ids)
-        {
-            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-        });
+        Notify(new ResponseNotification(notification, notification.Originator, HotelCreated, ids));
     }
 }

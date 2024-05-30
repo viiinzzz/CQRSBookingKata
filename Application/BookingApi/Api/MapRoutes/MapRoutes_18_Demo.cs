@@ -58,16 +58,16 @@ public static partial class ApiMethods
             }
         ).WithOpenApi().WithTags([DemoTag]);
 
-
-        app.MapGet("/context/demo", async
-            (
-                [FromServices] DemoContextService demoContext
-            ) 
-                =>
-            {
-                return Results.Json(demoContext);
-            }
-        ).WithOpenApi().WithTags([DemoTag]);
+        //
+        // app.MapGet("/context/demo", async
+        //     (
+        //         [FromServices] IDemoContext demoContext
+        //     ) 
+        //         =>
+        //     {
+        //         return Results.Json(demoContext);
+        //     }
+        // ).WithOpenApi().WithTags([DemoTag]);
 
     }
 }

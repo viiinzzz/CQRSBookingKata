@@ -29,10 +29,6 @@ public partial class SalesBus
 
         var id = new Id<Customer>(customerId);
 
-        Notify(new ResponseNotification(notification.Originator, Verb.Sales.CustomerCreated, id)
-        {
-            CorrelationId1 = notification.CorrelationId1,
-            CorrelationId2 = notification.CorrelationId2
-        });
+        Notify(new ResponseNotification(notification, notification.Originator, Verb.Sales.CustomerCreated, id));
     }
 }

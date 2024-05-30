@@ -6,10 +6,6 @@ public partial class AdminBus
     {
         using var scope = sp.GetScope<IServerContextService>(out var serverContext);
 
-        Notify(new ResponseNotification(Omni, RespondServerContext, serverContext)
-        {
-            CorrelationId1 = notification.CorrelationId1,
-            CorrelationId2 = notification.CorrelationId2
-        });
+        Notify(new ResponseNotification(notification, Omni, RespondServerContext, serverContext));
     }
 }

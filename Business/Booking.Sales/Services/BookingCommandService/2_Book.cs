@@ -19,6 +19,8 @@ namespace BookingKata.Sales;
 
 public partial class BookingCommandService
 {
+    private static readonly string[] StepsBook = [$"{nameof(BookingCommandService)}.{nameof(Book)}"];
+
     public int Book
     (
         string lastName,
@@ -58,8 +60,10 @@ public partial class BookingCommandService
             throw new PropositionNotFoundException();
         }
 
-        var roomDetails = bus.AskResult<RoomDetails>(Recipient.Admin, Verb.Admin.RequestSingleRoomDetails,
-            new Id<RoomRef>(stayProposition.Urid), originator);
+        var roomDetails = bus.AskResult<RoomDetails>(
+            Recipient.Admin, Verb.Admin.RequestSingleRoomDetails,
+            new Id<RoomRef>(stayProposition.Urid), 
+            originator, StepsBook);
 
         if (roomDetails == null)
         {
@@ -85,7 +89,8 @@ public partial class BookingCommandService
         var amount = stayProposition.Price;
         var currency = stayProposition.Currency;
 
-        var quotationId = bus.AskResult<Id<QuotationRequest>>(Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestQuotation,
+        var quotationId = bus.AskResult<Id<QuotationRequest>>(
+            Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestQuotation,
             new QuotationRequest
             {
                 price = amount,
@@ -97,14 +102,16 @@ public partial class BookingCommandService
                 jsonMeta = System.Text.Json.JsonSerializer.Serialize(quotationSpec),
 
                 referenceId = stayPropositionId
-            }, originator);
+            },
+            originator, StepsBook);
 
         if (quotationId == null)
         {
             throw new ArgumentException(ReferenceInvalid, nameof(quotationId));
         }
 
-        var invoiceId = bus.AskResult<Id<InvoiceRequest>>(Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestInvoice,
+        var invoiceId = bus.AskResult<Id<InvoiceRequest>>(
+            Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestInvoice,
             new InvoiceRequest
             {
                 amount = amount,
@@ -112,7 +119,8 @@ public partial class BookingCommandService
 
                 customerId = customerId,
                 quotationId = quotationId.id
-            }, originator);
+            },
+            originator, StepsBook);
 
         if (invoiceId == null)
         {
@@ -120,7 +128,8 @@ public partial class BookingCommandService
         }
 
 
-        var receiptId = bus.AskResult<Id<ReceiptRequest>>(Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestPayment,
+        var receiptId = bus.AskResult<Id<ReceiptRequest>>(
+            Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestPayment,
             new PaymentRequest
             {
                 referenceId = invoiceId.id,
@@ -135,7 +144,8 @@ public partial class BookingCommandService
 
                 vendorId = vendor.vendorId,
                 terminalId = vendor.terminalId
-            }, originator);
+            },
+            originator, StepsBook);
 
         if (receiptId == null)
         {
@@ -190,10 +200,16 @@ public partial class BookingCommandService
 
         sales.RemoveVacancies(booked);
 
-        bus.Notify(new ResponseNotification(Omni, BookConfirmed, booking)
+
+        var parentNotification = new ClientNotification(NotificationType.Request, nameof(BookingCommandService), nameof(Book))
         {
-            Originator = originator
-        });
+            CorrelationId1 = correlationId1,
+            CorrelationId2 = correlationId2,
+            Originator = originator,
+            _steps = []
+        };
+
+        bus.Notify(new ResponseNotification(parentNotification, Omni, BookConfirmed, booking));
 
         return booking.BookingId;
     }

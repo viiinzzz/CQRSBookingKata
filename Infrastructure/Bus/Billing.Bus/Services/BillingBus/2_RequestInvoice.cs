@@ -39,9 +39,6 @@ public partial class BillingBus
         //
         //
 
-        Notify(new ResponseNotification(Omni, InvoiceEmitted, id)
-        {
-            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-        });
+        Notify(new ResponseNotification(notification, Omni, InvoiceEmitted, id));
     }
 }

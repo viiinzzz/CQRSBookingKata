@@ -63,6 +63,7 @@ public partial class MqServer
             Originator = originator,
             CorrelationId1 = correlationId.Id1,
             CorrelationId2 = correlationId.Id2,
+            Steps = n._steps,
 
             NotificationTime = now,
             EarliestDelivery = selectEarliest ? new[] { now2, now + n.EarliestDelivery.Value }.Max() : now,
@@ -72,10 +73,15 @@ public partial class MqServer
             Aggregate = n.Aggregate ?? false,
         };
 
+        string[] steps = [.. (notification.Steps ?? []).Append($"{notification.Recipient ?? nameof(Omni)}.{notification.Verb}")];
+
+
         var ack = new NotifyAck
         {
             Valid = true,
-            CorrelationId = correlationId
+            _steps = steps,
+            correlationId1 = correlationId.Id1,
+            correlationId2 = correlationId.Id2
         };
 
         if (immediate)
@@ -110,10 +116,10 @@ public partial class MqServer
                 : notification.Type == NotificationType.Advertisement ? "Ad: " 
                 : "";
             var rvm = @$"---
-To: {notification.Recipient}
+To: {Href(notification.Recipient ?? nameof(Omni))}
 From: {notification.Originator}
-Subject: {messageType}{notification.Verb}
-{messageJson}
+Subject: {Bold}{messageType}{notification.Verb}{Rs}
+{string.Join('\n', messageJson.Split('\n').Select(line => $"{Faint}{line}{Rs}"))}
 ---";
 
             {
@@ -145,7 +151,9 @@ Subject: {messageType}{notification.Verb}
         return new NotifyAck
         {
             Valid = false,
-            CorrelationId = correlationId
+            _steps = steps,
+            correlationId1 = correlationId.Id1,
+            correlationId2 = correlationId.Id2
         };
     }
 }

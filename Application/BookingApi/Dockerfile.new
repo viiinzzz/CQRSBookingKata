@@ -1,28 +1,16 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-
+ARG BUILD_CONFIGURATION=Release
 RUN apt-get update -yq && apt-get upgrade -yq && apt-get install -yq curl inetutils-ping
 #git nano
-
 USER app
-WORKDIR /app
+WORKDIR "/app"
 
 
+#restore nugets
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS restore1
-WORKDIR /src
-COPY ["Business/ThirdParty/ThirdParty.csproj", "Business/ThirdParty/"]
-COPY ["Business/Business.Common/Business.Common.csproj", "Business/Business.Common/"]
-COPY ["Business/ThirdParty.Contract/ThirdParty.Contract.csproj", "Business/ThirdParty.Contract/"]
-COPY ["Business/Booking.Shared/Booking.Shared.Contract.csproj", "Business/Booking.Shared/"]
-COPY ["Business/Billing/Billing.csproj", "Business/Billing/"]
-COPY ["Business/Business.Service/Booking.Contract.csproj", "Business/Business.Service/"]
-COPY ["Business/Booking.Admin/Booking.Admin.csproj", "Business/Booking.Admin/"]
-COPY ["Business/Booking.Planning/Booking.Planning.csproj", "Business/Booking.Planning/"]
-COPY ["Business/Booking.Sales/Booking.Sales.csproj", "Business/Booking.Sales/"]
-
-FROM restore1 AS restore2
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS restore-common
+WORKDIR "/src"
 COPY ["VinZ/DateTimeHelper/VinZ.Common.DateTimeHelper.csproj", "VinZ/DateTimeHelper/"]
 COPY ["VinZ/FakeTime.Contracts/VinZ.Common.FakeTime.Contract.csproj", "VinZ/FakeTime.Contracts/"]
 COPY ["VinZ/GeoIndexing.Contract/VinZ.GeoIndexing.Contract.csproj", "VinZ/GeoIndexing.Contract/"]
@@ -50,8 +38,29 @@ COPY ["VinZ/ParsableHelper/VinZ.Common.ParsableHelper.csproj", "VinZ/ParsableHel
 COPY ["VinZ/MessageQueue.Contracts/VinZ.MessageQueue.Contract.csproj", "VinZ/MessageQueue.Contracts/"]
 COPY ["VinZ/JsonHelper/VinZ.Common.JsonHelper.csproj", "VinZ/JsonHelper/"]
 COPY ["VinZ/MiniAnsi/VinZ.Common.MiniAnsi.csproj", "VinZ/MiniAnsi/"]
+WORKDIR "/src/VinZ"
+RUN for p in $(find . -name *.csproj); do dotnet restore $p ;done
 
-FROM restore2 AS restore3
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS restore-business
+WORKDIR "/src"
+COPY ["Business/Business.Service/Booking.Contract.csproj", "Business/Business.Service/"]
+COPY ["Business/Business.Common/Business.Common.csproj", "Business/Business.Common/"]
+
+COPY ["Business/ThirdParty/ThirdParty.csproj", "Business/ThirdParty/"]
+COPY ["Business/ThirdParty.Contract/ThirdParty.Contract.csproj", "Business/ThirdParty.Contract/"]
+
+COPY ["Business/Billing/Billing.csproj", "Business/Billing/"]
+
+COPY ["Business/Booking.Shared/Booking.Shared.Contract.csproj", "Business/Booking.Shared/"]
+COPY ["Business/Booking.Admin/Booking.Admin.csproj", "Business/Booking.Admin/"]
+COPY ["Business/Booking.Planning/Booking.Planning.csproj", "Business/Booking.Planning/"]
+COPY ["Business/Booking.Sales/Booking.Sales.csproj", "Business/Booking.Sales/"]
+WORKDIR "/src/Business"
+RUN for p in $(find . -name *.csproj); do dotnet restore $p ;done
+
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS restore-infrastructure
+WORKDIR "/src"
 COPY ["Infrastructure/Repository/Booking.Admin.Repository/Booking.Admin.Repository.csproj", "Infrastructure/Repository/Booking.Admin.Repository/"]
 COPY ["Infrastructure/Repository/Infrastructure.Repository.Common/Infrastructure.Storage.Common.csproj", "Infrastructure/Repository/Infrastructure.Repository.Common/"]
 COPY ["Infrastructure/Repository/Booking.Planning.Repository/Booking.Planning.Repository.csproj", "Infrastructure/Repository/Booking.Planning.Repository/"]
@@ -60,39 +69,81 @@ COPY ["Infrastructure/Repository/Bus.Repository/Bus.Repository.csproj", "Infrast
 COPY ["Infrastructure/Repository/GeoIndexing.Repository/GeoIndexing.Repository.csproj", "Infrastructure/Repository/GeoIndexing.Repository/"]
 COPY ["Infrastructure/Repository/Money.Repository/Money.Repository.csproj", "Infrastructure/Repository/Money.Repository/"]
 
-COPY ["Infrastructure/Bus/ThirdParty.Bus.Contract/ThirdParty.Bus.Contract.csproj", "Infrastructure/Bus/ThirdParty.Bus.Contract/"]
-COPY ["Infrastructure/Bus/ThirdParty.Bus/ThirdParty.Bus.csproj", "Infrastructure/Bus/ThirdParty.Bus/"]
 COPY ["Infrastructure/Bus/Billing.Bus.Contract/Billing.Bus.Contract.csproj", "Infrastructure/Bus/Billing.Bus.Contract/"]
-COPY ["Infrastructure/Bus/Billing.Bus/Billing.Bus.csproj", "Infrastructure/Bus/Billing.Bus/"]
+COPY ["Infrastructure/Bus/ThirdParty.Bus.Contract/ThirdParty.Bus.Contract.csproj", "Infrastructure/Bus/ThirdParty.Bus.Contract/"]
 COPY ["Infrastructure/Bus/Booking.Admin.Bus/Booking.Admin.Bus.csproj", "Infrastructure/Bus/Booking.Admin.Bus/"]
 COPY ["Infrastructure/Bus/Booking.Planning.Bus/Booking.Planning.Bus.csproj", "Infrastructure/Bus/Booking.Planning.Bus/"]
 COPY ["Infrastructure/Bus/Booking.Sales.Bus/Booking.Sales.bus.csproj", "Infrastructure/Bus/Booking.Sales.Bus/"]
+COPY ["Infrastructure/Bus/ThirdParty.Bus/ThirdParty.Bus.csproj", "Infrastructure/Bus/ThirdParty.Bus/"]
+COPY ["Infrastructure/Bus/Billing.Bus/Billing.Bus.csproj", "Infrastructure/Bus/Billing.Bus/"]
 
-COPY ["Infrastructure/Infrastructure.Common/Bus.Common.csproj", "Infrastructure/Infrastructure.Common/"]
 COPY ["Infrastructure/BookingKata.Enterprise/Enterprise.Repository/Booking.Enterprise.Storage.csproj", "Infrastructure/BookingKata.Enterprise/Enterprise.Repository/"]
 COPY ["Infrastructure/BookingKata.Enterprise/Enterprise.Bus/Booking.Enterprise.Network.csproj", "Infrastructure/BookingKata.Enterprise/Enterprise.Bus/"]
 
-FROM restore3 AS restore
+COPY ["Infrastructure/Infrastructure.Common/Bus.Common.csproj", "Infrastructure/Infrastructure.Common/"]
+
+WORKDIR "/src/Infrastructure/Repository"
+RUN for p in $(find . -name *.csproj); do dotnet restore $p ;done
+WORKDIR "/src/Infrastructure/Bus"
+RUN for p in $(find . -name *.csproj); do dotnet restore $p ;done
+WORKDIR "/src/Infrastructure/BookingKata.Enterprise"
+RUN for p in $(find . -name *.csproj); do dotnet restore $p ;done
+WORKDIR "/src/Infrastructure"
+RUN dotnet restore ./Infrastructure.Common/Bus.Common.csproj
+
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS restore-application
+WORKDIR /src
 COPY ["Application/BookingApi/BookingApi.csproj", "Application/BookingApi/"]
-RUN dotnet restore "./Application/BookingApi/BookingApi.csproj"
+RUN dotnet restore "/src/Application/BookingApi/BookingApi.csproj"
 
 
 
-FROM restore AS build
-ARG BUILD_CONFIGURATION=Release
-COPY . .
+
+FROM restore-common AS build-common
+WORKDIR "/src/VinZ"
+COPY ./VinZ .
+RUN for p in $(find . -name *.csproj); do dotnet build $p --no-restore -c "$BUILD_CONFIGURATION" ;done
+
+FROM build-common AS build-business
+WORKDIR "/src"
+COPY --from=build-common /src .
+WORKDIR "/src/Business"
+COPY ./Business .
+RUN for p in $(find . -name *.csproj); do dotnet build $p -c "$BUILD_CONFIGURATION" ;done
+
+FROM build-business AS build-infrastructure
+WORKDIR "/src/Infrastructure"
+COPY ./Infrastructure .
+RUN dotnet build ./Infrastructure.Common/Bus.Common.csproj -c "$BUILD_CONFIGURATION"
+WORKDIR "/src/Infrastructure/Repository"
+RUN for p in $(find . -name *.csproj); do dotnet build $p -c "$BUILD_CONFIGURATION" ;done
+WORKDIR "/src/Infrastructure/Bus"
+RUN for p in $(find . -name *.csproj); do dotnet build $p -c "$BUILD_CONFIGURATION" ;done
+WORKDIR "/src/Infrastructure/BookingKata.Enterprise"
+RUN for p in $(find . -name *.csproj); do dotnet build $p -c "$BUILD_CONFIGURATION" ;done
+
+
+
+
+FROM restore-application AS build
+WORKDIR "/root/.nuget/packages"
+COPY --from=build-infrastructure /root/.nuget/packages .
+#RUN find /root/.nuget -type f &&[ 0 != 0 ]#stop
+WORKDIR "/src"
+COPY --from=build-infrastructure /src .
+COPY ./Application/ /src/Application/
+#RUN find /src -type f &&[ 0 != 0 ]#stop
 WORKDIR "/src/Application/BookingApi"
-RUN dotnet build "./BookingApi.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./BookingApi.csproj" -c "$BUILD_CONFIGURATION"
+RUN dotnet publish "./BookingApi.csproj" -c "$BUILD_CONFIGURATION" -o /app /p:UseAppHost=false
 
-FROM build AS publish
-RUN dotnet publish "./BookingApi.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+
 
 FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
-WORKDIR "/src"
-#COPY ["./Application/Docker/bookingapi/config/appsettings.*.json", "/app"]
-WORKDIR /app
+WORKDIR "/app"
+COPY --from=build /app .
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://*:8080
 ENTRYPOINT ["dotnet", "BookingApi.dll"]

@@ -19,6 +19,8 @@ namespace BookingKata.API.Demo;
 
 public partial class DemoBus
 {
+    private static readonly string[] StepsFakeHotels = [$"{nameof(DemoBus)}.{nameof(Fake_Hotels)}"];
+
     private void Fake_Hotels()
     {
         try
@@ -29,7 +31,7 @@ public partial class DemoBus
             {
                 var message = "Demo: Seeding Hotels...";
 
-                bus.Notify(new AdvertisementNotification(message, [])
+                bus.Notify(new AdvertisementNotification(message)
                 {
                     Originator = originator,
                     Immediate = true
@@ -46,7 +48,7 @@ public partial class DemoBus
 
                 var hotelId = bus.AskResult<Id<HotelRef>>(Recipient.Admin, Verb.Admin.RequestCreateHotel,
                     newHotel,
-                    originator);
+                    originator, StepsFakeHotels);
 
                 if (hotelId == null)
                 {
@@ -67,7 +69,7 @@ public partial class DemoBus
 
                 var hotel = bus.AskResult<Hotel>(Recipient.Admin, Verb.Admin.RequestModifyHotel,
                     new IdData<ModifyHotel>(hotelId.id, modifyHotel),
-                    originator);
+                    originator, StepsFakeHotels);
 
                 if (modifyHotel == null)
                 {
@@ -84,7 +86,7 @@ public partial class DemoBus
 
                 var rooms = bus.AskResult<Ids>(Recipient.Admin, Verb.Admin.RequestCreateFloorRooms,
                     createHotelFloor,
-                    originator);
+                    originator, StepsFakeHotels);
 
                 if (rooms == null)
                 {

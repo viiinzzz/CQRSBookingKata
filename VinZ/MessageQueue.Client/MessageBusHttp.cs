@@ -109,7 +109,7 @@ public class MessageBusHttp : IMessageBus
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             if (IsTraceSubscribe) log.LogInformation(@$"
-<<-( Subscribe )............................../{rid:000000}/
+<<-( {Bold}Subscribe{Rs} )............................../{rid:000000}/
 | {scheme}{postMethod} {Href(url)}
 +.....................................................
 {ToJsonDebug(sub)}
@@ -125,7 +125,7 @@ public class MessageBusHttp : IMessageBus
             var statusOk = statusCode >= 200 && statusCode < 300;
 
             if (IsTraceSubscribe) log.LogInformation(@$"
-                        +..( Subscribe )............................../{rid:000000}/
+                        +..( {Bold}Subscribe{Rs} )............................../{rid:000000}/
                         | {scheme}{postMethod} {Href(url)}
                         +........................................( {Fg(statusOk ? Color.Green : Color.Red)}{(int)post.Result.StatusCode:000}{Rs} )....>>
 ");
@@ -181,7 +181,7 @@ public class MessageBusHttp : IMessageBus
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             if (IsTraceSubscribe) log.LogInformation(@$"
-<<-( Unsubscribe )............................/{rid:000000}/
+<<-( {Bold}Unsubscribe{Rs} )............................/{rid:000000}/
 | {scheme}{postMethod} {Href(url)}
 +.....................................................
 {ToJsonDebug(sub)}
@@ -196,7 +196,7 @@ public class MessageBusHttp : IMessageBus
             var statusOk = statusCode >= 200 && statusCode < 300;
 
             if (IsTraceSubscribe) log.LogInformation(@$"
-                        +..( Unsubscribe )............................/{rid:000000}/
+                        +..( {Bold}Unsubscribe{Rs} )............................/{rid:000000}/
                         | {scheme}{postMethod} {Href(url)} ({(int)post.Result.StatusCode})
                         +........................................( {Fg(statusOk ? Color.Green : Color.Red)}{(int)post.Result.StatusCode:000}{Rs} )....>>
 ");
@@ -258,14 +258,20 @@ public class MessageBusHttp : IMessageBus
 
             var json = notification.ToJsonIgnoring([ nameof(IHaveMessageObj.MessageObj) ]);
 
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var content = new StringContent(json, Encoding.UTF8, "application/json")
+            {
+                Headers =
+                {
+                    { "_steps", notification._steps },
+                }
+            };
 
             if (IsTraceNotify) log.LogInformation(@$"
 <<-( Notify )........................................./{rid:000000}/
 | {scheme}{postMethod} {Href(url)}
+| To: {Href(notification.Recipient ?? nameof(Omni))}
 | From: {notification.Originator ?? ""}
-| To: {notification.Recipient ?? nameof(Omni)}
-| Subject: {messageType}{notification.Verb ?? nameof(AnyVerb)}
+| Subject: {Bold}{messageType}{notification.Verb ?? nameof(AnyVerb)}{Rs}
 +....{notification.CorrelationGuid()}...................
 {ToJsonDebug(notification)}
 ...");
@@ -281,9 +287,9 @@ public class MessageBusHttp : IMessageBus
             if (IsTraceNotify) log.LogInformation(@$"
                         +..( Notify )...................................../{rid:000000}/
                         | {scheme}{postMethod} {Href(url)}
+                        | To: {Href(notification.Recipient ?? nameof(Omni))}
                         | From: {notification.Originator ?? ""}
-                        | To: {notification.Recipient ?? nameof(Omni)}
-                        | Subject: {messageType}{notification.Verb ?? nameof(AnyVerb)}
+                        | Subject: {Bold}{messageType}{notification.Verb ?? nameof(AnyVerb)}{Rs}
                         +....{notification.CorrelationGuid()}..( {Fg(statusOk ? Color.Green : Color.Red)}{statusCode:000}{Rs} )....>>
 ");
 
@@ -308,6 +314,11 @@ public class MessageBusHttp : IMessageBus
                 throw new NullReferenceException(nameof(ack));
             }
 
+            if (ack.CorrelationId == null)
+            {
+                throw new NullReferenceException(nameof(ack.CorrelationId));
+            }
+
             return ack;
         }
         catch (Exception ex)
@@ -320,9 +331,9 @@ public class MessageBusHttp : IMessageBus
             if (IsTraceNotify) log.LogInformation(@$"
                         !--( {Fg(ex is HttpRequestException ? Color.Orange : Color.Red)}Notify{Rs} )-------------------------------------/{rid:000000}/
                         | {scheme}{postMethod} {Href(url)}
+                        | To: {Href(notification.Recipient ?? nameof(Omni))}
                         | From: {notification.Originator ?? ""}
-                        | To: {notification.Recipient ?? nameof(Omni)}
-                        | Subject: {messageType}{notification.Verb ?? nameof(AnyVerb)}
+                        | Subject: {Bold}{messageType}{notification.Verb ?? nameof(AnyVerb)}{Rs}
                         !!!!!{notification.CorrelationGuid()}!!!( {Fg(ex is HttpRequestException ? Color.Orange : Color.Red)}{(int)HttpStatusCode.InternalServerError:000}{Rs} )!!!!!X
 
 {(ex is HttpRequestException ? ex.Message : @$"!!! sensitive
@@ -363,6 +374,8 @@ public class MessageBusHttp : IMessageBus
 
         if (ret == null)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             throw new InvalidOperationException("Unexpected wait");
         }
 

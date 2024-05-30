@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.Drawing;
+
 namespace VinZ.MessageQueue;
 
 public partial class MqServer
@@ -133,9 +135,12 @@ public partial class MqServer
 
         var correlationId = new CorrelationId(serverNotification.CorrelationId1, serverNotification.CorrelationId2);
         var notificationLabel = $"Notification{correlationId}{(immediate ? "" : $" (Id:{serverNotification.NotificationId})")}";
-        var dequeuing = immediate ? "            >>>Relaying>>>          Immediate" : ">>>Dequeuing>>>                     scheduled";
+        var dequeuing = immediate 
+            ? $"{Inverted}{Fg(Color.LemonChiffon)}            >>>Relaying>>>         {Rs} Immediate" 
+            : $"{Inverted}{Fg(Color.SkyBlue)}>>>Dequeuing>>>                    {Rs} scheduled";
         var subscribersCountStr = $"{subscriberUrls.Count + (awaitersBus?.SubscribersCount ?? 0)} subscriber{(subscriberUrls.Count + (awaitersBus?.SubscribersCount ?? 0) > 1 ? "s" : "")}";
         var messageObj = serverNotification.MessageAsObject();
+        var messageHeaders = $"{Faint}---{Rs} {Fg(Color.DarkMagenta)}_steps{Rs} {Faint}={Rs} {Bold}{Fg(Color.DarkMagenta)}{string.Join(", ", serverNotification.Steps ?? [])}{Rs}";
         var messageJson = messageObj.ToJson(true)
             .Replace("\\r", "")
             .Replace("\\n", Environment.NewLine);
@@ -144,15 +149,16 @@ public partial class MqServer
             : serverNotification.Type == NotificationType.Advertisement ? "Ad: "
             : "";
         var rvm = @$"---
-To: {serverNotification.Recipient}
+To: {Href(serverNotification.Recipient ?? nameof(Omni))}
 From: {serverNotification.Originator}
-Subject: {messageType}{serverNotification.Verb}
-{messageJson}
+Subject: {Bold}{messageType}{serverNotification.Verb}{Rs}
+{messageHeaders}
+{string.Join('\n', messageJson.Split('\n').Select(line => $"{Faint}{line}{Rs}"))}
 ---";
         {
             var message =
                 @$"{dequeuing} {notificationLabel}
-                                  to {subscribersCountStr}...{Environment.NewLine}{rvm}";
+                                    to {subscribersCountStr}...{Environment.NewLine}{rvm}";
 
             LogLevel? logLevel =
                 serverNotification.IsErrorStatus() ? LogLevel.Error
@@ -201,7 +207,7 @@ Subject: {messageType}{serverNotification.Verb}
                     $"(matched {string.Join(" ", matchedHash)} unmatched {string.Join(" ", unmatchedHash)})";
 
                 var message =
-                    @$"            >>>Undeliverable!       {notificationLabel}...{Environment.NewLine}{matchedUnmatched}{Environment.NewLine}{rvm}";
+                    @$"{Inverted}{Fg(Color.Orange)}                  >>>Undeliverable !{Rs}{notificationLabel}...{Environment.NewLine}{matchedUnmatched}{Environment.NewLine}{rvm}";
 
                 LogLevel? logLevel =
                     serverNotification.Verb != ErrorProcessingRequest ? LogLevel.Error
@@ -221,18 +227,14 @@ Subject: {messageType}{serverNotification.Verb}
                 //if a liable message (not an error report),
                 //inform originator message got lost 424 (unavailable fringe bus?)
 
-                var nack = new NegativeResponseNotification(serverNotification.Originator)
+                var notification = new RequestNotification(serverNotification.Steps ?? [], serverNotification.Recipient, serverNotification.Verb)
                 {
-                    MessageObj = new
-                    {
-                        reason = "Undeliverable"
-                    },
-
-                    Status = (int)HttpStatusCode.FailedDependency,
-
                     CorrelationId1 = serverNotification.CorrelationId1,
                     CorrelationId2 = serverNotification.CorrelationId2,
+                    Originator = serverNotification.Originator
                 };
+
+                var nack = new NegativeResponseNotification(notification, new Exception("Undeliverable"));
 
             }
 
@@ -241,6 +243,7 @@ Subject: {messageType}{serverNotification.Verb}
 
         var clientNotification = new ClientNotification
         (
+            serverNotification.Steps ?? [],
             serverNotification.Type, 
             serverNotification.Recipient, serverNotification.Verb, 
             serverNotification.MessageAsObject())
@@ -250,7 +253,7 @@ Subject: {messageType}{serverNotification.Verb}
             CorrelationId2 = serverNotification.CorrelationId2,
         };
 
-        var delivering = "            >>>Delivering>>>        scheduled";
+        var delivering = $"{Inverted}{Fg(Color.PaleGreen)}            >>>Delivering>>>       {Rs} scheduled";
 
         if (awaitersBus != null)
         {
@@ -266,7 +269,7 @@ Subject: {messageType}{serverNotification.Verb}
 
                 if (_isTrace) log.LogInformation(
                     @$"{delivering} {notificationLabel}
-                                  to <<<awaitedBus>>>...");
+                                    to <<<awaitedBus>>>...");
 
                 count += new DeliveryCount(1, 0);
             }
@@ -274,7 +277,7 @@ Subject: {messageType}{serverNotification.Verb}
             {
                 log.LogError(
                     @$"{delivering} {notificationLabel}
-                                  to <<<awaitedBus>>>...
+                                    to <<<awaitedBus>>>...
 failure: {ex.Message}
 {ex.StackTrace}
 ");
@@ -330,8 +333,11 @@ failure: {ex.Message}
 
                         ack = new NotifyAck {
                             Valid = true,
+                            // _steps = serverNotification.Steps ?? [],
+                            _steps = clientNotification._steps,
                             Status = HttpStatusCode.Accepted,
-                            CorrelationId = correlationId
+                            correlationId1 = correlationId.Id1,
+                            correlationId2 = correlationId.Id2
                         };
                     }
                     else
@@ -375,10 +381,10 @@ failure: {ex.Message}
 
             if (logLevel.HasValue)
             {
-                var sent = "                         >>>Sent>>> scheduled";
+                var sent = $"{Inverted}{Fg(count.Failed > 0 || count.Delivered == 0 ? Color.Red : Color.Green)}                         >>>Sent>>>{Rs} scheduled";
                 var countStr = $"{subscribersCountStr}, {count.Delivered} delivered, {count.Failed} undelivered";
                 var message = @$"{sent} {notificationLabel}
-                                         to {countStr}...{Environment.NewLine}{rvm}";
+                                    to {countStr}...{Environment.NewLine}{rvm}";
              
                 log.Log(logLevel.Value, message);
             }

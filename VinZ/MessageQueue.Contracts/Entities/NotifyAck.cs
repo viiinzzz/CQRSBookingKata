@@ -15,19 +15,37 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.Text.Json.Serialization;
+
 namespace VinZ.MessageQueue;
 
 public record NotifyAck
 (
-    HttpStatusCode Status = 0,
+    long correlationId1 = 0,
+    long correlationId2 = 0,
 
     bool Valid = false,
-    string? data = default,
 
-    CorrelationId? CorrelationId = null
+    HttpStatusCode Status = 0,
+    string? data = default
 )
 {
+    [Newtonsoft.Json.JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
+    public CorrelationId? CorrelationId =>
+        correlationId1 == 0 && correlationId2 == 0 ? null : new CorrelationId(correlationId1, correlationId2);
+
+    [Newtonsoft.Json.JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     public Task<object?> Response { get; set; } = Task.FromResult<object?>(null);
+
+    [Newtonsoft.Json.JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string[]? _steps { get; set; }
+
+    public int hops => _steps?.Length ?? 0;
+
+    public object? response => Response.Status != TaskStatus.RanToCompletion ? null : Response.Result;
 }
 
 
@@ -37,7 +55,9 @@ public static class NotifyAckHelper
     {
         return new NotifyAck
         {
-            CorrelationId = notification.CorrelationId()
+            _steps = [.. notification._steps.Append("ack")],
+            correlationId1 = notification.CorrelationId1,
+            correlationId2 = notification.CorrelationId2,
         };
     }
 }

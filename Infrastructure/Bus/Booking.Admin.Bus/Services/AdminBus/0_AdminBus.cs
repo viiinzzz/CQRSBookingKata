@@ -136,7 +136,7 @@ public partial class AdminBus(IScopeProvider sp, BookingConfiguration bconf) : M
             }
             catch (Exception ex)
             {
-                Notify(new NegativeResponseNotification(notification.Originator, notification, ex));
+                Notify(new NegativeResponseNotification(notification, ex));
             }
         };
 

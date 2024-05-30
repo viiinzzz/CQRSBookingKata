@@ -6,7 +6,8 @@ public class ServerContextProxyService(IMessageBus mq)
     private ServerContext? GetContext()
     {
             var serverContext = mq.Ask<ServerContext>(
-                    nameof(ServerContextProxyService), Recipient.Admin, Verb.Admin.RequestServerContext, null, 
+                    nameof(ServerContextProxyService), [nameof(ServerContextProxyService)],
+                    Recipient.Admin, Verb.Admin.RequestServerContext, null, 
                     CancellationToken.None, 30)
                 .Result;
 

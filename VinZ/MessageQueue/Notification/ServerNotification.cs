@@ -19,7 +19,9 @@ namespace VinZ.MessageQueue;
 
 public record ServerNotification
 (
-    NotificationType Type = NotificationType.Request,
+    string[]? Steps = default,
+
+NotificationType Type = NotificationType.Request,
 
     string? Recipient = default,
     string? Verb = default,

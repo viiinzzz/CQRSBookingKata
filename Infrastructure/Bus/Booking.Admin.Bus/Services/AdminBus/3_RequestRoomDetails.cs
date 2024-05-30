@@ -38,10 +38,7 @@ public partial class AdminBus
         //
         //
 
-        Notify(new ResponseNotification(Omni, RespondHotelRoomDetails, roomDetails)
-        {
-            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-        });
+        Notify(new ResponseNotification(notification, Omni, RespondHotelRoomDetails, roomDetails));
     }
     
     private void Verb_Is_RequestSingleRoomDetails(IClientNotificationSerialized notification)
@@ -57,10 +54,7 @@ public partial class AdminBus
         //
         //
 
-        Notify(new ResponseNotification(Omni, RespondSingleRoomDetails, roomDetails)
-        {
-            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-        });
+        Notify(new ResponseNotification(notification, Omni, RespondSingleRoomDetails, roomDetails));
     } 
     
     
@@ -92,9 +86,6 @@ public partial class AdminBus
         //
         //
 
-        Notify(new ResponseNotification(Omni, RespondSingleRoomDetails, roomDetails)
-        {
-            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-        });
+        Notify(new ResponseNotification(notification, Omni, RespondSingleRoomDetails, roomDetails));
     }
 }

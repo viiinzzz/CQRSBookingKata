@@ -50,13 +50,15 @@ public static partial class ApiMethods
         admin.MapGet("/hotels/{id}/kpi", async
             (
                 int id,
+                [FromHeader] string[]? _steps,
                 [FromServices] IMessageBus mq,
                 CancellationToken requestCancel
             )
             =>
         {
             var kpi = await mq.Ask<KeyPerformanceIndicators>(
-                originator, Recipient.Sales, Verb.Sales.RequestHotelKpi, id,
+                originator, _steps ?? [],
+                Recipient.Sales, Verb.Sales.RequestHotelKpi, id,
                 requestCancel, responseTimeoutSeconds);
 
 
@@ -74,13 +76,15 @@ public static partial class ApiMethods
 
         admin.MapGet("/kpi", async
             (
+                [FromHeader] string[]? _steps,
                 [FromServices] IMessageBus mq,
                 CancellationToken requestCancel
             )
             =>
         {
             var kpi = await mq.Ask<KeyPerformanceIndicators>(
-                originator, Recipient.Sales, Verb.Sales.RequestHotelChainKpi, null,
+                originator, _steps ?? [],
+                Recipient.Sales, Verb.Sales.RequestHotelChainKpi, null,
                 requestCancel, responseTimeoutSeconds);
 
 

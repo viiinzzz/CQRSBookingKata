@@ -14,12 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+/*
 namespace VinZ.MessageQueue;
 
-public record ClientRequestNotification() : ClientNotification
+public record ClientRequestNotification(string[] steps) : ClientNotification
 (
     NotificationType.Request, 
     default,
-    default
+    default,
+    steps
 );
+*/

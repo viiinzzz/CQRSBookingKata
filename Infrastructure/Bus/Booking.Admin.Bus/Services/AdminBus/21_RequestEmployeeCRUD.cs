@@ -27,10 +27,7 @@ public partial class AdminBus
 
         var employee = repo.DisableEmployee(request.id, request.disable);
 
-        Notify(new ResponseNotification(notification.Originator, EmployeeDisabled, employee)
-        {
-            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-        });
+        Notify(new ResponseNotification(notification, notification.Originator, EmployeeDisabled, employee));
     }
 
     private void Verb_Is_RequestModifyEmployee(IClientNotificationSerialized notification)
@@ -41,10 +38,7 @@ public partial class AdminBus
 
         var employee = repo.Update(request.id, request.data);
 
-        Notify(new ResponseNotification(notification.Originator, EmployeeModified, employee)
-        {
-            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-        });
+        Notify(new ResponseNotification(notification, notification.Originator, EmployeeModified, employee));
     }
 
     private void Verb_Is_RequestFetchEmployee(IClientNotificationSerialized notification)
@@ -55,10 +49,7 @@ public partial class AdminBus
 
         var employee = repo.GetEmployee(request.id);
 
-        Notify(new ResponseNotification(notification.Originator, EmployeeFetched, employee)
-        {
-            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-        });
+        Notify(new ResponseNotification(notification, notification.Originator, EmployeeFetched, employee));
     }
 
     private void Verb_Is_RequestCreateEmployee(IClientNotificationSerialized notification)
@@ -71,9 +62,6 @@ public partial class AdminBus
 
         var id = new Id<Employee>(employeeId);
 
-        Notify(new ResponseNotification(notification.Originator, EmployeeCreated, id)
-        {
-            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-        });
+        Notify(new ResponseNotification(notification, notification.Originator, EmployeeCreated, id));
     }
 }

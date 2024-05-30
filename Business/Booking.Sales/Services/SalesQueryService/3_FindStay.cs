@@ -85,6 +85,8 @@ public partial class SalesQueryService
         return ret;
     }
 
+    private static readonly string[] StepsFindStay = [$"{nameof(SalesQueryService)}.{nameof(FindStay)}"];
+
     private IQueryable<StayMatch> FindStay2(StayRequest request, int customerId)
     {
         var firstNight = OvernightStay.From(request.ArrivalDate);
@@ -183,11 +185,13 @@ public partial class SalesQueryService
         var originator = GetType().FullName
                          ?? throw new Exception("invalid originator");
 
-        var roomDetails = bus.AskResult<RoomDetails[]>(Recipient.Admin, Verb.Admin.RequestManyRoomDetails,
+        var roomDetails = bus.AskResult<RoomDetails[]>(
+            Recipient.Admin, Verb.Admin.RequestManyRoomDetails,
             new RoomDetailsRequest
             {
                 onlyRoomNumbers = ids
-            }, originator);
+            },
+            originator, StepsFindStay);
 
         if (roomDetails is null or { Length: 0 })
         {
@@ -203,7 +207,8 @@ public partial class SalesQueryService
             {
 
 
-                var price = bus.AskResult<Price>(Support.Services.ThirdParty.Recipient, Support.Services.ThirdParty.Verb.RequestPricing,
+                var price = bus.AskResult<Price>(
+                    Support.Services.ThirdParty.Recipient, Support.Services.ThirdParty.Verb.RequestPricing,
                     new PricingRequest
                     {
                         //room
@@ -220,7 +225,8 @@ public partial class SalesQueryService
                         departureDateUtc = request.DepartureDate.SerializeUniversal(),
                         currency = request.Currency,
                         customerProfileJson = JsonSerializer.Serialize(customerProfile)
-                    }, originator);
+                    },
+                    originator, StepsFindStay);
 
                 var match = new StayMatch
                 (

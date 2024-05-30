@@ -8,7 +8,8 @@ public class DemoContextProxyService(IMessageBus mq, IServerContextService serve
     private DemoContext GetContext()
     {
         var context = mq.Ask<DemoContext>(
-                nameof(ServerContextProxyService), Recipient.Demo, Verb.Demo.RequestDemoContext, null, 
+                nameof(ServerContextProxyService), [nameof(DemoContextProxyService)],
+                Recipient.Demo, Verb.Demo.RequestDemoContext, null, 
                 CancellationToken.None, 30)
             .Result ?? throw new NullReferenceException();
 
@@ -35,7 +36,8 @@ public class DemoContextProxyService(IMessageBus mq, IServerContextService serve
     private Hotel[] GetHotels()
     {
         var hotels = mq.Ask<Hotel[]>(
-                         nameof(ServerContextProxyService), Recipient.Demo, Verb.Demo.RequestDemoHotels, null, 
+                         nameof(ServerContextProxyService), [nameof(DemoContextProxyService)],
+                         Recipient.Demo, Verb.Demo.RequestDemoHotels, null, 
                          CancellationToken.None, 30)
             .Result ?? throw new NullReferenceException();
 

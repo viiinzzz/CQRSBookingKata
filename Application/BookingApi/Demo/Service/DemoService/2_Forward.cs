@@ -57,11 +57,13 @@ public partial class DemoBus
         }
         catch (Exception ex)
         {
-            var childNotification = new RequestNotification(nameof(Demo), nameof(Forward));
-
-            bus.Notify(new NegativeResponseNotification(childNotification, ex, "aborted!")
+            var childNotification = new RequestNotification([], nameof(Demo), nameof(Forward))
             {
                 Originator = originator,
+            };
+
+            bus.Notify(new NegativeResponseNotification(childNotification, new Exception($"aborted: {ex.Message}"))
+            {
                 Immediate = true
             });
         }

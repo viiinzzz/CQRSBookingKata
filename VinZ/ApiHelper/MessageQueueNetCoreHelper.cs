@@ -238,9 +238,9 @@ public static class MessageQueueNetCoreHelper
     }
 
 
-    public static Func<int?, int?, IMessageBus, CancellationToken, Task<PageResult<TEntity>>?> ListMq<TEntity>
+    public static Func<int?, int?, string[]?, IMessageBus, CancellationToken, Task<PageResult<TEntity>>?> ListMq<TEntity>
     (
-        this string originator, 
+        this string originator,
         
         string recipient, string verb,
         string pattern, string uri, object filter,
@@ -250,6 +250,7 @@ public static class MessageQueueNetCoreHelper
     {
         return async (
                 int? page, int? pageSize,
+                [FromHeader] string[]? _steps,
                 [FromServices] IMessageBus mq, CancellationToken requestCancel
             )
             =>
@@ -257,7 +258,8 @@ public static class MessageQueueNetCoreHelper
             var pageRequest = new PageRequest(uri, page, pageSize, filter);
 
             var ret = await mq.Ask<PageResult<TEntity>>(
-                originator, recipient, verb, pageRequest,
+                originator, _steps ?? [],
+                recipient, verb, pageRequest,
                 requestCancel, responseTimeoutSeconds);
 
             if (ret == null)
@@ -269,7 +271,7 @@ public static class MessageQueueNetCoreHelper
         };
     }
 
-    public static Func<TNew, IMessageBus, CancellationToken, Task<Id<TNew>>> PostMq<TNew>
+    public static Func<TNew, string[]?, IMessageBus, CancellationToken, Task<Id<TNew>>> PostMq<TNew>
     (
         this string originator,
         
@@ -280,22 +282,24 @@ public static class MessageQueueNetCoreHelper
     {
         return async (
                 [FromBody] TNew post,
+                [FromHeader] string[]? _steps,
                 [FromServices] IMessageBus mq,
                 CancellationToken requestCancel
             )
             =>
         {
             var id = await mq.Ask<Id<TNew>>(
-                originator, recipient, verb, post,
+                originator, _steps ?? [],
+                recipient, verb, post,
                 requestCancel, responseTimeoutSeconds);
 
             return id;
         };
     }
 
-    public static Func<int, IMessageBus, CancellationToken, Task<IResult>> GetMq<TEntity>
+    public static Func<int, string[]?, IMessageBus, CancellationToken, Task<IResult>> GetMq<TEntity>
     (
-        this string originator,
+        this string originator, 
         
         string recipient, string verb,
         int responseTimeoutSeconds
@@ -304,20 +308,22 @@ public static class MessageQueueNetCoreHelper
     {
         return async (
                 int id,
+                [FromHeader] string[]? _steps,
                 [FromServices] IMessageBus mq,
                 CancellationToken requestCancel
             )
             =>
         {
             var entity = await mq.Ask<TEntity>(
-                originator, recipient, verb, new Id<TEntity>(id), 
+                originator, _steps ?? [],
+                recipient, verb, new Id<TEntity>(id), 
                 requestCancel, responseTimeoutSeconds);
 
             return entity.AsResult();
         };
     }
 
-    public static Func<int, TUpdate, IMessageBus, CancellationToken, Task<IResult>> PatchMq<TUpdate>
+    public static Func<int, TUpdate, string[]?, IMessageBus, CancellationToken, Task<IResult>> PatchMq<TUpdate>
     (
         this string originator,
         
@@ -329,12 +335,15 @@ public static class MessageQueueNetCoreHelper
         return async (
                 int id,
                 [FromBody] TUpdate patch,
+                [FromHeader] string[]? _steps,
                 [FromServices] IMessageBus mq,
                 CancellationToken requestCancel
             )
             =>
         {
-            var ret = await mq.AskObject(originator, recipient, verb,
+            var ret = await mq.AskObject(
+                originator, _steps ?? [],
+                recipient, verb,
                 new IdData<TUpdate>(id, patch),
                 requestCancel, responseTimeoutSeconds);
 
@@ -343,7 +352,7 @@ public static class MessageQueueNetCoreHelper
     }
 
 
-    public static Func<int, bool?, IMessageBus, CancellationToken, Task<IResult>> DisableMq<TEntity>
+    public static Func<int, bool?, string[]?, IMessageBus, CancellationToken, Task<IResult>> DisableMq<TEntity>
     (
         this string originator,
         
@@ -356,12 +365,14 @@ public static class MessageQueueNetCoreHelper
             (
                 int id,
                 bool? disable,
+                [FromHeader] string[]? _steps,
                 [FromServices] IMessageBus mq,
                 CancellationToken requestCancel
             ) => 
         {
             var ret = await mq.Ask<TEntity>(
-                originator, recipient, verb, new IdDisable<TEntity>(id, disable ?? true), 
+                originator, _steps ?? [],
+                recipient, verb, new IdDisable<TEntity>(id, disable ?? true), 
                 requestCancel, responseTimeoutSeconds);
 
             return ret.AsAccepted();

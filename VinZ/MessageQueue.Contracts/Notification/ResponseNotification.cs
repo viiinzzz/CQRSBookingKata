@@ -19,12 +19,11 @@ namespace VinZ.MessageQueue;
 
 public record ResponseNotification
 (
-    string? Recipient,
+    IClientNotificationSerialized parentNotification,
 
+    string? Recipient,
     string? Verb = Respond,
     object? MessageObj = default,
-
-    string? Originator = default,
 
     TimeSpan? EarliestDelivery = default,
     TimeSpan? LatestDelivery = default,
@@ -34,28 +33,33 @@ public record ResponseNotification
     bool? Aggregate = default,
     bool? Immediate = default,
 
-    long CorrelationId1 = default,
-    long CorrelationId2 = default
+    bool? Negative = default
 )
     : ClientNotification
     (
+         [.. (parentNotification?._steps ?? []).Append($"{((Negative ?? false) ? "KO" : "OK")}.{parentNotification?._steps?.LastOrDefault() ?? "null"}")],
+        // parentNotification._steps,
+
         NotificationType.Response,
 
         Recipient,
-        Verb, MessageObj,
-        (int)HttpStatusCode.OK, Originator,
+        (Negative ?? false) ? (Verb ?? ErrorProcessingRequest) : Verb, 
+        MessageObj,
+
+        (int)((Negative??false) ? HttpStatusCode.InternalServerError : HttpStatusCode.OK),
+        parentNotification.Originator,
 
         EarliestDelivery, LatestDelivery, RepeatDelay,
         RepeatCount, Aggregate, Immediate,
-        CorrelationId1, CorrelationId2
+        parentNotification.CorrelationId1, parentNotification.CorrelationId2
     ),
         IHaveMessageObj
 {
     public ResponseNotification
     (
-        object? MessageObj,
+        IClientNotificationSerialized parentNotification,
 
-        string? Originator = default,
+        object? MessageObj,
 
         TimeSpan? EarliestDelivery = default,
         TimeSpan? LatestDelivery = default,
@@ -63,21 +67,16 @@ public record ResponseNotification
 
         int? RepeatCount = default,
         bool? Aggregate = default,
-        bool? Immediate = default,
-
-        long CorrelationId1 = default,
-        long CorrelationId2 = default
+        bool? Immediate = default
     )
         : this
     (
+        parentNotification,
         Omni, Respond,
         MessageObj,
 
-        Originator,
-
         EarliestDelivery, LatestDelivery, RepeatDelay,
-        RepeatCount, Aggregate, Immediate,
-        CorrelationId1, CorrelationId2
+        RepeatCount, Aggregate, Immediate
     )
     { }
 }

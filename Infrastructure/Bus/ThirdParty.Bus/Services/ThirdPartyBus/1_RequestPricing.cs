@@ -48,9 +48,6 @@ public partial class ThirdPartyBus
             customerProfile
         );
 
-        Notify(new ResponseNotification(Omni, RespondPricing, price)
-        {
-            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2,
-        });
+        Notify(new ResponseNotification(notification, Omni, RespondPricing, price));
     }
 }

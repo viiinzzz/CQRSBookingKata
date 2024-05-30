@@ -19,10 +19,9 @@ namespace VinZ.MessageQueue;
 
 public record AdvertisementNotification
 (
-    string? Recipient,
-
     object? MessageObj = default,
-    
+
+    string? Recipient = default,
     string? Originator = default,
 
     TimeSpan? EarliestDelivery = default,
@@ -34,14 +33,21 @@ public record AdvertisementNotification
     bool? Immediate = default,
 
     long CorrelationId1 = default,
-    long CorrelationId2 = default
+    long CorrelationId2 = default,
+
+    string[]? Steps = default
 )
     : ClientNotification
     (
+        [.. (Steps ?? []).Append($"{Recipient ?? nameof(Omni)}.{AuditMessage}")],
+
         NotificationType.Advertisement,
 
         Recipient,
-        AuditMessage, MessageObj, 
+        AuditMessage,
+        
+        MessageObj,
+
         (int)HttpStatusCode.Continue, Originator,
 
         EarliestDelivery, LatestDelivery, RepeatDelay,
@@ -55,6 +61,7 @@ public record AdvertisementNotification
         string MessageText,
         object?[]? args = default,
 
+        string? Recipient = default,
         string? Originator = default,
 
         TimeSpan? EarliestDelivery = default,
@@ -66,18 +73,22 @@ public record AdvertisementNotification
         bool? Immediate = default,
 
         long CorrelationId1 = default,
-        long CorrelationId2 = default
+        long CorrelationId2 = default,
+        
+        string[]? steps = default
     )
         : this
         (
-            Omni,
             MessageObj: Format(MessageText, args),
 
+            Recipient,
             Originator,
 
             EarliestDelivery, LatestDelivery, RepeatDelay,
             RepeatCount, Aggregate, Immediate,
-            CorrelationId1, CorrelationId2
+            CorrelationId1, CorrelationId2,
+
+           steps
         )
     { }
 

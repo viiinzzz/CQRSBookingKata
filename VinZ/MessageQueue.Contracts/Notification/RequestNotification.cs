@@ -19,6 +19,8 @@ namespace VinZ.MessageQueue;
 
 public record RequestNotification
 (
+    string[] previousSteps,
+
     string? Recipient,
 
     string? Verb,
@@ -40,11 +42,14 @@ public record RequestNotification
 )
     : ClientNotification
     (
+        [.. (previousSteps ?? []).Append($"{Recipient ?? nameof(Omni)}.{Verb}")],
+
         NotificationType.Request,
 
         Recipient,
         Verb, MessageObj, 
-        0, Originator,
+        Status: 0,
+        Originator,
 
         EarliestDelivery, LatestDelivery, RepeatDelay,
         RepeatCount, Aggregate, Immediate,

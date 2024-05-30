@@ -64,10 +64,6 @@ public partial class SalesBus
             }
         }
 
-        Notify(new ResponseNotification(page)
-        {
-            Originator = notification.Originator,
-            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-        });
+        Notify(new ResponseNotification(notification, page));
     }
 }

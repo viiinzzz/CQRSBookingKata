@@ -178,6 +178,17 @@ public static class MessageHelper
         return type;
     }
 
+    public static bool IsNullable(this Type ClrType)
+    {
+        if (!ClrType.IsValueType)
+            return true; // Reference Type  
+
+        if (Nullable.GetUnderlyingType(ClrType) != null)
+            return true; // Nullable<T>
+
+        return false;    // Value Type  
+    }
+
     public static object MessageAs(this IHaveSerializedMessage notification, Type? tMessage)
     {
         if (notification == null)
@@ -189,7 +200,10 @@ public static class MessageHelper
         {
             if (tMessage != null)
             {
-                throw new ArgumentNullException(nameof(notification.Message));
+                if (!IsNullable(tMessage))
+                {
+                    throw new ArgumentNullException(nameof(notification.Message));
+                }
             }
         }
 
@@ -202,7 +216,7 @@ public static class MessageHelper
             throw new ArgumentException($"invalid type {messageType.FullName} : must be concrete", nameof(notification));
         }
 
-        if ((tMessage != null && messageType != tMessage) || 
+        if ((tMessage != null && messageType != tMessage && notification.Message != EmptySerialized) || 
             (messageType == null && notification.Message != null)
             )
         {

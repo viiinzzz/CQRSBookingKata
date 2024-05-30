@@ -45,10 +45,9 @@ public partial class AdminBus
             }
         }
 
-        Notify(new ResponseNotification(page)
+        Notify(new ResponseNotification(notification, page)
         {
             Originator = notification.Originator,
-            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
         });
     }
 }

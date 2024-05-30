@@ -43,17 +43,11 @@ public partial class BillingBus
 
             var id = new Id<Receipt>(receiptId);
 
-            Notify(new ResponseNotification(Omni, ReceiptFound, id)
-            {
-                CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-            });
+            Notify(new ResponseNotification(notification, Omni, ReceiptFound, id));
         }
         catch (Exception e)
         {
-            Notify(new ResponseNotification(Omni, ReceiptNotFound, referenceId)
-            {
-                CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-            });
+            Notify(new ResponseNotification(notification, Omni, ReceiptNotFound, referenceId));
         }
     }
 }

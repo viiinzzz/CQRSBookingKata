@@ -10,4 +10,5 @@ global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging;
 global using Newtonsoft.Json;
 global using VinZ.Common;
+global using static VinZ.Common.MiniAnsi;
 global using static VinZ.MessageQueue.Const;

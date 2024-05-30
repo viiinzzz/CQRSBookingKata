@@ -15,7 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using static VinZ.Common.MiniAnsi;
 using System.Drawing;
 
 namespace VinZ.MessageQueue;
@@ -95,6 +94,11 @@ public partial class MqServer
             if (ack == null)
             {
                 throw new NullReferenceException(nameof(ack));
+            }
+
+            if (ack.CorrelationId == null)
+            {
+                throw new NullReferenceException(nameof(ack.CorrelationId));
             }
 
             return ack;

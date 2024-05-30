@@ -26,12 +26,13 @@ public static class IMessageBusHelper
     (
         this IMessageBus mq,
         string recipient, string requestVerb, object? message,
-        string originator
+        string originator, string[] steps
     )
         where TReturn : class
     {
         var task = Ask<TReturn>(mq,
-            originator, recipient, requestVerb, message,
+            originator, steps,
+            recipient, requestVerb, message,
             CancellationToken.None, ResponseTimeoutSeconds);
 
         task.Wait();
@@ -49,19 +50,22 @@ public static class IMessageBusHelper
 
     public static async Task<ExpandoObject> AskObject(
         this IMessageBus mq,
-        string originator, string recipient, string requestVerb, object? message,
+        string originator, string[] steps,
+        string recipient, string requestVerb, object? message,
         CancellationToken requestCancel, int responseTimeoutSeconds = ResponseTimeoutSeconds
     )
     {
         return await mq.Ask<ExpandoObject>(
-            originator, recipient, requestVerb, message,
+            originator, steps,
+            recipient, requestVerb, message,
             requestCancel, responseTimeoutSeconds) 
                ?? new ExpandoObject();
     }
 
     public static async Task<TReturn?> Ask<TReturn>(
         this IMessageBus mq,
-        string originator, string recipient, string requestVerb, object? message,
+        string originator, string[] steps,
+        string recipient, string requestVerb, object? message,
         CancellationToken requestCancel, int responseTimeoutSeconds = ResponseTimeoutSeconds
     )
         where TReturn : class
@@ -73,7 +77,7 @@ public static class IMessageBusHelper
 
         var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(responseWait, requestCancel).Token;
 
-        var ack = mq.Notify(new RequestNotification(recipient, requestVerb,  message)
+        var ack = mq.Notify(new RequestNotification(steps, recipient, requestVerb,  message)
         {
             Immediate = true
         }, 0);

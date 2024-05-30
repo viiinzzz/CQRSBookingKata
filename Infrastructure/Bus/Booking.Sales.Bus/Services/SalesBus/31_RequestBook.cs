@@ -50,9 +50,6 @@ public partial class SalesBus
 
         var id = new Id<Shared.Booking>(bookingId);
 
-        Notify(new ResponseNotification(Omni, Verb.Sales.BookConfirmed, id)
-        {
-            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-        });
+        Notify(new ResponseNotification(notification, Omni, Verb.Sales.BookConfirmed, id));
     }
 }

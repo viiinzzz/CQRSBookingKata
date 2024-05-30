@@ -19,13 +19,17 @@ namespace BookingKata.Sales;
 
 public partial class SalesQueryService
 {
+    private static readonly string[] StepsOpenBooking = [$"{nameof(SalesQueryService)}.{nameof(OpenBooking)}"];
+
     public long[] OpenBooking(UniqueRoomId urid, DateTime openingDate, DateTime closingDate, int personCount)
     {
         var originator = GetType().FullName
                          ?? throw new Exception("invalid originator");
 
-        var roomDetails = bus.AskResult<RoomDetails>(Recipient.Admin, Verb.Admin.RequestSingleRoomDetails,
-            new Id<RoomRef>(urid.Value), originator);
+        var roomDetails = bus.AskResult<RoomDetails>(
+            Recipient.Admin, Verb.Admin.RequestSingleRoomDetails,
+            new Id<RoomRef>(urid.Value),
+            originator, StepsOpenBooking);
 
         if (roomDetails == default)
         {
@@ -33,8 +37,10 @@ public partial class SalesQueryService
         }
 
 
-        var hotelGeoProxy = bus.AskResult<GeoProxy>(Recipient.Admin, Verb.Admin.RequestFetchHotelGeoProxy,
-            new Id<HotelRef>(urid.HotelId), originator);
+        var hotelGeoProxy = bus.AskResult<GeoProxy>(
+            Recipient.Admin, Verb.Admin.RequestFetchHotelGeoProxy,
+            new Id<HotelRef>(urid.HotelId),
+            originator, StepsOpenBooking);
 
         if (hotelGeoProxy?.Cells is null or { Count: 0 })
         {

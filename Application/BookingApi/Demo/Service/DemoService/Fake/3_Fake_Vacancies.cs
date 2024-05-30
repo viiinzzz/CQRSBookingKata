@@ -19,6 +19,8 @@ namespace BookingKata.API.Demo;
 
 public partial class DemoBus
 {
+    private static readonly string[] StepsFakeVacancies = [$"{nameof(DemoBus)}.{nameof(Fake_Vacancies)}"];
+
     private void Fake_Vacancies()
     {
         try
@@ -50,7 +52,7 @@ public partial class DemoBus
 
                 var opening = bus.AskResult<HotelOpening>(Recipient.Sales, Verb.Sales.RequestOpenHotelSeason,
                     season,
-                    originator);
+                    originator, StepsFakeVacancies);
 
                 if (opening == null)
                 {

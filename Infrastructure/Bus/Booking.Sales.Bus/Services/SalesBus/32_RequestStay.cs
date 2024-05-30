@@ -42,9 +42,6 @@ public partial class SalesBus
         //
         //
 
-        Notify(new ResponseNotification(Omni, Verb.Sales.StayFound, page)
-        {
-            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-        });
+        Notify(new ResponseNotification(notification, Omni, Verb.Sales.StayFound, page));
     }
 }

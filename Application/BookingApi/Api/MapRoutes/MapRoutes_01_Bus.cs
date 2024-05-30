@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System;
+
 namespace BookingKata.API;
 
 public static partial class ApiMethods
@@ -53,9 +55,31 @@ public static partial class ApiMethods
 
 
         busGroup.MapPost("/{busId}/notify",
-            (ParsableHexInt busId, [FromBody]ClientRequestNotification notification, [FromServices]IMessageBus bus) =>
+            (ParsableHexInt busId, [FromBody]RequestNotification notification, [FromServices]IMessageBus bus) =>
             {
-                return bus.Notify(notification, busId.Value);
+                var ack = bus.Notify(notification, busId.Value);
+
+                if (ack.CorrelationId == null)
+                {
+                    return Results.UnprocessableEntity(new
+                    {
+                        correlationId = "undefined",
+                        status = ack.Status.ToString(),
+                        error = ack.data
+                    });
+                }
+
+                if (!ack.Valid)
+                {
+                    return Results.UnprocessableEntity(new
+                    {
+                        correlationId = ack.CorrelationId.ToString(),
+                        status = ack.Status.ToString(),
+                        error = ack.data
+                    });
+                }
+
+                return Results.Accepted(ack.CorrelationId.ToString(), ack);
             }
         ).ExcludeFromDescription();
         
@@ -70,9 +94,31 @@ public static partial class ApiMethods
         // ).ExcludeFromDescription();
 
         busGroup.MapPost("/notify",
-            ([FromBody] ClientRequestNotification notification, [FromServices]IMessageBus bus) =>
+            ([FromBody] RequestNotification notification, [FromServices]IMessageBus bus) =>
             {
-                return bus.Notify(notification, 0);
+                var ack = bus.Notify(notification, 0);
+
+                if (ack.CorrelationId == null)
+                {
+                    return Results.UnprocessableEntity(new
+                    {
+                        correlationId = "undefined",
+                        status = ack.Status.ToString(),
+                        error = ack.data
+                    });
+                }
+
+                if (!ack.Valid || ack.CorrelationId == null)
+                {
+                    return Results.UnprocessableEntity(new
+                    {
+                        correlationId = ack.CorrelationId.ToString(),
+                        status = ack.Status.ToString(),
+                        error = ack.data
+                    });
+                }
+
+                return Results.Accepted(ack.CorrelationId.ToString(), ack);
             }
         ).WithOpenApi().WithTags([BusTag]);
 

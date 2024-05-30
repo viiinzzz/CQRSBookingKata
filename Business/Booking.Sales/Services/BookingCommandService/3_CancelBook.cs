@@ -19,6 +19,8 @@ namespace BookingKata.Sales;
 
 public partial class BookingCommandService
 {
+    private static readonly string[] StepCancelBook = [$"{nameof(BookingCommandService)}.{nameof(CancelBook)}"];
+
     public void CancelBook
     (
         int bookingId,
@@ -59,11 +61,13 @@ public partial class BookingCommandService
         var originator = GetType().FullName
                          ?? throw new Exception("invalid originator");
 
-        var receiptId = bus.AskResult<Id<ReceiptRef>>(Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestReceipt,
+        var receiptId = bus.AskResult<Id<ReceiptRef>>(
+            Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestReceipt,
             new ReceiptRequest
             {
                 referenceId = bookingId
-            }, originator);
+            },
+            originator, StepCancelBook);
 
         if (receiptId == null)
         {
@@ -71,16 +75,20 @@ public partial class BookingCommandService
         }
 
 
-        var roomDetail = bus.AskResult<RoomDetails>(Recipient.Admin, Verb.Admin.RequestSingleRoomDetails,
-            new Id<RoomRef>(booking.UniqueRoomId), originator);
+        var roomDetail = bus.AskResult<RoomDetails>(
+            Recipient.Admin, Verb.Admin.RequestSingleRoomDetails,
+            new Id<RoomRef>(booking.UniqueRoomId),
+            originator, StepCancelBook);
 
         if (roomDetail == null)
         {
             throw new RoomNotFoundException();
         }
 
-        var refundId = bus.AskResult<Id<RefundRef>>(Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestRefund,
-            new RefundRequest { receiptId = receiptId.id }, originator);
+        var refundId = bus.AskResult<Id<RefundRef>>(
+            Support.Services.Billing.Recipient, Support.Services.Billing.Verb.RequestRefund,
+            new RefundRequest { receiptId = receiptId.id },
+            originator, StepCancelBook);
 
         if (refundId == null)
         {
@@ -110,9 +118,14 @@ public partial class BookingCommandService
 
         var id = new Id<Shared.Booking>(bookingId);
 
-        bus.Notify(new ResponseNotification(Omni, BookCancelled, id)
+        var parentNotification = new ClientNotification(NotificationType.Request, nameof(BookingCommandService), nameof(CancelBook))
         {
-            Originator = originator
-        });
+            CorrelationId1 = correlationId1,
+            CorrelationId2 = correlationId2,
+            Originator = originator,
+            _steps = []
+        };
+
+        bus.Notify(new ResponseNotification(parentNotification, Omni, BookCancelled, id));
     }
 }

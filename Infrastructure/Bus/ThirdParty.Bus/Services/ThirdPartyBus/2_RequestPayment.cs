@@ -49,9 +49,6 @@ public partial class ThirdPartyBus
 
         var responseVerb = response.Accepted ? PaymentAccepted : PaymentRefused;
 
-        Notify(new ResponseNotification(Omni, responseVerb, response)
-        {
-            CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2,
-        });
+        Notify(new ResponseNotification(notification, Omni, responseVerb, response));
     }
 }

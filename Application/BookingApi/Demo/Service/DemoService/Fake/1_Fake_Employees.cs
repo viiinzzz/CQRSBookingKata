@@ -19,6 +19,7 @@ namespace BookingKata.API.Demo;
 
 public partial class DemoBus
 {
+    private static readonly string[] StepsFakeEmployees = [$"{nameof(DemoBus)}.{nameof(Fake_Employees)}"];
 
     private void Fake_Employees()
     {
@@ -30,14 +31,15 @@ public partial class DemoBus
 
             int createAndEnrollEmployee(FakeHelper.FakeEmployee fakeEmployee)
             {
-                var employeeId = bus.AskResult<Id<Employee>>(Recipient.Admin,Verb.Admin.RequestCreateEmployee,
+                var employeeId = bus.AskResult<Id<Employee>>(
+                    Recipient.Admin,Verb.Admin.RequestCreateEmployee,
                     new CreateEmployeeRequest
                     {
                         LastName = fakeEmployee.LastName,
                         FirstName = fakeEmployee.FirstName,
                         SocialSecurityNumber = fakeEmployee.SocialSecurityNumber
                     }, 
-                    originator);
+                    originator, StepsFakeEmployees);
 
                 if (employeeId == null)
                 {
@@ -51,7 +53,7 @@ public partial class DemoBus
                         monthlyIncome = fakeEmployee.MonthlyIncome,
                         currency = fakeEmployee.Currency
                     }, 
-                    originator);
+                    originator, StepsFakeEmployees);
 
                 if (payrollId == null)
                 {
@@ -65,7 +67,7 @@ public partial class DemoBus
             {
                 var message = "Demo: Seeding Staff...";
 
-                bus.Notify(new AdvertisementNotification(message, [])
+                bus.Notify(new AdvertisementNotification(message)
                 {
                     Originator = originator,
                     Immediate = true
@@ -82,7 +84,7 @@ public partial class DemoBus
             {
                 var message = "Demo: Seeding Managers...";
 
-                bus.Notify(new AdvertisementNotification(message, [])
+                bus.Notify(new AdvertisementNotification(message)
                 {
                     Originator = originator,
                     Immediate = true

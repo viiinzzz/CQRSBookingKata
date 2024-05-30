@@ -40,6 +40,7 @@ public partial class DemoBus
             bus.Notify(new AdvertisementNotification(message, args)
             {
                 Originator = originator,
+                Steps = [nameof(Fake_BookingDay)],
                 Immediate = true
             });
         }
@@ -83,9 +84,14 @@ public partial class DemoBus
                 {
                     var message = "Demo: Booking skipped because no stay were found matching the customer's request!";
 
-                    bus.Notify(new NegativeResponseNotification(Omni, AuditMessage, message)
+
+                    var notification = new RequestNotification([], nameof(DemoBus), nameof(Fake_BookingDay))
                     {
                         Originator = originator,
+                    };
+
+                    bus.Notify(new NegativeResponseNotification(notification, new Exception(message), Omni, AuditMessage)
+                    {
                         Immediate = true
                     });
 
@@ -132,7 +138,12 @@ public partial class DemoBus
             {
                 if (ex is StayNotFoundException stayNotFoundException)
                 {
-                    bus.Notify(new NegativeResponseNotification(Omni, AuditMessage)
+                    var notification = new RequestNotification([], nameof(DemoBus), nameof(Fake_BookingDay))
+                    {
+                        Originator = originator,
+                    };
+
+                    bus.Notify(new NegativeResponseNotification(notification, ex, Omni, AuditMessage)
                     {
                         MessageObj = new
                         {

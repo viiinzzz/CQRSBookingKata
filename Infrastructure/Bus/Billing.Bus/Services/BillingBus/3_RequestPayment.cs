@@ -55,17 +55,11 @@ public partial class BillingBus
 
             var idAndReferenceId = referenceId.PatchRelax(id);
 
-            Notify(new ResponseNotification(Omni, PaymentAccepted, idAndReferenceId)
-            {
-                CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-            });
+            Notify(new ResponseNotification(notification, Omni, PaymentAccepted, idAndReferenceId));
         }
         catch (Exception e)
         {
-            Notify(new ResponseNotification(Omni, PaymentRefused, referenceId)
-            {
-                CorrelationId1 = notification.CorrelationId1, CorrelationId2 = notification.CorrelationId2
-            });
+            Notify(new ResponseNotification(notification, Omni, PaymentRefused, referenceId));
         }
     }
 }

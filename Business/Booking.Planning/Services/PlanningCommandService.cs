@@ -125,6 +125,7 @@ public class PlanningCommandService
     }
 
 
+    private static readonly string[] StepsAddReceptionCheck = [$"{nameof(PlanningCommandService)}.{nameof(Add)}{nameof(ReceptionCheck)}"];
 
     private void Add(ReceptionCheck check)
     {
@@ -135,8 +136,10 @@ public class PlanningCommandService
 
         var originator = this.GetType().FullName;
 
-        var hotelGeoProxy = bus.AskResult<GeoProxy>(Recipient.Admin, Verb.Admin.RequestFetchHotelGeoProxy,
-            new Id<HotelRef>(check.HotelId), originator);
+        var hotelGeoProxy = bus.AskResult<GeoProxy>(
+            Recipient.Admin, Verb.Admin.RequestFetchHotelGeoProxy,
+            new Id<HotelRef>(check.HotelId),
+            originator, StepsAddReceptionCheck);
 
         if (hotelGeoProxy == null)
         {
@@ -154,6 +157,9 @@ public class PlanningCommandService
         }
     }
 
+
+    private static readonly string[] StepsAddRoomServiceDuty = [$"{nameof(PlanningCommandService)}.{nameof(Add)}{nameof(RoomServiceDuty)}"];
+
     private void Add(RoomServiceDuty duty)
     {
         if (duty.Cancelled)
@@ -163,8 +169,10 @@ public class PlanningCommandService
 
         var originator = this.GetType().FullName;
 
-        var hotelGeoProxy = bus.AskResult<GeoProxy>(Recipient.Admin, Verb.Admin.RequestFetchHotelGeoProxy,
-            new Id<HotelRef>(duty.HotelId), originator);
+        var hotelGeoProxy = bus.AskResult<GeoProxy>(
+            Recipient.Admin, Verb.Admin.RequestFetchHotelGeoProxy,
+            new Id<HotelRef>(duty.HotelId),
+            originator, StepsAddRoomServiceDuty);
 
         if (hotelGeoProxy == null)
         {

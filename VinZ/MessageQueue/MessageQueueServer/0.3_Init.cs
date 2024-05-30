@@ -44,9 +44,15 @@ public partial class MqServer : Initializable, IMessageBus
                 state = $"{time.state}"
             };
 
-            Notify(new ResponseNotification(default, AuditMessage, message)
+
+            var parentNotification = new ClientNotification(NotificationType.Request, nameof(DateTime), nameof(DateTime.Notified))
             {
-                Originator = originator,
+                _steps = [],
+                Originator = originator
+            };
+
+            Notify(new ResponseNotification(parentNotification, default, AuditMessage, message)
+            {
                 Immediate = true
             }, 0);
         };

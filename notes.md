@@ -1,19 +1,11 @@
-# todo
-
- - if not Production-Admin
-	injection of IAdminRepo should be a proxy to ask on the bus
-	same for GeoIndexing
-	etc...
-	- 
- - POST /bus/subscribe not working
-
-
-
-
+#todo
+notification history. detect loop
 
 # build image
-
-A:\Kata\BookingKata> `cls&&docker build -f Application\BookingApi\Dockerfile --force-rm -t bookingapi .`
+ - image
+   A:\Kata\BookingKata> `cls&&docker build -f Application\BookingApi\Dockerfile --force-rm -t bookingapi .`
+ - compose
+   A:\Kata\BookingKata> `cls&&docker compose build`
 
 # run api -single container
 A:\Kata\BookingKata> `docker run -e ASPNETCORE_ENVIRONMENT=Production-Admin -it bookingapi /bin/bash`
@@ -70,3 +62,20 @@ RUN dotnet nuget push -k welcome -s http://localhost:5555/v3/index.json .\CoreSv
 
 
 dotnet add package EntityFramework
+
+#split screen
+Windows Terminal has split pane in its command palette ctrl+shift+p
+a:
+cd Kata\BookingKata
+docker compose logs -f app
+docker compose logs -f demo
+
+WSL
+tmux
+ctr+b "  split active pane vertical
+ctrl+b %  split active pane horizontal
+ctrl+b x  kill active pane
+ctrl+b &  kill tmux
+ctrl+b arrow  move active pane
+ctrl+b [ updown pageupdown  scroll active pane
+cd /mnt/a/Kata/BookingKata&&tmux new-session  'docker compose logs -f app ; bash' \; split-window -h 'docker compose logs -f demo ; bash' 

@@ -19,13 +19,17 @@ namespace BookingKata.Sales;
 
 public partial class BookingCommandService
 {
+    private static readonly string[] StepsOpenHotelSeason = [$"{nameof(BookingCommandService)}"];
+
     public void OpenHotelSeason(int hotelId, int[]? exceptRoomNumbers, DateTime openingDate, DateTime closingDate)
     {
         var originator = this.GetType().FullName;
 
 
-        var hotelGeoProxy = bus.AskResult<GeoProxy>(Recipient.Admin, Verb.Admin.RequestFetchHotelGeoProxy,
-            new Id<HotelRef>(hotelId), originator);
+        var hotelGeoProxy = bus.AskResult<GeoProxy>(
+            Recipient.Admin, Verb.Admin.RequestFetchHotelGeoProxy,
+            new Id<HotelRef>(hotelId),
+            originator, StepsOpenHotelSeason);
 
         if (hotelGeoProxy == null)
         {
@@ -33,8 +37,10 @@ public partial class BookingCommandService
         }
 
 
-        var roomDetails = bus.AskResult<RoomDetails[]>(Recipient.Admin, Verb.Admin.RequestHotelRoomDetails,
-            new RoomDetailsRequest(hotelId, exceptRoomNumbers), originator);
+        var roomDetails = bus.AskResult<RoomDetails[]>(
+            Recipient.Admin, Verb.Admin.RequestHotelRoomDetails,
+            new RoomDetailsRequest(hotelId, exceptRoomNumbers),
+            originator, StepsOpenHotelSeason);
 
         if (roomDetails is null or { Length: 0 })
         {
