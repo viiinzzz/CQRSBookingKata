@@ -19,9 +19,9 @@ namespace VinZ.MessageQueue;
 
 public record ServerNotification
 (
-    string[]? Steps = default,
+    string? History = default,
 
-NotificationType Type = NotificationType.Request,
+    NotificationType Type = NotificationType.Request,
 
     string? Recipient = default,
     string? Verb = default,
@@ -48,4 +48,7 @@ NotificationType Type = NotificationType.Request,
 )
    : IHaveSerializedMessage, IHaveDeliveryStatus, IHaveCorrelation
 {
+    public string[] HistorySteps => StepsFromHistory(History);
+    public static string[] StepsFromHistory(string? history) => (history ?? string.Empty).Split(',');
+    public static string HistoryFromSteps(string[]? steps) => string.Join(',', steps ?? []);
 }

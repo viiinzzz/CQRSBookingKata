@@ -140,7 +140,7 @@ public partial class MqServer
             : $"{Inverted}{Fg(Color.SkyBlue)}>>>Dequeuing>>>                    {Rs} scheduled";
         var subscribersCountStr = $"{subscriberUrls.Count + (awaitersBus?.SubscribersCount ?? 0)} subscriber{(subscriberUrls.Count + (awaitersBus?.SubscribersCount ?? 0) > 1 ? "s" : "")}";
         var messageObj = serverNotification.MessageAsObject();
-        var messageHeaders = $"{Faint}---{Rs} {Fg(Color.DarkMagenta)}_steps{Rs} {Faint}={Rs} {Bold}{Fg(Color.DarkMagenta)}{string.Join(", ", serverNotification.Steps ?? [])}{Rs}";
+        var messageHeaders = $"{Faint}---{Rs} {Fg(Color.DarkMagenta)}_steps{Rs} {Faint}={Rs} {Bold}{Fg(Color.DarkMagenta)}{serverNotification.History ?? string.Empty}{Rs}";
         var messageJson = messageObj.ToJson(true)
             .Replace("\\r", "")
             .Replace("\\n", Environment.NewLine);
@@ -230,7 +230,7 @@ Subject: {Bold}{messageType}{Fg(serverNotification.Verb == ErrorProcessingReques
                 ClientNotification notification = new RequestOptions {
                     Recipient = serverNotification.Recipient,
                     Verb = serverNotification.Verb,
-                    Steps = serverNotification.Steps,
+                    StepsArr = ServerNotification.StepsFromHistory(serverNotification.History),
                     Originator = serverNotification.Originator,
                     CorrelationId1 = serverNotification.CorrelationId1,
                     CorrelationId2 = serverNotification.CorrelationId2
@@ -249,9 +249,10 @@ Subject: {Bold}{messageType}{Fg(serverNotification.Verb == ErrorProcessingReques
 
         var clientNotification = new ClientNotification
         (
-            serverNotification.Steps ?? [],
-            serverNotification.Type, 
-            serverNotification.Recipient, serverNotification.Verb, 
+            Steps: serverNotification.HistorySteps,
+            Type: serverNotification.Type, 
+            Recipient: serverNotification.Recipient, 
+            Verb: serverNotification.Verb, 
             serverNotification.MessageAsObject())
         {
             // Originator = serverNotification.Originator,

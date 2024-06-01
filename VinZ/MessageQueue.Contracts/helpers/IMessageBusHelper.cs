@@ -80,7 +80,7 @@ public static class IMessageBusHelper
         var ack = mq.Notify((ClientNotification)new RequestOptions {
             Recipient = recipient,
             Verb = requestVerb,
-            Steps = steps, 
+            StepsArr = steps, 
             MessageObj = message, 
             Immediate = true
         }, busId: 0);

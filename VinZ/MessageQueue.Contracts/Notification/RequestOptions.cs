@@ -19,7 +19,7 @@ namespace VinZ.MessageQueue;
 
 public record RequestOptions
 (
-    string[]? Steps = default,
+    string[]? StepsArr = default,
     string? Recipient = default,
     string? Verb = default,
     string? Originator = default,
@@ -52,16 +52,16 @@ public record RequestOptions
         {
             throw new ArgumentNullException(nameof(Verb));
         } 
-        if (Steps == null)
+        if (StepsArr == null)
         {
-            throw new ArgumentNullException(nameof(Steps));
+            throw new ArgumentNullException(nameof(StepsArr));
         }
     }
 
 
     public static implicit operator ClientNotification(RequestOptions options)
     {
-        var _steps = (options.Steps ?? []).AsEnumerable();
+        var _steps = (options.StepsArr ?? []).AsEnumerable();
 
         if (!_steps.Any())
         {

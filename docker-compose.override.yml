@@ -63,7 +63,7 @@ services:
       - MESSAGEQUEUE_URL=http://app001.booking.local:8080/bus
  
   dbadmin:
-    entrypoint: ["echo", "warn: Service disabled"] #Un/Comment me out
+    #entrypoint: ["echo", "warn: Service disabled"] #Un/Comment me out
     ports:
       - 7038:80
   

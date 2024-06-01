@@ -29,92 +29,147 @@ public class MessageQueueRepository
     public TransactionContext AsTransaction() => new TransactionContext() * _queue;
 
     public IQueryable<ServerNotification> Notifications
+    {
+        get
+        {
+            try
+            {
+                return _queue.Notifications
+                    .AsNoTracking();
+            }
+            catch (Exception ex)
+            {
+                ThrowFatal(ex);
 
-        => _queue.Notifications
-            .AsNoTracking();
+                return Array.Empty<ServerNotification>().AsQueryable();
+            }
+        }
+    }
 
     public void AddNotification(ServerNotification notification)
     {
-        var entity = _queue.Notifications.Add(notification);
-        _queue.SaveChanges();
-        entity.State = EntityState.Detached;
+        try
+        {
+            var entity = _queue.Notifications.Add(notification);
+            _queue.SaveChanges();
+            entity.State = EntityState.Detached;
 
-        _queue.SaveChanges();
+            _queue.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            ThrowFatal(ex);
+        }
     }
 
 
     public int ArchiveNotifications()
     {
-        var done =
+        try
+        {
+            var done =
 
-            from notification in _queue.Notifications
+                from notification in _queue.Notifications
 
-            where notification.Done
+                where notification.Done
 
-            select notification;
+                select notification;
 
-        _queue.ArchivedNotifications.AddRange(done);
+            _queue.ArchivedNotifications.AddRange(done);
 
-        return done.ExecuteDelete();
+            return done.ExecuteDelete();
+        }
+        catch (Exception ex)
+        {
+            ThrowFatal(ex);
+
+            return default;
+        }
     }
 
     public int UpdateNotification(IEnumerable<ServerNotification> notifications, ServerNotificationUpdate update)
     {
-        var count = 0;
-
-        var updated = new List<EntityEntry<ServerNotification>>();
-
-        foreach (var notification in notifications)
+        try
         {
-            var notification2 = _queue.Notifications
-                .Find(notification.NotificationId);
+            var count = 0;
 
-            if (notification2 == default)
+            var updated = new List<EntityEntry<ServerNotification>>();
+
+            foreach (var notification in notifications)
             {
-                throw new InvalidOperationException("messageId not found");
-            }
+                var notification2 = _queue.Notifications
+                    .Find(notification.NotificationId);
 
-            _queue.Entry(notification2).State = EntityState.Detached;
-
-            if (update.RepeatCount.HasValue)
-            {
-                notification2 = notification2 with
+                if (notification2 == default)
                 {
-                    RepeatCount = update.RepeatCount.Value
-                };
-            }
+                    throw new InvalidOperationException("messageId not found");
+                }
 
-            if (update.Done.HasValue)
-            {
-                notification2 = notification2 with
+                _queue.Entry(notification2).State = EntityState.Detached;
+
+                if (update.RepeatCount.HasValue)
                 {
-                    Done = update.Done.Value
-                };
-            }
+                    notification2 = notification2 with
+                    {
+                        RepeatCount = update.RepeatCount.Value
+                    };
+                }
 
-            if (update.DoneTime.HasValue)
-            {
-                notification2 = notification2 with
+                if (update.Done.HasValue)
                 {
-                    DoneTime = update.DoneTime.Value
-                };
+                    notification2 = notification2 with
+                    {
+                        Done = update.Done.Value
+                    };
+                }
+
+                if (update.DoneTime.HasValue)
+                {
+                    notification2 = notification2 with
+                    {
+                        DoneTime = update.DoneTime.Value
+                    };
+                }
+
+                var entity = _queue.Notifications.Update(notification2);
+
+                updated.Add(entity);
+
+                count++;
             }
 
-            var entity = _queue.Notifications.Update(notification2);
+            _queue.SaveChanges();
 
-            updated.Add(entity);
+            foreach (var entity in updated)
+            {
+                entity.State = EntityState.Detached;
+            }
 
-            count++;
+            return count;
         }
-
-        _queue.SaveChanges();
-
-        foreach (var entity in updated)
+        catch (Exception ex)
         {
-            entity.State = EntityState.Detached;
-        }
+            ThrowFatal(ex);
 
-        return count;
+            return default;
+        }
     }
 
+
+    private void ThrowFatal(Exception ex)
+    {
+        Console.Error.WriteLine(@$"
+
+!!!ERROR!!!
+Fatal repository '{this.GetType().Name}' failure!
+
+ - Is the database schema not compatible anymore ?
+ - Please manually migrate your data.
+ - If you are ok, delete the database, if a docker-compose, delete docker volume 'bookingsolution_db_data'
+
+Error: {ex.Message}
+");
+    
+        Environment.Exit(500);
+    }
 }

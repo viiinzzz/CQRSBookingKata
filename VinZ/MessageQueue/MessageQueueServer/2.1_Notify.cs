@@ -52,6 +52,9 @@ public partial class MqServer
 
         var originator = clientNotification.Originator;
 
+        string[] steps1 = [.. n._steps ?? []];
+        string[] steps2 = [.. steps1.Append($"{n.Recipient ?? nameof(Omni)}.{n.Verb}")];
+
         var notification = new ServerNotification
         {
             Type = n.Type,
@@ -65,7 +68,7 @@ public partial class MqServer
             Originator = originator,
             CorrelationId1 = correlationId.Id1,
             CorrelationId2 = correlationId.Id2,
-            Steps = n._steps,
+            History = ServerNotification.HistoryFromSteps(steps1),
 
             NotificationTime = now,
             EarliestDelivery = selectEarliest ? new[] { now2, now + n.EarliestDelivery.Value }.Max() : now,
@@ -75,13 +78,12 @@ public partial class MqServer
             Aggregate = n.Aggregate ?? false,
         };
 
-        string[] steps = [.. (notification.Steps ?? []).Append($"{notification.Recipient ?? nameof(Omni)}.{notification.Verb}")];
 
 
         var ack = new NotifyAck
         {
             Valid = true,
-            _steps = steps,
+            _steps = steps2,
             correlationId1 = correlationId.Id1,
             correlationId2 = correlationId.Id2
         };
@@ -153,7 +155,7 @@ Subject: {Bold}{messageType}{Fg(notification.Verb == ErrorProcessingRequest ? Co
         return new NotifyAck
         {
             Valid = false,
-            _steps = steps,
+            _steps = steps2,
             correlationId1 = correlationId.Id1,
             correlationId2 = correlationId.Id2
         };
