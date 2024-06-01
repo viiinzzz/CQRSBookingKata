@@ -64,6 +64,6 @@ public partial class SalesBus
             }
         }
 
-        Notify(new ResponseNotification(notification, page));
+        Notify(notification.Response(page));
     }
 }

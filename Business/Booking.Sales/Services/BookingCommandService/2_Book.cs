@@ -209,7 +209,11 @@ public partial class BookingCommandService
             _steps = []
         };
 
-        bus.Notify(new ResponseNotification(parentNotification, Omni, BookConfirmed, booking));
+        bus.Notify(parentNotification.Response(new ResponseOptions {
+            Recipient = Omni,
+            Verb = BookConfirmed,
+            MessageObj = booking
+        }));
 
         return booking.BookingId;
     }

@@ -27,7 +27,12 @@ public partial class AdminBus
 
         var hotel = repo.DisableHotel(request.id, request.disable);
 
-        Notify(new ResponseNotification(notification, notification.Originator, HotelDisabled, hotel));
+        Notify(notification.Response(new ResponseOptions
+        {
+            Recipient = notification.Originator,
+            Verb = HotelDisabled, 
+            MessageObj = hotel
+        }));
     }
 
     private void Verb_Is_RequestModifyHotel(IClientNotificationSerialized notification)
@@ -38,7 +43,12 @@ public partial class AdminBus
 
         var hotel = repo.Update(request.id, request.data);
 
-        Notify(new ResponseNotification(notification, notification.Originator, HotelModified, hotel));
+        Notify(notification.Response(new ResponseOptions
+        {
+            Recipient = notification.Originator,
+            Verb = HotelModified,
+            MessageObj = hotel
+        }));
     }
 
     private void Verb_Is_RequestFetchHotel(IClientNotificationSerialized notification)
@@ -49,7 +59,12 @@ public partial class AdminBus
 
         var hotel = repo.GetHotel(request.id);
 
-        Notify(new ResponseNotification(notification, notification.Originator, HotelFetched, hotel));
+        Notify(notification.Response(new ResponseOptions
+        {
+            Recipient = notification.Originator, 
+            Verb = HotelFetched, 
+            MessageObj = hotel
+        }));
     }
 
     private void Verb_Is_RequestFetchHotelList(IClientNotificationSerialized notification)
@@ -58,7 +73,12 @@ public partial class AdminBus
 
         IdCollection<Hotel> list = new([.. repo.Hotels.Select(hotel => hotel.HotelId)]);
 
-        Notify(new ResponseNotification(notification, notification.Originator, HotelListFetched, list));
+        Notify(notification.Response(new ResponseOptions
+        {
+            Recipient = notification.Originator,
+            Verb = HotelListFetched,
+            MessageObj = list
+        }));
     }
     
     private void Verb_Is_RequestFetchHotelGeoProxy(IClientNotificationSerialized notification)
@@ -71,7 +91,12 @@ public partial class AdminBus
 
         var geoProxy = ret?.GetGeoProxy();
         
-        Notify(new ResponseNotification(notification, notification.Originator, HotelGeoProxyFetched, geoProxy));
+        Notify(notification.Response(new ResponseOptions
+        {
+            Recipient = notification.Originator,
+            Verb = HotelGeoProxyFetched,
+            MessageObj = geoProxy
+        }));
     }
 
     private void Verb_Is_RequestCreateHotel(IClientNotificationSerialized notification)
@@ -84,7 +109,10 @@ public partial class AdminBus
 
         var id = new Id<HotelRef>(hotelId);
 
-        Notify(new ResponseNotification(notification, notification.Originator, HotelCreated, id));
+        Notify(notification.Response(new ResponseOptions { 
+            Recipient = notification.Originator,
+            Verb = HotelCreated,
+            MessageObj = id}));
     }
 
     private void Verb_Is_RequestCreateFloorRooms(IClientNotificationSerialized notification)
@@ -104,6 +132,11 @@ public partial class AdminBus
 
         var ids = new Ids([.. urids]);
 
-        Notify(new ResponseNotification(notification, notification.Originator, HotelCreated, ids));
+        Notify(notification.Response(new ResponseOptions
+        {
+            Recipient = notification.Originator,
+            Verb = HotelCreated,
+            MessageObj = ids
+        }));
     }
 }

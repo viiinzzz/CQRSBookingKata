@@ -117,7 +117,7 @@ public class MyDebugMiddleware
                 logger.LogInformation(@$"
         <<-( {Bold}Request{Rs} )--------------------------------/{rid:000000}/
         | {scheme}{method} {Href(context.Request.Path + context.Request.QueryString)}
-        | ORIGIN {context.Request.Host}
+        | {Faint}ORIGIN {context.Request.Host}{Rs}
         +---/{tid}/--------------------------
 {requestHeaders}
 {ToJsonDebug(requestBodyObj)}
@@ -173,7 +173,7 @@ public class MyDebugMiddleware
 
                     var bodyLines = new[]{ $"({responseBody.Length} char{(responseBody.Length > 1 ? "s": "")})" };
 
-                    if (responseType.StartsWith("text"))
+                    if (responseType.StartsWith("text") && !responseType.EndsWith("html"))
                     {
                         bodyLines = responseBody.Replace("\r", "").Split('\n');
                     }
@@ -190,7 +190,7 @@ public class MyDebugMiddleware
             logger.LogInformation(@$"
                 +--( {Fg(Color.Green)}Response{Rs} {Italic}{$"{dt,6:#####0}"}ms{Rs})-----------------------/{rid:000000}/
                 | {scheme}{method} {Href(context.Request.Path + context.Request.QueryString)}
-                | ORIGIN {context.Request.Host}
+                | {Faint}ORIGIN {context.Request.Host}{Rs}
                 +---/{tid}/--------------( {Fg(statusOk ? Color.Green : Color.Red)}{context.Response.StatusCode:000}{Rs} )--->>
 {responseHeaders}
 {(responseBodyObj == null ? $"({statusStr}) " : "")}{ToJsonDebug(responseBodyObj)}
@@ -215,8 +215,7 @@ public class MyDebugMiddleware
             logger.LogWarning(@$"
                 !--( {Fg(Color.Orange)}Canceled{Rs} {Italic}{dt,6:#####0}ms{Rs})-----------------------/{rid:000000}/
                 | {scheme}{method} {Href(context.Request.Path + context.Request.QueryString)}
-                | ORIGIN 
-            {context.Request.Host}
+                | {Faint}ORIGIN {context.Request.Host}{Rs}
                 !!!!!{tid}!!!!!!!!!!!!!!( {Fg(Color.Orange)}{context.Response.StatusCode:000}{Rs} )!!!!!X
 Failure cause by {ex.GetType().Name}:
 {ex.Message}
@@ -234,7 +233,7 @@ Failure cause by {ex.GetType().Name}:
             logger.LogError(@$"
                 !--( {Fg(Color.Red)}Aborted{Rs} {dt,6:#####0}ms)------------------------/{rid:000000}/
                 | {scheme}{method} {Href(context.Request.Path + context.Request.QueryString)}
-                | ORIGIN {context.Request.Host} 
+                | ORIGIN {Faint}{context.Request.Host}{Rs}
                 !!!!!{tid}!!!!!!!!!!!!!!( {Fg(Color.Red)}{context.Response.StatusCode:000}{Rs} )!!!!!X
 Failure cause by {ex.GetType().Name}:
 {ex.Message}

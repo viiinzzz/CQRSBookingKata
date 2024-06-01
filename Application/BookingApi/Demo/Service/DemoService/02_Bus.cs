@@ -51,7 +51,10 @@ public partial class DemoBus : MessageBusClientBase
             }
             catch (Exception ex)
             {
-                Notify(new NegativeResponseNotification(notification, ex));
+                Notify(notification.Response(new ResponseOptions
+                {
+                    ex = ex
+                }));
             }
         };
     }
@@ -63,7 +66,11 @@ public partial class DemoBus : MessageBusClientBase
 
         throw new Exception("no go further!!!!!!!!!!!!!!!!!!!");
 
-        Notify(new ResponseNotification(notification, Omni, Verb.Demo.RequestDemoContext, demoContextService));
+        Notify(notification.Response(new ResponseOptions {
+            Recipient = Omni,
+            Verb = Verb.Demo.RequestDemoContext,
+            MessageObj = demoContextService
+        }));
     }
     
     private void Verb_Is_RequestDemoHotels(IClientNotificationSerialized notification)
@@ -86,7 +93,11 @@ public partial class DemoBus : MessageBusClientBase
             .ToArray();
 
 
-        Notify(new ResponseNotification(notification, Omni, Verb.Demo.RequestDemoHotels, hotels));
+        Notify(notification.Response(new ResponseOptions {
+            Recipient = Omni,
+            Verb = Verb.Demo.RequestDemoHotels,
+            MessageObj = hotels
+        }));
     }
 
 }

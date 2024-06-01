@@ -17,40 +17,9 @@
 
 using System.Dynamic;
 
-namespace VinZ.MessageQueue;
+namespace helpers;
 
-
-public record NegativeResponseNotification
-(
-    IClientNotificationSerialized parentNotification,
-
-    Exception ex,
-    string? Recipient = default,
-    string? Verb = default,
-
-    TimeSpan? EarliestDelivery = default,
-    TimeSpan? LatestDelivery = default,
-    TimeSpan? RepeatDelay = default,
-
-    int? RepeatCount = default,
-    bool? Aggregate = default,
-    bool? Immediate = default
-)
-    : ResponseNotification
-    (
-        parentNotification,
-
-        Recipient: Recipient ?? parentNotification.Originator,
-        MessageObj: parentNotification.MessageAsObject().IncludeError(ex),
-        Negative: true
-    ),
-        IHaveMessageObj
-{
-
-}
-
-
-public static class NegativeResponseNotificationHelper
+public static class IncludeErrorHelper
 {
 
     public static ExpandoObject? IncludeError(this object obj, Exception ex)
@@ -59,6 +28,15 @@ public static class NegativeResponseNotificationHelper
         {
             _error = ex.Message,
         });
+
+
+        if (ex.InnerException != null)
+        {
+            ret = ret.PatchRelax(new
+            {
+                _errorInner = (new { }).IncludeError(ex.InnerException)
+            });
+        }
 
         if (!ex.Message.StartsWith("SQLite Error"))
         {
@@ -78,15 +56,8 @@ public static class NegativeResponseNotificationHelper
             }
         }
 
-        if (ex.InnerException != null)
-        {
-            ret = ret.PatchRelax(new
-            {
-                _errorInner = IncludeError(new {}, ex.InnerException)
-            });
-        }
 
-        ret = JsonConvert.DeserializeObject<ExpandoObject>(JsonConvert.SerializeObject(ret));
+        //ret = JsonConvert.DeserializeObject<ExpandoObject>(JsonConvert.SerializeObject(ret));
 
         return ret;
     }

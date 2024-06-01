@@ -80,6 +80,6 @@ public partial class BillingBus
             }
         }
 
-        Notify(new ResponseNotification(notification, page));
+        Notify(notification.Response(page));
     }
 }

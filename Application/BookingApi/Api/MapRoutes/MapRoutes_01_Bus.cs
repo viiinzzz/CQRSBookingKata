@@ -55,7 +55,7 @@ public static partial class ApiMethods
 
 
         busGroup.MapPost("/{busId}/notify",
-            (ParsableHexInt busId, [FromBody]RequestNotification notification, [FromServices]IMessageBus bus) =>
+            (ParsableHexInt busId, [FromBody]ClientNotification notification, [FromServices]IMessageBus bus) =>
             {
                 var ack = bus.Notify(notification, busId.Value);
 
@@ -87,14 +87,14 @@ public static partial class ApiMethods
         //     ([FromBody] dynamic notification, [FromServices]IMessageBus bus) =>
         //     {
         //         var notificationStr = (string)notification.ToString();
-        //         ClientRequestNotification? notification_ = JsonConvert.DeserializeObject<ClientRequestNotification>(notificationStr);
+        //         ClientNotification? notification_ = JsonConvert.DeserializeObject<ClientNotification>(notificationStr);
         //         // var notificationDict =(IDictionary<string, object>)JsonConvert.DeserializeObject<ExpandoObject>(notification.ToString());
         //         return bus.Notify(notification, 0);
         //     }
         // ).ExcludeFromDescription();
 
         busGroup.MapPost("/notify",
-            ([FromBody] RequestNotification notification, [FromServices]IMessageBus bus) =>
+            ([FromBody] ClientNotification notification, [FromServices]IMessageBus bus) =>
             {
                 var ack = bus.Notify(notification, 0);
 

@@ -14,14 +14,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/*
+
 namespace VinZ.MessageQueue;
 
-public record ClientRequestNotification(string[] steps) : ClientNotification
-(
-    NotificationType.Request, 
-    default,
-    default,
-    steps
-);
-*/
+public static class InterpolationHelper
+{
+
+    public static string Interpolate(this string messageText, object?[]? args)
+    {
+        try
+        {
+            return string.Format(messageText, args ?? []);
+        }
+        catch
+        {
+            return $"{messageText} {args.ToJson()}";
+        }
+    }
+}

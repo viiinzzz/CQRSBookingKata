@@ -77,12 +77,15 @@ public static class IMessageBusHelper
 
         var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(responseWait, requestCancel).Token;
 
-        var ack = mq.Notify(new RequestNotification(steps, recipient, requestVerb,  message)
-        {
+        var ack = mq.Notify((ClientNotification)new RequestOptions {
+            Recipient = recipient,
+            Verb = requestVerb,
+            Steps = steps, 
+            MessageObj = message, 
             Immediate = true
-        }, 0);
+        }, busId: 0);
 
-        if (!ack.Valid)
+    if (!ack.Valid)
         {
             return null;
         }

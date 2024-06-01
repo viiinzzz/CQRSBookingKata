@@ -48,6 +48,10 @@ public partial class ThirdPartyBus
             customerProfile
         );
 
-        Notify(new ResponseNotification(notification, Omni, RespondPricing, price));
+        Notify(notification.Response(new ResponseOptions {
+            Recipient = Omni, 
+            Verb = RespondPricing,
+            MessageObj = price
+        }));
     }
 }

@@ -51,10 +51,12 @@ public partial class MqServer : Initializable, IMessageBus
                 Originator = originator
             };
 
-            Notify(new ResponseNotification(parentNotification, default, AuditMessage, message)
-            {
+            Notify(parentNotification.Response(new ResponseOptions {
+                Recipient = default, 
+                Verb = AuditMessage,
+                MessageObj = message,
                 Immediate = true
-            }, 0);
+            }), 0);
         };
 
         if (config.DomainBusTypes == default)

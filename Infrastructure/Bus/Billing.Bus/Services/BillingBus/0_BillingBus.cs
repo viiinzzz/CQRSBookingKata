@@ -74,7 +74,7 @@ public partial class BillingBus(IScopeProvider sp) : MessageBusClientBase
             }
             catch (Exception ex)
             {
-                Notify(new NegativeResponseNotification(notification, ex));
+                Notify(notification.Response(ex));
             }
         };
     }

@@ -126,6 +126,10 @@ public partial class BookingCommandService
             _steps = []
         };
 
-        bus.Notify(new ResponseNotification(parentNotification, Omni, BookCancelled, id));
+        bus.Notify(parentNotification.Response(new ResponseOptions {
+            Recipient = Omni,
+            Verb = BookCancelled, 
+            MessageObj = id
+        }));
     }
 }

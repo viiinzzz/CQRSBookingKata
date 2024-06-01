@@ -19,17 +19,22 @@ namespace VinZ.MessageQueue;
 
 public record ClientNotification
 (
-    NotificationType Type,
-    string? Recipient,
-    string? Verb,
+    NotificationType Type    = NotificationType.Request,
+    string? Recipient    = Omni,
+    string? Verb    = Request,
+
     int Status = default,
+
     string? Originator = default,
+
     TimeSpan? EarliestDelivery = default,
     TimeSpan? LatestDelivery = default,
     TimeSpan? RepeatDelay = default,
+
     int? RepeatCount = default,
     bool? Aggregate = default,
     bool? Immediate = default,
+
     long CorrelationId1 = default,
     long CorrelationId2 = default
 )
@@ -38,11 +43,26 @@ public record ClientNotification
     [Newtonsoft.Json.JsonIgnore]
     [System.Text.Json.Serialization.JsonIgnore]
     public string[] _steps { get; set; } = [];
+
     public int _hops => _steps.Length;
+
+    public string _type { get; } = $"Client{Type}Notification";
+    public string? MessageType { get; set; }
+    public string? Message { get; set; }
+
+
+    
+    public ClientNotification() : this(
+        default,
+        default, default, default, default, default, default, 
+        default, default, default,
+        default, default, default, default, default) {}
+
+
 
     public ClientNotification
     (
-        string[] previousSteps,
+        string[] Steps,
 
         NotificationType Type,
         string? Recipient,
@@ -80,7 +100,7 @@ public record ClientNotification
     )
     {
         // _steps = [..previousSteps.Append($"{Recipient ?? nameof(Omni)}.{Verb}")];
-        _steps = previousSteps ?? [];
+        _steps = Steps ?? [];
 
         MessageType = messageObj.GetTypeSerializedName();
 
@@ -92,8 +112,5 @@ public record ClientNotification
         Message = messageObj == null ? EmptySerialized : System.Text.Json.JsonSerializer.Serialize(messageObj);
     }
 
-    public string _type { get; } = "ClientNotification";
-    public string? MessageType { get; set;  }
-    public string? Message { get; set;  }
 
 }

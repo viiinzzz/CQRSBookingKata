@@ -34,8 +34,9 @@ public partial class DemoBus
 
                 var args = new object[] { hotelId };
 
-                bus.Notify(new AdvertisementNotification(message, args)
-                {
+                bus.Notify((ClientNotification)new AdvertiseOptions {
+                    MessageText = message, 
+                    Args = args,
                     Originator = originator,
                     Immediate = true
                 });

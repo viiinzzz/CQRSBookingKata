@@ -36,7 +36,11 @@ public partial class SalesBus
         //
         //
 
-        Notify(new ResponseNotification(notification, notification.Originator, Verb.Sales.RespondHotelKpi, indicators));
+        Notify(notification.Response(new ResponseOptions { 
+            Recipient = notification.Originator,
+            Verb = Verb.Sales.RespondHotelKpi, 
+            MessageObj = indicators
+        }));
     }
 
     private void Verb_Is_RequestHotelChainKpi(IClientNotificationSerialized notification)
@@ -53,6 +57,11 @@ public partial class SalesBus
         //
         //
 
-        Notify(new ResponseNotification(notification, notification.Originator, Verb.Sales.RespondHotelChainKpi, indicators));
+        Notify(notification.Response(new ResponseOptions
+        {
+            Recipient = notification.Originator,
+            Verb = Verb.Sales.RespondHotelChainKpi,
+            MessageObj = indicators
+        }));
     }
 }

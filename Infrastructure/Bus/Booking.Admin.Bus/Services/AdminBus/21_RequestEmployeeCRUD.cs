@@ -27,7 +27,13 @@ public partial class AdminBus
 
         var employee = repo.DisableEmployee(request.id, request.disable);
 
-        Notify(new ResponseNotification(notification, notification.Originator, EmployeeDisabled, employee));
+        Notify(notification.Response(new ResponseOptions
+        {
+            Recipient = notification.Originator,
+            Verb = EmployeeDisabled, 
+            MessageObj = employee
+
+        }));
     }
 
     private void Verb_Is_RequestModifyEmployee(IClientNotificationSerialized notification)
@@ -38,7 +44,12 @@ public partial class AdminBus
 
         var employee = repo.Update(request.id, request.data);
 
-        Notify(new ResponseNotification(notification, notification.Originator, EmployeeModified, employee));
+        Notify(notification.Response(new ResponseOptions
+        {
+            Recipient = notification.Originator,
+            Verb = EmployeeModified,
+            MessageObj = employee
+        }));
     }
 
     private void Verb_Is_RequestFetchEmployee(IClientNotificationSerialized notification)
@@ -49,7 +60,12 @@ public partial class AdminBus
 
         var employee = repo.GetEmployee(request.id);
 
-        Notify(new ResponseNotification(notification, notification.Originator, EmployeeFetched, employee));
+        Notify(notification.Response(new ResponseOptions
+        {
+            Recipient = notification.Originator,
+            Verb = EmployeeFetched,
+            MessageObj = employee
+        }));
     }
 
     private void Verb_Is_RequestCreateEmployee(IClientNotificationSerialized notification)
@@ -62,6 +78,11 @@ public partial class AdminBus
 
         var id = new Id<Employee>(employeeId);
 
-        Notify(new ResponseNotification(notification, notification.Originator, EmployeeCreated, id));
+        Notify(notification.Response(new ResponseOptions
+        {
+            Recipient = notification.Originator,
+            Verb = EmployeeCreated,
+            MessageObj = id
+        }));
     }
 }

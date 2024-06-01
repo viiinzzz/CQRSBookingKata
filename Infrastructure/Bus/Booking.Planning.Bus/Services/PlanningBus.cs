@@ -71,7 +71,7 @@ public class PlanningBus(IScopeProvider sp, BookingConfiguration bconf) : Messag
             }
             catch (Exception ex)
             {
-                Notify(new NegativeResponseNotification(notification, ex));
+                Notify(notification.Response(ex));
             }
         };
     }
@@ -154,6 +154,10 @@ public class PlanningBus(IScopeProvider sp, BookingConfiguration bconf) : Messag
             }
         }
 
-        Notify(new ResponseNotification(notification, notification.Originator, Respond, page));
+        Notify(notification.Response(new ResponseOptions { 
+            Recipient = notification.Originator, 
+            Verb = Respond, 
+            MessageObj = page
+        }));
     }
 }

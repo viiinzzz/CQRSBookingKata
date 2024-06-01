@@ -17,6 +17,7 @@
 
 using static VinZ.Common.MiniAnsi;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 
 namespace VinZ.MessageQueue;
 
@@ -84,7 +85,7 @@ public class MessageBusHttp : IMessageBus
     }
 
     private bool IsTraceSubscribe => logLevelSubscribe <= LogLevel.Trace;
-    private bool IsTraceNotify => logLevelSubscribe <= LogLevel.Trace;
+    private bool IsTraceNotify => logLevelNotify <= LogLevel.Trace;
 
 
     public void Subscribe(SubscriptionRequest sub, int busId)
@@ -112,7 +113,7 @@ public class MessageBusHttp : IMessageBus
 <<-( {Bold}Subscribe{Rs} )............................../{rid:000000}/
 | {scheme}{postMethod} {Href(url)}
 +.....................................................
-{ToJsonDebug(sub)}
+{ToJsonDebug(json)}
 ...");
             
             var post = _remote.PostAsync(uri, content, cancel.Token);
@@ -184,7 +185,7 @@ public class MessageBusHttp : IMessageBus
 <<-( {Bold}Unsubscribe{Rs} )............................/{rid:000000}/
 | {scheme}{postMethod} {Href(url)}
 +.....................................................
-{ToJsonDebug(sub)}
+{ToJsonDebug(json)}
 ...");
 
             var post = _remote.PostAsync(uri, content, cancel.Token);
@@ -241,7 +242,7 @@ public class MessageBusHttp : IMessageBus
         //     Console.WriteLine($"==================notify from me {GetHashCode().xby4()} to busId {busId.xby4()} remote {(_remote.BaseAddress + nameof(Notify).ToLower())}");
         //     throw new ArgumentException("Only value 0 allowed", nameof(busId));
         // }
-
+       
         var uri = nameof(Notify).ToLower();
         var url = _remote.BaseAddress + uri;
         
@@ -256,7 +257,11 @@ public class MessageBusHttp : IMessageBus
         {
             var cancel = new CancellationTokenSource();
 
-            var json = notification.ToJsonIgnoring([ nameof(IHaveMessageObj.MessageObj) ]);
+            string[] ignoreProperties = [
+                nameof(IHaveMessageObj.MessageObj)
+            ];
+
+            var json = notification.ToJsonIgnoring(ignoreProperties);
 
             var content = new StringContent(json, Encoding.UTF8, "application/json")
             {
@@ -271,9 +276,9 @@ public class MessageBusHttp : IMessageBus
 | {scheme}{postMethod} {Href(url)}
 | To: {Href(notification.Recipient ?? nameof(Omni))}
 | From: {notification.Originator ?? ""}
-| Subject: {Bold}{messageType}{notification.Verb ?? nameof(AnyVerb)}{Rs}
+| Subject: {Bold}{messageType}{Fg(notification.Verb == ErrorProcessingRequest ? Color.Red : Color.PaleGreen)}{notification.Verb ?? nameof(AnyVerb)}{Rs}
 +....{notification.CorrelationGuid()}...................
-{ToJsonDebug(notification)}
+{ToJsonDebug(json)}
 ...");
 
             var post = _remote.PostAsync(uri, content, cancel.Token);
@@ -289,7 +294,7 @@ public class MessageBusHttp : IMessageBus
                         | {scheme}{postMethod} {Href(url)}
                         | To: {Href(notification.Recipient ?? nameof(Omni))}
                         | From: {notification.Originator ?? ""}
-                        | Subject: {Bold}{messageType}{notification.Verb ?? nameof(AnyVerb)}{Rs}
+                        | Subject: {Bold}{messageType}{Fg(notification.Verb == ErrorProcessingRequest ? Color.Red : Color.PaleGreen)}{notification.Verb ?? nameof(AnyVerb)}{Rs}
                         +....{notification.CorrelationGuid()}..( {Fg(statusOk ? Color.Green : Color.Red)}{statusCode:000}{Rs} )....>>
 ");
 
@@ -333,7 +338,7 @@ public class MessageBusHttp : IMessageBus
                         | {scheme}{postMethod} {Href(url)}
                         | To: {Href(notification.Recipient ?? nameof(Omni))}
                         | From: {notification.Originator ?? ""}
-                        | Subject: {Bold}{messageType}{notification.Verb ?? nameof(AnyVerb)}{Rs}
+                        | Subject: {Bold}{messageType}{Fg(notification.Verb == ErrorProcessingRequest ? Color.Red : Color.PaleGreen)}{notification.Verb ?? nameof(AnyVerb)}{Rs}
                         !!!!!{notification.CorrelationGuid()}!!!( {Fg(ex is HttpRequestException ? Color.Orange : Color.Red)}{(int)HttpStatusCode.InternalServerError:000}{Rs} )!!!!!X
 
 {(ex is HttpRequestException ? ex.Message : @$"!!! sensitive
@@ -455,11 +460,11 @@ public class MessageBusHttp : IMessageBus
     }
 
 
-    private string ToJsonDebug(object obj)
+    private string ToJsonDebug(string json)
     {
-        var ret = obj.ToJson(true);
+        json = JsonConvert.SerializeObject(JsonConvert.DeserializeObject(json), Formatting.Indented);
 
-        return string.Join('\n', ret.Split('\n').Select(line =>
+        return string.Join('\n', json.Split('\n').Select(line =>
             
             $"{Faint}{line}{Rs}"
         

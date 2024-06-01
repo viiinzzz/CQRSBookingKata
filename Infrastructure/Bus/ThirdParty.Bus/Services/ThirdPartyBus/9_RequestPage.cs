@@ -40,6 +40,6 @@ public partial class ThirdPartyBus
             }
         }
 
-        Notify(new ResponseNotification(notification, page));
+        Notify(notification.Response(page));
     }
 }

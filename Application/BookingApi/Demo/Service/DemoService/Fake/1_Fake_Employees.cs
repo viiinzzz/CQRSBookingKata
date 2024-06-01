@@ -67,8 +67,8 @@ public partial class DemoBus
             {
                 var message = "Demo: Seeding Staff...";
 
-                bus.Notify(new AdvertisementNotification(message)
-                {
+                bus.Notify((ClientNotification)new AdvertiseOptions {
+                    MessageText = message,
                     Originator = originator,
                     Immediate = true
                 });
@@ -84,8 +84,8 @@ public partial class DemoBus
             {
                 var message = "Demo: Seeding Managers...";
 
-                bus.Notify(new AdvertisementNotification(message)
-                {
+                bus.Notify((ClientNotification)new AdvertiseOptions{
+                    MessageText = message,
                     Originator = originator,
                     Immediate = true
                 });

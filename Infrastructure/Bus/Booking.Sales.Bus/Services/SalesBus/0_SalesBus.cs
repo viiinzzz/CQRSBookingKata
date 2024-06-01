@@ -75,7 +75,7 @@ public partial class SalesBus(IScopeProvider sp, BookingConfiguration bconf) : M
             }
             catch (Exception ex)
             {
-                Notify(new NegativeResponseNotification(notification, ex));
+                Notify(notification.Response(ex));
             }
         };
     }

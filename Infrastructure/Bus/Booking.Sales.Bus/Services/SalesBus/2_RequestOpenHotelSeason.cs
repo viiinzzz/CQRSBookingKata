@@ -50,6 +50,11 @@ public partial class SalesBus
             closingDate = closingDateUtc.SerializeUniversal()
         };
 
-        Notify(new ResponseNotification(notification, Omni, Verb.Sales.HotelSeasonOpening, opening));
+        Notify(notification.Response(new ResponseOptions
+        {
+            Recipient = Omni, 
+            Verb = Verb.Sales.HotelSeasonOpening,
+            MessageObj = opening
+        }));
     }
 }

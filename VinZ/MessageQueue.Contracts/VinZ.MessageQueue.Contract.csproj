@@ -15,6 +15,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\JsonHelper\VinZ.Common.JsonHelper.csproj" />
+    <ProjectReference Include="..\RecordHelper\VinZ.Common.RecordHelper.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Notification\Interfaces\" />
   </ItemGroup>
 
 </Project>

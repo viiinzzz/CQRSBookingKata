@@ -151,7 +151,7 @@ public partial class MqServer
         var rvm = @$"---
 To: {Href(serverNotification.Recipient ?? nameof(Omni))}
 From: {serverNotification.Originator}
-Subject: {Bold}{messageType}{serverNotification.Verb}{Rs}
+Subject: {Bold}{messageType}{Fg(serverNotification.Verb == ErrorProcessingRequest ? Color.Red : Color.PaleGreen)}{serverNotification.Verb}{Rs}
 {messageHeaders}
 {string.Join('\n', messageJson.Split('\n').Select(line => $"{Faint}{line}{Rs}"))}
 ---";
@@ -161,7 +161,7 @@ Subject: {Bold}{messageType}{serverNotification.Verb}{Rs}
                                     to {subscribersCountStr}...{Environment.NewLine}{rvm}";
 
             LogLevel? logLevel =
-                serverNotification.IsErrorStatus() ? LogLevel.Error
+                serverNotification.IsErrorStatus() ? LogLevel.Warning
                 : _isTrace ? LogLevel.Information
                 : null;
 
@@ -207,7 +207,7 @@ Subject: {Bold}{messageType}{serverNotification.Verb}{Rs}
                     $"(matched {string.Join(" ", matchedHash)} unmatched {string.Join(" ", unmatchedHash)})";
 
                 var message =
-                    @$"{Inverted}{Fg(Color.Orange)}                  >>>Undeliverable !{Rs}{notificationLabel}...{Environment.NewLine}{matchedUnmatched}{Environment.NewLine}{rvm}";
+                    @$"{Inverted}{Fg(Color.Orange)}                  >>>Undeliverable {Rs} {notificationLabel}...{Environment.NewLine}{matchedUnmatched}{Environment.NewLine}{rvm}";
 
                 LogLevel? logLevel =
                     serverNotification.Verb != ErrorProcessingRequest ? LogLevel.Error
@@ -227,14 +227,20 @@ Subject: {Bold}{messageType}{serverNotification.Verb}{Rs}
                 //if a liable message (not an error report),
                 //inform originator message got lost 424 (unavailable fringe bus?)
 
-                var notification = new RequestNotification(serverNotification.Steps ?? [], serverNotification.Recipient, serverNotification.Verb)
-                {
+                ClientNotification notification = new RequestOptions {
+                    Recipient = serverNotification.Recipient,
+                    Verb = serverNotification.Verb,
+                    Steps = serverNotification.Steps,
+                    Originator = serverNotification.Originator,
                     CorrelationId1 = serverNotification.CorrelationId1,
-                    CorrelationId2 = serverNotification.CorrelationId2,
-                    Originator = serverNotification.Originator
+                    CorrelationId2 = serverNotification.CorrelationId2
                 };
 
-                var nack = new NegativeResponseNotification(notification, new Exception("Undeliverable"));
+                //todo
+                var nres = notification.Response(new ResponseOptions
+                {
+                    ex =new Exception("Undeliverable")
+                });
 
             }
 
@@ -346,7 +352,8 @@ failure: {ex.Message}
                     }
 
                     if (_isTrace) log.LogInformation(
-                        $"{delivering} {notificationLabel} to <<<Subscriber:{clientUrl.GetHashCode().xby4()}>>>...");
+                        @$"{delivering} {notificationLabel}
+                                    to <<<Subscriber:{clientUrl.GetHashCode().xby4()}>>>...");
 
                     if (!ack.Valid)
                     {
@@ -359,7 +366,8 @@ failure: {ex.Message}
                 catch (Exception ex)
                 {
                     log.LogError(
-                        @$"{delivering} {notificationLabel} to <<<Subscriber:{clientUrl.GetHashCode().xby4()}>>>...
+                        @$"{delivering} {notificationLabel}
+                                    to <<<Subscriber:{clientUrl.GetHashCode().xby4()}>>>...
 failure: {ex.Message}
 {ex.StackTrace}
 ");

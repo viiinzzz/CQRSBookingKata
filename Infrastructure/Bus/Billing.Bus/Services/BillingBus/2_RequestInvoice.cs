@@ -39,6 +39,10 @@ public partial class BillingBus
         //
         //
 
-        Notify(new ResponseNotification(notification, Omni, InvoiceEmitted, id));
+        Notify(notification.Response(new ResponseOptions { 
+            Recipient = Omni,
+            Verb = InvoiceEmitted,
+            MessageObj = id
+        }));
     }
 }

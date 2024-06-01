@@ -37,10 +37,11 @@ public partial class DemoBus
 
             var args = new object[] { demoContextService.SimulationDay };
 
-            bus.Notify(new AdvertisementNotification(message, args)
-            {
-                Originator = originator,
+            bus.Notify((ClientNotification)new AdvertiseOptions {
+                MessageText = message,
+                Args = args,
                 Steps = [nameof(Fake_BookingDay)],
+                Originator = originator,
                 Immediate = true
             });
         }
@@ -85,15 +86,19 @@ public partial class DemoBus
                     var message = "Demo: Booking skipped because no stay were found matching the customer's request!";
 
 
-                    var notification = new RequestNotification([], nameof(DemoBus), nameof(Fake_BookingDay))
+                    ClientNotification notification = new RequestOptions
                     {
-                        Originator = originator,
+                        Recipient = nameof(DemoBus),
+                        Verb = nameof(Fake_BookingDay),
+                        Originator = originator
                     };
 
-                    bus.Notify(new NegativeResponseNotification(notification, new Exception(message), Omni, AuditMessage)
-                    {
+                    bus.Notify(notification.Response(new ResponseOptions {
+                        ex = new Exception(message),
+                        Recipient = Omni,
+                        MessageObj = AuditMessage,
                         Immediate = true
-                    });
+                    }));
 
                     continue;
                     // throw new Exception("stay not found");
@@ -138,21 +143,21 @@ public partial class DemoBus
             {
                 if (ex is StayNotFoundException stayNotFoundException)
                 {
-                    var notification = new RequestNotification([], nameof(DemoBus), nameof(Fake_BookingDay))
+
+                    ClientNotification notification = new RequestOptions
                     {
-                        Originator = originator,
+                        Recipient = nameof(DemoBus),
+                        Verb = nameof(Fake_BookingDay),
+                        Originator = originator
                     };
 
-                    bus.Notify(new NegativeResponseNotification(notification, ex, Omni, AuditMessage)
-                    {
-                        MessageObj = new
-                        {
-                            _error = nameof(StayNotFoundException),
-                            stayNotFoundException.StayRequest
-                        },
-                        Originator = originator,
-                        Immediate = true
-                    });
+                    bus.Notify(notification.Response(new ResponseOptions {
+                        ex = stayNotFoundException,
+                        MessageObj = new { stayRequest = stayNotFoundException.StayRequest },
+                        Recipient = Omni, 
+                        Verb = AuditMessage, 
+                        Immediate= true
+                    }));
 
                     continue;
                 }

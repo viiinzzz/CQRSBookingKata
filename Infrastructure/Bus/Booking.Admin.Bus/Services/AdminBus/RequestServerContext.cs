@@ -6,6 +6,11 @@ public partial class AdminBus
     {
         using var scope = sp.GetScope<IServerContextService>(out var serverContext);
 
-        Notify(new ResponseNotification(notification, Omni, RespondServerContext, serverContext));
+        Notify(notification.Response(new ResponseOptions
+        {
+            Recipient = Omni, 
+            Verb = RespondServerContext,
+            MessageObj = serverContext
+        }));
     }
 }

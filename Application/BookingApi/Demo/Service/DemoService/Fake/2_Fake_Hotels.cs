@@ -31,8 +31,8 @@ public partial class DemoBus
             {
                 var message = "Demo: Seeding Hotels...";
 
-                bus.Notify(new AdvertisementNotification(message)
-                {
+                bus.Notify((ClientNotification)new AdvertiseOptions {
+                    MessageText = message,
                     Originator = originator,
                     Immediate = true
                 });

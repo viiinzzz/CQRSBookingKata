@@ -49,6 +49,12 @@ public partial class DemoBus
 
     public async Task Execute(CancellationToken cancel)
     {
+        ClientNotification initialNotification = new RequestOptions {
+                Recipient = nameof(Demo),
+                Verb = nameof(Seed), 
+                Originator = originator
+        };
+
         try
         {
             DateTime.Freeze();
@@ -60,12 +66,12 @@ public partial class DemoBus
         }
         catch (Exception ex)
         {
-            var childNotification = new RequestNotification([nameof(DemoBus)], nameof(Demo), nameof(Seed));
+            
 
-            bus.Notify(new NegativeResponseNotification(childNotification, new Exception($"aborted: {ex.Message}"))
-            {
-                Immediate = true
-            });
+            bus.Notify(initialNotification.Response(new ResponseOptions {
+                ex = ex, 
+                Immediate =  true
+            }));
         }
     }
 

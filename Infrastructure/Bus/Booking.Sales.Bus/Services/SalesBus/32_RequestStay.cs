@@ -42,6 +42,10 @@ public partial class SalesBus
         //
         //
 
-        Notify(new ResponseNotification(notification, Omni, Verb.Sales.StayFound, page));
+        Notify(notification.Response(new ResponseOptions { 
+            Recipient = Omni, 
+            Verb = Verb.Sales.StayFound,
+            MessageObj=page
+        }));
     }
 }

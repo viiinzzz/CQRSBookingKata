@@ -49,6 +49,12 @@ public partial class ThirdPartyBus
 
         var responseVerb = response.Accepted ? PaymentAccepted : PaymentRefused;
 
-        Notify(new ResponseNotification(notification, Omni, responseVerb, response));
+        Notify(notification.Response(new ResponseOptions
+        {
+            Recipient=Omni,
+            Verb=responseVerb, 
+            MessageObj=response
+
+        }));
     }
 }

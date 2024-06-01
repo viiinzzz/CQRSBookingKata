@@ -27,10 +27,10 @@ public partial class DemoBus
             {
                 var message = "Demo: Seeding Customers...";
 
-                bus.Notify(new AdvertisementNotification(message)
-                {
-                    _steps = [nameof(Fake_Customers)],
-                    Originator = originator,
+                bus.Notify((ClientNotification)new AdvertiseOptions {
+                    MessageText = message,
+                    Steps = [nameof(Fake_Customers)],
+                    Originator = originator, 
                     Immediate = true
                 });
             }

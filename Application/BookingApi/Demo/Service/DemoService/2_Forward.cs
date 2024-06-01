@@ -26,6 +26,13 @@ public partial class DemoBus
 
     public async Task<DateTime> Forward(int days, double? speedFactor, CancellationToken cancellationToken)
     {
+        ClientNotification initialNotification = new RequestOptions
+        {
+            Recipient = nameof(Demo),
+            Verb = nameof(Forward),
+            Originator = originator
+        };
+
         try
         {
             using var scope1 = sp.GetScope<IAdminRepository>(out var admin);
@@ -57,15 +64,10 @@ public partial class DemoBus
         }
         catch (Exception ex)
         {
-            var childNotification = new RequestNotification([], nameof(Demo), nameof(Forward))
-            {
-                Originator = originator,
-            };
-
-            bus.Notify(new NegativeResponseNotification(childNotification, new Exception($"aborted: {ex.Message}"))
-            {
+            bus.Notify(initialNotification.Response(new ResponseOptions {
+                ex = ex,
                 Immediate = true
-            });
+            }));
         }
 
         return DateTime.UtcNow;

@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.Drawing;
+
 namespace VinZ.MessageQueue;
 
 public partial class MqServer
@@ -118,7 +120,7 @@ public partial class MqServer
             var rvm = @$"---
 To: {Href(notification.Recipient ?? nameof(Omni))}
 From: {notification.Originator}
-Subject: {Bold}{messageType}{notification.Verb}{Rs}
+Subject: {Bold}{messageType}{Fg(notification.Verb == ErrorProcessingRequest ? Color.Red : Color.PaleGreen)}{notification.Verb}{Rs}
 {string.Join('\n', messageJson.Split('\n').Select(line => $"{Faint}{line}{Rs}"))}
 ---";
 
@@ -126,7 +128,7 @@ Subject: {Bold}{messageType}{notification.Verb}{Rs}
                 var message = @$"{queuing} {notificationLabel}...{Environment.NewLine}{rvm}";
 
                 LogLevel? logLevel = 
-                    notification.IsErrorStatus() ? LogLevel.Error
+                    notification.IsErrorStatus() ? LogLevel.Warning
                     : _isTrace ? LogLevel.Information
                     : null;
 

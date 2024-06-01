@@ -56,7 +56,7 @@ public partial class ThirdPartyBus(IScopeProvider sp) : MessageBusClientBase
             }
             catch (Exception ex)
             {
-                Notify(new NegativeResponseNotification(notification, ex));
+                Notify(notification.Response(ex));
             }
         };
     }

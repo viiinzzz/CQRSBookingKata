@@ -45,9 +45,10 @@ public partial class AdminBus
             }
         }
 
-        Notify(new ResponseNotification(notification, page)
+        Notify(notification.Response(new ResponseOptions
         {
-            Originator = notification.Originator,
-        });
+            MessageObj = page,
+            Originator = notification.Originator
+        }));
     }
 }

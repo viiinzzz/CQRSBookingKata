@@ -55,11 +55,19 @@ public partial class BillingBus
 
             var idAndReferenceId = referenceId.PatchRelax(id);
 
-            Notify(new ResponseNotification(notification, Omni, PaymentAccepted, idAndReferenceId));
+            Notify(notification.Response(new ResponseOptions {
+                    Recipient = Omni, 
+                    Verb = PaymentAccepted, 
+                    MessageObj = idAndReferenceId
+            }));
         }
         catch (Exception e)
         {
-            Notify(new ResponseNotification(notification, Omni, PaymentRefused, referenceId));
+            Notify(notification.Response(new ResponseOptions { 
+                Recipient = Omni, 
+                Verb = PaymentRefused, 
+                MessageObj = referenceId
+            }));
         }
     }
 }

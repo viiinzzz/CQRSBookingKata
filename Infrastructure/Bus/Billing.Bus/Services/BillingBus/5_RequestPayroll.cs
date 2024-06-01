@@ -38,6 +38,11 @@ public partial class BillingBus
         //
         //
 
-        Notify(new ResponseNotification(notification, Omni, PayrollEmitted, payrollId));
+        Notify(notification.Response(new ResponseOptions
+        {
+            Recipient = Omni,
+            Verb = PayrollEmitted, 
+            MessageObj = payrollId
+        }));
     }
 }

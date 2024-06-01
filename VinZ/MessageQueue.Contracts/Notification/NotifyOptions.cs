@@ -17,42 +17,17 @@
 
 namespace VinZ.MessageQueue;
 
-public record RequestNotification
+public record NotifyOptions
 (
-    string[] previousSteps,
-
-    string? Recipient,
-
-    string? Verb,
-    object? MessageObj = default,
-    string? Message = default,
-
-    string? Originator = default,
-
     TimeSpan? EarliestDelivery = default,
     TimeSpan? LatestDelivery = default,
-    TimeSpan? RepeatDelay = default,
 
+    TimeSpan? RepeatDelay = default,
     int? RepeatCount = default,
+
     bool? Aggregate = default,
     bool? Immediate = default,
 
     long CorrelationId1 = default,
     long CorrelationId2 = default
-)
-    : ClientNotification
-    (
-        [.. (previousSteps ?? []).Append($"{Recipient ?? nameof(Omni)}.{Verb}")],
-
-        NotificationType.Request,
-
-        Recipient,
-        Verb, MessageObj, 
-        Status: 0,
-        Originator,
-
-        EarliestDelivery, LatestDelivery, RepeatDelay,
-        RepeatCount, Aggregate, Immediate,
-        CorrelationId1, CorrelationId2
-    ),
-        IHaveMessageObj;
+) : RecordWithValidation;

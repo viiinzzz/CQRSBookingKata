@@ -29,6 +29,11 @@ public partial class SalesBus
 
         var id = new Id<Customer>(customerId);
 
-        Notify(new ResponseNotification(notification, notification.Originator, Verb.Sales.CustomerCreated, id));
+        Notify(notification.Response(new ResponseOptions
+        {
+            Recipient = notification.Originator,
+            Verb = Verb.Sales.CustomerCreated,
+            MessageObj = id
+        }));
     }
 }

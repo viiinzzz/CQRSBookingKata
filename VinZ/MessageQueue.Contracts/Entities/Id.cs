@@ -17,7 +17,15 @@
 
 namespace VinZ.Common;
 
-public record Id<TEntity>(int id)
+public record Id<TEntity>(int id) : RecordWithValidation
 {
     public string _type { get; } = typeof(TEntity).Name;
+
+    protected virtual void Validate()
+    {
+        if (id == 0)
+        {
+            throw new ArgumentException("Must not be 0", nameof(id));
+        }
+    }
 }

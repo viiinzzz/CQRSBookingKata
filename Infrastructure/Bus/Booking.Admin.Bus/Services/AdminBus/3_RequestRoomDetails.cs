@@ -38,7 +38,12 @@ public partial class AdminBus
         //
         //
 
-        Notify(new ResponseNotification(notification, Omni, RespondHotelRoomDetails, roomDetails));
+        Notify(notification.Response(new ResponseOptions
+        {
+            Recipient = Omni, 
+            Verb = RespondHotelRoomDetails, 
+            MessageObj = roomDetails
+        }));
     }
     
     private void Verb_Is_RequestSingleRoomDetails(IClientNotificationSerialized notification)
@@ -54,7 +59,11 @@ public partial class AdminBus
         //
         //
 
-        Notify(new ResponseNotification(notification, Omni, RespondSingleRoomDetails, roomDetails));
+        Notify(notification.Response(new ResponseOptions {
+            Recipient = Omni, 
+            Verb = RespondSingleRoomDetails,
+            MessageObj =  roomDetails
+        }));
     } 
     
     
@@ -86,6 +95,10 @@ public partial class AdminBus
         //
         //
 
-        Notify(new ResponseNotification(notification, Omni, RespondSingleRoomDetails, roomDetails));
+        Notify(notification.Response(new ResponseOptions { 
+            Recipient = Omni,
+            Verb = RespondSingleRoomDetails, 
+            MessageObj = roomDetails
+        }));
     }
 }
