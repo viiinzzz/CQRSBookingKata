@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="EfCore.SchemaCompare" Version="8.0.4" />
+    <PackageReference Include="EntityFrameworkCore.Triggered" Version="4.0.0-preview.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
@@ -17,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DbContext.Contract\VinZ.Common.DbTransaction.csproj" />
+    <ProjectReference Include="..\TypeHelper\VinZ.Common.TypeHelper.csproj" />
   </ItemGroup>
 
 </Project>

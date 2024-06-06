@@ -90,13 +90,49 @@ void ConfigureDependencyInjection
 {
     var configureApiHooks = new List<Action<WebApplication>>();
 
+    var appConfig = builder.Configuration;
+    var services = builder.Services;
+
+
+    //bus
+    var logLevelMessageQueueDefault = LogLevel.Trace;
+    Enum.TryParse(appConfig[$"MessageQueue.Default"], true, out logLevelMessageQueueDefault);
+
+    var mqEffects = new MqEffects();//singleton
+
+    var mqConfig = new MessageQueueConfiguration
+    {
+        logLevel = logLevelMessageQueueDefault,
+        busUrl = busUrl,
+        messageQueueUrl = Environment.GetEnvironmentVariable("MESSAGEQUEUE_URL") ?? builder.GetConfigurationValue("Api:MessageQueueUrl"),
+        busTypes = builder.GetConfigurationTypes("Api:Bus", Dependencies.AvailableBusTypes).ToArray(),
+        pauseOnError = pauseOnError,
+        effects = mqEffects
+    };
+
+    services.AddSingleton(mqConfig);
+
+    services.AddMessageQueue(mqConfig, out var messageQueueUrl, out var addedBus);
+
+    Console.Out.WriteLine(@$"(f=darkgray)Bus:(rdc) (uon){messageQueueUrl}(rdc) (f=darkgray){string.Join(", ", addedBus)}(rdc)");
+
+
+
     //database
     var logLevelEFContext = builder.EnumConfiguration("Logging:LogLevel:Microsoft.EntityFrameworkCore.DbContext",
         "Logging:LogLevel:Default", LogLevel.Warning);
 
     var dbContextTypes = builder.GetConfigurationTypes("Api:DbContext", Dependencies.AvailableDbContextTypes);
 
-    builder.RegisterDbContexts(dbContextTypes, pif.IsDebug, pif.Env, logLevelEFContext);
+    var configureMyWayOptions = new DbContextHelper.ConfigureMyWayOptions(pif.IsDebug, pif.Env, logLevelEFContext);
+
+    var effectsMap = new Dictionary<Type, object>()
+    {
+        [typeof(MessageQueueContext)] = mqEffects,
+    };
+    
+
+    builder.RegisterDbContexts(dbContextTypes, configureMyWayOptions, effectsMap);
 
     configureApiHooks.Add(app =>
     {
@@ -105,7 +141,6 @@ void ConfigureDependencyInjection
     });
 
 
-    var services = builder.Services;
 
 
     //infra
@@ -174,26 +209,6 @@ void ConfigureDependencyInjection
     {
         services.AddSingleton<IServerContextService, ServerContextProxyService>();
     }
-
-    var appConfig = builder.Configuration;
-    var logLevelMessageQueueDefault = LogLevel.Trace;
-    Enum.TryParse(appConfig[$"MessageQueue.Default"], true, out logLevelMessageQueueDefault);
-
-    //bus
-    var mqConfig = new MessageQueueConfiguration
-    {
-        logLevel = logLevelMessageQueueDefault,
-        busUrl = busUrl,
-        messageQueueUrl = Environment.GetEnvironmentVariable("MESSAGEQUEUE_URL") ?? builder.GetConfigurationValue("Api:MessageQueueUrl"),
-        busTypes = builder.GetConfigurationTypes("Api:Bus", Dependencies.AvailableBusTypes).ToArray(),
-        pauseOnError = pauseOnError
-    };
-
-    services.AddSingleton(mqConfig);
-
-    services.AddMessageQueue(mqConfig, out var messageQueueUrl, out var addedBus);
-
-    Console.Out.WriteLine(@$"(f=darkgray)Bus:(rdc) (uon){messageQueueUrl}(rdc) (f=darkgray){string.Join(", ", addedBus)}(rdc)");
 
 
     //repo

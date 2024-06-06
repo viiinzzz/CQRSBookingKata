@@ -17,6 +17,8 @@
 
 namespace Support.Infrastructure.Storage;
 
+
+
 public class MessageQueueContext : MyDbContext
 {
     public DbSet<ServerNotification> Notifications { get; set; }
@@ -24,7 +26,11 @@ public class MessageQueueContext : MyDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {
-        builder.ConfigureMyWay<MessageQueueContext>(IsDebug, Env, logLevel);
+        var options = new DbContextHelper.ConfigureMyWayOptions(IsDebug, Env, logLevel, [
+            typeof(ServerNotificationTrigger)
+        ], Effects);
+
+        builder.ConfigureMyWay<MessageQueueContext>(options);
     }
 
 
@@ -38,5 +44,11 @@ public class MessageQueueContext : MyDbContext
             .Entity<ServerNotification>()
             .Property(message => message.NotificationId)
             .ValueGeneratedOnAdd();
+
+        builder.Entity<ServerNotification>()
+            .HasIndex(b => new { b.CorrelationId1, b.CorrelationId2 })
+            .HasDatabaseName("IX_CorrelationId");
     }
+
+
 }

@@ -2,7 +2,7 @@
 
 public class DemoContextProxyService(IMessageBus mq, IServerContextService serverContext) : IDemoContext
 {
-    public long ServerId => serverContext.Id;
+    public long ServerId => serverContext.ServerId;
     public long SessionId => serverContext.SessionId;
 
     private DemoContext GetContext()

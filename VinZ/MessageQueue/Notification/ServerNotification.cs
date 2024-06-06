@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace VinZ.MessageQueue;
 
 public record ServerNotification
@@ -48,6 +50,9 @@ public record ServerNotification
 )
    : IHaveSerializedMessage, IHaveDeliveryStatus, IHaveCorrelation
 {
+    [NotMapped] public int CorrelatedPrecedingCount { get; set; } = -1;
+    [NotMapped] public ICollection<string>? CorrelatedPrecedingActions { get; set; }
+
     public string[] HistorySteps => StepsFromHistory(History);
     public static string[] StepsFromHistory(string? history) => (history ?? string.Empty).Split(',');
     public static string HistoryFromSteps(string[]? steps) => string.Join(',', steps ?? []);

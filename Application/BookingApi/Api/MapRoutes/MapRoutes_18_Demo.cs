@@ -32,12 +32,12 @@ public static partial class ApiMethods
                 long serverId,
                 long sessionId,
 
-                [FromServices] DemoBus demos,
+                [FromServices] DemoBus demo,
                 [FromServices] IServerContextService serverContext
             ) 
                 =>
             {
-                if (serverId != serverContext.Id)
+                if (serverId != serverContext.ServerId)
                 {
                     return Results.BadRequest($"Invalid serverId {serverId}");
                 }
@@ -49,12 +49,33 @@ public static partial class ApiMethods
 
                 var forward = async () =>
                 {
-                    var newTime = await demos.Forward(days, speedFactor.Value, CancellationToken.None);
+                    var newTime = await demo.Forward(days, speedFactor.Value, CancellationToken.None);
 
                     return Results.Redirect("/");
                 };
 
                 return await forward.WithStackTrace();
+            }
+        ).WithOpenApi().WithTags([DemoTag]);
+
+
+        app.MapGet("/context/demo", async
+            (
+                [FromServices] DemoBus demo
+            ) 
+                =>
+            {
+                var context = async () =>
+                {
+                    var simulationDay = demo.SimulationDay;
+
+                    return Results.Json(new
+                    {
+                        simulationDay
+                    });
+                };
+
+                return await context.WithStackTrace();
             }
         ).WithOpenApi().WithTags([DemoTag]);
 

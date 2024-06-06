@@ -33,7 +33,7 @@ public class PlanningRepository
 
         var utcNow = DateTime.UtcNow;
         var utcNowDayNum = utcNow.FractionalDayNum();
-        var serverContextId = serverContext.Id;
+        var serverContextId = serverContext.ServerId;
 
         var serverContext2 = new ServerContext(utcNow, utcNowDayNum, serverContextId, 0);
 
@@ -170,7 +170,7 @@ public class PlanningRepository
 
     public ServerContext? GetServerContext()
     {
-        var context = _planning.ServerContext.Find(serverContext.Id);
+        var context = _planning.ServerContext.Find(serverContext.ServerId);
 
         if (context == default)
         {

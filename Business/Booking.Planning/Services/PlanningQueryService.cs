@@ -108,7 +108,7 @@ public class PlanningQueryService
             from duty in planning.Duties
 
             join serverContext in planning.ServerContexts
-                on server.Id equals serverContext.ServerContextId
+                on server.ServerId equals serverContext.ServerContextId
 
             join check in planning.Checks
                 on duty.BookingId equals check.BookingId

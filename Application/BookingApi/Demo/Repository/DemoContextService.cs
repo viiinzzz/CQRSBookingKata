@@ -33,6 +33,6 @@ public class DemoContextService(IServerContextService serverContext) : IDemoCont
     public int SimulationDay { get; set; } = 0;
     public Hotel[] Hotels { get; set; } = [];
 
-    public long ServerId { get; set; } = serverContext.Id;
+    public long ServerId { get; set; } = serverContext.ServerId;
     public long SessionId { get; set; } = serverContext.SessionId;
 }

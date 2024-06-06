@@ -24,4 +24,8 @@ public interface IMessageQueueRepository
     void AddNotification(ServerNotification notification);
     int UpdateNotification(IEnumerable<ServerNotification> notifications, ServerNotificationUpdate update);
     int ArchiveNotifications();
+
+
+
+    IQueryable<ServerNotification> QueryCorrelatedPreceding(ServerNotification notification);
 }

@@ -26,7 +26,9 @@ public class BookingPlanningContext : MyDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {
-        builder.ConfigureMyWay<BookingPlanningContext>(IsDebug, Env, logLevel);
+        var options = new DbContextHelper.ConfigureMyWayOptions(IsDebug, Env, logLevel);
+
+        builder.ConfigureMyWay<BookingPlanningContext>(options);
     }
 
 

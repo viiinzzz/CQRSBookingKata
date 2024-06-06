@@ -16,6 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\JsonHelper\VinZ.Common.JsonHelper.csproj" />
     <ProjectReference Include="..\RecordHelper\VinZ.Common.RecordHelper.csproj" />
+    <ProjectReference Include="..\TypeHelper\VinZ.Common.TypeHelper.csproj" />
   </ItemGroup>
 
   <ItemGroup>

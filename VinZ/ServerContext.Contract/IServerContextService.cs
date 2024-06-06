@@ -19,6 +19,6 @@ namespace VinZ.Common;
 
 public interface IServerContextService
 {
-    long Id { get; }
+    long ServerId { get; }
     long SessionId { get; }
 }

@@ -21,5 +21,6 @@ public record ServerNotificationUpdate
 (
     int? RepeatCount = default,
     bool? Done = default,
-    DateTime? DoneTime = default
+    DateTime? DoneTime = default,
+    int? Status = default
 );

@@ -79,3 +79,14 @@ ctrl+b &  kill tmux
 ctrl+b arrow  move active pane
 ctrl+b [ updown pageupdown  scroll active pane
 cd /mnt/a/Kata/BookingKata&&tmux new-session  'docker compose logs -f app ; bash' \; split-window -h 'docker compose logs -f demo ; bash' 
+
+
+# Database
+db schema compatibility
+DbUp
+EFCore.TestSupport
+Scaffolding
+
+event on messagequeue table to replace check loop
+
+hop calc rather than updated

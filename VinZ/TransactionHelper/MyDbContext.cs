@@ -22,4 +22,5 @@ public class MyDbContext : DbContext
     public bool IsDebug { get; set; } = false;
     public string Env { get; set; } = "Development";
     public LogLevel logLevel { get; set; } = LogLevel.Warning;
+    public object? Effects { get; set; }
 }

@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace BookingKata.Infrastructure.Storage;
 
 public class BookingAdminContext: MyDbContext
@@ -26,8 +28,9 @@ public class BookingAdminContext: MyDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {
-        builder.ConfigureMyWay<BookingAdminContext>(IsDebug, Env, logLevel);
+        var options = new DbContextHelper.ConfigureMyWayOptions(IsDebug, Env, logLevel);
 
+        builder.ConfigureMyWay<BookingAdminContext>(options);
     }
 
 
@@ -35,13 +38,27 @@ public class BookingAdminContext: MyDbContext
     {
         builder
             .Entity<Employee>()
-            .Property(employee => employee.EmployeeId)
-            .ValueGeneratedOnAdd();
+            .HasKey(employee => employee.EmployeeId);
 
+        builder
+            .Entity<Hotel>()
+            .HasKey(hotel => hotel.HotelId);
+
+        builder
+            .Entity<Employee>()
+            .HasKey(employee => employee.EmployeeId);
+
+
+        builder
+            .Entity<Employee>()
+            .Property(employee => employee.EmployeeId)
+            .HasColumnOrder(0)
+            .ValueGeneratedOnAdd();
 
         builder
             .Entity<Hotel>()
             .Property(hotel => hotel.HotelId)
+            .HasColumnOrder(0)
             .ValueGeneratedOnAdd();
 
         builder
@@ -59,8 +76,6 @@ public class BookingAdminContext: MyDbContext
         builder
             .Entity<Room>()
             .HasKey(room => room.Urid);
-
-
 
     }
 }

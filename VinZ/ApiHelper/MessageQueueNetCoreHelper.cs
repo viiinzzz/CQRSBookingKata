@@ -23,7 +23,8 @@ public record MessageQueueConfiguration
     Uri busUrl = default,
     string? messageQueueUrl = default,
     Type[] busTypes = default,
-    bool pauseOnError = default
+    bool pauseOnError = default,
+    MqEffects? effects = default
 );
 
 public class AddClientsService
@@ -123,6 +124,8 @@ public static class MessageQueueNetCoreHelper
         if (isLocalMessageQueue)
         {
             addedBusList.Add($"{nameof(MqServer)}");
+
+            services.AddSingleton<MqEffects>(sp => mqConfig.effects);
 
             services.AddSingleton(_ => new MqServerConfig
             {

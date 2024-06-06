@@ -21,6 +21,7 @@ public partial class MqServer
 (
     IScopeProvider scp,
     MqServerConfig config,
+    MqEffects effects,
     ITimeService DateTime,
     ILogger<MqServer> log
 )
@@ -58,6 +59,7 @@ Press a key to continue . . .
         //initialize
         Console.Out.WriteLine("Starting MqServer...");
         queueScope = scp.GetScope<IMessageQueueRepository>(out queue);
+        effects.OnNotified += ServerNotificationChanged;
         Console.Out.WriteLine("Starting MqServer.");
     }
 
@@ -79,6 +81,8 @@ Press a key to continue . . .
     private async Task Execute(CancellationToken cancel)
     {
         Console.Out.WriteLine("Execute MqServer...");
+
+
         while (!cancel.IsCancellationRequested)
         {
             var t0 = DateTime.UtcNow;
@@ -114,6 +118,11 @@ Press a key to continue . . .
         Console.Out.WriteLine("Execute MqServer.");
     }
 
+    private void ServerNotificationChanged(object? sender, ServerNotificationChange change)
+    {
+        Console.Out.WriteLine("ServerNotificationChanged id=" + change.Notification.NotificationId);
+    }
+
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         Console.Out.WriteLine("Stop MqServer...");
@@ -127,7 +136,7 @@ Press a key to continue . . .
     {
         Console.Out.WriteLine("Stopping MqServer...");
         //tearing down
-
+        effects.OnNotified -= ServerNotificationChanged;
         queueScope.Dispose();
         Console.Out.WriteLine("Stopping MqServer...");
     }

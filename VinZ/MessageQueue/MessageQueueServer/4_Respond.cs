@@ -21,6 +21,9 @@ namespace VinZ.MessageQueue;
 
 public partial class MqServer
 {
+    private const int MaxHops = 20;
+
+
     private static readonly Regex BusIdRx = new(@"^/bus/([^/]+)/$");
 
     private readonly IPAddress[] _myIps= Dns.GetHostEntry(Dns.GetHostEntry("").HostName).AddressList;
@@ -46,6 +49,17 @@ public partial class MqServer
         CancellationToken cancel
     )
     {
+        // One or more errors occurred. (A second operation was started on this context instance before a previous operation completed.
+        // This is usually caused by different threads concurrently using the same instance of DbContext. 
+
+        // var correlatedPreceding = queue.QueryCorrelatedPreceding(serverNotification);
+        //
+        // serverNotification.CorrelatedPrecedingCount = correlatedPreceding.Count();
+        // serverNotification.CorrelatedPrecedingActions = correlatedPreceding.Select(notification2 => $"{notification2.Recipient}.{notification2.Verb}").ToArray();
+
+
+
+
         var updates = new List<(ServerNotification[], ServerNotificationUpdate)>();
 
         var subscriberUrls = new HashSet<string>();
@@ -140,7 +154,9 @@ public partial class MqServer
             : $"{Inverted}{Fg(Color.SkyBlue)}>>>Dequeuing>>>                    {Rs} scheduled";
         var subscribersCountStr = $"{subscriberUrls.Count + (awaitersBus?.SubscribersCount ?? 0)} subscriber{(subscriberUrls.Count + (awaitersBus?.SubscribersCount ?? 0) > 1 ? "s" : "")}";
         var messageObj = serverNotification.MessageAsObject();
-        var messageHeaders = $"{Faint}---{Rs} {Fg(Color.DarkMagenta)}_steps{Rs} {Faint}={Rs} {Bold}{Fg(Color.DarkMagenta)}{serverNotification.History ?? string.Empty}{Rs}";
+        var messageHeaders = @$"
+correlatedPreceding hops = {serverNotification.CorrelatedPrecedingCount}  {Fg(Color.DarkMagenta)}steps{Rs} {Faint}={Rs} {Bold}{Fg(Color.DarkMagenta)}{string.Join(',', serverNotification.CorrelatedPrecedingActions ?? [])}{Rs}
+{Faint}---{Rs} {Fg(Color.DarkMagenta)}_steps{Rs} {Faint}={Rs} {Bold}{Fg(Color.DarkMagenta)}{serverNotification.History ?? string.Empty}{Rs}";
         var messageJson = messageObj.ToJson(true)
             .Replace("\\r", "")
             .Replace("\\n", Environment.NewLine);
@@ -176,7 +192,7 @@ Subject: {Bold}{messageType}{Fg(serverNotification.Verb == ErrorProcessingReques
 
 
 
-        var updateRepeatMessage = () =>
+        var updateRepeatNotification = () =>
         {
             if (serverNotification is { RepeatDelay: { Ticks: > 0 }, RepeatCount: > 1 })
             {
@@ -196,11 +212,45 @@ Subject: {Bold}{messageType}{Fg(serverNotification.Verb == ErrorProcessingReques
         };
 
 
+
+        var updateFailedNotification = () =>
+        {
+            updates.Add((new[] { serverNotification }, new ServerNotificationUpdate
+            {
+                Done = true,
+                DoneTime = DateTime.UtcNow,
+                Status = (int)HttpStatusCode.LoopDetected
+            }));
+        };
+
+
+
+        if (serverNotification.CorrelatedPrecedingCount > MaxHops)
+        {
+            var maxHopsReahed =
+                @$"Maximum number of hops reached ({serverNotification.CorrelatedPrecedingCount})
+{Fg(Color.BlueViolet)}steps{Rs} {Faint}={Rs} {Fg(Color.BlueViolet)}{string.Join(',', serverNotification.CorrelatedPrecedingActions ?? [])}{Rs}";
+
+            var message =
+                @$"{Inverted}{Fg(Color.Red)}                  >>>Undeliverable {Rs} {notificationLabel}...{Environment.NewLine}{maxHopsReahed}{Environment.NewLine}{rvm}";
+
+            log.LogError(
+                @$"{message}");
+
+            var countFailed = new DeliveryCount(0, 1);
+
+            updateFailedNotification();
+
+            return new DeliveryCountAndUpdates(countFailed, updates);
+        }
+
+
+
         DeliveryCount count = default;
 
         if (subscriberUrls.Count == 0 && awaitersBus == null)
         {
-            if (!immediate) updateRepeatMessage();
+            if (!immediate) updateRepeatNotification();
 
             {
                 var matchedUnmatched =
@@ -379,7 +429,7 @@ failure: {ex.Message}
             })
             .Aggregate((a, b) => a + b);
 
-        updateRepeatMessage();
+        updateRepeatNotification();
 
         {
             LogLevel? logLevel =

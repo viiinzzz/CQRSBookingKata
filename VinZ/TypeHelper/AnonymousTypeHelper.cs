@@ -16,8 +16,11 @@
  */
 
 using System.Dynamic;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using Newtonsoft.Json.Linq;
 
-namespace VinZ.MessageQueue;
+namespace VinZ.Common;
 
 public static class AnonymousTypeHelper
 {

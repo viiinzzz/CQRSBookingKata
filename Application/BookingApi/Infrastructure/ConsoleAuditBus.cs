@@ -39,7 +39,7 @@ public class ConsoleAuditBus
 
         Notified += (object? sender, IClientNotificationSerialized notification) =>
         {
-            var serverLabel = sender == null ? "" : $"<<<Server:{server.Id.xby4()}>>>";
+            var serverLabel = sender == null ? "" : $"<<<Server:{server.ServerId.xby4()}>>>";
             var senderLabel = sender == null ? "" : $"<<<{sender.GetType().Name}:{sender.GetHashCode().xby4()}>>>";
 
             var correlation = new CorrelationId(notification.CorrelationId1, notification.CorrelationId2);

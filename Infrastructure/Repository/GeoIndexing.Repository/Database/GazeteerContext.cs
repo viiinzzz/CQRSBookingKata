@@ -23,7 +23,9 @@ public class GazeteerContext : MyDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {
-        builder.ConfigureMyWay<GazeteerContext>(IsDebug, Env, logLevel);
+        var options = new DbContextHelper.ConfigureMyWayOptions(IsDebug, Env, logLevel);
+
+        builder.ConfigureMyWay<GazeteerContext>(options);
     }
 
 

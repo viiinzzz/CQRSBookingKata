@@ -15,9 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.Reflection;
 using System.Text.RegularExpressions;
 
-namespace VinZ.MessageQueue;
+namespace VinZ.Common;
 
 public static class TypeHelper
 {
@@ -98,4 +99,26 @@ public static class TypeHelper
 
         return null;
     }
+
+    public static IEnumerable<Type> FindGenericInterfaces(this Type type, Type interfaceType)
+    {
+        return type.GetInterfaces().Where(i => 
+                i.IsGenericType && 
+                i.GetGenericTypeDefinition() == interfaceType);
+    }
+
+    public static IEnumerable<Type> EnumerateTypeHierarchy(this Type type)
+    {
+        var nextType = type;
+
+        while (nextType is not null)
+        {
+            yield return nextType;
+
+            nextType = nextType.BaseType;
+        }
+    }
+
 }
+
+

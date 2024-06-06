@@ -131,6 +131,14 @@ public class MessageQueueRepository
                     };
                 }
 
+                if (update.Status.HasValue)
+                {
+                    notification2 = notification2 with
+                    {
+                        Status = update.Status.Value
+                    };
+                }
+
                 var entity = _queue.Notifications.Update(notification2);
 
                 updated.Add(entity);
@@ -156,6 +164,23 @@ public class MessageQueueRepository
     }
 
 
+    public IQueryable<ServerNotification> QueryCorrelatedPreceding(ServerNotification notification)
+    {
+        if (notification is { CorrelationId1: 0, CorrelationId2: 0 })
+        {
+            return Enumerable.Empty<ServerNotification>().AsQueryable();
+        }
+
+        return _queue.Notifications
+
+            .Where(notification2 => notification2.CorrelationId1 == notification.CorrelationId1 &&
+                                    notification2.CorrelationId2 == notification.CorrelationId2 &&
+                                    notification2.NotificationId < notification.NotificationId)
+
+            .AsNoTracking();
+    }
+
+
     private void ThrowFatal(Exception ex)
     {
         Console.Error.WriteLine(@$"
@@ -168,6 +193,8 @@ Fatal repository '{this.GetType().Name}' failure!
  - If you are ok, delete the database, if a docker-compose, delete docker volume 'bookingsolution_db_data'
 
 Error: {ex.Message}
+
+{ex.StackTrace}
 ");
     
         Environment.Exit(500);

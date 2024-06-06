@@ -15,6 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.ComponentModel.Design;
+using System.Data.Common;
+
 namespace VinZ.MessageQueue;
 
 public partial class MqServer
@@ -30,9 +33,12 @@ public partial class MqServer
         try
         {
             var expired =
+
                 from notification in queue.Notifications
+
                 where now > notification.LatestDelivery &&
                       !notification.Done
+
                 select notification;
 
             var expiredCount = queue.UpdateNotification(expired, new ServerNotificationUpdate
@@ -43,12 +49,18 @@ public partial class MqServer
 
 
             var duplicates =
+
                 from notification in queue.Notifications
+
                 where notification.Aggregate &&
-                      !notification.Done
-                group notification by new { notification.Recipient, notification.Verb }
+                      !notification.Done &&
+                      notification.CorrelationId1 != 0 && notification.CorrelationId2 != 0
+
+                group notification by new { notification.Recipient, notification.Verb, notification.CorrelationId1, notification.CorrelationId2 }
                 into g
+
                 where g.Count() > 1
+
                 select g.OrderBy(ss => ss.NotificationTime).Skip(1);
 
             var duplicates2 = new List<ServerNotification>();
@@ -65,9 +77,13 @@ public partial class MqServer
             });
 
             var hold =
+
                 from notification in queue.Notifications
+
                 where now < notification.EarliestDelivery &&
+                      now < notification.LatestDelivery &&
                       !notification.Done
+
                 select notification;
 
             var holdCount = hold.Count();
@@ -94,25 +110,55 @@ Message purge failure: {ex.Message}
         }
 
 
-        var messages =
+        var notifications =
+
             from notification in queue.Notifications
+
             where now >= notification.EarliestDelivery &&
+                  now < notification.LatestDelivery &&
                   !notification.Done
-            orderby notification.NotificationTime descending
+
+            orderby notification.NotificationTime ascending
+
             select notification;
+
+
+        // var notificationGroups =
+        //
+        //     from notification in queue.Notifications
+        //
+        //     where now >= notification.EarliestDelivery &&
+        //           now < notification.LatestDelivery &&
+        //           !notification.Done
+        //
+        //     group notification by new{notification.CorrelationId1, notification.CorrelationId2}
+        //     into g
+        //     
+        //     select g.OrderBy(n=>n.NotificationId);
+
 
         var count = new DeliveryCount();
 
-        if (!messages.Any())
+        if (!notifications.Any())
+        // if (!notificationGroups.Any())
         {
             return count;
         }
 
         try
         {
-         
+            var orderedNotifications = notifications.AsEnumerable();
+            // var orderedNotifications = notificationGroups.AsEnumerable()
+            //
+            //     .Select(g => g.Select((n,i) => new {n,i}))
+            //     .SelectMany(ni => ni)
+            //
+            //     .GroupBy(ni => ni.i, ni => ni.n)
+            //     .Select(g=> g.AsEnumerable())
+            //     .SelectMany(n => n);
 
-            var responded = messages
+            
+            var responded = orderedNotifications
 
                 .AsParallel()
                 .WithCancellation(cancel)
@@ -126,17 +172,16 @@ Message purge failure: {ex.Message}
             {
                 RefreshFastest();
             }
-
-
+            
             log.LogInformation(@$"
 ---
 Message queue processed {responded.count.Total}.
 ---
 ");
 
-            foreach (var (notifications, update) in responded.updates)
+            foreach (var (updatedNotifications, update) in responded.updates)
             {
-                queue.UpdateNotification(notifications, update);
+                queue.UpdateNotification(updatedNotifications, update);
             }
 
         }

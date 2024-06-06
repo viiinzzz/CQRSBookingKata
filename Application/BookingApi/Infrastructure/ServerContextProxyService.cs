@@ -14,7 +14,7 @@ public class ServerContextProxyService(IMessageBus mq)
             return serverContext;
     } 
     
-    public long Id => GetContext()?.ServerContextId ?? 0;
+    public long ServerId => GetContext()?.ServerContextId ?? 0;
     
     public long SessionId => GetContext()?.SessionId ?? 0;
 }

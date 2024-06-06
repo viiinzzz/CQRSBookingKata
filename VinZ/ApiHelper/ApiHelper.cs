@@ -39,12 +39,20 @@ public static partial class ApiHelper
         var addressList = Dns.GetHostByName(hostName).AddressList;
 
         IPAddress ip0;
+        try
         {
             using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0);
-        
-            socket.Connect("8.8.8.8", 65530);
+
+            // socket.Connect("8.8.8.8", 65530);
+            socket.Connect("127.0.0.1", 65530);
             var endPoint = socket.LocalEndPoint as IPEndPoint;
             ip0 = endPoint.Address;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"{nameof(GetMyIps)}: {ex.Message}");
+
+            ip0 = new IPAddress(new byte[] { 127, 0, 0, 1 });
         }
         // Console.Error.WriteLine($"localIP={ip0}");
         //

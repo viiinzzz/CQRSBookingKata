@@ -19,7 +19,7 @@ using Microsoft.Extensions.Logging;
 
 namespace VinZ.Common;
 
-public class ServerContextService
+public class ServerContextService //the server context id should be instanciated once by a master and shared to participants through a proxy
     : IServerContextService
 {
     private readonly ILogger<IServerContextService> _logger;
@@ -27,14 +27,14 @@ public class ServerContextService
     public ServerContextService(ILogger<IServerContextService> logger)
     {
         _logger = logger;
-        Id = UuidHelper.GetUuidInt64();
+        ServerId = UuidHelper.GetUuidInt64();
         SessionId = RandomHelper.Long();
 
         logger.Log(LogLevel.Debug, 
-            $"<<<Server:{Id.xby4()}>>> SessiondId {SessionId}");
+            $"<<<Server:{ServerId.xby4()}>>> SessiondId {SessionId}");
     }
 
-    public long Id { get; }
-    public long SessionId { get; }
+    public long ServerId { get; } //server id is fixed for a hardware
+    public long SessionId { get; } //session id change when the server reboots
 }
 
