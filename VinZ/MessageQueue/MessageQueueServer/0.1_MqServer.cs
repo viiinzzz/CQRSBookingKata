@@ -34,6 +34,9 @@ public partial class MqServer
 
     private readonly bool _pauseOnError = config.PauseOnError;
 
+
+
+
     private void Check(LogLevel logLevel)
     {
         if (logLevel != LogLevel.Error || !_pauseOnError)
@@ -87,11 +90,21 @@ Press a key to continue . . .
         {
             var t0 = DateTime.UtcNow;
 
+
+            _queueChanged = false;
+
             //
             //
             await ProcessQueue(cancel);
             //
             //
+
+            if (_queueChanged)
+            {
+                RefreshFaster();
+
+                continue;
+            }
 
             var t1 = DateTime.UtcNow;
 
@@ -115,13 +128,10 @@ Press a key to continue . . .
 
             await Task.Delay(delay, cancel);
         }
+
         Console.Out.WriteLine("Execute MqServer.");
     }
 
-    private void ServerNotificationChanged(object? sender, ServerNotificationChange change)
-    {
-        Console.Out.WriteLine("ServerNotificationChanged id=" + change.Notification.NotificationId);
-    }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {

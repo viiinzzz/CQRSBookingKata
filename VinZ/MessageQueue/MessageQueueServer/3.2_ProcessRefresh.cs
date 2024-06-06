@@ -19,6 +19,21 @@ namespace VinZ.MessageQueue;
 
 public partial class MqServer
 {
+
+
+
+    private bool _queueChanged = false;
+
+    private void ServerNotificationChanged(object? sender, ServerNotificationChange change)
+    {
+        // Console.Out.WriteLine("ServerNotificationChanged id=" + change.Notification.NotificationId);
+
+        _queueChanged = true;
+    }
+
+
+
+
     private int _refresh = config.BusRefreshMinMilliseconds;
 
     private void LogRefresh()

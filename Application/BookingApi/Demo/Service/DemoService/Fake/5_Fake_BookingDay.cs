@@ -153,7 +153,11 @@ public partial class DemoBus
 
                     bus.Notify(notification.Response(new ResponseOptions {
                         ex = stayNotFoundException,
-                        MessageObj = new { stayRequest = stayNotFoundException.StayRequest },
+                        MessageObj = new
+                        {
+                            error = "No stay found with the requested criteria.",
+                            stayRequest = stayNotFoundException.StayRequest
+                        },
                         Recipient = Omni, 
                         Verb = AuditMessage, 
                         Immediate= true
