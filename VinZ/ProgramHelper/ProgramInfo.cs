@@ -37,6 +37,8 @@ public class ProgramInfo
     public static ProgramInfo Get() => Instance;
 
 
+    public int Pid { get; } = Environment.ProcessId;
+
     public string ProgName { get; } = Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly()?.Location ?? string.Empty).Trim();
     
     public string ExeName =

@@ -1,9 +1,10 @@
-name: bookingsolution
+name: bookingsolution_${BUILD_CONFIGURATION:-release}
 
 services:
 
   app:
     image: ${DOCKER_REGISTRY-}bookingapi:latest
+    container_name: bookingapp_${BUILD_CONFIGURATION:-release}
     build:
       context: .
       dockerfile: Application/BookingApi/Dockerfile
@@ -17,10 +18,10 @@ services:
       - booking_backend
       - booking_frontend
     volumes:
-        - type: bind
-          source: ./Application/Docker/bookingapi/config/appsettings.Production-App.json
-          target: /app/appsettings.Production-App.json
-          read_only: true
+      - type: bind
+        source: ./Application/Docker/bookingapi/config/appsettings.Production-App.json
+        target: /app/appsettings.Production-App.json
+        read_only: true
     tty: true
     environment:
       TERM: xterm-256color
@@ -31,6 +32,7 @@ services:
  
   demo:
     image: ${DOCKER_REGISTRY-}bookingapi:latest
+    container_name: bookingdemo_${BUILD_CONFIGURATION:-release}
     build:
       context: .
       dockerfile: Application/BookingApi/Dockerfile
@@ -40,10 +42,10 @@ services:
     networks:
       - booking_backend
     volumes:
-        - type: bind
-          source: ./Application/Docker/bookingapi/config/appsettings.Production-Demo.json
-          target: /app/appsettings.Production-Demo.json
-          read_only: true
+      - type: bind
+        source: ./Application/Docker/bookingapi/config/appsettings.Production-Demo.json
+        target: /app/appsettings.Production-Demo.json
+        read_only: true
     tty: true
     environment:
       TERM: xterm-256color
@@ -54,6 +56,7 @@ services:
 
   admin:
     image: ${DOCKER_REGISTRY-}bookingapi:latest
+    container_name: bookingadmin_${BUILD_CONFIGURATION:-release}
     build:
       context: .
       dockerfile: Application/BookingApi/Dockerfile
@@ -63,10 +66,10 @@ services:
     networks:
       - booking_backend
     volumes:
-        - type: bind
-          source: ./Application/Docker/bookingapi/config/appsettings.Production-Admin.json
-          target: /app/appsettings.Production-Admin.json
-          read_only: true
+      - type: bind
+        source: ./Application/Docker/bookingapi/config/appsettings.Production-Admin.json
+        target: /app/appsettings.Production-Admin.json
+        read_only: true
     tty: true
     environment:
       TERM: xterm-256color
@@ -77,6 +80,7 @@ services:
 
   planning:
     image: ${DOCKER_REGISTRY-}bookingapi:latest
+    container_name: bookingplanning_${BUILD_CONFIGURATION:-release}
     build:
       context: .
       dockerfile: Application/BookingApi/Dockerfile
@@ -86,10 +90,10 @@ services:
     networks:
       - booking_backend
     volumes:
-        - type: bind
-          source: ./Application/Docker/bookingapi/config/appsettings.Production-Planning.json
-          target: /app/appsettings.Production-Planning.json
-          read_only: true
+      - type: bind
+        source: ./Application/Docker/bookingapi/config/appsettings.Production-Planning.json
+        target: /app/appsettings.Production-Planning.json
+        read_only: true
     tty: true
     environment:
       TERM: xterm-256color
@@ -100,6 +104,7 @@ services:
 
   sales:
     image: ${DOCKER_REGISTRY-}bookingapi:latest
+    container_name: bookingsales_${BUILD_CONFIGURATION:-release}
     build:
       context: .
       dockerfile: Application/BookingApi/Dockerfile
@@ -109,10 +114,10 @@ services:
     networks:
       - booking_backend
     volumes:
-        - type: bind
-          source: ./Application/Docker/bookingapi/config/appsettings.Production-Sales.json
-          target: /app/appsettings.Production-Sales.json
-          read_only: true
+      - type: bind
+        source: ./Application/Docker/bookingapi/config/appsettings.Production-Sales.json
+        target: /app/appsettings.Production-Sales.json
+        read_only: true
     tty: true
     environment:
       TERM: xterm-256color
@@ -123,6 +128,7 @@ services:
 
   support:
     image: ${DOCKER_REGISTRY-}bookingapi:latest
+    container_name: bookingsupport_${BUILD_CONFIGURATION:-release}
     build:
       context: .
       dockerfile: Application/BookingApi/Dockerfile
@@ -132,10 +138,10 @@ services:
     networks:
       - booking_backend
     volumes:
-        - type: bind
-          source: ./Application/Docker/bookingapi/config/appsettings.Production-Support.json
-          target: /app/appsettings.Production-Support.json
-          read_only: true
+      - type: bind
+        source: ./Application/Docker/bookingapi/config/appsettings.Production-Support.json
+        target: /app/appsettings.Production-Support.json
+        read_only: true
     tty: true
     environment:
       TERM: xterm-256color
@@ -149,7 +155,7 @@ services:
   db:
     image: ${DOCKER_REGISTRY-}postgres:16.3
     command: ["postgres", "-c", "log_statement=none"]
-    container_name: booking_db
+    container_name: bookingdb_${BUILD_CONFIGURATION:-release}
     domainname: booking.local
     tty: true
     environment:
@@ -173,7 +179,8 @@ services:
       - db_data:/var/lib/postgresql/data:rw
   
   dbadmin:
-    container_name: booking_dbadmin
+    image: ${DOCKER_REGISTRY-}booking_dbadmin:latest
+    container_name: bookingdbadmin_${BUILD_CONFIGURATION:-release}
     build:
       context: .
       dockerfile: Application/Docker/db-admin/Dockerfile.dbadmin
@@ -201,7 +208,11 @@ services:
       - dbadmin_data:/var/lib/pgadmin:rw
 
   dbadmin2:
-    image: adminer
+    image: ${DOCKER_REGISTRY-}booking_dbadmin2:latest
+    container_name: bookingdbadmin2_${BUILD_CONFIGURATION:-release}
+    build:
+      context: .
+      dockerfile: Application/Docker/db-admin/Dockerfile.dbadmin2
     depends_on:
      - db
     domainname: booking.local

@@ -22,7 +22,6 @@ using VinZ.Common.KVStore;
 using VinZ.Common.KVStore.Sqlite;
 using VinZ.Common.Logging;
 using VinZ.Common.Retry;
-using VinZ.Common;
 
 namespace VinZ.Common.Http;
 
@@ -106,7 +105,7 @@ public class RobustHttp
         var authorizationHash = authorization == default ? default :  $"{$"{authorization.Scheme} {authorization.Parameter}".GetHashCode64():x16}";
         var url2 = authorizationHash == default ? url : $"{authorizationHash}@{url}";
             
-        var retryer = new Retryer(logs, Retryer.Arguments.Default with
+        var retryer = new Retryer(logs, Retryer.RetryOptions.Default with
         {
             debug = $"GET {url}",
             MaxWaitMilliseconds = (timeoutSeconds + 5) * 1000,
@@ -129,7 +128,7 @@ public class RobustHttp
 
         var getWithoutCacheWithRetry = async (CancellationToken? cancel) =>
         {
-            return await retryer.Run<string>(
+            return await retryer.RunAsync<string>(
                 async (retryCancellation) => await getWithoutCache(retryCancellation),
                 cancel);
         };
@@ -185,7 +184,7 @@ public class RobustHttp
         }
         else
         {
-            response = await retryer.Run<string>(
+            response = await retryer.RunAsync<string>(
                 async (retryCancellation) => await getWithoutCache(retryCancellation),
                 cancellationToken);
         }

@@ -20,7 +20,7 @@ namespace VinZ.Common.Retry;
 
 public partial class Retryer
 {
-    public partial record Arguments(
+    public record RetryOptions(
         int RetryCount, 
         double RetryDelayFactor, 
         int RetryMilliseconds, 
@@ -30,7 +30,8 @@ public partial class Retryer
         )
     {
         private const int Second = 1000;
-        public static Arguments Default = new(
+
+        public static RetryOptions Default = new(
             3,
             1.5,
             20 * Second,

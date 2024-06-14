@@ -11,6 +11,7 @@
     <DockerComposeProjectName>bookingsolution</DockerComposeProjectName>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Application\Scripts\**" />
     <None Remove="appsettings\**" />
     <None Remove="images\**" />
   </ItemGroup>
@@ -23,17 +24,5 @@
     <None Include=".dockerignore" />
     <None Include="Application\Docker\**" />
     <None Include="notes.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="appsettings.Production-App.Development.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </None>
-    <None Update="appsettings.Production-Sales.Development.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </None>
   </ItemGroup>
 </Project>

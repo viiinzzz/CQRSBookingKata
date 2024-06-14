@@ -1,9 +1,12 @@
+name: bookingsolution_${BUILD_CONFIGURATION:-debug}
+
 services:
 
   app:
+    container_name: bookingapp_${BUILD_CONFIGURATION:-debug}
     build:
       args:
-        BUILD_CONFIGURATION: Debug
+        BUILD_CONFIGURATION: debug
       labels:
         com.microsoft.created-by: "visual-studio"
         com.microsoft.visual-studio.project-name: "BookingApi"
@@ -12,8 +15,9 @@ services:
       ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS: true
       NUGET_FALLBACK_PACKAGES:
     volumes:
-      - C:\Users\vinz_\vsdbg\vs2017u5:/remote_debugger:rw
-      - C:\Users\vinz_\.nuget\packages\:/.nuget/packages:ro
+      - ./.ssh/authorized_keys:/home/app/.ssh/authorized_keys:ro
+      - ${HOMEDRIVE}${HOMEPATH}\vsdbg\vs2017u5:/remote_debugger:rw
+      - ${HOMEDRIVE}${HOMEPATH}\.nuget\packages\:/.nuget/packages:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
@@ -27,13 +31,16 @@ services:
       com.microsoft.visualstudio.debuggee.workingdirectory: "/app"
       com.microsoft.visualstudio.debuggee.killprogram: "/bin/sh -c \"if PID=$$(pidof dotnet); then kill $$PID; fi\""
     tty: true
+    ports:
+      - 2291:22
     #entrypoint: tail -f /dev/null
 
  
   demo:
+    container_name: bookingdemo_${BUILD_CONFIGURATION:-debug}
     build:
       args:
-        BUILD_CONFIGURATION: Debug
+        BUILD_CONFIGURATION: debug
       labels:
         com.microsoft.created-by: "visual-studio"
         com.microsoft.visual-studio.project-name: "BookingApi"
@@ -42,8 +49,9 @@ services:
       ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS: true
       NUGET_FALLBACK_PACKAGES:
     volumes:
-      - C:\Users\vinz_\vsdbg\vs2017u5:/remote_debugger:rw
-      - C:\Users\vinz_\.nuget\packages\:/.nuget/packages:ro
+      - ./.ssh/authorized_keys:/home/app/.ssh/authorized_keys:ro
+      - ${HOMEDRIVE}${HOMEPATH}\vsdbg\vs2017u5:/remote_debugger:rw
+      - ${HOMEDRIVE}${HOMEPATH}\.nuget\packages\:/.nuget/packages:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
@@ -57,12 +65,15 @@ services:
       com.microsoft.visualstudio.debuggee.workingdirectory: "/app"
       com.microsoft.visualstudio.debuggee.killprogram: "/bin/sh -c \"if PID=$$(pidof dotnet); then kill $$PID; fi\""
     tty: true
-    entrypoint: tail -f /dev/null
+    ports:
+      - 2292:22
+    #entrypoint: tail -f /dev/null
 
   admin:
+    container_name: bookingadmin_${BUILD_CONFIGURATION:-debug}
     build:
       args:
-        BUILD_CONFIGURATION: Debug
+        BUILD_CONFIGURATION: debug
       labels:
         com.microsoft.created-by: "visual-studio"
         com.microsoft.visual-studio.project-name: "BookingApi"
@@ -71,8 +82,9 @@ services:
       ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS: true
       NUGET_FALLBACK_PACKAGES:
     volumes:
-      - C:\Users\vinz_\vsdbg\vs2017u5:/remote_debugger:rw
-      - C:\Users\vinz_\.nuget\packages\:/.nuget/packages:ro
+      - ./.ssh/authorized_keys:/home/app/.ssh/authorized_keys:ro
+      - ${HOMEDRIVE}${HOMEPATH}\vsdbg\vs2017u5:/remote_debugger:rw
+      - ${HOMEDRIVE}${HOMEPATH}\.nuget\packages\:/.nuget/packages:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
@@ -86,12 +98,15 @@ services:
       com.microsoft.visualstudio.debuggee.workingdirectory: "/app"
       com.microsoft.visualstudio.debuggee.killprogram: "/bin/sh -c \"if PID=$$(pidof dotnet); then kill $$PID; fi\""
     tty: true
+    ports:
+      - 2293:22
     #entrypoint: tail -f /dev/null
 
   planning:
+    container_name: bookingplanning_${BUILD_CONFIGURATION:-debug}
     build:
       args:
-        BUILD_CONFIGURATION: Debug
+        BUILD_CONFIGURATION: debug
       labels:
         com.microsoft.created-by: "visual-studio"
         com.microsoft.visual-studio.project-name: "BookingApi"
@@ -100,8 +115,9 @@ services:
       ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS: true
       NUGET_FALLBACK_PACKAGES:
     volumes:
-      - C:\Users\vinz_\vsdbg\vs2017u5:/remote_debugger:rw
-      - C:\Users\vinz_\.nuget\packages\:/.nuget/packages:ro
+      - ./.ssh/authorized_keys:/home/app/.ssh/authorized_keys:ro
+      - ${HOMEDRIVE}${HOMEPATH}\vsdbg\vs2017u5:/remote_debugger:rw
+      - ${HOMEDRIVE}${HOMEPATH}\.nuget\packages\:/.nuget/packages:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
@@ -115,12 +131,15 @@ services:
       com.microsoft.visualstudio.debuggee.workingdirectory: "/app"
       com.microsoft.visualstudio.debuggee.killprogram: "/bin/sh -c \"if PID=$$(pidof dotnet); then kill $$PID; fi\""
     tty: true
+    ports:
+      - 2294:22
     #entrypoint: tail -f /dev/null
 
   sales:
+    container_name: bookingsales_${BUILD_CONFIGURATION:-debug}
     build:
       args:
-        BUILD_CONFIGURATION: Debug
+        BUILD_CONFIGURATION: debug
       labels:
         com.microsoft.created-by: "visual-studio"
         com.microsoft.visual-studio.project-name: "BookingApi"
@@ -129,8 +148,9 @@ services:
       ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS: true
       NUGET_FALLBACK_PACKAGES:
     volumes:
-      - C:\Users\vinz_\vsdbg\vs2017u5:/remote_debugger:rw
-      - C:\Users\vinz_\.nuget\packages\:/.nuget/packages:ro
+      - ./.ssh/authorized_keys:/home/app/.ssh/authorized_keys:ro
+      - ${HOMEDRIVE}${HOMEPATH}\vsdbg\vs2017u5:/remote_debugger:rw
+      - ${HOMEDRIVE}${HOMEPATH}\.nuget\packages\:/.nuget/packages:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
@@ -144,12 +164,15 @@ services:
       com.microsoft.visualstudio.debuggee.workingdirectory: "/app"
       com.microsoft.visualstudio.debuggee.killprogram: "/bin/sh -c \"if PID=$$(pidof dotnet); then kill $$PID; fi\""
     tty: true
+    ports:
+      - 2295:22
     #entrypoint: tail -f /dev/null
 
   support:
+    container_name: bookingsupport_${BUILD_CONFIGURATION:-debug}
     build:
       args:
-        BUILD_CONFIGURATION: Debug
+        BUILD_CONFIGURATION: debug
       labels:
         com.microsoft.created-by: "visual-studio"
         com.microsoft.visual-studio.project-name: "BookingApi"
@@ -158,8 +181,9 @@ services:
       ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS: true
       NUGET_FALLBACK_PACKAGES:
     volumes:
-      - C:\Users\vinz_\vsdbg\vs2017u5:/remote_debugger:rw
-      - C:\Users\vinz_\.nuget\packages\:/.nuget/packages:ro
+      - ./.ssh/authorized_keys:/home/app/.ssh/authorized_keys:ro
+      - ${HOMEDRIVE}${HOMEPATH}\vsdbg\vs2017u5:/remote_debugger:rw
+      - ${HOMEDRIVE}${HOMEPATH}\.nuget\packages\:/.nuget/packages:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
@@ -173,6 +197,16 @@ services:
       com.microsoft.visualstudio.debuggee.workingdirectory: "/app"
       com.microsoft.visualstudio.debuggee.killprogram: "/bin/sh -c \"if PID=$$(pidof dotnet); then kill $$PID; fi\""
     tty: true
+    ports:
+      - 2296:22
     #entrypoint: tail -f /dev/null
 
+  db:
+    container_name: bookingdb_${BUILD_CONFIGURATION:-debug}
   
+  dbadmin:
+    container_name: bookingdbadmin_${BUILD_CONFIGURATION:-debug}
+
+  dbadmin2:
+    container_name: bookingdbadmin2_${BUILD_CONFIGURATION:-debug}
+

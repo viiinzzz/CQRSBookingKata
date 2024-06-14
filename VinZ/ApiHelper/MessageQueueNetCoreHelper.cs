@@ -33,7 +33,7 @@ public class AddClientsService
 )
     : BackgroundService
 {
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var scope0 = scp.GetScope<MessageQueueConfiguration>(out var mqConfig);
         var scope1 = scp.GetScope<ILogger<IMessageBus>>(out var log);
@@ -41,7 +41,7 @@ public class AddClientsService
         var busTypes = mqConfig.busTypes;
         var logLevel = mqConfig.logLevel;
 
-        return Task.WhenAll(busTypes.Select(busType =>
+        await Task.WhenAll(busTypes.Select(async busType =>
         {
             if (logLevel <= LogLevel.Trace)
             {
@@ -54,7 +54,19 @@ public class AddClientsService
 
             client.Log = log;
 
+            //initial wait for master bus to be ready
+            for (var i = 0; i < 6; i++)
+            {
+                await Task.Delay(10_000);
+
+                log.Log(LogLevel.Warning, $"Delayed connection to bus {i * 10}s");
+
+                stoppingToken.ThrowIfCancellationRequested();
+            }
+
+            //
             client.ConnectToBus(scp);
+            //
 
             return client
                 .Configure()

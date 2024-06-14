@@ -23,7 +23,7 @@ public record MqServerConfig
 
     bool PauseOnError = false,
 
-    int BusRefreshMinMilliseconds = 1000,//50
+    int BusRefreshMinMilliseconds = 50,//50
     int BusRefreshMaxMilliseconds = 60000,//7000,
 
     LogLevel logLevel = LogLevel.Trace

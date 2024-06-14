@@ -1,0 +1,47 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Docker bookingapp",
+      "type": "coreclr",
+      "request": "attach",
+      "sourceFileMap": {
+        "/app": "${workspaceRoot}"
+      },
+      "processId": "${command:pickRemoteProcess}",
+      "pipeTransport": {
+        "pipeProgram": "klink",
+        "pipeArgs": [ "app@localhost -P 2291 -pw welcome -auto_store_sshkey -batch" ],
+        "debuggerPath": "/vsdbg/vsdbg",
+        "pipeCwd": "${workspaceRoot}",
+        "quoteArgs": false
+      },
+      "logging": {
+        "engineLogging": true,
+        "programOutput": true,
+        "exceptions": true
+      }
+    },
+    {
+      "name": "Docker bookingdemo",
+      "type": "coreclr",
+      "request": "attach",
+      "sourceFileMap": {
+        "/app": "${workspaceRoot}"
+      },
+      "processId": "${command:pickRemoteProcess}",
+      "pipeTransport": {
+        "pipeProgram": "klink",
+        "pipeArgs": [ "app@localhost -P 2292 -pw welcome -auto_store_sshkey -batch" ],
+        "debuggerPath": "/vsdbg/vsdbg",
+        "pipeCwd": "${workspaceRoot}",
+        "quoteArgs": false
+      },
+      "logging": {
+        "engineLogging": true,
+        "programOutput": true,
+        "exceptions": true
+      }
+    }
+  ]
+}

@@ -51,7 +51,7 @@ public static class MessageHelper
 
     public static string GetTypeSerializedName(this object? messageObj)
     {
-        if (messageObj == null)
+        if (messageObj == null || messageObj.GetType() == typeof(System.Object))
         {
             return EmptyType;
         }

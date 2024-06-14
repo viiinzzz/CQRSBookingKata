@@ -1,9 +1,75 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 
-RUN apt-get update -yq && apt-get upgrade -yq && apt-get install -yq curl inetutils-ping
-#git nano
+ARG BUILD_CONFIGURATION=release
+
+#must have basic network troubleshooting tools
+RUN \
+  apt-get update -yq \
+&& \
+  apt-get upgrade -yq \
+&& \
+  apt-get install -yq \
+    curl \
+    unzip \
+    inetutils-ping \
+    net-tools \
+    nano \
+    sudo \
+#    git \
+&& true
+
+#in debug configuration we need ssh
+RUN \
+#  [ "$BUILD_CONFIGURATION" = "debug" ] && \
+  apt-get install -yq \
+    openssh-server \
+&& \
+    mkdir -p /var/run/sshd \
+&& \
+    chmod 755 /var/run/sshd \
+&& true
+
+RUN	\
+  curl -sSL https://aka.ms/getvsdbgsh | \
+    /bin/bash /dev/stdin -v latest -l /vsdbg
+
+RUN \
+#  addgroup -S app \
+#&& \
+#  adduser -S -D app -G app \
+#&& \
+  echo "root:notwelcome" | chpasswd \
+&& \
+  echo "app:welcome" | chpasswd \
+&& \
+  echo "app ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/user \
+&& \
+  true
+
+RUN \
+  sed -i \
+    's/#PasswordAuthentication.*/PasswordAuthentication\ yes/' \
+    /etc/ssh/sshd_config \
+&& \
+  echo "ChallengeResponseAuthentication no" >> /etc/ssh/sshd_config \
+&& \
+  sed -i \
+    's/#PermitRootLogin.*/PermitRootLogin\ no/' \
+    /etc/ssh/sshd_config \
+&& \
+  sed -i \
+    's/#PubkeyAuthentication.*/PubkeyAuthentication\ yes/' \
+    /etc/ssh/sshd_config \
+&& \
+  sed -i \
+    's/#GSSAPIAuthentication.*/GSSAPIAuthentication\ yes/' \
+    /etc/ssh/sshd_config \
+&& \
+  sed -i \
+    's/#GSSAPICleanupCredentials.*/GSSAPICleanupCredentials\ no/' \
+    /etc/ssh/sshd_config \
+&& \
+  true
 
 USER app
 WORKDIR /app
@@ -29,6 +95,7 @@ COPY ["VinZ/GeoIndexing.Contract/VinZ.GeoIndexing.Contract.csproj", "VinZ/GeoInd
 COPY ["VinZ/PositionHelper/VinZ.Common.PositionHelper.csproj", "VinZ/PositionHelper/"]
 COPY ["VinZ/RecordHelper/VinZ.Common.RecordHelper.csproj", "VinZ/RecordHelper/"]
 COPY ["VinZ/NumberHelper/VinZ.Common.NumberHelper.csproj", "VinZ/NumberHelper/"]
+COPY ["VinZ/RetryHelper/VinZ.Common.RetryHelper.csproj", "VinZ/RetryHelper/"]
 COPY ["VinZ/ServerContext.Contract/VinZ.Common.ServerContext.Contract.csproj", "VinZ/ServerContext.Contract/"]
 COPY ["VinZ/AnotherConsole/VinZ.Common.AnotherConsole.csproj", "VinZ/AnotherConsole/"]
 COPY ["VinZ/StringHelper/VinZ.Common.StringHelper.csproj", "VinZ/StringHelper/"]
@@ -79,7 +146,8 @@ RUN dotnet restore "./Application/BookingApi/BookingApi.csproj"
 
 
 FROM restore AS build
-ARG BUILD_CONFIGURATION=Release
+ARG BUILD_CONFIGURATION=release
+ARG DOTNET_CLI_TELEMETRY_OPTOUT=1
 COPY . .
 WORKDIR "/src/Application/BookingApi"
 RUN dotnet build "./BookingApi.csproj" -c $BUILD_CONFIGURATION -o /app/build
@@ -88,11 +156,34 @@ FROM build AS publish
 RUN dotnet publish "./BookingApi.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
-WORKDIR /app
+WORKDIR  "/etc/ssh/"
+RUN ssh-keygen -A
+
+RUN \
+  /bin/bash -c \
+    "ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa <<<y >/dev/null 2>&1" \
+&& \
+  (([ ! -f /home/app/.ssh/id_rsa ] && exit 2) || true)
+
+EXPOSE 22
+
+WORKDIR "/app"
 COPY --from=publish /app/publish .
 WORKDIR "/src"
 #COPY ["./Application/Docker/bookingapi/config/appsettings.*.json", "/app"]
-WORKDIR /app
+WORKDIR "/app"
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://*:8080
-ENTRYPOINT ["dotnet", "BookingApi.dll"]
+
+#RUN \
+#  apt-get clean \
+#&& \
+#  apt-get autoremove --yes \
+#&& \
+#  rm -rf /var/lib/{apt,dpkg,cache,log}/ \
+#&& true
+
+ENTRYPOINT \
+  /usr/sbin/sshd -D -h ~/.ssh/id_rsa \
+& \
+  dotnet BookingApi.dll

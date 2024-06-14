@@ -17,6 +17,7 @@
 
 using System.Net.NetworkInformation;
 using EfSchemaCompare;
+using VinZ.Common.Retry;
 
 namespace VinZ.Common;
 
@@ -81,21 +82,31 @@ public static partial class DbContextHelper
 
         // Console.Error.WriteLine($"ensurecreated contextName={contextName} connectionString={connectionString}");
 
-        bool created = false;
-        try
+        var created = false;
+
+        var again = new Retryer(null, Retryer.RetryOptions.Default with
         {
-            created = database.EnsureCreated();
-        }
-        catch (Exception ex)
+            RetryCount = 5,
+            RetryMilliseconds = 30000
+        });
+
+        created = again.Run(cancel =>
         {
-            app.Logger.LogError(
-                @$"
+            try
+            {
+                return Task.FromResult(database.EnsureCreated());
+            }
+            catch (Exception ex)
+            {
+                app.Logger.LogError(
+                    @$"
 Database context: {typeof(TContext).Name}
 Connection string: {database.GetConnectionString()}
 Error: {ex.Message}
 ");
-            throw new NetworkInformationException();
-        }
+                throw new NetworkInformationException();
+            }
+        });
 
 
         //seems not to work correctly with records and EFCore
@@ -111,7 +122,8 @@ Error: {ex.Message}
                 app.Logger.LogWarning(
                     @$"
 Database context: {typeof(TContext).Name}
-Connection string: {database.GetConnectionString()} already exists.
+Connection string: {database.GetConnectionString()}
+Database already exists.
 
 However schema seems not to be compatible:
 {comparer.GetAllErrors}");
@@ -124,7 +136,8 @@ However schema seems not to be compatible:
             app.Logger.LogWarning(
                 @$"
 Database context: {typeof(TContext).Name}
-Connection string: {database.GetConnectionString()} already exists for {typeof(TContext).Name}
+Connection string: {database.GetConnectionString()}
+Database already already exists.
 
 However schema could not be verified because:
 {ex.Message}");
@@ -136,7 +149,8 @@ However schema could not be verified because:
             app.Logger.LogInformation(
                 @$"
 Database context: {typeof(TContext).Name}
-Connection string: {database.GetConnectionString()} {(created ? "was created" : "already exists")}.");
+Connection string: {database.GetConnectionString()}
+Database {(created ? "was created" : "already exists")}.");
         }
 
         if (keepAliveMilliseconds.HasValue)

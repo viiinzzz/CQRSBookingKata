@@ -26,29 +26,46 @@ public partial class Retryer
 
 
     public ILogs? Logs { get; set; }
-    private readonly Arguments _args;
+    private readonly RetryOptions _options;
 
-    public Retryer(ILogs? logs = default, Arguments? args = default)
+    public Retryer(ILogs? logs = default, RetryOptions? options = default)
     {
         Logs = logs;
-        _args = args ?? Arguments.Default;
+        _options = options ?? RetryOptions.Default;
     }
 
 
-    public async Task Run(Func<CancellationToken?, Task> func, CancellationToken? retryCancellation = default)
-        => await Run(async cancel =>
+
+
+
+    public void Run(Func<CancellationToken?, Task> func, CancellationToken? retryCancellation = default)
+        => RunAsync(func, retryCancellation).Wait();
+
+
+    public R? Run<R>(Func<CancellationToken?, Task<R>> func, CancellationToken? retryCancellation = default)
+        => RunAsync(func, retryCancellation).Result;
+    
+
+
+
+
+
+    public async Task RunAsync(Func<CancellationToken?, Task> func, CancellationToken? retryCancellation = default)
+    {
+        await RunAsync(async cancel =>
         {
             await func(cancel);
             return true;
         }, retryCancellation);
+    }
 
 
-    public async Task<R?> Run<R>(Func<CancellationToken?, Task<R>> func, CancellationToken? retryCancellation = default)
+    public async Task<R?> RunAsync<R>(Func<CancellationToken?, Task<R>> func, CancellationToken? retryCancellation = default)
     {
-        var retryMilliseconds = _args.RetryMilliseconds;
-        for (int i = 0; i < _args.RetryCount; i++)
+        var retryMilliseconds = _options.RetryMilliseconds;
+        for (int i = 0; i < _options.RetryCount; i++)
         {
-            var maxWaitReached = new CancellationTokenSource(_args.MaxWaitMilliseconds);
+            var maxWaitReached = new CancellationTokenSource(_options.MaxWaitMilliseconds);
 
             var cancelOrMaxWaitReached = CancellationTokenSource.CreateLinkedTokenSource(
                 maxWaitReached.Token,
@@ -62,11 +79,11 @@ public partial class Retryer
             {
                 if (cancelEx.CancellationToken != cancelOrMaxWaitReached.Token)
                 {
-                    if (_args.debug != default)
+                    if (_options.debug != default)
                     {
                         Logs?.Warn(
-                            @$"{_args.debug}
-retry {i + 1}/{_args.RetryCount} has been cancelled: {cancelEx.Message}
+                            @$"{_options.debug}
+retry {i + 1}/{_options.RetryCount} has been cancelled: {cancelEx.Message}
 {cancelEx.StackTrace}");
                     }
 
@@ -75,10 +92,10 @@ retry {i + 1}/{_args.RetryCount} has been cancelled: {cancelEx.Message}
 
                 if (retryCancellation?.IsCancellationRequested ?? false)
                 {
-                    if (_args.debug != default)
+                    if (_options.debug != default)
                     {
-                        Logs?.Warn(@$"{_args.debug}
-retry {i + 1}/{_args.RetryCount} has been cancelled.");
+                        Logs?.Warn(@$"{_options.debug}
+retry {i + 1}/{_options.RetryCount} has been cancelled.");
                     }
 
                     return default;
@@ -86,21 +103,21 @@ retry {i + 1}/{_args.RetryCount} has been cancelled.");
 
                 if (maxWaitReached.Token.IsCancellationRequested)
                 {
-                    if (_args.debug != default)
+                    if (_options.debug != default)
                     {
                         Logs?.Warn(
-                            @$"{_args.debug}
-retry {i + 1}/{_args.RetryCount} has timed out after {_args.MaxWaitMilliseconds}ms");
+                            @$"{_options.debug}
+retry {i + 1}/{_options.RetryCount} has timed out after {_options.MaxWaitMilliseconds}ms");
                     }
                 }
             }
             catch (NullReferenceException nullEx)
             {
-                if (_args.debug != default)
+                if (_options.debug != default)
                 {
                     Logs?.Error(
-                        @$"{_args.debug}
-retry {i + 1}/{_args.RetryCount} has failed: {nullEx.Message}
+                        @$"{_options.debug}
+retry {i + 1}/{_options.RetryCount} has failed: {nullEx.Message}
 {nullEx.StackTrace}");
                 }
 
@@ -109,11 +126,11 @@ retry {i + 1}/{_args.RetryCount} has failed: {nullEx.Message}
             catch (Exception ex)
             {
                 if (
-                    (_args.StopExceptions?.Length ?? 0) > 0 &&
-                    _args.StopExceptions.Any(stopException => ex.GetType().IsAssignableTo(stopException))
+                    (_options.StopExceptions?.Length ?? 0) > 0 &&
+                    _options.StopExceptions.Any(stopException => ex.GetType().IsAssignableTo(stopException))
                     )
                 {
-                    if (_args.debug != default)
+                    if (_options.debug != default)
                     {
                         Logs?.Warn(@$"{ex.Message}");
                     }
@@ -122,10 +139,10 @@ retry {i + 1}/{_args.RetryCount} has failed: {nullEx.Message}
                 }
 
                 //we don't know what happened, we show the error and retry
-                if (_args.debug != default)
+                if (_options.debug != default)
                 {
-                    Logs?.Error(@$"{_args.debug}
-retry {i + 1}/{_args.RetryCount} has failed: {ex.Message}");
+                    Logs?.Error(@$"{_options.debug}
+retry {i + 1}/{_options.RetryCount} has failed: {ex.Message}");
                 }
             }
 
@@ -133,13 +150,13 @@ retry {i + 1}/{_args.RetryCount} has failed: {ex.Message}");
 
             retryCancellation?.ThrowIfCancellationRequested();
 
-            retryMilliseconds *= (int)Math.Ceiling(_args.RetryDelayFactor);
+            retryMilliseconds *= (int)Math.Ceiling(_options.RetryDelayFactor);
         }
 
-        if (_args.debug != default)
+        if (_options.debug != default)
         {
-            Logs?.Warn(@$"{_args.debug}
-maximum retry count reached: {_args.RetryCount}");
+            Logs?.Warn(@$"{_options.debug}
+maximum retry count reached: {_options.RetryCount}");
         }
 
         throw new MaximumRetryCountReachedException();

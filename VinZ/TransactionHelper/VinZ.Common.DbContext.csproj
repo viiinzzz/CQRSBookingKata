@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DbContext.Contract\VinZ.Common.DbTransaction.csproj" />
+    <ProjectReference Include="..\RetryHelper\VinZ.Common.RetryHelper.csproj" />
     <ProjectReference Include="..\TypeHelper\VinZ.Common.TypeHelper.csproj" />
   </ItemGroup>
 

@@ -17,9 +17,7 @@
 
 namespace BookingKata.API.Demo;
 
-public class DemoHostService
-    // : IHostedLifecycleService
-    : BackgroundService
+public class DemoHostService : BackgroundService
 {
     private readonly string _debugSubscribeUrl;
     private readonly HashSet<string> _requiredParticipants;
@@ -63,22 +61,8 @@ public class DemoHostService
         _demo = scope.ServiceProvider.GetRequiredService<DemoBus>() ?? throw new NullReferenceException();
     }
 
-
-    private const int DelayBeforeDemoStartSeconds = 20;
-
-    protected async Task Execute(CancellationToken cancel)
-    {
-        //DI/Bus warmup delay before demo kicks in
-        // await Task.Delay(DelayBeforeDemoStartSeconds * 1000, cancel);
-
-        await _demo.Execute(cancel);
-    }
-
     // public async Task<DateTime> Forward(int days, double? speedFactor, CancellationToken cancel) => await _demo.Forward(days, speedFactor, cancel);
 
-
-    // private Task _executeTask = Task.CompletedTask;
-    // private CancellationTokenSource _executeCancel = new();
 
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -167,34 +151,7 @@ public class DemoHostService
         }
 
         //let's demo
-        await Execute(stoppingToken);
+        await _demo.Execute(stoppingToken);
     }
 
-    // public async Task StartAsync(CancellationToken cancellationToken)
-    // {
-    //     _executeTask = Execute(_executeCancel.Token);
-    // }
-    //
-    // public async Task StartingAsync(CancellationToken cancellationToken)
-    // {
-    // }
-    //
-    // public async Task StartedAsync(CancellationToken cancellationToken)
-    // {
-    // }
-    //
-    // public async Task StopAsync(CancellationToken cancellationToken)
-    // {
-    //     _executeCancel.Cancel();
-    //
-    //     await Task.WhenAny(_executeTask, Task.Delay(Timeout.Infinite, cancellationToken));
-    // }
-    //
-    // public async Task StoppingAsync(CancellationToken cancellationToken)
-    // {
-    // }
-    //
-    // public async Task StoppedAsync(CancellationToken cancellationToken)
-    // {
-    // }
 }

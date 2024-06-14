@@ -55,8 +55,9 @@ if (myIps.Length == 0)
     var osFwStr = $"(f=darkgray){pif.Os} {pif.Framework}(rdc)";
     var envStr = $"(invon,f={(pif.IsRelease ? "magenta" : "cyan")}){pif.Env}(rdc)";
     var pauseStr = pauseOnError ? " " + $"(invon,f=yellow)PauseOnError(rdc)" : "";
+    var pidStr = $"pid=(bon){pif.Pid}(rdc)";
 
-    Console.Out.WriteLine(@$"{exeStr} {envStr}{pauseStr} {buildArchiStr} {osFwStr} 
+    Console.Out.WriteLine(@$"{exeStr} {envStr}{pauseStr} {buildArchiStr} {osFwStr} {pidStr}
 (f=darkgray)Network:(rdc) {string.Join(", ", myIps.Select(ip => $"(uon)http://{ip}:{busUrl.Port}(rdc)"))}");
 }
 // (uon){busUrl}(rdc)
